@@ -1,5 +1,6 @@
 package com.isofarm.graphics;
 
+import com.isofarm.data.BlockShape;
 import com.isofarm.utils.K;
 import org.lwjgl.system.MemoryUtil;
 import org.slf4j.Logger;
@@ -228,24 +229,48 @@ public class Mesh {
      * @return the {@link Mesh} representing the selection result
      */
     public static Mesh selection() {
-        float eps = 0.002f;
-        float[] positions = getPositions(eps);
-        float[] normals = new float[24];
-        float[] textCoords = new float[16];
-        int[] indices = new int[]{0, 1, 1, 2, 2, 3, 3, 0, 4, 5, 5, 6, 6, 7, 7, 4, 0, 4, 1, 5, 2, 6, 3, 7};
-        return new Mesh(positions, normals, textCoords, indices);
+        return selection(BlockShape.FULL_CUBE);
     }
 
     /**
-     * Returns the positions.
-     * @param eps the {@code float} supplied as {@code eps}
-     * @return an array of {@code float} values; the positions
+     * Creates an outline matching every cuboid in a block shape.
      */
-    private static float[] getPositions(float eps) {
-        float minX = -eps; float maxX = 1.0f + eps;
-        float minY = -eps; float maxY = 1.0f + eps;
-        float minZ = -eps; float maxZ = 1.0f + eps;
-        return new float[]{minX, maxY, minZ, maxX, maxY, minZ, maxX, maxY, maxZ, minX, maxY, maxZ, minX, minY, minZ, maxX, minY, minZ, maxX, minY, maxZ, minX, minY, maxZ};
+    public static Mesh selection(BlockShape shape) {
+        float epsilon = 0.002f;
+        BlockShape.Box[] boxes = shape.getBoxes();
+        float[] positions = new float[boxes.length * 24];
+        float[] normals = new float[positions.length];
+        float[] textCoords = new float[boxes.length * 16];
+        int[] indices = new int[boxes.length * 24];
+        int positionIndex = 0;
+        int index = 0;
+        int vertexOffset = 0;
+
+        for (BlockShape.Box box : boxes) {
+            float minX = box.minX() - epsilon;
+            float minY = box.minY() - epsilon;
+            float minZ = box.minZ() - epsilon;
+            float maxX = box.maxX() + epsilon;
+            float maxY = box.maxY() + epsilon;
+            float maxZ = box.maxZ() + epsilon;
+            float[] boxPositions = {
+                    minX, maxY, minZ, maxX, maxY, minZ,
+                    maxX, maxY, maxZ, minX, maxY, maxZ,
+                    minX, minY, minZ, maxX, minY, minZ,
+                    maxX, minY, maxZ, minX, minY, maxZ
+            };
+            System.arraycopy(boxPositions, 0, positions, positionIndex, boxPositions.length);
+            positionIndex += boxPositions.length;
+
+            int[] boxIndices = {
+                    0, 1, 1, 2, 2, 3, 3, 0,
+                    4, 5, 5, 6, 6, 7, 7, 4,
+                    0, 4, 1, 5, 2, 6, 3, 7
+            };
+            for (int boxIndex : boxIndices) indices[index++] = vertexOffset + boxIndex;
+            vertexOffset += 8;
+        }
+        return new Mesh(positions, normals, textCoords, indices);
     }
 
     /**

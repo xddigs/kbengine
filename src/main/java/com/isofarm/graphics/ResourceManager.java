@@ -53,6 +53,9 @@ public class ResourceManager {
     private static final Mesh screenQuadMesh = Mesh.screenQuad();
     private static final Mesh blockMesh = Mesh.createMesh(K.World.DEFAULT_BLOCK_DEPTH);
     private static final Mesh selectionMesh = Mesh.selection();
+    private static final Mesh horizontalSlabSelectionMesh = Mesh.selection(BlockShape.HORIZONTAL_SLAB);
+    private static final Mesh verticalSlabSelectionMesh = Mesh.selection(BlockShape.VERTICAL_SLAB);
+    private static final Mesh fenceSelectionMesh = Mesh.selection(BlockShape.FENCE);
     private static final Mesh spriteMesh = Mesh.createCrop();
     private static final Mesh flowerMesh = Mesh.createCrossMesh();
     private static final Mesh playerMesh = Mesh.quadVertical();
@@ -204,6 +207,9 @@ public class ResourceManager {
         blockMesh.dispose();
         flowerMesh.dispose();
         selectionMesh.dispose();
+        horizontalSlabSelectionMesh.dispose();
+        verticalSlabSelectionMesh.dispose();
+        fenceSelectionMesh.dispose();
         spriteMesh.dispose();
         screenQuadMesh.dispose();
         playerMesh.dispose();
@@ -326,6 +332,17 @@ public class ResourceManager {
      */
     public Mesh getSelectionMesh() {
         return selectionMesh;
+    }
+
+    /** Returns an outline mesh matching the supplied voxel block. */
+    public Mesh getSelectionMesh(BlockData data) {
+        if (data == null) return selectionMesh;
+        return switch (data.getShape()) {
+            case HORIZONTAL_SLAB -> horizontalSlabSelectionMesh;
+            case VERTICAL_SLAB -> verticalSlabSelectionMesh;
+            case FENCE -> fenceSelectionMesh;
+            default -> selectionMesh;
+        };
     }
 
     /**

@@ -798,7 +798,7 @@ public class GameInteraction {
             int placeY = cell.y() + normalY;
             int placeZ = cell.z() + normalZ;
 
-            if (player.intersectsBlock(placeX, placeY, placeZ)) return;
+            if (player.intersectsBlock(block.getType(), placeX, placeY, placeZ)) return;
 
             byte targetBlock = world.getBlockTypeAt(placeX, placeY, placeZ);
             BlockData target = BlockData.fromId(targetBlock);

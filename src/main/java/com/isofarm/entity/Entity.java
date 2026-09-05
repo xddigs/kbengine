@@ -530,7 +530,8 @@ public abstract class Entity {
             }
         }
 
-        return world.intersectsDoor(minX, minY, minZ, maxX, maxY, maxZ);
+        return world.intersectsShapedBlocks(minX, minY, minZ, maxX, maxY, maxZ)
+                || world.intersectsDoor(minX, minY, minZ, maxX, maxY, maxZ);
     }
 
     /**
@@ -562,6 +563,20 @@ public abstract class Entity {
                 maxY > blockY &&
                 minZ < blockMaxZ &&
                 maxZ > blockZ;
+    }
+
+    /** Tests this entity against the actual shape of a voxel block. */
+    public boolean intersectsBlock(BlockData data, int blockX, int blockY, int blockZ) {
+        if (data == null) return false;
+        float epsilon = 0.001f;
+        float minX = position.x - dimensions.x / 2.0f + epsilon;
+        float maxX = position.x + dimensions.x / 2.0f - epsilon;
+        float minY = position.y + epsilon;
+        float maxY = position.y + dimensions.y - epsilon;
+        float minZ = position.z - dimensions.z / 2.0f + epsilon;
+        float maxZ = position.z + dimensions.z / 2.0f - epsilon;
+        return data.getShape().intersects(blockX, blockY, blockZ,
+                minX, minY, minZ, maxX, maxY, maxZ);
     }
 
     /**

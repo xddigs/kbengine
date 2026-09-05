@@ -226,6 +226,7 @@ public class InventorySlotUI extends UIElement {
         }
 
         String amount = String.valueOf(currentSlot.getAmount());
+        final float offset = 5.0f;
         float textWidth = getTextWidth(amount);
         float textHeight = Frontend.getNormalFont().getSize();
         float paddingX = Settings.scale(2.0f);
@@ -233,7 +234,6 @@ public class InventorySlotUI extends UIElement {
         float x = getAbsoluteX() + getAbsoluteWidth() - textWidth - paddingX;
         float y = getAbsoluteY() + getAbsoluteHeight() - textHeight - paddingY;
 
-        Frontend.drawNormalString(amount, x + Settings.scale(0.5f), y + textHeight, new Vector4f(1.0f));
         Frontend.drawNormalString(amount, x, y + textHeight, new Vector4f(K.UI.UI_TEXT_COLOR.x,
                 K.UI.UI_TEXT_COLOR.y, K.UI.UI_TEXT_COLOR.z, K.UI.UI_TEXT_COLOR.w * getWorldOpacity()));
     }

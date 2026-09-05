@@ -528,7 +528,41 @@ public class World {
         if (interactiveBlock != null) {
             return interactiveBlock.getType() != InteractiveBlocks.OAK_DOOR;
         }
-        return isBlockSolid(x, y, z);
+        BlockData block = BlockData.fromId(getBlockTypeAt(x, y, z));
+        return block != null && block.isFullCube();
+    }
+
+    /** Tests an AABB against non-full voxel block shapes. */
+    public boolean intersectsShapedBlocks(float minX, float minY, float minZ,
+                                          float maxX, float maxY, float maxZ) {
+        int blockMinX = (int) Math.floor(minX);
+        int blockMaxX = (int) Math.floor(maxX);
+        int blockMinY = Math.max(0, (int) Math.floor(minY));
+        int blockMaxY = Math.min(Chunk.SIZE_Y - 1, (int) Math.floor(maxY));
+        int blockMinZ = (int) Math.floor(minZ);
+        int blockMaxZ = (int) Math.floor(maxZ);
+
+        for (int x = blockMinX; x <= blockMaxX; x++) {
+            for (int y = blockMinY; y <= blockMaxY; y++) {
+                for (int z = blockMinZ; z <= blockMaxZ; z++) {
+                    BlockData block = BlockData.fromId(getBlockTypeAt(x, y, z));
+                    if (block == null || !block.isSolid() || block.isFullCube()) continue;
+                    if (block.getShape().intersects(x, y, z,
+                            minX, minY, minZ, maxX, maxY, maxZ)) return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /** Returns the world-space collision surface under a point in one cell. */
+    public float getBlockSurfaceY(int x, int y, int z, float worldX, float worldZ) {
+        iBlock interactiveBlock = getInteractiveBlockAt(x, y, z);
+        if (interactiveBlock != null && interactiveBlock.isSolid()) return y + 1.0f;
+        BlockData block = BlockData.fromId(getBlockTypeAt(x, y, z));
+        if (block == null || !block.isSolid()) return Float.NEGATIVE_INFINITY;
+        float localTop = block.getShape().getTopAt(worldX - x, worldZ - z);
+        return localTop > 0.0f ? y + localTop : Float.NEGATIVE_INFINITY;
     }
 
     /**

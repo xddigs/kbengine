@@ -1,6 +1,7 @@
 package com.isofarm.graphics;
 
 import com.isofarm.data.BlockData;
+import com.isofarm.data.BlockShape;
 import com.isofarm.utils.K;
 import com.isofarm.wrld.Chunk;
 import com.isofarm.wrld.FluidSimulation;
@@ -16,7 +17,7 @@ public class ChunkMeshBuilder {
     private static final float TILLED_HEIGHT = 1.0f - PIXEL;
     private static final BlockData[] BLOCK_LUT = new BlockData[256];
     private static final int MAX_POSITION_FLOATS = Chunk.SIZE_X * Chunk.SIZE_Y * Chunk.SIZE_Z * 72;
-    private static final int MAX_NORMAL_FLOATS = Chunk.SIZE_X * Chunk.SIZE_Y * Chunk.SIZE_Z * 72;
+    private static final int MAX_NORMAL_FLOATS = MAX_POSITION_FLOATS;
     private static final int MAX_UV_FLOATS = Chunk.SIZE_X * Chunk.SIZE_Y * Chunk.SIZE_Z * 48;
     private static final int MAX_INDICES = Chunk.SIZE_X * Chunk.SIZE_Y * Chunk.SIZE_Z * 36;
     private static final ThreadLocal<float[]> POS_BUFFER = ThreadLocal.withInitial(() -> new float[MAX_POSITION_FLOATS]);
@@ -46,6 +47,7 @@ public class ChunkMeshBuilder {
     public record ChunkMeshData(RawMeshData solidData, RawMeshData waterData) {}
 
     private record WaterMeshCursor(int position, int normal, int uv, int element, int vertices) {}
+    private record MeshCursor(int position, int normal, int uv, int element, int vertices) {}
 
     /**
      * Immutable value object containing chunk render mesh.
@@ -73,10 +75,15 @@ public class ChunkMeshBuilder {
         int chunkX = chunk.getChunkX();
         int chunkZ = chunk.getChunkZ();
 
-        float[] posBuf = POS_BUFFER.get();
-        float[] normBuf = NORMAL_BUFFER.get();
-        float[] uvBuf = UV_BUFFER.get();
-        int[] idxBuf = INDEX_BUFFER.get();
+        int extraShapeBoxes = countExtraShapeBoxes(chunk);
+        float[] posBuf = ensureFloatCapacity(POS_BUFFER,
+                MAX_POSITION_FLOATS + extraShapeBoxes * 72);
+        float[] normBuf = ensureFloatCapacity(NORMAL_BUFFER,
+                MAX_NORMAL_FLOATS + extraShapeBoxes * 72);
+        float[] uvBuf = ensureFloatCapacity(UV_BUFFER,
+                MAX_UV_FLOATS + extraShapeBoxes * 48);
+        int[] idxBuf = ensureIntCapacity(INDEX_BUFFER,
+                MAX_INDICES + extraShapeBoxes * 36);
 
         float[] wPosBuf = WATER_POS_BUFFER.get();
         float[] wNormBuf = WATER_NORMAL_BUFFER.get();
@@ -99,6 +106,18 @@ public class ChunkMeshBuilder {
 
                     BlockData data = BLOCK_LUT[blockId & 0xFF];
                     if (data == null || data.isPlant()) continue;
+
+                    if (!data.getShape().isFullCube()) {
+                        MeshCursor cursor = addBlockShape(data, data.getShape(), x, y, z,
+                                posBuf, normBuf, uvBuf, idxBuf,
+                                posIdx, normIdx, uvIdx, elemIdx, vertexCount);
+                        posIdx = cursor.position();
+                        normIdx = cursor.normal();
+                        uvIdx = cursor.uv();
+                        elemIdx = cursor.element();
+                        vertexCount = cursor.vertices();
+                        continue;
+                    }
 
                     int worldX = chunkX * Chunk.SIZE_X + x;
                     int worldZ = chunkZ * Chunk.SIZE_Z + z;
@@ -250,6 +269,37 @@ public class ChunkMeshBuilder {
         return new ChunkMeshData(solidData, waterData);
     }
 
+    private static int countExtraShapeBoxes(Chunk chunk) {
+        int extraBoxes = 0;
+        for (int x = 0; x < Chunk.SIZE_X; x++) {
+            for (int y = 0; y < Chunk.SIZE_Y; y++) {
+                for (int z = 0; z < Chunk.SIZE_Z; z++) {
+                    BlockData data = BLOCK_LUT[chunk.getBlock(x, y, z) & 0xFF];
+                    if (data != null && !data.getShape().isFullCube()) {
+                        extraBoxes += data.getShape().getBoxCount() - 1;
+                    }
+                }
+            }
+        }
+        return extraBoxes;
+    }
+
+    private static float[] ensureFloatCapacity(ThreadLocal<float[]> storage, int capacity) {
+        float[] buffer = storage.get();
+        if (buffer.length >= capacity) return buffer;
+        buffer = new float[capacity];
+        storage.set(buffer);
+        return buffer;
+    }
+
+    private static int[] ensureIntCapacity(ThreadLocal<int[]> storage, int capacity) {
+        int[] buffer = storage.get();
+        if (buffer.length >= capacity) return buffer;
+        buffer = new int[capacity];
+        storage.set(buffer);
+        return buffer;
+    }
+
     /**
      * Merges each contiguous rectangle of generated ocean surface into one quad.
      * Simulated fluids, lakes and player-placed water deliberately remain unmerged.
@@ -345,6 +395,90 @@ public class ChunkMeshBuilder {
         return (y * Chunk.SIZE_Z + z) * Chunk.SIZE_X + x;
     }
 
+    /** Adds every cuboid composing a non-full voxel shape to the chunk mesh. */
+    private static MeshCursor addBlockShape(BlockData data, BlockShape shape,
+                                            int x, int y, int z,
+                                            float[] positions, float[] normals,
+                                            float[] uv, int[] indices,
+                                            int positionIndex, int normalIndex,
+                                            int uvIndex, int elementIndex, int vertexCount) {
+        for (BlockShape.Box box : shape.getBoxes()) {
+            float minX = x + box.minX();
+            float minY = y + box.minY();
+            float minZ = z + box.minZ();
+            float maxX = x + box.maxX();
+            float maxY = y + box.maxY();
+            float maxZ = z + box.maxZ();
+
+            TextureAtlas.TextureRegion top = data.getTopRegion();
+            TextureAtlas.TextureRegion bottom = data.getBottomRegion();
+            TextureAtlas.TextureRegion side = data.getSideRegion();
+
+            if (top != null) {
+                positionIndex = addQuadPos(positions, positionIndex,
+                        minX, maxY, maxZ, maxX, maxY, maxZ,
+                        maxX, maxY, minZ, minX, maxY, minZ);
+                uvIndex = addRegionUV(uv, uvIndex, top);
+                normalIndex = addQuadNorm(normals, normalIndex, 0, 1, 0);
+                elementIndex = addQuadIndices(indices, elementIndex, vertexCount);
+                vertexCount += 4;
+            }
+            if (bottom != null) {
+                positionIndex = addQuadPos(positions, positionIndex,
+                        minX, minY, minZ, maxX, minY, minZ,
+                        maxX, minY, maxZ, minX, minY, maxZ);
+                uvIndex = addRegionUV(uv, uvIndex, bottom);
+                normalIndex = addQuadNorm(normals, normalIndex, 0, -1, 0);
+                elementIndex = addQuadIndices(indices, elementIndex, vertexCount);
+                vertexCount += 4;
+            }
+            if (side == null) continue;
+
+            positionIndex = addQuadPos(positions, positionIndex,
+                    minX, minY, maxZ, maxX, minY, maxZ,
+                    maxX, maxY, maxZ, minX, maxY, maxZ);
+            uvIndex = addRegionUV(uv, uvIndex, side);
+            normalIndex = addQuadNorm(normals, normalIndex, 0, 0, 1);
+            elementIndex = addQuadIndices(indices, elementIndex, vertexCount);
+            vertexCount += 4;
+
+            positionIndex = addQuadPos(positions, positionIndex,
+                    maxX, minY, minZ, minX, minY, minZ,
+                    minX, maxY, minZ, maxX, maxY, minZ);
+            uvIndex = addRegionUV(uv, uvIndex, side);
+            normalIndex = addQuadNorm(normals, normalIndex, 0, 0, -1);
+            elementIndex = addQuadIndices(indices, elementIndex, vertexCount);
+            vertexCount += 4;
+
+            positionIndex = addQuadPos(positions, positionIndex,
+                    maxX, minY, maxZ, maxX, minY, minZ,
+                    maxX, maxY, minZ, maxX, maxY, maxZ);
+            uvIndex = addRegionUV(uv, uvIndex, side);
+            normalIndex = addQuadNorm(normals, normalIndex, 1, 0, 0);
+            elementIndex = addQuadIndices(indices, elementIndex, vertexCount);
+            vertexCount += 4;
+
+            positionIndex = addQuadPos(positions, positionIndex,
+                    minX, minY, minZ, minX, minY, maxZ,
+                    minX, maxY, maxZ, minX, maxY, minZ);
+            uvIndex = addRegionUV(uv, uvIndex, side);
+            normalIndex = addQuadNorm(normals, normalIndex, -1, 0, 0);
+            elementIndex = addQuadIndices(indices, elementIndex, vertexCount);
+            vertexCount += 4;
+        }
+        return new MeshCursor(positionIndex, normalIndex, uvIndex,
+                elementIndex, vertexCount);
+    }
+
+    private static int addRegionUV(float[] buffer, int index,
+                                   TextureAtlas.TextureRegion region) {
+        return addQuadUV(buffer, index,
+                region.uvMin().x, region.uvMax().y,
+                region.uvMax().x, region.uvMax().y,
+                region.uvMax().x, region.uvMin().y,
+                region.uvMin().x, region.uvMin().y);
+    }
+
     /**
      * Creates raw data from the supplied state and configuration.
      * @param pBuf an array of {@code float} values supplied as {@code pBuf}
@@ -383,8 +517,10 @@ public class ChunkMeshBuilder {
      * @param y the {@code float} supplied as {@code y}
      * @return {@code float}; the block top y
      */
-    private static float getBlockTopY(BlockData data, float y) { return (data == BlockData.TILLED_DIRT ||
-            data.isFluid()) ? y + TILLED_HEIGHT : y + 1.0f; }
+    private static float getBlockTopY(BlockData data, float y) {
+        if (data == BlockData.TILLED_DIRT || data.isFluid()) return y + TILLED_HEIGHT;
+        return y + data.getShape().getTop();
+    }
     /**
      * Returns the block bottom y.
      * @param world the {@link World} supplied as {@code world}
@@ -438,10 +574,12 @@ public class ChunkMeshBuilder {
         if (neighborData == null) return true;
 
         if (currentBlock.isFluid()) {
-            return !neighborData.isSolid() && neighborData != currentBlock;
+            return (!neighborData.isSolid() || !neighborData.isFullCube())
+                    && neighborData != currentBlock;
         }
 
         if (neighborData.isFluid()) return true;
+        if (!neighborData.isFullCube()) return true;
         return neighborData.isTransparent() && neighborData != currentBlock;
     }
 

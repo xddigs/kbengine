@@ -2,6 +2,7 @@ package com.isofarm.graphics;
 
 import com.isofarm.data.BlockData;
 import com.isofarm.data.BlockPos;
+import com.isofarm.data.BlockShape;
 import com.isofarm.data.InteractiveBlocks;
 import com.isofarm.data.Ray;
 import com.isofarm.item.Bucket;
@@ -322,9 +323,14 @@ public class Camera implements CameraView {
 
             byte block = world.getBlockTypeAt(x, y, z);
             BlockData data = BlockData.fromId(block);
-            boolean hasBlock = data != BlockData.AIR;
+            boolean hasBlock = data != null && data != BlockData.AIR;
+            float cellExit = Math.min(tMaxX, Math.min(tMaxY, tMaxZ));
+            BlockShape.RayHit shapeHit = hasBlock && !data.getShape().isFullCube()
+                    ? data.getShape().raycast(origin, direction, x, y, z) : null;
+            boolean hitsShape = data != null && (data.getShape().isFullCube()
+                    || (shapeHit != null && shapeHit.distance() <= cellExit));
 
-            if (hasBlock && (!data.isFluid() || isBucket)) {
+            if (hasBlock && hitsShape && (!data.isFluid() || isBucket)) {
                 boolean isTransparentObject = data == BlockData.OAK_LEAVES;
 
                 if (!isSmartFilter || !isTransparentObject) {
@@ -339,9 +345,9 @@ public class Camera implements CameraView {
                     );
 
                     if (distToPlayer <= Settings.getMaxInteractionDistance()) {
-                        lastHitNormalX = previousX - x;
-                        lastHitNormalY = previousY - y;
-                        lastHitNormalZ = previousZ - z;
+                        lastHitNormalX = shapeHit == null ? previousX - x : shapeHit.normalX();
+                        lastHitNormalY = shapeHit == null ? previousY - y : shapeHit.normalY();
+                        lastHitNormalZ = shapeHit == null ? previousZ - z : shapeHit.normalZ();
 
                         return new BlockPos(data, x, y, z);
                     } else {
@@ -350,7 +356,6 @@ public class Camera implements CameraView {
                 }
             }
 
-            float cellExit = Math.min(tMaxX, Math.min(tMaxY, tMaxZ));
             if (doorHit != null && doorHit.distance() <= cellExit) {
                 var door = doorHit.block();
                 float distance = playerPos.distance(

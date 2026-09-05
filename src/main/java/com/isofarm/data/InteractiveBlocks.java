@@ -10,8 +10,8 @@ import java.util.Locale;
 @DataClass
 public enum InteractiveBlocks implements Blockable {
     EMPTY(null, null, (byte) 0, (byte) -1, (byte) -1, -1, 0.0f, 0),
-    CHEST("assets/models/blocks/chest.gltf", SoundGroup.CHEST, (byte) 1, (byte) 0, (byte) 1, 10, 2.5f, 1),
-    OAK_DOOR("assets/models/blocks/oak_door.gltf", SoundGroup.DOOR, (byte) 2, (byte) 1, (byte) 1, 15, 2.0f, 2);
+    CHEST("assets/models/blocks/chest.gltf", SoundGroup.CHEST, (byte) 1, (byte) 7, (byte) 1, 10, 2.5f, 1),
+    OAK_DOOR("assets/models/blocks/oak_door.gltf", SoundGroup.DOOR, (byte) 2, (byte) 5, (byte) 1, 15, 2.0f, 2);
 
     private final String modelPath;
     private final SoundGroup soundGroup;

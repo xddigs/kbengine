@@ -83,7 +83,7 @@ public final class K {
         public static final int ICON_SEED_CROPS_COLS = 5;
 
         public static final int ICON_BLOCK_COLS = 10;
-        public static final int ICON_BLOCK_ROWS = 5;
+        public static final int ICON_BLOCK_ROWS = 7;
         public static final int ICON_TOOL_COLS = 5;
         public static final int ICON_TOOL_ROWS = 7;
         public static final int ICON_USABLES_COLS = 6;

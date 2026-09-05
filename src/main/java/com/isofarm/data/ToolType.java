@@ -22,7 +22,8 @@ public enum ToolType implements Item {
             BlockData.DIAMOND_ORE, BlockData.FOSSIL, BlockData.OBSIDIAN
     }, 7, 2.5f),
     AXE((byte) 2, "Axe", 8, new BlockData[]{
-            BlockData.OAK_LOG, BlockData.OAK_WOOD, BlockData.OAK_LEAVES
+            BlockData.OAK_LOG, BlockData.OAK_PLANK, BlockData.OAK_PLANK_SLAB,
+            BlockData.OAK_PLANK_VERTICAL_SLAB, BlockData.OAK_PLANK_FENCE, BlockData.OAK_LEAVES
     }, 10, 2.5f),
     HOE((byte) 3, "Hoe", 5, new BlockData[]{
             BlockData.GRASS, BlockData.DIRT, BlockData.TILLED_DIRT,

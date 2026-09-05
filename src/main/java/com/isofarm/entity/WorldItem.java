@@ -113,9 +113,10 @@ public class WorldItem extends Entity {
         int currentZ = (int) Math.floor(position.z);
         int startY = (int) Math.floor(position.y);
         for (int y = startY; y >= 0; y--) {
-            if (world.isBlockSolid(currentX, y, currentZ)) {
-                return y + 1.0f + GROUND_OFFSET + ITEM_HEIGHT * 0.5f;
-            }
+            float surfaceY = world.getBlockSurfaceY(
+                    currentX, y, currentZ, position.x, position.z);
+            if (surfaceY != Float.NEGATIVE_INFINITY)
+                return surfaceY + GROUND_OFFSET + ITEM_HEIGHT * 0.5f;
         }
         return 0.0f;
     }

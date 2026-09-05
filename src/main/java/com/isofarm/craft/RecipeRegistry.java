@@ -19,16 +19,17 @@ public class RecipeRegistry {
      */
     public List<Recipe> init() {
         recipes.clear();
+        registerBlocksRecipes();
         registeriBlocksRecipes();
         registerSmeltingRecipes();
         registerMaterialRecipes();
 
-        create(Tier.LEATHER).result(new Block(BlockData.OAK_WOOD), 4).with(BlockData.fromIdTo(BlockData.OAK_LOG.getId()),1).add();
-        create(Tier.LEATHER).result(new Material(Tier.NONE, MaterialID.STICK), 4).with(BlockData.fromIdTo(BlockData.OAK_WOOD.getId()), 1).add();
+        create(Tier.LEATHER).result(new Block(BlockData.OAK_PLANK), 4).with(BlockData.fromIdTo(BlockData.OAK_LOG.getId()),1).add();
+        create(Tier.LEATHER).result(new Material(Tier.NONE, MaterialID.STICK), 4).with(BlockData.fromIdTo(BlockData.OAK_PLANK.getId()), 1).add();
         create(Tier.LEATHER).result(new Book(false), 1).with(MaterialID.LEATHER, 3).with(MaterialID.PAPER, 2).add();
         create(Tier.LEATHER).result(new Backpack(), 1).with(MaterialID.LEATHER, 3).add();
         create(Tier.LEATHER).result(new Bucket(), 1).with(new MiningComponent(Tier.STEEL, MaterialID.INGOT), 3).add();
-        registerToolSet(Tier.LEATHER, BlockData.fromIdTo(BlockData.OAK_WOOD.getId()));
+        registerToolSet(Tier.LEATHER, BlockData.fromIdTo(BlockData.OAK_PLANK.getId()));
 
         Map<Tier, Tier> metalProgression = Map.of(
                 Tier.COPPER, Tier.COPPER,
@@ -87,15 +88,36 @@ public class RecipeRegistry {
     }
 
     /**
+     * Registers the recipes contributed by blocks.
+     */
+    private void registerBlocksRecipes() {
+        create(Tier.WOODEN)
+                .with(new Block(BlockData.OAK_PLANK), 3)
+                .result(new Block(BlockData.OAK_PLANK_SLAB), 6)
+                .add();
+
+        create(Tier.WOODEN)
+                .with(new Block(BlockData.OAK_PLANK), 3)
+                .result(new Block(BlockData.OAK_PLANK_VERTICAL_SLAB), 6)
+                .add();
+
+        create(Tier.WOODEN)
+                .with(new Block(BlockData.OAK_PLANK), 6)
+                .result(new Block(BlockData.OAK_PLANK_FENCE), 4)
+                .add();
+    }
+
+    /**
      * Registers the recipes contributed by interactive block items.
      */
     private void registeriBlocksRecipes() {
         create(Tier.WOODEN)
-                .with(new Block(BlockData.OAK_WOOD), 6)
+                .with(new Block(BlockData.OAK_PLANK), 8)
                 .result(new iBlock(InteractiveBlocks.CHEST), 1)
                 .add();
+
         create(Tier.WOODEN)
-                .with(new Block(BlockData.OAK_WOOD), 8)
+                .with(new Block(BlockData.OAK_PLANK), 6)
                 .result(new iBlock(InteractiveBlocks.OAK_DOOR), 1)
                 .add();
     }

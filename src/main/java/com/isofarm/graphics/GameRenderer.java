@@ -2,6 +2,7 @@ package com.isofarm.graphics;
 
 import com.isofarm.data.BlockData;
 import com.isofarm.data.BlockPos;
+import com.isofarm.data.BlockShape;
 import com.isofarm.data.Crop;
 import com.isofarm.data.InteractiveBlocks;
 import com.isofarm.data.RenderPass;
@@ -356,7 +357,8 @@ public class GameRenderer {
             }
 
             defaultShader.setUniform("uModel", modelMatrix);
-            ResourceManager.rem.getSelectionMesh().renderLines();
+            BlockData selectedBlock = hoveredCell.data() instanceof BlockData data ? data : null;
+            ResourceManager.rem.getSelectionMesh(selectedBlock).renderLines();
 
             glDepthMask(true);
             glEnable(GL_DEPTH_TEST);
@@ -476,10 +478,19 @@ public class GameRenderer {
         Vector4f uvBounds = new Vector4f(uv.x, uv.w, uv.z, uv.y);
         shader.setUniform("uUVBounds", uvBounds);
 
-        modelMatrix.identity().translate(pos.x, pos.y, pos.z).scale(1.0001f);
-
-        shader.setUniform("uModel", modelMatrix);
-        blockMesh.render();
+        BlockData breakingData = BlockData.fromId(
+                GameMaster.game.getWorld().getBlockTypeAt(pos.x, pos.y, pos.z));
+        BlockShape shape = breakingData == null
+                ? BlockShape.FULL_CUBE : breakingData.getShape();
+        for (BlockShape.Box box : shape.getBoxes()) {
+            modelMatrix.identity()
+                    .translate(pos.x + box.minX(), pos.y + box.minY(), pos.z + box.minZ())
+                    .scale((box.maxX() - box.minX()) * 1.0001f,
+                            (box.maxY() - box.minY()) * 1.0001f,
+                            (box.maxZ() - box.minZ()) * 1.0001f);
+            shader.setUniform("uModel", modelMatrix);
+            blockMesh.render();
+        }
 
         destroyTexture.unbind();
         shader.unbind();
