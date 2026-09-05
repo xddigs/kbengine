@@ -1,8 +1,10 @@
 package com.isofarm.ui;
 
+import com.isofarm.data.SoundGroup;
 import com.isofarm.graphics.ResourceManager;
 import com.isofarm.graphics.SpriteSheet;
 import com.isofarm.graphics.Texture;
+import com.isofarm.service.SoundService;
 import org.joml.Vector4f;
 
 /**
@@ -53,6 +55,7 @@ public class UIButton extends UIElement {
         }
         if (onClick != null) {
             onClick.run();
+            SoundService.fx.playUseSound(SoundGroup.BUTTON);
         }
         return false;
     }
