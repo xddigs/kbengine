@@ -678,6 +678,7 @@ public class InventoryUI extends UIElement {
      */
     public void slotInteract() {
         if (hotbarUI == null) return;
+        if (!GameMaster.game.isInventoryOpen()) return;
 
         InventorySlotUI[] hotbarSlots = hotbarUI.getSlotUIs();
         InventorySlotUI[] backpackSlots = (backpackUI != null && backpackUI.isVisible()) ?

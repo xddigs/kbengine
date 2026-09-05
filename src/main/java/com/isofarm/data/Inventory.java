@@ -368,9 +368,7 @@ public class Inventory {
         }
 
         int taken = Math.min(amount, slot.getAmount());
-
         slot.setAmount(slot.getAmount() - taken);
-
         return taken;
     }
 
@@ -390,7 +388,6 @@ public class Inventory {
 
         if (target.isEmpty()) {
             int added = Math.min(amount, getMaxStack(item));
-
             target.setItem(item);
             target.setAmount(added);
 
@@ -402,7 +399,6 @@ public class Inventory {
         }
 
         int space = getMaxStack(item) - target.getAmount();
-
         if (space <= 0) {
             return 0;
         }
@@ -429,9 +425,7 @@ public class Inventory {
      */
     public List<Item> getHotbarItems() {
         List<Item> hotbar = new ArrayList<>();
-
         int hotbarStart = getHotbarStart();
-
         for (int i = 0; i < K.UI.INVENTORY_COLUMNS; i++) {
             int index = hotbarStart + i;
 
@@ -440,7 +434,6 @@ public class Inventory {
             }
 
             InventorySlot slot = slots.get(index);
-
             if (!slot.isEmpty()) {
                 hotbar.add(slot.getItem());
             }

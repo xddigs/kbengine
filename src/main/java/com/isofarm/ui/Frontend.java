@@ -46,7 +46,7 @@ public class Frontend {
     private static final UIFont smallBold = new UIFont(K.Paths.FONT_BOLD, FONT_SMALL);
     private static final UIFont normalBold = new UIFont(K.Paths.FONT_BOLD, FONT_NORMAL);
     private static final UIFont bigBold = new UIFont(K.Paths.FONT_BOLD, FONT_BIG);
-    private static final float CURSOR_ICON_OFFSET = 36.0f;
+    private static final float CURSOR_ICON_OFFSET = 10.0f;
 
     private static int screenWidth;
     private static int screenHeight;
@@ -275,7 +275,6 @@ public class Frontend {
         shader.setUniform("uUseTexture", true);
         shader.setUniform("uUseFont", false);
         shader.setUniform("uUVBounds", new Vector4f(0.0f, 1.0f, 1.0f, 0.0f));
-
         mesh.render();
         texture.unbind();
     }

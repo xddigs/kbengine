@@ -16,6 +16,10 @@ import static org.lwjgl.system.MemoryUtil.NULL;
  * Encapsulates the state and operations required by mouse within the game runtime.
  */
 public final class Mouse {
+    /** Hotspot of pointer.png: the tip of the raised index finger. */
+    private static final int CURSOR_HOTSPOT_X = 20;
+    private static final int CURSOR_HOTSPOT_Y = 8;
+
     public static final int BUTTON_1 = GLFW_MOUSE_BUTTON_1;
     public static final int BUTTON_2 = GLFW_MOUSE_BUTTON_2;
     public static final int BUTTON_3 = GLFW_MOUSE_BUTTON_3;
@@ -240,7 +244,7 @@ public final class Mouse {
 
             GLFWImage image = GLFWImage.malloc(stack)
                     .set(frameWidth, frameHeight, framePixels);
-            return glfwCreateCursor(image, 0, 0);
+            return glfwCreateCursor(image, CURSOR_HOTSPOT_X, CURSOR_HOTSPOT_Y);
         } finally {
             MemoryUtil.memFree(framePixels);
         }
