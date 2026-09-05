@@ -546,6 +546,7 @@ public class GameInteraction {
                 block.getX() + 0.5f, block.getY() + 0.5f, block.getZ() + 0.5f);
 
         world.removeInteractiveBlockAt(block.getX(), block.getY(), block.getZ());
+        gameMaster.rebuildChunkMeshAt(block.getX(), block.getZ());
         for (int offsetY = 0; offsetY < block.getType().getHeight(); offsetY++) {
             FluidSimulation.notifyBlockDestroyed(
                     block.getX(), block.getY() + offsetY, block.getZ());
@@ -781,6 +782,7 @@ public class GameInteraction {
             }
 
             world.addInteractiveBlock(placedBlock);
+            gameMaster.rebuildChunkMeshAt(placeX, placeZ);
             for (int offsetY = 0; offsetY < blockHeight; offsetY++) {
                 FluidSimulation.notifyBlockPlaced(placeX, placeY + offsetY, placeZ);
             }

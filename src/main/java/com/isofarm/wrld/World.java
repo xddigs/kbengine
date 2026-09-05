@@ -112,10 +112,24 @@ public class World {
 
     /** Returns the placed shape state, falling back to the block type default. */
     public BlockShape getBlockShapeAt(int x, int y, int z) {
+        BlockData data = BlockData.fromId(getBlockTypeAt(x, y, z));
+        if (data == BlockData.OAK_PLANK_FENCE) {
+            int connections = 0;
+            if (canFenceConnectTo(x, y, z - 1)) connections |= 1;
+            if (canFenceConnectTo(x, y, z + 1)) connections |= 2;
+            if (canFenceConnectTo(x - 1, y, z)) connections |= 4;
+            if (canFenceConnectTo(x + 1, y, z)) connections |= 8;
+            return BlockShape.fence(connections);
+        }
         Block registeredBlock = blocks.get(getBlockKey(x, y, z));
         if (registeredBlock != null) return registeredBlock.getShape();
-        BlockData data = BlockData.fromId(getBlockTypeAt(x, y, z));
         return data == null ? BlockShape.FULL_CUBE : data.getShape();
+    }
+
+    private boolean canFenceConnectTo(int x, int y, int z) {
+        if (getInteractiveBlockAt(x, y, z) != null) return true;
+        BlockData neighbor = BlockData.fromId(getBlockTypeAt(x, y, z));
+        return neighbor != null && neighbor.isSolid();
     }
 
     /**

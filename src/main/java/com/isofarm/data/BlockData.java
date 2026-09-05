@@ -370,7 +370,7 @@ public enum BlockData implements Blockable {
         return switch (this) {
             case OAK_PLANK_SLAB -> BlockShape.HORIZONTAL_SLAB;
             case OAK_PLANK_VERTICAL_SLAB -> BlockShape.VERTICAL_SLAB_WEST;
-            case OAK_PLANK_FENCE -> BlockShape.FENCE;
+            case OAK_PLANK_FENCE -> BlockShape.FENCE_NONE;
             default -> BlockShape.FULL_CUBE;
         };
     }

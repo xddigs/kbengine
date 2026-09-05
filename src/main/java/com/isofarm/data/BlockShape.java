@@ -2,6 +2,9 @@ package com.isofarm.data;
 
 import org.joml.Vector3f;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /** Geometry and collision bounds for voxel blocks that are not full cubes. */
 public enum BlockShape {
     FULL_CUBE(new Box(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f)),
@@ -10,17 +13,37 @@ public enum BlockShape {
     VERTICAL_SLAB_EAST(new Box(0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f)),
     VERTICAL_SLAB_NORTH(new Box(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.5f)),
     VERTICAL_SLAB_SOUTH(new Box(0.0f, 0.0f, 0.5f, 1.0f, 1.0f, 1.0f)),
-    FENCE(new Box(0.375f, 0.0f, 0.375f, 0.625f, 1.0f, 0.625f),
-            new Box(0.0f, 0.375f, 0.4375f, 1.0f, 0.5625f, 0.5625f),
-            new Box(0.0f, 0.6875f, 0.4375f, 1.0f, 0.875f, 0.5625f),
-            new Box(0.4375f, 0.375f, 0.0f, 0.5625f, 0.5625f, 1.0f),
-            new Box(0.4375f, 0.6875f, 0.0f, 0.5625f, 0.875f, 1.0f));
+    FENCE_NONE(0),
+    FENCE_N(1), FENCE_S(2), FENCE_NS(3),
+    FENCE_W(4), FENCE_NW(5), FENCE_SW(6), FENCE_NSW(7),
+    FENCE_E(8), FENCE_NE(9), FENCE_SE(10), FENCE_NSE(11),
+    FENCE_WE(12), FENCE_NWE(13), FENCE_SWE(14), FENCE_NSWE(15);
 
     private static final float EPSILON = 0.00001f;
     private final Box[] boxes;
 
     BlockShape(Box... boxes) {
         this.boxes = boxes;
+    }
+
+    BlockShape(int fenceMask) {
+        this.boxes = createFenceBoxes(fenceMask);
+    }
+
+    private static Box[] createFenceBoxes(int mask) {
+        List<Box> result = new ArrayList<>();
+        result.add(new Box(0.375f, 0.0f, 0.375f, 0.625f, 1.0f, 0.625f));
+        if ((mask & 1) != 0) addFenceRails(result, 0.4375f, 0.0f, 0.5625f, 0.5f);
+        if ((mask & 2) != 0) addFenceRails(result, 0.4375f, 0.5f, 0.5625f, 1.0f);
+        if ((mask & 4) != 0) addFenceRails(result, 0.0f, 0.4375f, 0.5f, 0.5625f);
+        if ((mask & 8) != 0) addFenceRails(result, 0.5f, 0.4375f, 1.0f, 0.5625f);
+        return result.toArray(new Box[0]);
+    }
+
+    private static void addFenceRails(List<Box> boxes, float minX, float minZ,
+                                      float maxX, float maxZ) {
+        boxes.add(new Box(minX, 0.375f, minZ, maxX, 0.5625f, maxZ));
+        boxes.add(new Box(minX, 0.6875f, minZ, maxX, 0.875f, maxZ));
     }
 
     public Box[] getBoxes() {
@@ -38,6 +61,21 @@ public enum BlockShape {
     public boolean isVerticalSlab() {
         return this == VERTICAL_SLAB_WEST || this == VERTICAL_SLAB_EAST
                 || this == VERTICAL_SLAB_NORTH || this == VERTICAL_SLAB_SOUTH;
+    }
+
+    public boolean isFence() {
+        return ordinal() >= FENCE_NONE.ordinal();
+    }
+
+    public static BlockShape fence(int mask) {
+        return switch (mask & 15) {
+            case 1 -> FENCE_N; case 2 -> FENCE_S; case 3 -> FENCE_NS;
+            case 4 -> FENCE_W; case 5 -> FENCE_NW; case 6 -> FENCE_SW;
+            case 7 -> FENCE_NSW; case 8 -> FENCE_E; case 9 -> FENCE_NE;
+            case 10 -> FENCE_SE; case 11 -> FENCE_NSE; case 12 -> FENCE_WE;
+            case 13 -> FENCE_NWE; case 14 -> FENCE_SWE; case 15 -> FENCE_NSWE;
+            default -> FENCE_NONE;
+        };
     }
 
     /** Chooses the half-cell closest to the supplied world-space point. */
