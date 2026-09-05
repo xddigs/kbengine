@@ -180,6 +180,9 @@ public final class K {
         public static final String DEFAULT_BACKGROUND_UI = "assets/ui/slot.png";
         public static final String DEFAULT_SELECTOR_UI = "assets/ui/selector.png";
         public static final String BOOK_ANIMATION = "assets/ui/book.png";
+        public static final String BOOK_SORT_NAME = "assets/ui/sort_name.png";
+        public static final String BOOK_SORT_TYPE = "assets/ui/sort_type.png";
+        public static final String BOOK_CLOSE = "assets/ui/close.png";
     }
 
     /**

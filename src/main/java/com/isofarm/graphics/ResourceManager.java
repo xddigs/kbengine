@@ -29,6 +29,9 @@ public class ResourceManager {
     private static final SpriteSheet usablesIcons = new SpriteSheet(K.Paths.USABLES_ICONS, K.UI.ICON_USABLES_COLS, 1);
     private static final SpriteSheet inventoryIcons = new SpriteSheet(K.Paths.INVENTORY_ICONS, K.UI.ICON_INV_COLS, 1);
     private static final SpriteSheet bookAnimationSheet = new SpriteSheet(K.Paths.BOOK_ANIMATION, 16, 1);
+    private static final SpriteSheet bookSortNameIcon = new SpriteSheet(K.Paths.BOOK_SORT_NAME, 1, 1);
+    private static final SpriteSheet bookSortTypeIcon = new SpriteSheet(K.Paths.BOOK_SORT_TYPE, 1, 1);
+    private static final SpriteSheet bookCloseIcon = new SpriteSheet(K.Paths.BOOK_CLOSE, 1, 1);
     private static final SpriteSheet heartsSpriteSheet = new SpriteSheet(K.Paths.HEARTS_SPRITESHEET, 1, K.UI.ICON_HEARTS_ROWS);
     private static final SpriteSheet destroyTexture = new SpriteSheet(K.Paths.DESTROY_STAGES, K.UI.DESTROY_FRAMES, 1);
 
@@ -462,6 +465,30 @@ public class ResourceManager {
      */
     public SpriteSheet getBookAnimationSheet() {
         return bookAnimationSheet;
+    }
+
+    /**
+     * Returns the icon used to sort crafting-book recipes by name.
+     * @return the {@link SpriteSheet} representing the sort-by-name icon
+     */
+    public SpriteSheet getBookSortNameIcon() {
+        return bookSortNameIcon;
+    }
+
+    /**
+     * Returns the icon used to sort crafting-book recipes by type.
+     * @return the {@link SpriteSheet} representing the sort-by-type icon
+     */
+    public SpriteSheet getBookSortTypeIcon() {
+        return bookSortTypeIcon;
+    }
+
+    /**
+     * Returns the icon used to close a book.
+     * @return the {@link SpriteSheet} representing the close icon
+     */
+    public SpriteSheet getBookCloseIcon() {
+        return bookCloseIcon;
     }
 
     /**

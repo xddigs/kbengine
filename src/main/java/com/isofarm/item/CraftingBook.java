@@ -8,6 +8,7 @@ import com.isofarm.service.CraftingService;
 import com.isofarm.ui.GameUIService;
 import com.isofarm.wrld.GameMaster;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -16,6 +17,12 @@ import java.util.stream.Collectors;
  */
 public class CraftingBook extends Book implements Undroppable {
     private static final int LINES_PER_PAGE = 16;
+    private RecipeOrder recipeOrder = RecipeOrder.NAME;
+
+    private enum RecipeOrder {
+        NAME,
+        TYPE
+    }
 
     /**
      * Creates a new {@code CraftingBook} instance.
@@ -37,6 +44,7 @@ public class CraftingBook extends Book implements Undroppable {
     public void reload() {
         clearPages();
         List<Recipe> recipes = RecipeRegistry.reg.getRecipes();
+        recipes.sort(recipeComparator());
         if (recipes.isEmpty()) return;
 
         Page page = new Page();
@@ -62,6 +70,36 @@ public class CraftingBook extends Book implements Undroppable {
                     line -> CraftingService.cs.craft(recipe), tooltip);
             lineCount++;
         }
+    }
+
+    /**
+     * Sorts the recipes alphabetically by their localized result name.
+     */
+    public void sortByName() {
+        recipeOrder = RecipeOrder.NAME;
+        reload();
+    }
+
+    /**
+     * Groups recipes by result type and crafting tier, then sorts each group by name.
+     */
+    public void sortByType() {
+        recipeOrder = RecipeOrder.TYPE;
+        reload();
+    }
+
+    private Comparator<Recipe> recipeComparator() {
+        Comparator<Recipe> byName = Comparator.comparing(
+                recipe -> recipe.result().getDisplayName(),
+                String.CASE_INSENSITIVE_ORDER);
+        if (recipeOrder == RecipeOrder.NAME) {
+            return byName;
+        }
+
+        return Comparator
+                .comparing((Recipe recipe) -> recipe.result().getClass().getSimpleName())
+                .thenComparingInt(recipe -> recipe.tier().ordinal())
+                .thenComparing(byName);
     }
 
     /**

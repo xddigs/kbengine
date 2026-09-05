@@ -8,8 +8,10 @@ import com.isofarm.input.ControlAction;
 import com.isofarm.input.Controls;
 import com.isofarm.input.Mouse;
 import com.isofarm.item.Book;
+import com.isofarm.item.CraftingBook;
 import com.isofarm.item.Item;
 import com.isofarm.item.Page;
+import com.isofarm.service.BookService;
 import com.isofarm.utils.K;
 import org.joml.Vector4f;
 import org.lwjgl.stb.STBTTBakedChar;
@@ -31,6 +33,9 @@ public class BookUI extends UIElement {
     private static final float PAGE_STATIC_CONTENT_HIDE_PROGRESS = 0.99f;
     private static final float BASE_CONTENT_HEIGHT_OFFSET = 0.15f;
     private static final float MOUSE_OFFSET = 32.0f;
+    private static final float BUTTON_SIZE = 32.0f;
+    private static final float BUTTON_GAP = 8.0f;
+    private static final float BUTTON_TOP_PADDING = 52.0f;
 
     public static BookUI bui;
     private float animationProgress = 0.0f;
@@ -44,6 +49,9 @@ public class BookUI extends UIElement {
     private float pageFlipTimer = 0.0f;
 
     private BookLine hoveredBookLine;
+    private final UIButton sortNameButton;
+    private final UIButton sortTypeButton;
+    private final UIButton closeButton;
 
     /**
      * Creates a new {@code BookUI} instance.
@@ -54,7 +62,48 @@ public class BookUI extends UIElement {
      */
     public BookUI(float x, float y, float width, float height) {
         super(x, y, width, height);
+        sortNameButton = createButton(ResourceManager.rem.getBookSortNameIcon(),
+                "book.sort_name", () -> sortCraftingBook(true));
+        sortTypeButton = createButton(ResourceManager.rem.getBookSortTypeIcon(),
+                "book.sort_type", () -> sortCraftingBook(false));
+        closeButton = createButton(ResourceManager.rem.getBookCloseIcon(),
+                "book.close", BookService.bs::close);
+
+        addChild(sortNameButton);
+        addChild(sortTypeButton);
+        addChild(closeButton);
+        layoutButtons(width);
         hide();
+    }
+
+    private UIButton createButton(SpriteSheet icon, String tooltip, Runnable action) {
+        UIButton button = new UIButton(0.0f, 0.0f, BUTTON_SIZE, BUTTON_SIZE)
+                .setOnClick(action);
+        button.setSpriteSheet(icon);
+        button.setTooltipText(tooltip);
+        return button;
+    }
+
+    private void layoutButtons(float bookWidth) {
+        float totalWidth = BUTTON_SIZE * 3.0f + BUTTON_GAP * 2.0f;
+        float startX = bookWidth - K.UI.UI_BOOK_PADDING_X - totalWidth;
+        sortNameButton.setPosition(startX, BUTTON_TOP_PADDING);
+        sortTypeButton.setPosition(startX + BUTTON_SIZE + BUTTON_GAP, BUTTON_TOP_PADDING);
+        closeButton.setPosition(startX + (BUTTON_SIZE + BUTTON_GAP) * 2.0f,
+                BUTTON_TOP_PADDING);
+    }
+
+    private void sortCraftingBook(boolean byName) {
+        if (!isOpen() || !(BookService.bs.getOpenedBook() instanceof CraftingBook book)) {
+            return;
+        }
+
+        if (byName) {
+            book.sortByName();
+        } else {
+            book.sortByType();
+        }
+        hoveredBookLine = null;
     }
 
     /**
@@ -107,6 +156,8 @@ public class BookUI extends UIElement {
     public void open() {
         isClosing = false;
         isOpening = true;
+        show();
+        updateButtonState();
     }
 
     /**
@@ -117,6 +168,7 @@ public class BookUI extends UIElement {
 
         isClosing = true;
         isOpening = false;
+        updateButtonState();
     }
 
     /**
@@ -155,6 +207,11 @@ public class BookUI extends UIElement {
             GameUIService.ui
                     .getUIManager()
                     .hideTooltip();
+            return;
+        }
+
+        if (isAnyButtonHovered()) {
+            hoveredBookLine = null;
             return;
         }
 
@@ -295,6 +352,11 @@ public class BookUI extends UIElement {
         float alpha = easeInOutCubic(animationProgress);
         float y = lerp(screenHeight, centerY, alpha);
 
+        setPosition(centerX, y);
+        setSize(bookWidth, bookHeight);
+        layoutButtons(bookWidth);
+        updateButtonState();
+
         Vector4f color = new Vector4f(0.8706f, 0.8196f, 0.6745f, 1.0f);
         Frontend.drawRect(centerX, y + BASE_CONTENT_HEIGHT_OFFSET + BASE_CONTENT_HEIGHT_OFFSET/2f, bookWidth, bookHeight + BASE_CONTENT_HEIGHT_OFFSET, color);
 
@@ -315,6 +377,23 @@ public class BookUI extends UIElement {
             Frontend.drawSprite(animSheet, 0, centerX, y, bookWidth, bookHeight, new Vector4f(1.0f));
         }
         renderChildren();
+    }
+
+    private boolean isAnyButtonHovered() {
+        return sortNameButton.isHovered() || sortTypeButton.isHovered() || closeButton.isHovered();
+    }
+
+    private void updateButtonState() {
+        boolean bookIsReady = isOpen() && !isFlippingPage;
+        boolean isCraftingBook = BookService.bs.getOpenedBook() instanceof CraftingBook;
+        setButtonState(sortNameButton, bookIsReady && isCraftingBook);
+        setButtonState(sortTypeButton, bookIsReady && isCraftingBook);
+        setButtonState(closeButton, bookIsReady);
+    }
+
+    private void setButtonState(UIButton button, boolean active) {
+        button.setVisible(active);
+        button.setEnabled(active);
     }
 
     /**
@@ -412,6 +491,7 @@ public class BookUI extends UIElement {
             if (animationProgress <= 0.0f) {
                 animationProgress = 0.0f;
                 isClosing = false;
+                hide();
             }
         }
     }

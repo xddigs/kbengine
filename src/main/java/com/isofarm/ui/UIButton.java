@@ -1,6 +1,8 @@
 package com.isofarm.ui;
 
+import com.isofarm.graphics.ResourceManager;
 import com.isofarm.graphics.SpriteSheet;
+import com.isofarm.graphics.Texture;
 import org.joml.Vector4f;
 
 /**
@@ -8,6 +10,9 @@ import org.joml.Vector4f;
  */
 @SuppressWarnings("all")
 public class UIButton extends UIElement {
+    private static final Texture BUTTON_TEXTURE = ResourceManager
+            .rem.getBackgroundUI();
+
     private SpriteSheet spriteSheet;
     private int spriteFrame;
     private Runnable onClick;
@@ -40,35 +45,29 @@ public class UIButton extends UIElement {
     @Override
     public boolean mouseReleased(float mouseX, float mouseY, int button) {
         super.mouseReleased(mouseX, mouseY, button);
-
         if (button != 0 || !isHovered()) {
             return false;
         }
-
         if (onClick != null) {
             onClick.run();
         }
-
         return false;
     }
 
     /**
      * {@inheritDoc}
-     * Renders this object in the requested render pass.
      */
     @Override
     public void render() {
         Vector4f color = normalColor;
-
         if (isPressed()) {
             color = pressedColor;
         } else if (isHovered()) {
             color = hoverColor;
         }
 
-        Frontend.drawRect(getAbsoluteX(), getAbsoluteY(), getAbsoluteWidth(),
-                getAbsoluteHeight(),
-                new Vector4f(color.x, color.y, color.z, color.w * getWorldOpacity()));
+        Frontend.drawTexture(BUTTON_TEXTURE, getAbsoluteX(), getAbsoluteY(),
+                getAbsoluteWidth(), getAbsoluteHeight(), color);
 
         if (spriteSheet != null) {
             float size = Math.min(getAbsoluteWidth(), getAbsoluteHeight()) * 0.65f;

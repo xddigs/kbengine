@@ -147,6 +147,7 @@ public final class GameUIService implements Service<GameMaster> {
         uiManager.getRoot().addChild(inventoryUI);
         uiManager.getRoot().addChild(hotbarUI);
         uiManager.getRoot().addChild(backpackUI);
+        uiManager.getRoot().addChild(BookUI.bui);
 
         this.chatField = new UITextField(10, windowHeight - 10, windowWidth - 10, 32);
         chatField.setCompletionProvider(
