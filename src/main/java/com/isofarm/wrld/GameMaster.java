@@ -5,6 +5,7 @@ import com.isofarm.craft.RecipeRegistry;
 import com.isofarm.data.*;
 import com.isofarm.entity.*;
 import com.isofarm.graphics.*;
+import com.isofarm.item.iBlock;
 import com.isofarm.ui.Frontend;
 import com.isofarm.ui.GameUIService;
 import com.isofarm.ui.UIManager;
@@ -59,7 +60,7 @@ public class GameMaster {
 
     private boolean isChatOpen = false;
     private boolean isInventoryOpen = false;
-    private boolean isHUDShown = true;
+    private boolean isHUDShown = false;
 
     private float genDelta;
 
@@ -330,7 +331,16 @@ public class GameMaster {
     }
 
     /**
-     * Toggles the setting represented by hud and applies it immediately.
+     * Sets the value for {@code isHUDShown}
+     * @param isHudShown {@link Boolean}
+     * @return {@link Boolean} supplied as {@code isHudShown}
+     */
+    public boolean setisHudShown(boolean isHudShown) {
+        return this.isHUDShown = isHudShown;
+    }
+
+    /**
+     * Toggles the setting represented by HUD and applies it immediately.
      */
     public void toggleHUD() {
         this.isHUDShown = !isHUDShown;
@@ -495,7 +505,7 @@ public class GameMaster {
         shop.update(TimeService.ts);
         CropService.cs.update(delta, WeatherService.wes.getWeather());
         TreeService.ts.update(this);
-        world.forEachInteractiveBlock(block -> block.animate());
+        world.forEachInteractiveBlock(iBlock::animate);
         updateEntities(delta);
         cameraController.update(this, delta);
         ParticleEngine.peng.update(delta);
