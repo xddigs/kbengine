@@ -17,12 +17,7 @@ import org.joml.Vector4f;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.IdentityHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Encapsulates the state and operations required by inventory ui within the game runtime.
@@ -87,7 +82,7 @@ public class InventoryUI extends UIElement {
         int totalVisualSlots = K.UI.INVENTORY_SLOTS;
         this.slotUIs = new InventorySlotUI[totalVisualSlots];
         this.creativeSlotData = new InventorySlot[totalVisualSlots];
-        this.creativeSlots = java.util.Collections.newSetFromMap(new IdentityHashMap<>());
+        this.creativeSlots = Collections.newSetFromMap(new IdentityHashMap<>());
         this.creativeItems = new EnumMap<>(Tab.class);
         this.buttons = new ArrayList<>();
         this.creativeTabButtons = new ArrayList<>();
