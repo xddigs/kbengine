@@ -9,8 +9,9 @@ import java.util.Locale;
  */
 @DataClass
 public enum InteractiveBlocks implements Blockable {
-    EMPTY(null, null, (byte) 0, (byte) -1, (byte) -1, -1, 0.0f),
-    CHEST("assets/models/blocks/chest.gltf", SoundGroup.CHEST, (byte) 1, (byte) 0, (byte) 2, 10, 2.5f),;
+    EMPTY(null, null, (byte) 0, (byte) -1, (byte) -1, -1, 0.0f, 0),
+    CHEST("assets/models/blocks/chest.gltf", SoundGroup.CHEST, (byte) 1, (byte) 0, (byte) 1, 10, 2.5f, 1),
+    OAK_DOOR("assets/models/blocks/oak_door.gltf", SoundGroup.DOOR, (byte) 2, (byte) 1, (byte) 1, 15, 2.0f, 2);
 
     private final String modelPath;
     private final SoundGroup soundGroup;
@@ -19,9 +20,10 @@ public enum InteractiveBlocks implements Blockable {
     private final byte row;
     private final int value;
     private final float destroyTime;
+    private final int height;
 
     InteractiveBlocks(String modelPath, SoundGroup soundGroup, byte id, byte col, byte row, int value,
-                      float destroyTime) {
+                      float destroyTime, int height) {
         this.modelPath = modelPath;
         this.soundGroup = soundGroup;
         this.id = id;
@@ -29,6 +31,7 @@ public enum InteractiveBlocks implements Blockable {
         this.row = row;
         this.value = value;
         this.destroyTime = destroyTime;
+        this.height = height;
     }
 
     /**
@@ -102,5 +105,14 @@ public enum InteractiveBlocks implements Blockable {
      */
     public float getDestroyTime() {
         return destroyTime;
+    }
+
+    /**
+     * Returns how many vertical world cells this block occupies.
+     *
+     * @return the occupied height in blocks
+     */
+    public int getHeight() {
+        return height;
     }
 }

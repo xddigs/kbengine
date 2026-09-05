@@ -457,7 +457,7 @@ public class GameInteraction {
 
         iBlock interactiveBlock = world.getInteractiveBlockAt(x, y, z);
         if (interactiveBlock != null) {
-            breakInteractiveBlock(gameMaster, world, cell, interactiveBlock);
+            breakInteractiveBlock(gameMaster, world, interactiveBlock);
             return;
         }
 
@@ -508,11 +508,10 @@ public class GameInteraction {
     /**
      * Advances or completes the destruction of an interactive block.
      */
-    private void breakInteractiveBlock(GameMaster gameMaster, World world,
-                                       BlockPos cell, iBlock block) {
-        int x = cell.x();
-        int y = cell.y();
-        int z = cell.z();
+    private void breakInteractiveBlock(GameMaster gameMaster, World world, iBlock block) {
+        int x = block.getX();
+        int y = block.getY();
+        int z = block.getZ();
 
         if (breakingX != x || breakingY != y || breakingZ != z) {
             breakingX = x;
@@ -547,6 +546,10 @@ public class GameInteraction {
                 block.getX() + 0.5f, block.getY() + 0.5f, block.getZ() + 0.5f);
 
         world.removeInteractiveBlockAt(block.getX(), block.getY(), block.getZ());
+        for (int offsetY = 0; offsetY < block.getType().getHeight(); offsetY++) {
+            FluidSimulation.notifyBlockDestroyed(
+                    block.getX(), block.getY() + offsetY, block.getZ());
+        }
         gameMaster.addEntity(new WorldItem(new iBlock(block.getType()), 1,
                 new Vector3f(dropPosition)));
 
@@ -735,22 +738,7 @@ public class GameInteraction {
             int placeX = cell.x() + normalX;
             int placeY = cell.y() + normalY;
             int placeZ = cell.z() + normalZ;
-
-            if (player.intersectsBlock(placeX, placeY, placeZ)) return;
-            if (world.getInteractiveBlockAt(placeX, placeY, placeZ) != null) return;
-
-            BlockData target = BlockData.fromId(
-                    world.getBlockTypeAt(placeX, placeY, placeZ));
-            FluidSimulation targetFluid = FluidSimulation.forBlock(target);
-            boolean replacesFluid = targetFluid != null;
-            if (target == null || (target != BlockData.AIR && !replacesFluid)
-                    || world.getCropAt(placeX, placeY, placeZ) != null) {
-                return;
-            }
-
-            if (replacesFluid && !targetFluid.removeFluid(placeX, placeY, placeZ)) {
-                return;
-            }
+            int blockHeight = interactiveBlock.getType().getHeight();
 
             Vector3f playerPosition = player.getPosition();
             float directionX = playerPosition.x - (placeX + 0.5f);
@@ -759,11 +747,43 @@ public class GameInteraction {
                     + (float) Math.PI;
             float quarterTurn = (float) (Math.PI * 0.5);
             orientation = Math.round(orientation / quarterTurn) * quarterTurn;
-
             iBlock placedBlock = new iBlock(
                     interactiveBlock.getType(), placeX, placeY, placeZ, orientation);
+
+            if (placeY < 0 || placeY + blockHeight > Chunk.SIZE_Y) return;
+            if (interactiveBlock.getType() == InteractiveBlocks.OAK_DOOR
+                    && !world.isBlockSolid(placeX, placeY - 1, placeZ)) return;
+
+            for (int offsetY = 0; offsetY < blockHeight; offsetY++) {
+                int occupiedY = placeY + offsetY;
+                if (interactiveBlock.getType() != InteractiveBlocks.OAK_DOOR
+                        && player.intersectsBlock(placeX, occupiedY, placeZ)) return;
+                if (world.getInteractiveBlockAt(placeX, occupiedY, placeZ) != null) return;
+
+                BlockData target = BlockData.fromId(
+                        world.getBlockTypeAt(placeX, occupiedY, placeZ));
+                boolean replacesFluid = FluidSimulation.forBlock(target) != null;
+                if (target == null || (target != BlockData.AIR && !replacesFluid)
+                        || world.getCropAt(placeX, occupiedY, placeZ) != null) {
+                    return;
+                }
+            }
+            if (interactiveBlock.getType() == InteractiveBlocks.OAK_DOOR
+                    && player.intersects(placedBlock)) return;
+
+            for (int offsetY = 0; offsetY < blockHeight; offsetY++) {
+                int occupiedY = placeY + offsetY;
+                BlockData target = BlockData.fromId(
+                        world.getBlockTypeAt(placeX, occupiedY, placeZ));
+                FluidSimulation targetFluid = FluidSimulation.forBlock(target);
+                if (targetFluid != null
+                        && !targetFluid.removeFluid(placeX, occupiedY, placeZ)) return;
+            }
+
             world.addInteractiveBlock(placedBlock);
-            FluidSimulation.notifyBlockPlaced(placeX, placeY, placeZ);
+            for (int offsetY = 0; offsetY < blockHeight; offsetY++) {
+                FluidSimulation.notifyBlockPlaced(placeX, placeY + offsetY, placeZ);
+            }
             player.remove(selectedItem);
             SoundService.fx.playPlaceSound(placedBlock.getType().getSoundGroup());
             GameUIService.ui.logAction(
@@ -875,6 +895,14 @@ public class GameInteraction {
     private void breakAbove(int x, int y, int z) {
         int aboveY = y + 1;
         if (aboveY >= Chunk.SIZE_Y) {
+            return;
+        }
+
+        iBlock interactiveBlock = World.wrld.getInteractiveBlockAt(x, aboveY, z);
+        if (interactiveBlock != null
+                && interactiveBlock.getType() == InteractiveBlocks.OAK_DOOR
+                && interactiveBlock.getY() == aboveY) {
+            destroyInteractiveBlock(GameMaster.game, World.wrld, interactiveBlock);
             return;
         }
 

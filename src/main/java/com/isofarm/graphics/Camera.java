@@ -2,6 +2,7 @@ package com.isofarm.graphics;
 
 import com.isofarm.data.BlockData;
 import com.isofarm.data.BlockPos;
+import com.isofarm.data.InteractiveBlocks;
 import com.isofarm.data.Ray;
 import com.isofarm.item.Bucket;
 import com.isofarm.utils.K;
@@ -304,10 +305,12 @@ public class Camera implements CameraView {
         int previousX = x;
         int previousY = y;
         int previousZ = z;
+        World.DoorHit doorHit = world.raycastDoor(origin, direction);
 
         do {
             var interactiveBlock = world.getInteractiveBlockAt(x, y, z);
-            if (interactiveBlock != null) {
+            if (interactiveBlock != null
+                    && interactiveBlock.getType() != InteractiveBlocks.OAK_DOOR) {
                 float distToPlayer = playerPos.distance(x + 0.5f, y + 0.5f, z + 0.5f);
                 if (distToPlayer > Settings.getMaxInteractionDistance()) return null;
 
@@ -345,6 +348,19 @@ public class Camera implements CameraView {
                         return null;
                     }
                 }
+            }
+
+            float cellExit = Math.min(tMaxX, Math.min(tMaxY, tMaxZ));
+            if (doorHit != null && doorHit.distance() <= cellExit) {
+                var door = doorHit.block();
+                float distance = playerPos.distance(
+                        door.getX() + 0.5f, door.getY() + 1.0f, door.getZ() + 0.5f);
+                if (distance > Settings.getMaxInteractionDistance()) return null;
+
+                lastHitNormalX = previousX - x;
+                lastHitNormalY = previousY - y;
+                lastHitNormalZ = previousZ - z;
+                return new BlockPos(door.getType(), door.getX(), door.getY(), door.getZ());
             }
 
             previousX = x;
