@@ -89,9 +89,9 @@ public class Bucket extends Usable {
             return false;
         }
 
-        int normalX = gameMaster.getOrthoCamera().getLastHitNormalX();
-        int normalY = gameMaster.getOrthoCamera().getLastHitNormalY();
-        int normalZ = gameMaster.getOrthoCamera().getLastHitNormalZ();
+        int normalX = gameMaster.getCamera().getLastHitNormalX();
+        int normalY = gameMaster.getCamera().getLastHitNormalY();
+        int normalZ = gameMaster.getCamera().getLastHitNormalZ();
 
         int placeX = targetBlock.x() + normalX;
         int placeY = targetBlock.y() + normalY;

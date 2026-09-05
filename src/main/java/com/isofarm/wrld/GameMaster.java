@@ -48,11 +48,10 @@ public class GameMaster {
     private ShadowMap shadowMap;
     private ChunkManager chunkManager;
     private ItemRenderer itemRenderer;
-    private GameUIService gameUIservice;
     private Framebuffer sceneFbo;
     private Framebuffer blurFbo;
-    private Camera orthoCamera;
-    private CameraController orthoCameraController;
+    private Camera camera;
+    private CameraController cameraController;
     private float windowWidth = K.Window.DEFAULT_WIDTH;
     private float windowHeight = K.Window.DEFAULT_HEIGHT;
     private Shop shop;
@@ -98,9 +97,9 @@ public class GameMaster {
         this.shop = new Shop();
         notifyProgress(progressCallback, ++currentStep / totalSteps);
 
-        this.orthoCamera = new Camera(windowWidth, windowHeight, Settings.getRenderDistance());
+        this.camera = new Camera(windowWidth, windowHeight, Settings.getRenderDistance());
 
-        this.orthoCameraController = new CameraController(orthoCamera);
+        this.cameraController = new CameraController(camera);
         notifyProgress(progressCallback, ++currentStep / totalSteps);
 
         notifyProgress(progressCallback, ++currentStep / totalSteps);
@@ -133,14 +132,13 @@ public class GameMaster {
      * Initializes the ui.
      */
     public void initUI() {
-        gameUIservice = new GameUIService(windowHandle, this,
+        GameUIService.init(this,
                 uiManager, ResourceManager.rem.getSeedIcons(), ResourceManager.rem.getCropIcons(),
                 ResourceManager.rem.getBlockIcons(), ResourceManager.rem.getToolIcons(),
                 ResourceManager.rem.getMaterialIcons(),
                 ResourceManager.rem.getInventoryIcons());
 
-        commandService.setGameUIService(gameUIservice);
-        gameUIservice.setShop(shop);
+        GameUIService.ui.setShop(shop);
 
     }
 
@@ -152,7 +150,7 @@ public class GameMaster {
         GridPos spawn = world.getHighestY(0.5f, 0.5f);
         float spawnY = spawn.y() + 1.8f;
         Player.plyr.setPosition(0.5f, spawnY, 0.5f);
-        orthoCamera.setPosition(0.5f, spawnY + 10.0f, 0.5f);
+        camera.setPosition(0.5f, spawnY + 10.0f, 0.5f);
     }
 
     /**
@@ -252,14 +250,6 @@ public class GameMaster {
     }
 
     /**
-     * Returns the game uiservice.
-     * @return the {@link GameUIService} representing the game uiservice
-     */
-    public GameUIService getGameUIService() {
-        return gameUIservice;
-    }
-
-    /**
      * Returns the command service.
      * @return the {@link CommandService} representing the command service
      */
@@ -287,8 +277,8 @@ public class GameMaster {
      * Returns the ortho camera.
      * @return the {@link Camera} representing the ortho camera
      */
-    public Camera getOrthoCamera() {
-        return orthoCamera;
+    public Camera getCamera() {
+        return camera;
     }
 
     /**
@@ -408,7 +398,7 @@ public class GameMaster {
      * @return the {@link CameraView} representing the active camera
      */
     public CameraView getActiveCamera() {
-        return orthoCamera;
+        return camera;
     }
 
     /**
@@ -496,7 +486,7 @@ public class GameMaster {
         }
 
         BookService.bs.update();
-        gameUIservice.update(delta);
+        GameUIService.ui.update(delta);
 
         genDelta = delta;
         TimeService.ts.update(delta, WeatherService.wes);
@@ -506,7 +496,7 @@ public class GameMaster {
         CropService.cs.update(delta, WeatherService.wes.getWeather());
         TreeService.ts.update(this);
         updateEntities(delta);
-        orthoCameraController.update(this, delta);
+        cameraController.update(this, delta);
         ParticleEngine.peng.update(delta);
         StepController.step.update(this, SoundService.fx, delta);
         GameInteraction.gami.update(this, Settings.selectedItem);
@@ -525,7 +515,7 @@ public class GameMaster {
      */
     public void render() {
         GameRenderer.gamr.render(this, chunkManager.getChunkMeshes());
-        gameUIservice.render(isHUDShown(), this);
+        GameUIService.ui.render(isHUDShown(), this);
     }
 
     /**
@@ -543,7 +533,7 @@ public class GameMaster {
         rainEngine.dispose();
         shadowMap.dispose();
 
-        orthoCameraController.release(this);
+        cameraController.release(this);
         SoundService.fx.cleanup();
         log.info("GameMaster resources successfully cleaned up");
     }
@@ -578,8 +568,8 @@ public class GameMaster {
         this.windowWidth = newWidth;
         this.windowHeight = newHeight;
 
-        if (orthoCamera != null) {
-            orthoCamera.updateProjection(newWidth, newHeight,
+        if (camera != null) {
+            camera.updateProjection(newWidth, newHeight,
                     Settings.getRenderDistance());
         }
 
@@ -593,8 +583,8 @@ public class GameMaster {
             Frontend.resize(newWidth, newHeight);
         }
 
-        if (gameUIservice != null) {
-            gameUIservice.onResize(newWidth, newHeight);
+        if (GameUIService.ui != null) {
+            GameUIService.ui.onResize(newWidth, newHeight);
         }
         ToastFactory.onResize(newWidth);
     }

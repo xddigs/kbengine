@@ -3,6 +3,7 @@ package com.isofarm.item;
 import com.isofarm.data.Enchantment;
 import com.isofarm.data.Usables;
 import com.isofarm.entity.Player;
+import com.isofarm.ui.GameUIService;
 import com.isofarm.utils.Local;
 import com.isofarm.wrld.GameMaster;
 
@@ -30,7 +31,7 @@ public class Backpack extends Usable implements Undroppable {
         Player player = Player.plyr;
         if (!player.getInventory().hasBackpackEquipped()) {
             player.getInventory().equipBackpack(this);
-            gameMaster.getGameUIService().resetHotbarPosition();
+            GameUIService.ui.resetHotbarPosition();
             return true;
         }
 
@@ -54,7 +55,7 @@ public class Backpack extends Usable implements Undroppable {
     public void unequip() {
         if (Player.plyr.getInventory().hasBackpackEquipped()) {
             Player.plyr.getInventory().unequipBackpack();
-            GameMaster.game.getGameUIService().resetHotbarPosition();
+            GameUIService.ui.resetHotbarPosition();
         }
     }
 

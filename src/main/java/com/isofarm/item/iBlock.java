@@ -6,6 +6,7 @@ import com.isofarm.data.InteractiveBlocks;
 import com.isofarm.graphics.ResourceManager;
 import com.isofarm.graphics.gltf.GLTFNode;
 import com.isofarm.graphics.gltf.GLTFModel;
+import com.isofarm.ui.GameUIService;
 import com.isofarm.wrld.GameMaster;
 import org.joml.Quaternionf;
 
@@ -190,7 +191,7 @@ public class iBlock implements Craftable {
         if (type != InteractiveBlocks.CHEST || GameMaster.game == null) return;
 
         setActivated(true);
-        GameMaster.game.getGameUIService().getInventoryUI().openContainer(this);
+        GameUIService.ui.getInventoryUI().openContainer(this);
     }
 
     /**

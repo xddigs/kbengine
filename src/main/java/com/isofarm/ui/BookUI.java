@@ -11,7 +11,6 @@ import com.isofarm.item.Book;
 import com.isofarm.item.Item;
 import com.isofarm.item.Page;
 import com.isofarm.utils.K;
-import com.isofarm.wrld.GameMaster;
 import org.joml.Vector4f;
 import org.lwjgl.stb.STBTTBakedChar;
 
@@ -153,7 +152,7 @@ public class BookUI extends UIElement {
         if (book == null || !isOpen() || isFlippingPage
                 || book.getPages().isEmpty() || animSheet == null) {
             hoveredBookLine = null;
-            GameMaster.game.getGameUIService()
+            GameUIService.ui
                     .getUIManager()
                     .hideTooltip();
             return;
@@ -190,7 +189,7 @@ public class BookUI extends UIElement {
         float lineHeight = Frontend.getNormalFont().getSize();
 
         setTooltipText(null);
-        GameMaster.game.getGameUIService()
+        GameUIService.ui
                 .getUIManager()
                 .hideTooltip();
 
@@ -236,7 +235,7 @@ public class BookUI extends UIElement {
                 hoveredBookLine = bookLine;
                 float mouseX = Mouse.getX() + MOUSE_OFFSET + MOUSE_OFFSET / 2;
                 float mouseY = Mouse.getY() - MOUSE_OFFSET / 2;
-                GameMaster.game.getGameUIService().getUIManager().showTooltip(bookLine.getTooltipText(),
+                GameUIService.ui.getUIManager().showTooltip(bookLine.getTooltipText(),
                         mouseX, mouseY);
                 break;
             }
@@ -267,7 +266,7 @@ public class BookUI extends UIElement {
                 hoveredBookLine = bookLine;
                 float mouseX = Mouse.getX() + MOUSE_OFFSET + MOUSE_OFFSET / 2;
                 float mouseY = Mouse.getY() - MOUSE_OFFSET / 2;
-                GameMaster.game.getGameUIService().getUIManager().showTooltip(
+                GameUIService.ui.getUIManager().showTooltip(
                         bookLine.getTooltipText(), mouseX, mouseY);
                 return;
             }

@@ -805,7 +805,7 @@ public class Frontend {
         if (gameMaster == null) return;
         if (wasCursorIconDrawn) return;
 
-        var hotbarUI = gameMaster.getGameUIService().getHotbarUI();
+        var hotbarUI = GameUIService.ui.getHotbarUI();
         if (hotbarUI == null) return;
 
         Item selectedItem = Settings.selectedItem;

@@ -5,6 +5,7 @@ import com.isofarm.craft.RecipeRegistry;
 import com.isofarm.data.Inventory;
 import com.isofarm.entity.Player;
 import com.isofarm.service.CraftingService;
+import com.isofarm.ui.GameUIService;
 import com.isofarm.wrld.GameMaster;
 
 import java.util.List;
@@ -77,7 +78,7 @@ public class CraftingBook extends Book implements Undroppable {
         if (isCtrlHeld) {
             if (!inventory.hasBookEquipped()) {
                 inventory.equipBook(this);
-                gameMaster.getGameUIService().resetHotbarPosition();
+                GameUIService.ui.resetHotbarPosition();
             } else {
                 inventory.unequipBook();
             }

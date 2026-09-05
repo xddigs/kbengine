@@ -167,7 +167,7 @@ public class InventoryUI extends UIElement {
             if (isBackpackOpen && !isBackpackClosing) {
                 closeBackpack();
             } else if (!isBackpackOpen) {
-                openBackpack(GameMaster.game.getGameUIService().getBackpackInventoryUI());
+                openBackpack(GameUIService.ui.getBackpackInventoryUI());
             }
         });
 

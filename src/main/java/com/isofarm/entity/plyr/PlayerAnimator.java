@@ -201,7 +201,7 @@ public final class PlayerAnimator {
         if (head == null || baseHeadRotation == null) return;
         GameMaster game = GameMaster.game;
         float width = Math.max(game.getWindowWidth(), 1), height = Math.max(game.getWindowHeight(), 1);
-        Ray ray = game.getOrthoCamera().getMouseRay(Mouse.getX(), Mouse.getY(), width, height);
+        Ray ray = game.getCamera().getMouseRay(Mouse.getX(), Mouse.getY(), width, height);
         Vector3f mouse = new Vector3f(ray.origin());
 
         if (Math.abs(ray.direction().y) > .0001f) {

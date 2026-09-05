@@ -18,7 +18,7 @@ public class HoveredCell {
      * @return the {@link BlockPos} representing the get result
      */
     public static BlockPos get(GameMaster gameMaster, boolean isShiftHeld) {
-        return gameMaster.getOrthoCamera().highlight(gameMaster.getWorld(),
+        return gameMaster.getCamera().highlight(gameMaster.getWorld(),
                 Player.plyr.getPosition(), Mouse.getX(), Mouse.getY(),
                 gameMaster.getWindowWidth(),
                 gameMaster.getWindowHeight(),

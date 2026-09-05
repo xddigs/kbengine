@@ -3,6 +3,7 @@ package com.isofarm.service;
 import com.isofarm.data.*;
 import com.isofarm.entity.WorldItem;
 import com.isofarm.item.*;
+import com.isofarm.ui.GameUIService;
 import com.isofarm.utils.HoveredCell;
 import com.isofarm.utils.Settings;
 import com.isofarm.wrld.Chunk;
@@ -92,7 +93,7 @@ public class TreeService {
         }
 
         if (blocksBroken > 0) {
-            gamemaster.getGameUIService().logAction(cell);
+            GameUIService.ui.logAction(cell);
             SoundService.fx.playBreakSound(startBlock.getSoundGroup()
             );
 

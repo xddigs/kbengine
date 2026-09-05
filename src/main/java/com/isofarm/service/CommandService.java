@@ -9,7 +9,6 @@ import com.isofarm.utils.ToastFactory;
  */
 public class CommandService implements Service<Command> {
     private final CommandRegistry registry;
-    private GameUIService gameUIService;
 
     /**
      * Creates a new {@code CommandService} instance.
@@ -17,14 +16,6 @@ public class CommandService implements Service<Command> {
      */
     public CommandService(CommandRegistry registry) {
         this.registry = registry;
-    }
-
-    /**
-     * Sets the game uiservice.
-     * @param gameUIService the {@link GameUIService} supplied as {@code gameUIService}
-     */
-    public void setGameUIService(GameUIService gameUIService) {
-        this.gameUIService = gameUIService;
     }
 
     /**
@@ -42,7 +33,7 @@ public class CommandService implements Service<Command> {
         String commandName = tokens[0];
         Command command = registry.get(commandName);
         if (command == null) {
-            if (gameUIService != null) {
+            if (GameUIService.ui != null) {
                 ToastFactory.error("Command not found: " + commandName);
             }
             return;

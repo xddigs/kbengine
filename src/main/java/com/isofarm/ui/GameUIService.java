@@ -34,7 +34,9 @@ import static org.lwjgl.opengl.GL13.glActiveTexture;
  */
 @SuppressWarnings("all")
 @GodObject
-public class GameUIService implements Service<GameMaster> {
+@Singleton
+public final class GameUIService implements Service<GameMaster> {
+    public static GameUIService ui;
     private static final Logger log = LoggerFactory.getLogger(GameUIService.class);
     private static final float CHAT_HISTORY_DURATION = 3.0f;
     private static final float HARDWARE_UPDATE_INTERVAL = 0.5f;
@@ -82,7 +84,6 @@ public class GameUIService implements Service<GameMaster> {
     /**
      * Creates a new {@code GameUIService} instance.
      *
-     * @param windowHandle   the {@code long} supplied as {@code windowHandle}
      * @param gameMaster     the {@link GameMaster} supplied as {@code gameMaster}
      * @param uiManager      the {@link UIManager} supplied as {@code uiManager}
      * @param seedIcons      the {@link SpriteSheet} supplied as {@code seedIcons}
@@ -92,8 +93,7 @@ public class GameUIService implements Service<GameMaster> {
      * @param materialIcons  the {@link SpriteSheet} supplied as {@code materialIcons}
      * @param inventoryIcons the {@link SpriteSheet} supplied as {@code inventoryIcons}
      */
-    public GameUIService(
-            long windowHandle,
+    private GameUIService(
             GameMaster gameMaster,
             UIManager uiManager,
             SpriteSheet seedIcons,
@@ -198,6 +198,19 @@ public class GameUIService implements Service<GameMaster> {
         this.youDied.setHorizontalAlignment(UILabel.HorizontalAlignment.CENTER);
         this.youDied.hide();
         uiManager.getRoot().addChild(youDied);
+    }
+
+    /**
+     * Initializes the shared UI service after the OpenGL and UI resources are ready.
+     * Subsequent calls preserve the original instance.
+     */
+    public static void init(GameMaster gameMaster, UIManager uiManager,
+                            SpriteSheet seedIcons, SpriteSheet cropIcons,
+                            SpriteSheet blockIcons, SpriteSheet toolIcons,
+                            SpriteSheet materialIcons, SpriteSheet inventoryIcons) {
+        if (ui != null) return;
+        ui = new GameUIService(gameMaster, uiManager, seedIcons, cropIcons,
+                blockIcons, toolIcons, materialIcons, inventoryIcons);
     }
 
     /**

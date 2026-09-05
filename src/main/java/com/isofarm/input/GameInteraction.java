@@ -8,6 +8,7 @@ import com.isofarm.graphics.ParticleEngine;
 import com.isofarm.graphics.SpriteSheet;
 import com.isofarm.item.*;
 import com.isofarm.service.*;
+import com.isofarm.ui.GameUIService;
 import com.isofarm.utils.HoveredCell;
 import com.isofarm.utils.K;
 import com.isofarm.utils.Settings;
@@ -81,14 +82,14 @@ public class GameInteraction {
         if (Controls.isPressed(ControlAction.OPEN_CHAT)) {
             if (!GameMaster.game.isChatOpen()) {
                 GameMaster.game.setChatOpen(true);
-                GameMaster.game.getGameUIService().openChat();
+                GameUIService.ui.openChat();
             } else {
-                String command = GameMaster.game.getGameUIService().getChatText();
+                String command = GameUIService.ui.getChatText();
                 if (command != null && !command.isEmpty()) {
                     GameMaster.game.getCommandService().execute(command);
                 }
                 GameMaster.game.setChatOpen(false);
-                GameMaster.game.getGameUIService().closeChat();
+                GameUIService.ui.closeChat();
             }
         }
 
@@ -436,7 +437,7 @@ public class GameInteraction {
             if (crop.getCropType().isStackable()) {
                 breakStackedCrop(world, crop);
                 SoundService.fx.playBreakSound(SoundGroup.SOIL);
-                GameMaster.game.getGameUIService().logAction(cell);
+                GameUIService.ui.logAction(cell);
                 return;
             }
             CropType cropType = crop.getCropType();
@@ -451,7 +452,7 @@ public class GameInteraction {
             SoundService.fx.playBreakSound(SoundGroup.SOIL);
             if (sheet != null) ParticleEngine.peng.spawnCrop(x, y + K.World.SHORTER_BLOCK_HEIGHT,
                     z, sheet, frameIndex);
-            GameMaster.game.getGameUIService().logAction(cell);
+            GameUIService.ui.logAction(cell);
             return;
         }
 
@@ -568,7 +569,7 @@ public class GameInteraction {
                     new Vector3f(dropPosition)));
         }
         block.getInventory().clear();
-        gameMaster.getGameUIService().logAction(
+        GameUIService.ui.logAction(
                 new BlockPos(block.getType(), block.getX(), block.getY(), block.getZ()));
         log.trace("Interactive block removed: {} at {},{},{}",
                 block.getType().getName().toUpperCase(),
@@ -646,7 +647,7 @@ public class GameInteraction {
             if (tool instanceof Axe axe && isSmartShift) {
                 List<BlockPos> destroyedBlocks = TreeService.chop(gameMaster, axe);
                 for (BlockPos pos : destroyedBlocks) {
-                    GameMaster.game.getGameUIService().logAction(new BlockPos(blockData, pos.x(), pos.y(), pos.z()));
+                    GameUIService.ui.logAction(new BlockPos(blockData, pos.x(), pos.y(), pos.z()));
                     if (!(pos.data() instanceof BlockData bData)) {
                         continue;
                     }
@@ -705,7 +706,7 @@ public class GameInteraction {
         WorldItem dropEntity = new WorldItem(itemToDrop, (int) (Math.random()) + 1, position);
         GameMaster.game.addEntity(dropEntity);
 
-        GameMaster.game.getGameUIService().logAction(cell);
+        GameUIService.ui.logAction(cell);
         log.trace("Block removed: {} at {},{},{}", blockData.getName().toUpperCase(), cell.x(), cell.y(), cell.z());
         this.breakTimeout = TIMEOUT;
     }
@@ -740,9 +741,9 @@ public class GameInteraction {
             player.interact();
         }
 
-        int normalX = GameMaster.game.getOrthoCamera().getLastHitNormalX();
-        int normalY = GameMaster.game.getOrthoCamera().getLastHitNormalY();
-        int normalZ = GameMaster.game.getOrthoCamera().getLastHitNormalZ();
+        int normalX = GameMaster.game.getCamera().getLastHitNormalX();
+        int normalY = GameMaster.game.getCamera().getLastHitNormalY();
+        int normalZ = GameMaster.game.getCamera().getLastHitNormalZ();
 
         if (selectedItem instanceof iBlock interactiveBlock) {
             int placeX = cell.x() + normalX;
@@ -779,7 +780,7 @@ public class GameInteraction {
             FluidSimulation.notifyBlockPlaced(placeX, placeY, placeZ);
             player.remove(selectedItem);
             SoundService.fx.playPlaceSound(placedBlock.getType().getSoundGroup());
-            GameMaster.game.getGameUIService().logAction(
+            GameUIService.ui.logAction(
                     new BlockPos(placedBlock.getType(), placeX, placeY, placeZ));
             log.trace("Interactive block placed: {} at {},{},{}",
                     placedBlock.getType().getName().toUpperCase(), placeX, placeY, placeZ);
@@ -834,7 +835,7 @@ public class GameInteraction {
             player.remove(selectedItem);
             SoundService.fx.playBreakSound(newBlock.getType().getSoundGroup());
             GameMaster.game.rebuildChunkMeshAt(placeX, placeZ);
-            GameMaster.game.getGameUIService().logAction(
+            GameUIService.ui.logAction(
                     new BlockPos(newBlock.getType(), placeX, placeY, placeZ));
             log.trace("Block placed: {} at {},{},{}",
                     newBlock.getType().getName().toUpperCase(), placeX, placeY, placeZ);
@@ -874,7 +875,7 @@ public class GameInteraction {
                     TimeService.ts.getCurrentSeason());
 
             if (planted != null) {
-                GameMaster.game.getGameUIService().logAction(cell);
+                GameUIService.ui.logAction(cell);
                 log.info("Planted {} at {},{},{}", p.getType().getName(), x, y, z);
             }
         }
