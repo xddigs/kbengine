@@ -149,10 +149,9 @@ public final class GameUIService implements Service<GameMaster> {
         uiManager.getRoot().addChild(backpackUI);
         uiManager.getRoot().addChild(BookUI.bui);
 
-        this.chatField = new UITextField(10, windowHeight - 10, windowWidth - 10, 32);
-        chatField.setCompletionProvider(
-                new CommandCompletionProvider(gameMaster.getCommandRegistry()));
-
+        final float offset = 32.0f;
+        this.chatField = new UITextField(0, windowHeight - offset, windowWidth, offset);
+        chatField.setCompletionProvider(new CommandCompletionProvider(gameMaster.getCommandRegistry()));
         uiManager.getRoot().addChild(chatField);
 
         final float lineheight = 32.0f;
