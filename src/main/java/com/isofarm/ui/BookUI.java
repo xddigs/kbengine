@@ -355,6 +355,7 @@ public class BookUI extends UIElement {
 
         setPosition(centerX, y);
         setSize(bookWidth, bookHeight);
+        setOpacity(alpha);
         layoutButtons(bookWidth);
         updateButtonState();
 
@@ -377,7 +378,6 @@ public class BookUI extends UIElement {
             renderSpread(book, centerX, y, animSheet, scale, alpha);
             Frontend.drawSprite(animSheet, 0, centerX, y, bookWidth, bookHeight, new Vector4f(1.0f));
         }
-        renderChildren();
     }
 
     private boolean isAnyButtonHovered() {
@@ -385,16 +385,26 @@ public class BookUI extends UIElement {
     }
 
     private void updateButtonState() {
-        boolean bookIsReady = isOpen() && !isFlippingPage;
-        boolean isCraftingBook = BookService.bs.getOpenedBook() instanceof CraftingBook;
-        setButtonState(sortNameButton, bookIsReady && isCraftingBook);
-        setButtonState(sortTypeButton, bookIsReady && isCraftingBook);
-        setButtonState(closeButton, bookIsReady);
+        Book openedBook = BookService.bs.getOpenedBook();
+        boolean hasRightPage = openedBook != null
+                && openedBook.getCurrentPage() + 1 < openedBook.getPages().size();
+        boolean buttonsCanRender = hasRightPage || isFlippingPage;
+        boolean bookIsReady = isOpen() && !isFlippingPage && hasRightPage;
+        boolean isCraftingBook = openedBook instanceof CraftingBook;
+        setButtonState(sortNameButton, buttonsCanRender && isCraftingBook,
+                bookIsReady && isCraftingBook);
+        setButtonState(sortTypeButton, buttonsCanRender && isCraftingBook,
+                bookIsReady && isCraftingBook);
+        setButtonState(closeButton, buttonsCanRender, bookIsReady);
     }
 
-    private void setButtonState(UIButton button, boolean active) {
-        button.setVisible(active);
-        button.setEnabled(active);
+    private void setButtonState(UIButton button, boolean visible, boolean enabled) {
+        button.setVisible(visible);
+        button.setEnabled(enabled);
+    }
+
+    private void renderBookButtons() {
+        renderChildren();
     }
 
     /**
@@ -414,36 +424,40 @@ public class BookUI extends UIElement {
             int oldRight = currentPage - 1;
             if (progress < PAGE_STATIC_CONTENT_HIDE_PROGRESS) {
                 renderPageAt(book, oldLeft, bookX, bookY,
-                        pageWidth, bookHeight, alpha);
+                        pageWidth, bookHeight, alpha, false);
             }
             if (progress < 0.5f) {
                 float fold = easeInOutCubic(progress * 2.0f);
                 renderTransformedPage(book, oldRight, bookX + pageWidth, bookY,
-                        pageWidth, bookHeight, alpha, spineX, 1.0f - fold, foldCurve);
+                        pageWidth, bookHeight, alpha, spineX, 1.0f - fold, foldCurve,
+                        true);
             } else {
                 float unfold = easeInOutCubic((progress - 0.5f) * 2.0f);
                 renderPageAt(book, currentPage + 1, bookX + pageWidth, bookY,
-                        pageWidth, bookHeight, alpha);
+                        pageWidth, bookHeight, alpha, true);
                 renderTransformedPage(book, currentPage, bookX, bookY,
-                        pageWidth, bookHeight, alpha, spineX, unfold, foldCurve);
+                        pageWidth, bookHeight, alpha, spineX, unfold, foldCurve,
+                        false);
             }
         } else {
             int oldLeft = currentPage + 2;
             int oldRight = currentPage + 3;
             if (progress < PAGE_STATIC_CONTENT_HIDE_PROGRESS) {
                 renderPageAt(book, oldRight, bookX + pageWidth, bookY,
-                        pageWidth, bookHeight, alpha);
+                        pageWidth, bookHeight, alpha, true);
             }
             if (progress < 0.5f) {
                 float fold = easeInOutCubic(progress * 2.0f);
                 renderTransformedPage(book, oldLeft, bookX, bookY,
-                        pageWidth, bookHeight, alpha, spineX, 1.0f - fold, foldCurve);
+                        pageWidth, bookHeight, alpha, spineX, 1.0f - fold, foldCurve,
+                        false);
             } else {
                 float unfold = easeInOutCubic((progress - 0.5f) * 2.0f);
                 renderPageAt(book, currentPage, bookX, bookY,
-                        pageWidth, bookHeight, alpha);
+                        pageWidth, bookHeight, alpha, false);
                 renderTransformedPage(book, currentPage + 1, bookX + pageWidth, bookY,
-                        pageWidth, bookHeight, alpha, spineX, unfold, foldCurve);
+                        pageWidth, bookHeight, alpha, spineX, unfold, foldCurve,
+                        true);
             }
         }
     }
@@ -452,9 +466,13 @@ public class BookUI extends UIElement {
      * Renders a page when its index exists.
      */
     private void renderPageAt(Book book, int pageIndex, float pageX, float pageY,
-                              float pageWidth, float pageHeight, float alpha) {
+                              float pageWidth, float pageHeight, float alpha,
+                              boolean renderButtons) {
         if (pageIndex < 0 || pageIndex >= book.getPages().size()) return;
         renderPage(book.getPage(pageIndex), pageX, pageY, pageWidth, pageHeight, alpha);
+        if (renderButtons) {
+            renderBookButtons();
+        }
     }
 
     /**
@@ -463,10 +481,14 @@ public class BookUI extends UIElement {
     private void renderTransformedPage(Book book, int pageIndex,
                                        float pageX, float pageY,
                                        float pageWidth, float pageHeight, float alpha,
-                                       float spineX, float scaleX, float curve) {
+                                       float spineX, float scaleX, float curve,
+                                       boolean renderButtons) {
         if (pageIndex < 0 || pageIndex >= book.getPages().size()) return;
         Frontend.beginPageTransform(spineX, scaleX, pageWidth, curve);
         renderPage(book.getPage(pageIndex), pageX, pageY, pageWidth, pageHeight, alpha);
+        if (renderButtons) {
+            renderBookButtons();
+        }
         Frontend.endPageTransform();
     }
 
@@ -543,6 +565,7 @@ public class BookUI extends UIElement {
         if (rightPageIndex < book.getPages().size()) {
             renderPage(book.getPage(rightPageIndex), x + pageWidth, y,
                     pageWidth, bookHeight, alpha);
+            renderBookButtons();
         }
     }
 
