@@ -44,6 +44,7 @@ public class ResourceManager {
     private static final Map<CropType, SpriteSheet> cropSpritesheets = new EnumMap<>(CropType.class);
 
     private static final Shader defaultShader = new Shader(K.Paths.DEFAULT_VERT_SHADER, K.Paths.DEFAULT_FRAG_SHADER);
+    private static final Shader destroyShader = new Shader(K.Paths.DESTROY_VERT_SHADER, K.Paths.DESTROY_FRAG_SHADER);
     private static final Shader rainShader = new Shader(K.Paths.RAIN_VERT_SHADER, K.Paths.RAIN_FRAG_SHADER);
     private static final Shader motionBlurShader = new Shader(K.Paths.MOTION_BLUR_VERT_SHADER, K.Paths.MOTION_BLUR_FRAG_SHADER);
     private static final Shader shadowMapShader = new Shader(K.Paths.SHADOW_VERT_SHADER, K.Paths.SHADOW_FRAG_SHADER);
@@ -232,6 +233,7 @@ public class ResourceManager {
         heartsSpriteSheet.dispose();
 
         defaultShader.dispose();
+        destroyShader.dispose();
         motionBlurShader.dispose();
         rainShader.dispose();
         shadowMapShader.dispose();
@@ -244,6 +246,14 @@ public class ResourceManager {
      */
     public Shader getDefaultShader() {
         return defaultShader;
+    }
+
+    /**
+     * Returns the shader dedicated to the block destruction overlay.
+     * @return the {@link Shader} used to render block cracks
+     */
+    public Shader getDestroyShader() {
+        return destroyShader;
     }
 
     /**

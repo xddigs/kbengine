@@ -303,7 +303,7 @@ public class GameRenderer {
         glDepthFunc(GL_LESS);
         glDepthMask(true);
         glEnable(GL_DEPTH_TEST);
-        renderDestroyOverlay(GameInteraction.gami, defaultShader,
+        renderDestroyOverlay(GameInteraction.gami, ResourceManager.rem.getDestroyShader(),
                 ResourceManager.rem.getDestroyOverlayMesh(),
                 ResourceManager.rem.getDestroyTexture(), camera);
 
@@ -464,10 +464,7 @@ public class GameRenderer {
         glActiveTexture(GL_TEXTURE0 + K.Render.PRIMARY_TEXTURE_UNIT);
         destroyTexture.bind();
 
-        shader.setUniform("uUseTexture", true);
-        shader.setUniform("uUseFaceAtlas", false);
         shader.setUniform("uTexture", K.Render.PRIMARY_TEXTURE_UNIT);
-        shader.setUniform("uParticleAlpha", 1.0f);
         shader.setUniform("uProjection", camera.getProjectionMatrix());
         shader.setUniform("uView", camera.getViewMatrix());
 
@@ -492,7 +489,10 @@ public class GameRenderer {
         glDepthMask(true);
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
-        glDisable(GL_BLEND);
+        // Blending is the normal state for the remaining scene passes.
+        // In particular, do not let the temporary crack pass alter them.
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glActiveTexture(GL_TEXTURE0);
     }
 

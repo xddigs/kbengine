@@ -139,6 +139,8 @@ public final class K {
 
         public static final String DEFAULT_VERT_SHADER = "shaders/default.vert";
         public static final String DEFAULT_FRAG_SHADER = "shaders/default.frag";
+        public static final String DESTROY_VERT_SHADER = "shaders/destroy.vert";
+        public static final String DESTROY_FRAG_SHADER = "shaders/destroy.frag";
 
         public static final String MOTION_BLUR_VERT_SHADER = "shaders/motion_blur.vert";
         public static final String MOTION_BLUR_FRAG_SHADER = "shaders/motion_blur.frag";
