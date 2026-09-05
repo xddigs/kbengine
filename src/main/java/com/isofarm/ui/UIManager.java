@@ -7,7 +7,7 @@ import com.isofarm.input.Mouse;
  * Encapsulates the state and operations required by uimanager within the game runtime.
  */
 public class UIManager {
-    private static final float MOUSE_OFFSET = 32.0f;
+    private static final float MOUSE_OFFSET = 16.0f;
     private final UIPanel root;
     private final UITooltip tooltip;
     private UIElement focusedElement;
