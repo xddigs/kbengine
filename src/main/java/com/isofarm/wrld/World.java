@@ -3,12 +3,15 @@ package com.isofarm.wrld;
 import com.isofarm.data.BlockData;
 import com.isofarm.data.BlockPos;
 import com.isofarm.data.Crop;
+import com.isofarm.data.InteractiveBlocks;
 import com.isofarm.data.Singleton;
 import com.isofarm.item.Block;
 import com.isofarm.item.iBlock;
 import com.isofarm.pathfinding.GridPos;
+import org.joml.Vector3f;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -134,7 +137,10 @@ public class World {
      */
     public void addInteractiveBlock(iBlock block) {
         if (block == null) return;
-        interactiveBlocks.put(getBlockKey(block.getX(), block.getY(), block.getZ()), block);
+        for (int offsetY = 0; offsetY < block.getType().getHeight(); offsetY++) {
+            interactiveBlocks.put(getBlockKey(
+                    block.getX(), block.getY() + offsetY, block.getZ()), block);
+        }
     }
 
     /**
@@ -158,7 +164,16 @@ public class World {
      * @return the {@link iBlock} representing the removed block, or {@code null} when none was present
      */
     public iBlock removeInteractiveBlockAt(int x, int y, int z) {
-        return interactiveBlocks.remove(getBlockKey(x, y, z));
+        iBlock block = getInteractiveBlockAt(x, y, z);
+        if (block == null) return null;
+
+        for (int offsetY = 0; offsetY < block.getType().getHeight(); offsetY++) {
+            long key = getBlockKey(block.getX(), block.getY() + offsetY, block.getZ());
+            if (interactiveBlocks.get(key) == block) {
+                interactiveBlocks.remove(key);
+            }
+        }
+        return block;
     }
 
     /**
@@ -167,8 +182,38 @@ public class World {
      * @param consumer the {@link Consumer} argument; the block consumer
      */
     public void forEachInteractiveBlock(Consumer<iBlock> consumer) {
-        interactiveBlocks.values().forEach(consumer);
+        new HashSet<>(interactiveBlocks.values()).forEach(consumer);
     }
+
+    /**
+     * Tests an AABB against every door model using its current animated angle.
+     */
+    public boolean intersectsDoor(float minX, float minY, float minZ,
+                                  float maxX, float maxY, float maxZ) {
+        for (iBlock block : new HashSet<>(interactiveBlocks.values())) {
+            if (block.intersects(minX, minY, minZ, maxX, maxY, maxZ)) return true;
+        }
+        return false;
+    }
+
+    /**
+     * Finds the closest animated door model intersected by a world-space ray.
+     */
+    public DoorHit raycastDoor(Vector3f origin, Vector3f direction) {
+        iBlock closest = null;
+        float closestDistance = Float.POSITIVE_INFINITY;
+        for (iBlock block : new HashSet<>(interactiveBlocks.values())) {
+            float distance = block.rayIntersection(origin, direction);
+            if (distance < closestDistance) {
+                closest = block;
+                closestDistance = distance;
+            }
+        }
+        return closest == null ? null : new DoorHit(closest, closestDistance);
+    }
+
+    /** Closest precise door intersection along a ray. */
+    public record DoorHit(iBlock block, float distance) { }
 
     /**
      * Adds the crop.
@@ -465,12 +510,25 @@ public class World {
      * @return {@code true} if block solid; otherwise {@code false}
      */
     public boolean isBlockSolid(int x, int y, int z) {
-        if (getInteractiveBlockAt(x, y, z) != null) return true;
+        iBlock interactiveBlock = getInteractiveBlockAt(x, y, z);
+        if (interactiveBlock != null) return interactiveBlock.isSolid();
         byte blockId = getBlockTypeAt(x, y, z);
         BlockData block = BlockData.fromId(blockId);
         if (block == null) return false;
         if (block.isFluid()) return false;
         return block.isSolid();
+    }
+
+    /**
+     * Returns whether a cell contains a solid full-cube collider. Doors are
+     * excluded because their model-shaped collision is evaluated separately.
+     */
+    public boolean isFullCubeSolid(int x, int y, int z) {
+        iBlock interactiveBlock = getInteractiveBlockAt(x, y, z);
+        if (interactiveBlock != null) {
+            return interactiveBlock.getType() != InteractiveBlocks.OAK_DOOR;
+        }
+        return isBlockSolid(x, y, z);
     }
 
     /**

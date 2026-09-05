@@ -5,6 +5,7 @@ import com.isofarm.data.BlockPos;
 import com.isofarm.data.Cause;
 import com.isofarm.data.DataClass;
 import com.isofarm.data.RenderPass;
+import com.isofarm.item.iBlock;
 import com.isofarm.utils.K;
 import com.isofarm.wrld.GameMaster;
 import com.isofarm.wrld.World;
@@ -522,14 +523,14 @@ public abstract class Entity {
         for (int x = blockMinX; x <= blockMaxX; x++) {
             for (int y = blockMinY; y <= blockMaxY; y++) {
                 for (int z = blockMinZ; z <= blockMaxZ; z++) {
-                    if (world.isBlockSolid(x, y, z)) {
+                    if (world.isFullCubeSolid(x, y, z)) {
                         return true;
                     }
                 }
             }
         }
 
-        return false;
+        return world.intersectsDoor(minX, minY, minZ, maxX, maxY, maxZ);
     }
 
     /**
@@ -561,6 +562,21 @@ public abstract class Entity {
                 maxY > blockY &&
                 minZ < blockMaxZ &&
                 maxZ > blockZ;
+    }
+
+    /**
+     * Tests this entity's collision box against an interactive model collider.
+     */
+    public boolean intersects(iBlock block) {
+        if (block == null) return false;
+        float epsilon = 0.001f;
+        float minX = position.x - dimensions.x / 2.0f + epsilon;
+        float maxX = position.x + dimensions.x / 2.0f - epsilon;
+        float minY = position.y + epsilon;
+        float maxY = position.y + dimensions.y - epsilon;
+        float minZ = position.z - dimensions.z / 2.0f + epsilon;
+        float maxZ = position.z + dimensions.z / 2.0f - epsilon;
+        return block.intersects(minX, minY, minZ, maxX, maxY, maxZ);
     }
 
     /**

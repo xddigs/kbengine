@@ -15,6 +15,7 @@ public enum SoundGroup {
     RAIN(new String[]{}, new String[]{}, new String[]{}, new String[]{}, new String[]{}, new String[]{"fx/ambient/rain.ogg"}, new String[]{}, new String[]{}),
     NATURE(new String[]{}, new String[]{}, new String[]{}, new String[]{}, new String[]{}, new String[]{"fx/ambient/nature.ogg"}, new String[]{}, new String[]{}),
     CHEST(new String[]{}, new String[]{"fx/blocks/wood.ogg"}, new String[]{"fx/blocks/wood_tumbling.ogg"}, new String[]{"fx/blocks/wood.ogg"}, new String[]{}, new String[]{}, new String[]{}, new String[]{"fx/blocks/chest_open.ogg", "fx/blocks/chest_close.ogg"}),
+    DOOR(new String[]{"fx/blocks/wood.ogg"}, new String[]{"fx/blocks/wood.ogg"}, new String[]{"fx/blocks/wood_tumbling.ogg"}, new String[]{"fx/blocks/wood.ogg"}, new String[]{}, new String[]{}, new String[]{}, new String[]{"fx/blocks/chest_open.ogg", "fx/blocks/chest_close.ogg"}),
     WATER(new String[]{"fx/steps/steps_water_01.ogg", "fx/steps/steps_water_02.ogg", "fx/steps/steps_water_03.ogg", "fx/steps/steps_water_04.ogg"}, new String[]{}, new String[]{}, new String[]{}, new String[]{}, new String[]{}, new String[]{}, new String[]{}),
     LAVA(new String[]{"fx/steps/steps_lava_01.ogg", "fx/steps/steps_lava_02.ogg"}, new String[]{}, new String[]{}, new String[]{}, new String[]{}, new String[]{"fx/ambient/lava.ogg"}, new String[]{}, new String[]{}),
     SILENT(new String[]{}, new String[]{}, new String[]{}, new String[]{}, new String[]{}, new String[]{}, new String[]{}, new String[]{});

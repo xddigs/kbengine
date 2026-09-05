@@ -3,6 +3,7 @@ package com.isofarm.graphics;
 import com.isofarm.data.BlockData;
 import com.isofarm.data.BlockPos;
 import com.isofarm.data.Crop;
+import com.isofarm.data.InteractiveBlocks;
 import com.isofarm.data.RenderPass;
 import com.isofarm.entity.Player;
 import com.isofarm.input.GameInteraction;
@@ -230,7 +231,6 @@ public class GameRenderer {
         gameMaster.getWorld().forEachInteractiveBlock(block -> {
             if (block.getBlockModel() == null) return;
 
-            block.animate();
             defaultShader.setUniform("uUseFaceAtlas", false);
             defaultShader.setUniform("uIsSprite", false);
             defaultShader.setUniform("uUseTexture", true);
@@ -240,9 +240,7 @@ public class GameRenderer {
             defaultShader.setUniform("uLightIntensity", lighting.getIntensity());
             defaultShader.setUniform("uAmbientIntensity", lighting.getAmbientIntensity());
 
-            modelMatrix.identity().translate(
-                    block.getX() + 0.5f, block.getY(), block.getZ() + 0.5f)
-                    .rotateY(block.getOrientation());
+            block.getModelTransform(modelMatrix);
             block.getBlockModel().render(defaultShader, modelMatrix);
         });
 
@@ -347,11 +345,15 @@ public class GameRenderer {
             defaultShader.setUniform("uUseParticleAlpha", false);
             defaultShader.setUniform("uParticleAlpha", 1.0f);
 
-            modelMatrix.identity()
-                    .translate(
-                    hoveredCell.x(),
-                    hoveredCell.y(),
-                    hoveredCell.z());
+            var selectedInteractiveBlock = gameMaster.getWorld().getInteractiveBlockAt(
+                    hoveredCell.x(), hoveredCell.y(), hoveredCell.z());
+            if (selectedInteractiveBlock != null
+                    && selectedInteractiveBlock.getType() == InteractiveBlocks.OAK_DOOR) {
+                selectedInteractiveBlock.getSelectionTransform(modelMatrix);
+            } else {
+                modelMatrix.identity().translate(
+                        hoveredCell.x(), hoveredCell.y(), hoveredCell.z());
+            }
 
             defaultShader.setUniform("uModel", modelMatrix);
             ResourceManager.rem.getSelectionMesh().renderLines();

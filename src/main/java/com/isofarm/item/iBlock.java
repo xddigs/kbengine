@@ -6,16 +6,23 @@ import com.isofarm.data.InteractiveBlocks;
 import com.isofarm.graphics.ResourceManager;
 import com.isofarm.graphics.gltf.GLTFNode;
 import com.isofarm.graphics.gltf.GLTFModel;
+import com.isofarm.service.SoundService;
 import com.isofarm.ui.GameUIService;
 import com.isofarm.wrld.GameMaster;
+import org.joml.Matrix4f;
 import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 /**
  * A craftable block with a model and interactive state.
  */
 public class iBlock implements Craftable {
-    private static final float ANIMATION_DURATION = 0.35f;
+    private static final float ANIMATION_DURATION = 0.16f;
     private static final float CHEST_OPEN_ANGLE = (float) Math.toRadians(35.0);
+    private static final float DOOR_OPEN_ANGLE = (float) Math.toRadians(90.0);
+    private static final float QUARTER_TURN = (float) (Math.PI * 0.5);
+    private static final float DOOR_MIN_Z = 0.0625f;
+    private static final float DOOR_DEPTH = 0.0625f;
 
     private final InteractiveBlocks type;
     private final GLTFModel blockModel;
@@ -184,14 +191,22 @@ public class iBlock implements Craftable {
     }
 
     /**
-     * Uses the interactive block. Currently this toggles its activated state;
-     * calling {@link #animate()} advances the corresponding visual transition.
+     * Uses the interactive block and starts its corresponding interaction.
      */
     public void use() {
-        if (type != InteractiveBlocks.CHEST || GameMaster.game == null) return;
+        if (GameMaster.game == null) return;
 
-        setActivated(true);
-        GameUIService.ui.getInventoryUI().openContainer(this);
+        switch (type) {
+            case CHEST -> {
+                setActivated(true);
+                GameUIService.ui.getInventoryUI().openContainer(this);
+            }
+            case OAK_DOOR -> {
+                setActivated(!isActivated);
+                SoundService.fx.playUseSound(type.getSoundGroup(), isActivated ? 0 : 1);
+            }
+            default -> { }
+        }
     }
 
     /**
@@ -219,6 +234,137 @@ public class iBlock implements Craftable {
      */
     public float getOrientation() {
         return orientation;
+    }
+
+    /**
+     * Builds the world transform for this block's model. Door models use their
+     * corner origin as a hinge and are kept inside the occupied cell for every
+     * cardinal orientation.
+     *
+     * @param destination matrix to populate
+     * @return the populated matrix
+     */
+    public Matrix4f getModelTransform(Matrix4f destination) {
+        if (type != InteractiveBlocks.OAK_DOOR) {
+            return destination.identity()
+                    .translate(x + 0.5f, y, z + 0.5f)
+                    .rotateY(orientation);
+        }
+
+        return destination.identity()
+                .translate(getDoorHingeX(), y, getDoorHingeZ())
+                .rotateY(orientation + DOOR_OPEN_ANGLE * animationProgress);
+    }
+
+    /**
+     * Builds an outline transform matching the complete animated door model.
+     *
+     * @param destination matrix to populate
+     * @return the populated matrix
+     */
+    public Matrix4f getSelectionTransform(Matrix4f destination) {
+        return getModelTransform(destination)
+                .translate(0.0f, 0.0f, DOOR_MIN_Z)
+                .scale(1.0f, 2.0f, DOOR_DEPTH);
+    }
+
+    /**
+     * Tests an entity AABB against the animated, oriented door panel.
+     */
+    public boolean intersects(float minX, float minY, float minZ,
+                              float maxX, float maxY, float maxZ) {
+        if (type != InteractiveBlocks.OAK_DOOR
+                || maxY <= y || minY >= y + 2.0f) return false;
+
+        float angle = orientation + DOOR_OPEN_ANGLE * animationProgress;
+        float cosine = (float) Math.cos(angle);
+        float sine = (float) Math.sin(angle);
+        float hingeX = getDoorHingeX();
+        float hingeZ = getDoorHingeZ();
+
+        float localCenterX = 0.5f;
+        float localCenterZ = DOOR_MIN_Z + DOOR_DEPTH * 0.5f;
+        float centerX = hingeX + cosine * localCenterX + sine * localCenterZ;
+        float centerZ = hingeZ - sine * localCenterX + cosine * localCenterZ;
+
+        float boxCenterX = (minX + maxX) * 0.5f;
+        float boxCenterZ = (minZ + maxZ) * 0.5f;
+        float boxHalfX = (maxX - minX) * 0.5f;
+        float boxHalfZ = (maxZ - minZ) * 0.5f;
+        float deltaX = boxCenterX - centerX;
+        float deltaZ = boxCenterZ - centerZ;
+
+        float axisXX = cosine;
+        float axisXZ = -sine;
+        float axisZX = sine;
+        float axisZZ = cosine;
+        float halfWidth = 0.5f;
+        float halfDepth = DOOR_DEPTH * 0.5f;
+
+        if (Math.abs(deltaX) > boxHalfX
+                + halfWidth * Math.abs(axisXX) + halfDepth * Math.abs(axisZX)) return false;
+        if (Math.abs(deltaZ) > boxHalfZ
+                + halfWidth * Math.abs(axisXZ) + halfDepth * Math.abs(axisZZ)) return false;
+        if (Math.abs(deltaX * axisXX + deltaZ * axisXZ) > halfWidth
+                + boxHalfX * Math.abs(axisXX) + boxHalfZ * Math.abs(axisXZ)) return false;
+        return Math.abs(deltaX * axisZX + deltaZ * axisZZ) <= halfDepth
+                + boxHalfX * Math.abs(axisZX) + boxHalfZ * Math.abs(axisZZ);
+    }
+
+    /**
+     * Returns the distance along a ray to the animated door model.
+     */
+    public float rayIntersection(Vector3f origin, Vector3f direction) {
+        if (type != InteractiveBlocks.OAK_DOOR) return Float.POSITIVE_INFINITY;
+
+        Matrix4f inverse = getModelTransform(new Matrix4f()).invert();
+        Vector3f localOrigin = inverse.transformPosition(new Vector3f(origin));
+        Vector3f localDirection = inverse.transformDirection(new Vector3f(direction));
+        float[] origins = {localOrigin.x, localOrigin.y, localOrigin.z};
+        float[] directions = {localDirection.x, localDirection.y, localDirection.z};
+        float[] minimums = {0.0f, 0.0f, DOOR_MIN_Z};
+        float[] maximums = {1.0f, 2.0f, DOOR_MIN_Z + DOOR_DEPTH};
+        float near = 0.0f;
+        float far = Float.POSITIVE_INFINITY;
+
+        for (int axis = 0; axis < 3; axis++) {
+            float axisDirection = directions[axis];
+            if (Math.abs(axisDirection) < 0.000001f) {
+                if (origins[axis] < minimums[axis] || origins[axis] > maximums[axis]) {
+                    return Float.POSITIVE_INFINITY;
+                }
+                continue;
+            }
+
+            float first = (minimums[axis] - origins[axis]) / axisDirection;
+            float second = (maximums[axis] - origins[axis]) / axisDirection;
+            if (first > second) {
+                float swap = first;
+                first = second;
+                second = swap;
+            }
+            near = Math.max(near, first);
+            far = Math.min(far, second);
+            if (near > far) return Float.POSITIVE_INFINITY;
+        }
+        return far >= 0.0f ? near : Float.POSITIVE_INFINITY;
+    }
+
+    /**
+     * Returns whether this block currently blocks movement.
+     */
+    public boolean isSolid() {
+        return type != InteractiveBlocks.OAK_DOOR || !isActivated;
+    }
+
+    private float getDoorHingeX() {
+        int quarter = Math.floorMod(Math.round(orientation / QUARTER_TURN), 4);
+        return x + ((quarter == 1 || quarter == 2) ? 1.0f : 0.0f);
+    }
+
+    private float getDoorHingeZ() {
+        int quarter = Math.floorMod(Math.round(orientation / QUARTER_TURN), 4);
+        return z + ((quarter == 2 || quarter == 3) ? 1.0f : 0.0f);
     }
 
     private void applyAnimation() {

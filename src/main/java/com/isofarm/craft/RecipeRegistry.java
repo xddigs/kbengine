@@ -92,7 +92,12 @@ public class RecipeRegistry {
     private void registeriBlocksRecipes() {
         create(Tier.WOODEN)
                 .with(new Block(BlockData.OAK_WOOD), 6)
-                .result(new iBlock(InteractiveBlocks.CHEST), 1);
+                .result(new iBlock(InteractiveBlocks.CHEST), 1)
+                .add();
+        create(Tier.WOODEN)
+                .with(new Block(BlockData.OAK_WOOD), 8)
+                .result(new iBlock(InteractiveBlocks.OAK_DOOR), 1)
+                .add();
     }
 
     /**

@@ -91,10 +91,15 @@ public final class PlayerAnimator {
         deathTime = 0.0f;
         deathWeight = 0.0f;
         deathAlpha = 1.0f;
-        updateRotation(delta);
         if (backpack != null) backpack.setVisible(player.getInventory().hasBackpackEquipped());
         Vector3f velocity = player.getVelocity();
         boolean moving = Math.abs(velocity.x) > MOVE_THRESHOLD || Math.abs(velocity.z) > MOVE_THRESHOLD;
+        if (moving) {
+            updateFacing(velocity);
+        } else {
+            updateFacingCursor();
+        }
+        updateRotation(delta);
         boolean sneaking = player.getCurrentState() instanceof SneakingState;
         sneakWeight = lerp(sneakWeight, sneaking ? 1 : ZERO, Math.clamp(delta * 75, ZERO, 1));
         if (moving) {
@@ -132,7 +137,6 @@ public final class PlayerAnimator {
         rotate(rightLeg, new Quaternionf().rotateX(-swing)); rotate(leftLeg, new Quaternionf().rotateX(swing));
         updateHead(delta);
         if (model != null) model.updateTransforms();
-        if (moving) updateFacing(velocity);
         updateEquipment();
     }
 
@@ -182,7 +186,19 @@ public final class PlayerAnimator {
 
     private void updateFacing(Vector3f velocity) {
         float raw = (float) Math.toDegrees(Math.atan2(velocity.x, velocity.z));
-        targetYaw = (raw + 180) % 360; if (targetYaw < 0) targetYaw += 360;
+        setTargetYaw(raw + 180.0f);
+    }
+
+    private void updateFacingCursor() {
+        float worldYaw = getCursorWorldYaw();
+        if (!Float.isNaN(worldYaw)) {
+            setTargetYaw((float) Math.toDegrees(worldYaw));
+        }
+    }
+
+    private void setTargetYaw(float yaw) {
+        targetYaw = yaw % FULL_DEGREES;
+        if (targetYaw < 0) targetYaw += FULL_DEGREES;
         int sector = (int) Math.round(targetYaw / 45) % 8;
         direction = switch (sector) { case 1 -> Direction.NE; case 2 -> Direction.E; case 3 -> Direction.SE;
             case 4 -> Direction.S; case 5 -> Direction.SW; case 6 -> Direction.W; case 7 -> Direction.NW; default -> Direction.N; };
@@ -201,6 +217,21 @@ public final class PlayerAnimator {
         if (head == null || baseHeadRotation == null) return;
         GameMaster game = GameMaster.game;
         float width = Math.max(game.getWindowWidth(), 1), height = Math.max(game.getWindowHeight(), 1);
+        float worldYaw = getCursorWorldYaw();
+        if (Float.isNaN(worldYaw)) return;
+        float yaw = Math.clamp(wrap(worldYaw - (float) Math.toRadians(modelYaw)), -MAX_HEAD_YAW, MAX_HEAD_YAW);
+        float normalizedY = Math.clamp((Mouse.getY() - height * .5f) / (height * .5f), -1, 1);
+        Quaternionf target = new Quaternionf(baseHeadRotation).rotateY(yaw).rotateX(-normalizedY * MAX_HEAD_PITCH);
+        Quaternionf current = new Quaternionf(head.getRotation());
+        current.slerp(target, Math.clamp(1 - (float) Math.exp(-HEAD_SPEED * delta), 0, 1));
+        head.setRotation(current);
+    }
+
+    private float getCursorWorldYaw() {
+        GameMaster game = GameMaster.game;
+        if (game == null) return Float.NaN;
+        float width = Math.max(game.getWindowWidth(), 1);
+        float height = Math.max(game.getWindowHeight(), 1);
         Ray ray = game.getCamera().getMouseRay(Mouse.getX(), Mouse.getY(), width, height);
         Vector3f mouse = new Vector3f(ray.origin());
 
@@ -209,13 +240,8 @@ public final class PlayerAnimator {
         }
 
         Vector3f toward = mouse.sub(player.getPosition());
-        float worldYaw = (float) Math.atan2(toward.x, toward.z) + (float) Math.PI;
-        float yaw = Math.clamp(wrap(worldYaw - (float) Math.toRadians(modelYaw)), -MAX_HEAD_YAW, MAX_HEAD_YAW);
-        float normalizedY = Math.clamp((Mouse.getY() - height * .5f) / (height * .5f), -1, 1);
-        Quaternionf target = new Quaternionf(baseHeadRotation).rotateY(yaw).rotateX(-normalizedY * MAX_HEAD_PITCH);
-        Quaternionf current = new Quaternionf(head.getRotation());
-        current.slerp(target, Math.clamp(1 - (float) Math.exp(-HEAD_SPEED * delta), 0, 1));
-        head.setRotation(current);
+        if (toward.x * toward.x + toward.z * toward.z < 0.000001f) return Float.NaN;
+        return (float) Math.atan2(toward.x, toward.z) + (float) Math.PI;
     }
 
     /**

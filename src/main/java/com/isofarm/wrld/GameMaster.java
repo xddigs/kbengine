@@ -495,6 +495,7 @@ public class GameMaster {
         shop.update(TimeService.ts);
         CropService.cs.update(delta, WeatherService.wes.getWeather());
         TreeService.ts.update(this);
+        world.forEachInteractiveBlock(block -> block.animate());
         updateEntities(delta);
         cameraController.update(this, delta);
         ParticleEngine.peng.update(delta);
