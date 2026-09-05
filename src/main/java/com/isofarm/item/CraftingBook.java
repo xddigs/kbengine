@@ -98,7 +98,7 @@ public class CraftingBook extends Book implements Undroppable {
 
         return Comparator
                 .comparing((Recipe recipe) -> recipe.result().getClass().getSimpleName())
-                .thenComparingInt(recipe -> recipe.tier().ordinal())
+                .thenComparingInt(recipe -> recipe.tier().getId())
                 .thenComparing(byName);
     }
 
