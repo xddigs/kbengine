@@ -2,6 +2,7 @@ package com.isofarm.entity;
 
 import com.isofarm.data.BlockData;
 import com.isofarm.data.BlockPos;
+import com.isofarm.data.BlockShape;
 import com.isofarm.data.Cause;
 import com.isofarm.data.DataClass;
 import com.isofarm.data.RenderPass;
@@ -568,6 +569,12 @@ public abstract class Entity {
     /** Tests this entity against the actual shape of a voxel block. */
     public boolean intersectsBlock(BlockData data, int blockX, int blockY, int blockZ) {
         if (data == null) return false;
+        return intersectsBlock(data.getShape(), blockX, blockY, blockZ);
+    }
+
+    /** Tests this entity against an explicitly oriented block shape. */
+    public boolean intersectsBlock(BlockShape shape, int blockX, int blockY, int blockZ) {
+        if (shape == null) return false;
         float epsilon = 0.001f;
         float minX = position.x - dimensions.x / 2.0f + epsilon;
         float maxX = position.x + dimensions.x / 2.0f - epsilon;
@@ -575,7 +582,7 @@ public abstract class Entity {
         float maxY = position.y + dimensions.y - epsilon;
         float minZ = position.z - dimensions.z / 2.0f + epsilon;
         float maxZ = position.z + dimensions.z / 2.0f - epsilon;
-        return data.getShape().intersects(blockX, blockY, blockZ,
+        return shape.intersects(blockX, blockY, blockZ,
                 minX, minY, minZ, maxX, maxY, maxZ);
     }
 

@@ -357,8 +357,10 @@ public class GameRenderer {
             }
 
             defaultShader.setUniform("uModel", modelMatrix);
-            BlockData selectedBlock = hoveredCell.data() instanceof BlockData data ? data : null;
-            ResourceManager.rem.getSelectionMesh(selectedBlock).renderLines();
+            BlockShape selectedShape = hoveredCell.data() instanceof BlockData
+                    ? gameMaster.getWorld().getBlockShapeAt(
+                            hoveredCell.x(), hoveredCell.y(), hoveredCell.z()) : null;
+            ResourceManager.rem.getSelectionMesh(selectedShape).renderLines();
 
             glDepthMask(true);
             glEnable(GL_DEPTH_TEST);
@@ -480,14 +482,16 @@ public class GameRenderer {
 
         BlockData breakingData = BlockData.fromId(
                 GameMaster.game.getWorld().getBlockTypeAt(pos.x, pos.y, pos.z));
-        BlockShape shape = breakingData == null
-                ? BlockShape.FULL_CUBE : breakingData.getShape();
+        BlockShape shape = breakingData == null ? BlockShape.FULL_CUBE
+                : GameMaster.game.getWorld().getBlockShapeAt(pos.x, pos.y, pos.z);
         for (BlockShape.Box box : shape.getBoxes()) {
             modelMatrix.identity()
                     .translate(pos.x + box.minX(), pos.y + box.minY(), pos.z + box.minZ())
                     .scale((box.maxX() - box.minX()) * 1.0001f,
                             (box.maxY() - box.minY()) * 1.0001f,
                             (box.maxZ() - box.minZ()) * 1.0001f);
+            shader.setUniform("uShapeMin", new Vector3f(box.minX(), box.minY(), box.minZ()));
+            shader.setUniform("uShapeMax", new Vector3f(box.maxX(), box.maxY(), box.maxZ()));
             shader.setUniform("uModel", modelMatrix);
             blockMesh.render();
         }

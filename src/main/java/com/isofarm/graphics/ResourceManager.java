@@ -54,7 +54,10 @@ public class ResourceManager {
     private static final Mesh blockMesh = Mesh.createMesh(K.World.DEFAULT_BLOCK_DEPTH);
     private static final Mesh selectionMesh = Mesh.selection();
     private static final Mesh horizontalSlabSelectionMesh = Mesh.selection(BlockShape.HORIZONTAL_SLAB);
-    private static final Mesh verticalSlabSelectionMesh = Mesh.selection(BlockShape.VERTICAL_SLAB);
+    private static final Mesh verticalSlabWestSelectionMesh = Mesh.selection(BlockShape.VERTICAL_SLAB_WEST);
+    private static final Mesh verticalSlabEastSelectionMesh = Mesh.selection(BlockShape.VERTICAL_SLAB_EAST);
+    private static final Mesh verticalSlabNorthSelectionMesh = Mesh.selection(BlockShape.VERTICAL_SLAB_NORTH);
+    private static final Mesh verticalSlabSouthSelectionMesh = Mesh.selection(BlockShape.VERTICAL_SLAB_SOUTH);
     private static final Mesh fenceSelectionMesh = Mesh.selection(BlockShape.FENCE);
     private static final Mesh spriteMesh = Mesh.createCrop();
     private static final Mesh flowerMesh = Mesh.createCrossMesh();
@@ -208,7 +211,10 @@ public class ResourceManager {
         flowerMesh.dispose();
         selectionMesh.dispose();
         horizontalSlabSelectionMesh.dispose();
-        verticalSlabSelectionMesh.dispose();
+        verticalSlabWestSelectionMesh.dispose();
+        verticalSlabEastSelectionMesh.dispose();
+        verticalSlabNorthSelectionMesh.dispose();
+        verticalSlabSouthSelectionMesh.dispose();
         fenceSelectionMesh.dispose();
         spriteMesh.dispose();
         screenQuadMesh.dispose();
@@ -335,11 +341,14 @@ public class ResourceManager {
     }
 
     /** Returns an outline mesh matching the supplied voxel block. */
-    public Mesh getSelectionMesh(BlockData data) {
-        if (data == null) return selectionMesh;
-        return switch (data.getShape()) {
+    public Mesh getSelectionMesh(BlockShape shape) {
+        if (shape == null) return selectionMesh;
+        return switch (shape) {
             case HORIZONTAL_SLAB -> horizontalSlabSelectionMesh;
-            case VERTICAL_SLAB -> verticalSlabSelectionMesh;
+            case VERTICAL_SLAB_WEST -> verticalSlabWestSelectionMesh;
+            case VERTICAL_SLAB_EAST -> verticalSlabEastSelectionMesh;
+            case VERTICAL_SLAB_NORTH -> verticalSlabNorthSelectionMesh;
+            case VERTICAL_SLAB_SOUTH -> verticalSlabSouthSelectionMesh;
             case FENCE -> fenceSelectionMesh;
             default -> selectionMesh;
         };

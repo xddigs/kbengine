@@ -75,7 +75,7 @@ public class ChunkMeshBuilder {
         int chunkX = chunk.getChunkX();
         int chunkZ = chunk.getChunkZ();
 
-        int extraShapeBoxes = countExtraShapeBoxes(chunk);
+        int extraShapeBoxes = countExtraShapeBoxes(world, chunk);
         float[] posBuf = ensureFloatCapacity(POS_BUFFER,
                 MAX_POSITION_FLOATS + extraShapeBoxes * 72);
         float[] normBuf = ensureFloatCapacity(NORMAL_BUFFER,
@@ -107,8 +107,11 @@ public class ChunkMeshBuilder {
                     BlockData data = BLOCK_LUT[blockId & 0xFF];
                     if (data == null || data.isPlant()) continue;
 
-                    if (!data.getShape().isFullCube()) {
-                        MeshCursor cursor = addBlockShape(data, data.getShape(), x, y, z,
+                    int worldX = chunkX * Chunk.SIZE_X + x;
+                    int worldZ = chunkZ * Chunk.SIZE_Z + z;
+                    BlockShape shape = world.getBlockShapeAt(worldX, y, worldZ);
+                    if (!shape.isFullCube()) {
+                        MeshCursor cursor = addBlockShape(data, shape, x, y, z,
                                 posBuf, normBuf, uvBuf, idxBuf,
                                 posIdx, normIdx, uvIdx, elemIdx, vertexCount);
                         posIdx = cursor.position();
@@ -119,8 +122,6 @@ public class ChunkMeshBuilder {
                         continue;
                     }
 
-                    int worldX = chunkX * Chunk.SIZE_X + x;
-                    int worldZ = chunkZ * Chunk.SIZE_Z + z;
                     float bottomY = y;
                     boolean isWater = data.isFluid();
                     float topY;
@@ -269,14 +270,18 @@ public class ChunkMeshBuilder {
         return new ChunkMeshData(solidData, waterData);
     }
 
-    private static int countExtraShapeBoxes(Chunk chunk) {
+    private static int countExtraShapeBoxes(World world, Chunk chunk) {
         int extraBoxes = 0;
+        int chunkWorldX = chunk.getChunkX() * Chunk.SIZE_X;
+        int chunkWorldZ = chunk.getChunkZ() * Chunk.SIZE_Z;
         for (int x = 0; x < Chunk.SIZE_X; x++) {
             for (int y = 0; y < Chunk.SIZE_Y; y++) {
                 for (int z = 0; z < Chunk.SIZE_Z; z++) {
                     BlockData data = BLOCK_LUT[chunk.getBlock(x, y, z) & 0xFF];
                     if (data != null && !data.getShape().isFullCube()) {
-                        extraBoxes += data.getShape().getBoxCount() - 1;
+                        BlockShape shape = world.getBlockShapeAt(
+                                chunkWorldX + x, y, chunkWorldZ + z);
+                        extraBoxes += shape.getBoxCount() - 1;
                     }
                 }
             }
@@ -418,7 +423,11 @@ public class ChunkMeshBuilder {
                 positionIndex = addQuadPos(positions, positionIndex,
                         minX, maxY, maxZ, maxX, maxY, maxZ,
                         maxX, maxY, minZ, minX, maxY, minZ);
-                uvIndex = addRegionUV(uv, uvIndex, top);
+                uvIndex = addQuadUV(uv, uvIndex,
+                        atlasU(top, box.minX()), atlasV(top, box.maxZ()),
+                        atlasU(top, box.maxX()), atlasV(top, box.maxZ()),
+                        atlasU(top, box.maxX()), atlasV(top, box.minZ()),
+                        atlasU(top, box.minX()), atlasV(top, box.minZ()));
                 normalIndex = addQuadNorm(normals, normalIndex, 0, 1, 0);
                 elementIndex = addQuadIndices(indices, elementIndex, vertexCount);
                 vertexCount += 4;
@@ -427,7 +436,11 @@ public class ChunkMeshBuilder {
                 positionIndex = addQuadPos(positions, positionIndex,
                         minX, minY, minZ, maxX, minY, minZ,
                         maxX, minY, maxZ, minX, minY, maxZ);
-                uvIndex = addRegionUV(uv, uvIndex, bottom);
+                uvIndex = addQuadUV(uv, uvIndex,
+                        atlasU(bottom, box.minX()), atlasV(bottom, box.minZ()),
+                        atlasU(bottom, box.maxX()), atlasV(bottom, box.minZ()),
+                        atlasU(bottom, box.maxX()), atlasV(bottom, box.maxZ()),
+                        atlasU(bottom, box.minX()), atlasV(bottom, box.maxZ()));
                 normalIndex = addQuadNorm(normals, normalIndex, 0, -1, 0);
                 elementIndex = addQuadIndices(indices, elementIndex, vertexCount);
                 vertexCount += 4;
@@ -437,7 +450,11 @@ public class ChunkMeshBuilder {
             positionIndex = addQuadPos(positions, positionIndex,
                     minX, minY, maxZ, maxX, minY, maxZ,
                     maxX, maxY, maxZ, minX, maxY, maxZ);
-            uvIndex = addRegionUV(uv, uvIndex, side);
+            uvIndex = addQuadUV(uv, uvIndex,
+                    atlasU(side, box.minX()), atlasSideV(side, box.minY()),
+                    atlasU(side, box.maxX()), atlasSideV(side, box.minY()),
+                    atlasU(side, box.maxX()), atlasSideV(side, box.maxY()),
+                    atlasU(side, box.minX()), atlasSideV(side, box.maxY()));
             normalIndex = addQuadNorm(normals, normalIndex, 0, 0, 1);
             elementIndex = addQuadIndices(indices, elementIndex, vertexCount);
             vertexCount += 4;
@@ -445,7 +462,11 @@ public class ChunkMeshBuilder {
             positionIndex = addQuadPos(positions, positionIndex,
                     maxX, minY, minZ, minX, minY, minZ,
                     minX, maxY, minZ, maxX, maxY, minZ);
-            uvIndex = addRegionUV(uv, uvIndex, side);
+            uvIndex = addQuadUV(uv, uvIndex,
+                    atlasU(side, box.maxX()), atlasSideV(side, box.minY()),
+                    atlasU(side, box.minX()), atlasSideV(side, box.minY()),
+                    atlasU(side, box.minX()), atlasSideV(side, box.maxY()),
+                    atlasU(side, box.maxX()), atlasSideV(side, box.maxY()));
             normalIndex = addQuadNorm(normals, normalIndex, 0, 0, -1);
             elementIndex = addQuadIndices(indices, elementIndex, vertexCount);
             vertexCount += 4;
@@ -453,7 +474,11 @@ public class ChunkMeshBuilder {
             positionIndex = addQuadPos(positions, positionIndex,
                     maxX, minY, maxZ, maxX, minY, minZ,
                     maxX, maxY, minZ, maxX, maxY, maxZ);
-            uvIndex = addRegionUV(uv, uvIndex, side);
+            uvIndex = addQuadUV(uv, uvIndex,
+                    atlasU(side, 1.0f - box.maxZ()), atlasSideV(side, box.minY()),
+                    atlasU(side, 1.0f - box.minZ()), atlasSideV(side, box.minY()),
+                    atlasU(side, 1.0f - box.minZ()), atlasSideV(side, box.maxY()),
+                    atlasU(side, 1.0f - box.maxZ()), atlasSideV(side, box.maxY()));
             normalIndex = addQuadNorm(normals, normalIndex, 1, 0, 0);
             elementIndex = addQuadIndices(indices, elementIndex, vertexCount);
             vertexCount += 4;
@@ -461,7 +486,11 @@ public class ChunkMeshBuilder {
             positionIndex = addQuadPos(positions, positionIndex,
                     minX, minY, minZ, minX, minY, maxZ,
                     minX, maxY, maxZ, minX, maxY, minZ);
-            uvIndex = addRegionUV(uv, uvIndex, side);
+            uvIndex = addQuadUV(uv, uvIndex,
+                    atlasU(side, box.minZ()), atlasSideV(side, box.minY()),
+                    atlasU(side, box.maxZ()), atlasSideV(side, box.minY()),
+                    atlasU(side, box.maxZ()), atlasSideV(side, box.maxY()),
+                    atlasU(side, box.minZ()), atlasSideV(side, box.maxY()));
             normalIndex = addQuadNorm(normals, normalIndex, -1, 0, 0);
             elementIndex = addQuadIndices(indices, elementIndex, vertexCount);
             vertexCount += 4;
@@ -470,13 +499,16 @@ public class ChunkMeshBuilder {
                 elementIndex, vertexCount);
     }
 
-    private static int addRegionUV(float[] buffer, int index,
-                                   TextureAtlas.TextureRegion region) {
-        return addQuadUV(buffer, index,
-                region.uvMin().x, region.uvMax().y,
-                region.uvMax().x, region.uvMax().y,
-                region.uvMax().x, region.uvMin().y,
-                region.uvMin().x, region.uvMin().y);
+    private static float atlasU(TextureAtlas.TextureRegion region, float local) {
+        return region.uvMin().x + (region.uvMax().x - region.uvMin().x) * local;
+    }
+
+    private static float atlasV(TextureAtlas.TextureRegion region, float local) {
+        return region.uvMin().y + (region.uvMax().y - region.uvMin().y) * local;
+    }
+
+    private static float atlasSideV(TextureAtlas.TextureRegion region, float localY) {
+        return region.uvMax().y - (region.uvMax().y - region.uvMin().y) * localY;
     }
 
     /**

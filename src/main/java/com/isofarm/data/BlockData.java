@@ -369,7 +369,7 @@ public enum BlockData implements Blockable {
     public BlockShape getShape() {
         return switch (this) {
             case OAK_PLANK_SLAB -> BlockShape.HORIZONTAL_SLAB;
-            case OAK_PLANK_VERTICAL_SLAB -> BlockShape.VERTICAL_SLAB;
+            case OAK_PLANK_VERTICAL_SLAB -> BlockShape.VERTICAL_SLAB_WEST;
             case OAK_PLANK_FENCE -> BlockShape.FENCE;
             default -> BlockShape.FULL_CUBE;
         };

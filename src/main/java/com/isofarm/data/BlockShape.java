@@ -6,7 +6,10 @@ import org.joml.Vector3f;
 public enum BlockShape {
     FULL_CUBE(new Box(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f)),
     HORIZONTAL_SLAB(new Box(0.0f, 0.0f, 0.0f, 1.0f, 0.5f, 1.0f)),
-    VERTICAL_SLAB(new Box(0.25f, 0.0f, 0.0f, 0.75f, 1.0f, 1.0f)),
+    VERTICAL_SLAB_WEST(new Box(0.0f, 0.0f, 0.0f, 0.5f, 1.0f, 1.0f)),
+    VERTICAL_SLAB_EAST(new Box(0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f)),
+    VERTICAL_SLAB_NORTH(new Box(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.5f)),
+    VERTICAL_SLAB_SOUTH(new Box(0.0f, 0.0f, 0.5f, 1.0f, 1.0f, 1.0f)),
     FENCE(new Box(0.375f, 0.0f, 0.375f, 0.625f, 1.0f, 0.625f),
             new Box(0.0f, 0.375f, 0.4375f, 1.0f, 0.5625f, 0.5625f),
             new Box(0.0f, 0.6875f, 0.4375f, 1.0f, 0.875f, 0.5625f),
@@ -30,6 +33,22 @@ public enum BlockShape {
 
     public boolean isFullCube() {
         return this == FULL_CUBE;
+    }
+
+    public boolean isVerticalSlab() {
+        return this == VERTICAL_SLAB_WEST || this == VERTICAL_SLAB_EAST
+                || this == VERTICAL_SLAB_NORTH || this == VERTICAL_SLAB_SOUTH;
+    }
+
+    /** Chooses the half-cell closest to the supplied world-space point. */
+    public static BlockShape verticalSlabFacing(float pointX, float pointZ,
+                                                int blockX, int blockZ) {
+        float offsetX = pointX - (blockX + 0.5f);
+        float offsetZ = pointZ - (blockZ + 0.5f);
+        if (Math.abs(offsetX) > Math.abs(offsetZ)) {
+            return offsetX < 0.0f ? VERTICAL_SLAB_WEST : VERTICAL_SLAB_EAST;
+        }
+        return offsetZ < 0.0f ? VERTICAL_SLAB_NORTH : VERTICAL_SLAB_SOUTH;
     }
 
     public float getTop() {

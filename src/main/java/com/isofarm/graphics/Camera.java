@@ -325,9 +325,11 @@ public class Camera implements CameraView {
             BlockData data = BlockData.fromId(block);
             boolean hasBlock = data != null && data != BlockData.AIR;
             float cellExit = Math.min(tMaxX, Math.min(tMaxY, tMaxZ));
-            BlockShape.RayHit shapeHit = hasBlock && !data.getShape().isFullCube()
-                    ? data.getShape().raycast(origin, direction, x, y, z) : null;
-            boolean hitsShape = data != null && (data.getShape().isFullCube()
+            BlockShape blockShape = hasBlock
+                    ? world.getBlockShapeAt(x, y, z) : BlockShape.FULL_CUBE;
+            BlockShape.RayHit shapeHit = hasBlock && !blockShape.isFullCube()
+                    ? blockShape.raycast(origin, direction, x, y, z) : null;
+            boolean hitsShape = data != null && (blockShape.isFullCube()
                     || (shapeHit != null && shapeHit.distance() <= cellExit));
 
             if (hasBlock && hitsShape && (!data.isFluid() || isBucket)) {

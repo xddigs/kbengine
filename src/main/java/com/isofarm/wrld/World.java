@@ -2,6 +2,7 @@ package com.isofarm.wrld;
 
 import com.isofarm.data.BlockData;
 import com.isofarm.data.BlockPos;
+import com.isofarm.data.BlockShape;
 import com.isofarm.data.Crop;
 import com.isofarm.data.InteractiveBlocks;
 import com.isofarm.data.Singleton;
@@ -107,6 +108,14 @@ public class World {
      */
     public Block getBlockAt(BlockPos pos) {
         return getBlockAt(pos.x(), pos.y(), pos.z());
+    }
+
+    /** Returns the placed shape state, falling back to the block type default. */
+    public BlockShape getBlockShapeAt(int x, int y, int z) {
+        Block registeredBlock = blocks.get(getBlockKey(x, y, z));
+        if (registeredBlock != null) return registeredBlock.getShape();
+        BlockData data = BlockData.fromId(getBlockTypeAt(x, y, z));
+        return data == null ? BlockShape.FULL_CUBE : data.getShape();
     }
 
     /**
@@ -529,7 +538,7 @@ public class World {
             return interactiveBlock.getType() != InteractiveBlocks.OAK_DOOR;
         }
         BlockData block = BlockData.fromId(getBlockTypeAt(x, y, z));
-        return block != null && block.isFullCube();
+        return block != null && block.isSolid() && getBlockShapeAt(x, y, z).isFullCube();
     }
 
     /** Tests an AABB against non-full voxel block shapes. */
@@ -546,8 +555,9 @@ public class World {
             for (int y = blockMinY; y <= blockMaxY; y++) {
                 for (int z = blockMinZ; z <= blockMaxZ; z++) {
                     BlockData block = BlockData.fromId(getBlockTypeAt(x, y, z));
-                    if (block == null || !block.isSolid() || block.isFullCube()) continue;
-                    if (block.getShape().intersects(x, y, z,
+                    BlockShape shape = getBlockShapeAt(x, y, z);
+                    if (block == null || !block.isSolid() || shape.isFullCube()) continue;
+                    if (shape.intersects(x, y, z,
                             minX, minY, minZ, maxX, maxY, maxZ)) return true;
                 }
             }
@@ -561,7 +571,7 @@ public class World {
         if (interactiveBlock != null && interactiveBlock.isSolid()) return y + 1.0f;
         BlockData block = BlockData.fromId(getBlockTypeAt(x, y, z));
         if (block == null || !block.isSolid()) return Float.NEGATIVE_INFINITY;
-        float localTop = block.getShape().getTopAt(worldX - x, worldZ - z);
+        float localTop = getBlockShapeAt(x, y, z).getTopAt(worldX - x, worldZ - z);
         return localTop > 0.0f ? y + localTop : Float.NEGATIVE_INFINITY;
     }
 

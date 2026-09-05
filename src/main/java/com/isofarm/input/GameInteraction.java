@@ -798,7 +798,13 @@ public class GameInteraction {
             int placeY = cell.y() + normalY;
             int placeZ = cell.z() + normalZ;
 
-            if (player.intersectsBlock(block.getType(), placeX, placeY, placeZ)) return;
+            BlockShape placedShape = block.getType().getShape();
+            if (block.getType() == BlockData.OAK_PLANK_VERTICAL_SLAB) {
+                Vector3f playerPosition = player.getPosition();
+                placedShape = BlockShape.verticalSlabFacing(
+                        playerPosition.x, playerPosition.z, placeX, placeZ);
+            }
+            if (player.intersectsBlock(placedShape, placeX, placeY, placeZ)) return;
 
             byte targetBlock = world.getBlockTypeAt(placeX, placeY, placeZ);
             BlockData target = BlockData.fromId(targetBlock);
@@ -826,6 +832,7 @@ public class GameInteraction {
             }
 
             Block newBlock = new Block(block.getType(), placeX, placeY, placeZ);
+            newBlock.setShape(placedShape);
             if (block.getType().equals(BlockData.OAK_BONSAI)) {
                 TreeService.ts.plant(placeX, placeY, placeZ, BlockData.OAK_BONSAI);
             } else if (block.getType().isFluid()) {
@@ -833,6 +840,7 @@ public class GameInteraction {
                 if (placedFluid == null || !placedFluid.addSource(placeX, placeY, placeZ)) return;
             } else {
                 world.setBlockTypeAt(placeX, placeY, placeZ, block.getType().getId());
+                if (!placedShape.isFullCube()) world.addBlock(newBlock);
             }
             if (!block.getType().isFluid()) {
                 FluidSimulation.notifyBlockPlaced(placeX, placeY, placeZ);

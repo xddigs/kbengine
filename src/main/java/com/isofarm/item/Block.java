@@ -2,6 +2,7 @@ package com.isofarm.item;
 
 import com.isofarm.data.BlockData;
 import com.isofarm.data.BlockPos;
+import com.isofarm.data.BlockShape;
 import com.isofarm.data.DataClass;
 import com.isofarm.utils.K;
 
@@ -15,6 +16,7 @@ public class Block implements Craftable {
     private final String name;
     private final int value;
     private BlockData type;
+    private BlockShape shape;
     private int x, y, z;
     private int waterLevel = 15;
     private boolean isInteractive;
@@ -31,6 +33,7 @@ public class Block implements Craftable {
         this.name = type.getDisplayName();
         this.value = type.getValue();
         this.type = type;
+        this.shape = type.getShape();
         this.x = x;
         this.y = y;
         this.z = z;
@@ -55,6 +58,7 @@ public class Block implements Craftable {
         this.name = type.getDisplayName();
         this.value = type.getValue();
         this.type = type;
+        this.shape = type.getShape();
     }
 
     /**
@@ -118,6 +122,15 @@ public class Block implements Craftable {
      */
     public void setType(BlockData type) {
         this.type = type;
+        this.shape = type.getShape();
+    }
+
+    public BlockShape getShape() {
+        return shape == null ? type.getShape() : shape;
+    }
+
+    public void setShape(BlockShape shape) {
+        this.shape = shape == null ? type.getShape() : shape;
     }
 
     /**
@@ -207,6 +220,8 @@ public class Block implements Craftable {
      */
     @Override
     public Item copy() {
-        return new Block(type, x, y, z);
+        Block copy = new Block(type, x, y, z);
+        copy.setShape(getShape());
+        return copy;
     }
 }
