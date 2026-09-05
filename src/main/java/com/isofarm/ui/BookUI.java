@@ -33,9 +33,9 @@ public class BookUI extends UIElement {
     private static final float PAGE_STATIC_CONTENT_HIDE_PROGRESS = 0.99f;
     private static final float BASE_CONTENT_HEIGHT_OFFSET = 0.15f;
     private static final float MOUSE_OFFSET = 32.0f;
-    private static final float BUTTON_SIZE = 32.0f;
-    private static final float BUTTON_GAP = 8.0f;
-    private static final float BUTTON_TOP_PADDING = 52.0f;
+    private static final float BUTTON_SIZE = 48.0f;
+    private static final float BUTTON_GAP = 10.0f;
+    private static final float BUTTON_TOP_PADDING = 44.0f;
 
     public static BookUI bui;
     private float animationProgress = 0.0f;
@@ -78,7 +78,8 @@ public class BookUI extends UIElement {
 
     private UIButton createButton(SpriteSheet icon, String tooltip, Runnable action) {
         UIButton button = new UIButton(0.0f, 0.0f, BUTTON_SIZE, BUTTON_SIZE)
-                .setOnClick(action);
+                .setOnClick(action)
+                .setDrawBackground(false);
         button.setSpriteSheet(icon);
         button.setTooltipText(tooltip);
         return button;

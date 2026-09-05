@@ -10,12 +10,15 @@ import org.joml.Vector4f;
  */
 @SuppressWarnings("all")
 public class UIButton extends UIElement {
+    private static final float ICON_SCALE = 0.65f;
+    private static final float BACKGROUNDLESS_ICON_SCALE = 5.0f / 6.0f;
     private static final Texture BUTTON_TEXTURE = ResourceManager
             .rem.getBackgroundUI();
 
     private SpriteSheet spriteSheet;
     private int spriteFrame;
     private Runnable onClick;
+    private boolean drawBackground = true;
 
     private Vector4f normalColor = new Vector4f(0.15f, 0.15f, 0.15f, 1.0f);
     private Vector4f hoverColor = new Vector4f(0.25f, 0.25f, 0.25f, 1.0f);
@@ -66,13 +69,27 @@ public class UIButton extends UIElement {
             color = hoverColor;
         }
 
-        Frontend.drawTexture(BUTTON_TEXTURE, getAbsoluteX(), getAbsoluteY(),
-                getAbsoluteWidth(), getAbsoluteHeight(), color);
+        if (drawBackground) {
+            Frontend.drawTexture(BUTTON_TEXTURE, getAbsoluteX(), getAbsoluteY(),
+                    getAbsoluteWidth(), getAbsoluteHeight(), color);
+        }
 
         if (spriteSheet != null) {
-            float size = Math.min(getAbsoluteWidth(), getAbsoluteHeight()) * 0.65f;
+            float iconScale = drawBackground ? ICON_SCALE : BACKGROUNDLESS_ICON_SCALE;
+            float size = Math.min(getAbsoluteWidth(), getAbsoluteHeight()) * iconScale;
             float x = getAbsoluteX() + (getAbsoluteWidth() - size) * 0.5f;
             float y = getAbsoluteY() + (getAbsoluteHeight() - size) * 0.5f;
+
+            if (!drawBackground && (isHovered() || isPressed())) {
+                float pixelScaleX = size / spriteSheet.getFrameWidth();
+                float pixelScaleY = size / spriteSheet.getFrameHeight();
+                float outlineSize = Math.max(1.0f,
+                        Math.round(Math.min(pixelScaleX, pixelScaleY)));
+                Frontend.drawSpriteOutline(spriteSheet, spriteFrame, x, y, size, size,
+                        outlineSize,
+                        new Vector4f(1.0f, 1.0f, 1.0f, getWorldOpacity()));
+            }
+
             Frontend.drawSprite(spriteSheet, spriteFrame, 0, x, y, size, size,
                     new Vector4f(1.0f, 1.0f, 1.0f, getWorldOpacity()));
         }
@@ -127,6 +144,25 @@ public class UIButton extends UIElement {
      */
     public UIButton setOnClick(Runnable onClick) {
         this.onClick = onClick;
+        return this;
+    }
+
+    /**
+     * Checks whether the standard slot texture is drawn behind the button icon.
+     * @return {@code true} when the button background is drawn
+     */
+    public boolean isDrawBackground() {
+        return drawBackground;
+    }
+
+    /**
+     * Controls whether the standard slot texture is drawn behind the button icon.
+     * Backgroundless buttons use the icon's alpha channel to draw a hover outline.
+     * @param drawBackground whether the standard background should be drawn
+     * @return this button
+     */
+    public UIButton setDrawBackground(boolean drawBackground) {
+        this.drawBackground = drawBackground;
         return this;
     }
 
