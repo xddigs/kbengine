@@ -151,6 +151,10 @@ public class ChunkManager {
     private void queueMeshBuild(Chunk chunk) {
         long key = world.get2DKey(chunk.getChunkX(), chunk.getChunkZ());
 
+        if (meshExecutor.isShutdown()) {
+            return;
+        }
+
         if (!buildingChunks.add(key)) {
             return;
         }
@@ -398,11 +402,11 @@ public class ChunkManager {
      */
     public void dispose() {
         meshExecutor.shutdownNow();
+        soilTimers.clear();
         completedMeshes.clear();
         buildingChunks.clear();
         chunkMeshes.values().forEach(ChunkMeshBuilder.ChunkRenderMesh::dispose);
         chunkMeshes.clear();
-        soilTimers.clear();
     }
 
     /**

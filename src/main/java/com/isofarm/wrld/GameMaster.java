@@ -60,7 +60,7 @@ public class GameMaster {
 
     private boolean isChatOpen = false;
     private boolean isInventoryOpen = false;
-    private boolean isHUDShown = false;
+    private boolean isHUDShown = true;
 
     private float genDelta;
 
