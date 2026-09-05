@@ -22,7 +22,6 @@ import org.joml.Vector3i;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -487,19 +486,7 @@ public class GameInteraction {
             return;
         }
 
-        float destroyTime = blockData.getDestroyTime();
-        if (selectedItem instanceof Tool tool) {
-            BlockData[] usableOn = tool.getType().getUsableOn();
-            float[] efficiency = tool.getType().getEfficiency();
-            for (int i = 0; i < usableOn.length; i++) {
-                if (usableOn[i].getId() == blockId) {
-                    if (i < efficiency.length) {
-                        destroyTime *= efficiency[i];
-                    }
-                    break;
-                }
-            }
-        }
+        float destroyTime = blockData.getDestroyTime(selectedItem);
 
         if (destroyTime <= 0.0f) {
             resetBreaking();
@@ -635,8 +622,7 @@ public class GameInteraction {
         Item itemToDrop = null;
 
         if (selectedItem instanceof Tool tool) {
-            boolean isUsableOn = Arrays.stream(tool.getType().getUsableOn())
-                    .anyMatch(b -> b.getId() == blockId);
+            boolean isUsableOn = tool.getType().isUsableOn(blockData);
 
             if (!isUsableOn) {
                 tool.misuse();
@@ -844,8 +830,7 @@ public class GameInteraction {
 
         if (selectedItem instanceof Hoe hoe) {
             Block block = world.getBlockAt(cell.x(), cell.y(), cell.z());
-            if (Arrays.stream(hoe.getType().getUsableOn()).noneMatch(
-                    b -> b.getId() == block.getType().getId())) {
+            if (!hoe.getType().isUsableOn(block.getType())) {
                 hoe.misuse();
             } else {
                 hoe.use(gameMaster, block);

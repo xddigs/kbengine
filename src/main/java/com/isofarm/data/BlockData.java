@@ -2,7 +2,9 @@ package com.isofarm.data;
 
 import com.isofarm.graphics.TextureAtlas;
 import com.isofarm.item.Block;
+import com.isofarm.item.Item;
 import com.isofarm.item.MiningComponent;
+import com.isofarm.item.Tool;
 import com.isofarm.utils.K;
 import com.isofarm.utils.Local;
 
@@ -417,6 +419,25 @@ public enum BlockData implements Blockable {
      */
     public float getDestroyTime() {
         return destroyTime;
+    }
+
+    /**
+     * Returns the effective destroy time for the item currently being used.
+     * Incompatible items keep the block's base time. Compatible, usable tools
+     * apply their type speed and gain 25% more speed per material tier.
+     * @param item item used to break this block, or {@code null} for an empty hand
+     * @return effective destroy time in seconds
+     */
+    public float getDestroyTime(Item item) {
+        if (!(item instanceof Tool tool)
+                || !tool.canBeUsed()
+                || !tool.getType().isUsableOn(this)) {
+            return destroyTime;
+        }
+
+        int tierLevel = Math.max(0, tool.getTier().getId());
+        float tierSpeed = 1.0f + tierLevel * 0.25f;
+        return destroyTime / (tool.getType().getDestroySpeed() * tierSpeed);
     }
 
     /**
