@@ -167,7 +167,7 @@ public class ResourceManager {
      */
     public static int getItemFrame(Item item) {
         if (item instanceof Block block && block.getType() == BlockData.TORCH) {
-            return 0;
+            return (int) ((System.nanoTime() / 125_000_000L) % K.UI.TORCH_COLS);
         }
 
         if (item instanceof iBlock block && block.getType() != null) {

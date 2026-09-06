@@ -5,6 +5,7 @@ import com.isofarm.graphics.SpriteSheet;
 import com.isofarm.graphics.ResourceManager;
 import com.isofarm.graphics.Texture;
 import com.isofarm.item.Bucket;
+import com.isofarm.item.Block;
 import com.isofarm.item.Item;
 import com.isofarm.item.Tool;
 import com.isofarm.utils.K;
@@ -58,7 +59,9 @@ public class InventorySlotUI extends UIElement {
         int currentAmount = slot != null ? slot.getAmount() : 0;
         Item currentItem = getItem();
 
-        if (currentItem instanceof Bucket && spriteSheet != null) {
+        if ((currentItem instanceof Bucket
+                || (currentItem instanceof Block block && block.getType() == BlockData.TORCH))
+                && spriteSheet != null) {
             spriteFrame = ResourceManager.getItemFrame(currentItem);
         }
 
