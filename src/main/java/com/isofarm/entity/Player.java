@@ -61,6 +61,12 @@ public class Player extends Character {
             animator.update(delta);
             return;
         }
+        // Keep the player state fixed while interacting with inventory slots.
+        // In particular, do not advance falling/void or ocean-drowning damage.
+        if (GameMaster.game != null && GameMaster.game.isInventoryOpen()) {
+            animator.update(delta);
+            return;
+        }
         if (gameplay.checkOceanDrowning()) return;
         manager.update(delta);
         animator.update(delta);

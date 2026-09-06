@@ -21,6 +21,7 @@ public class Inventory {
     }
 
     private final List<InventorySlot> slots;
+    private final boolean hasHotbar;
     private final List<InventorySlot> equippedExtraItems = new ArrayList<>();
     private final InventorySlot backpackSlot;
     private final InventorySlot bookSlot;
@@ -38,6 +39,7 @@ public class Inventory {
      */
     public Inventory(boolean includeHotbar) {
         this.slots = new ArrayList<>();
+        this.hasHotbar = includeHotbar;
         this.backpackSlot = new InventorySlot();
         this.bookSlot = new InventorySlot();
 
@@ -297,7 +299,9 @@ public class Inventory {
     public void sort() {
         group();
         List<Stack> stacks = new ArrayList<>();
-        for (InventorySlot slot : slots) {
+        int firstMutableSlot = getFirstMutableSlotIndex();
+        for (int i = firstMutableSlot; i < slots.size(); i++) {
+            InventorySlot slot = slots.get(i);
             if (!slot.isEmpty()) {
                 stacks.add(new Stack(slot.getItem(), slot.getAmount()));
                 slot.clear();
@@ -308,7 +312,7 @@ public class Inventory {
                 .thenComparing(stack -> stack.item().getName(), Comparator.nullsLast(String::compareTo))
                 .thenComparingInt(Stack::amount).reversed());
 
-        int index = 0;
+        int index = firstMutableSlot;
         for (Stack stack : stacks) {
             int remaining = stack.amount();
 
@@ -381,7 +385,8 @@ public class Inventory {
      * Creates or returns group from the supplied arguments.
      */
     public void group() {
-        for (int i = 0; i < slots.size(); i++) {
+        int firstMutableSlot = getFirstMutableSlotIndex();
+        for (int i = firstMutableSlot; i < slots.size(); i++) {
             InventorySlot currentSlot = slots.get(i);
 
             if (currentSlot.isEmpty()) {
@@ -672,7 +677,16 @@ public class Inventory {
      * @return {@code int}; the hotbar start
      */
     public int getHotbarStart() {
-        return K.UI.INVENTORY_SLOTS;
+        return hasHotbar ? K.UI.INVENTORY_SLOTS : slots.size();
+    }
+
+    /**
+     * Returns the first slot that inventory-wide actions may modify.
+     * Player hotbar slots are deliberately excluded from sorting and grouping.
+     * @return the first mutable slot index
+     */
+    private int getFirstMutableSlotIndex() {
+        return hasHotbar ? getHotbarStart() : 0;
     }
 
     /**
