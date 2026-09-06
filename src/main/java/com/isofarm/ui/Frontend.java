@@ -745,7 +745,7 @@ public class Frontend {
      * @param height the {@code float} supplied as {@code height}
      */
     public static void pushScissor(float x, float y, float width, float height) {
-        int windowHeight = (int) getScreenHeight();
+        int windowHeight = getScreenHeight();
         glEnable(GL_SCISSOR_TEST);
         glScissor((int) x, windowHeight - (int) (y + height),
                 (int) width, (int) height);
@@ -842,14 +842,6 @@ public class Frontend {
         float renderY = Mouse.getY() + CURSOR_ICON_OFFSET;
         drawSprite(spriteSheet, frameIndex, renderX, renderY, iconSize, iconSize, new Vector4f(1.0f));
         wasCursorIconDrawn = true;
-    }
-
-    /**
-     * Checks if the cursor was drawn
-     * @return {@code true} if the cursor was drawn, {@code false} otherwise
-     */
-    public static boolean wasCursorIconDrawn() {
-        return wasCursorIconDrawn;
     }
 
     /**
