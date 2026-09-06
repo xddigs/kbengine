@@ -618,14 +618,6 @@ public class BookUI extends UIElement {
             boolean isHovered = bookLine == hoveredBookLine;
             Vector4f baseColor = isHovered ? new Vector4f(0.1f, 0.4f, 0.9f, 1.0f) : K.UI.UI_BOOK_TEXT_COLOR;
             Vector4f finalColor = new Vector4f(baseColor.x, baseColor.y, baseColor.z, baseColor.w * alpha);
-
-            if (isHovered) {
-                float cursorOffset = 24.0f;
-                Frontend.drawNormalString(">", textX - cursorOffset, textY, finalColor);
-            }
-            if (renderText.startsWith("**")) {
-                renderText = renderText.replace("**", "");
-            }
             Frontend.drawNormalString(renderText, textX, textY, finalColor);
             textY += lineHeight;
         }

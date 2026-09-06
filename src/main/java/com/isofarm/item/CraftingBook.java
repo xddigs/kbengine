@@ -65,8 +65,8 @@ public class CraftingBook extends Book implements Undroppable {
                     .map(ingredient -> ingredient.options().stream()
                             .map(option -> option.craftable().getDisplayName()
                                     + " x " + option.amount())
-                            .collect(Collectors.joining(" or ")))
-                    .collect(Collectors.joining("\n"));
+                            .collect(Collectors.joining(" || ")))
+                            .collect(Collectors.joining("\n"));
             String tooltip = recipe.result().getDisplayName()
                     + (ingredients.isEmpty() ? "" : "\n" + ingredients);
 
