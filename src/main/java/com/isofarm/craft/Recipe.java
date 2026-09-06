@@ -33,13 +33,16 @@ public record Recipe(Item result, int resultAmount, List<Ingredient> ingredients
         }
 
         for (Ingredient req : ingredients) {
-            Craftable reqKey = req.craftable();
-            int requiredAmount = req.amount();
-
             boolean found = false;
             for (Map.Entry<Craftable, Integer> entry : inputIngredients.entrySet()) {
-                if (isSameCraftable(reqKey, entry.getKey())) {
-                    if (entry.getValue() != requiredAmount) return false;
+                for (Ingredient option : req.options()) {
+                    if (isSameCraftable(option.craftable(), entry.getKey())) {
+                        if (entry.getValue() != option.amount()) return false;
+                        found = true;
+                        break;
+                    }
+                }
+                if (found) {
                     found = true;
                     break;
                 }
@@ -56,16 +59,20 @@ public record Recipe(Item result, int resultAmount, List<Ingredient> ingredients
      */
     public boolean canCraftWith(Map<Craftable, Integer> availableMaterials) {
         for (Ingredient req : ingredients) {
-            Craftable reqKey = req.craftable();
-            int requiredAmount = req.amount();
-
-            int available = 0;
-            for (Map.Entry<Craftable, Integer> entry : availableMaterials.entrySet()) {
-                if (isSameCraftable(reqKey, entry.getKey())) {
-                    available += entry.getValue();
+            boolean available = false;
+            for (Ingredient option : req.options()) {
+                int amount = 0;
+                for (Map.Entry<Craftable, Integer> entry : availableMaterials.entrySet()) {
+                    if (isSameCraftable(option.craftable(), entry.getKey())) {
+                        amount += entry.getValue();
+                    }
+                }
+                if (amount >= option.amount()) {
+                    available = true;
+                    break;
                 }
             }
-            if (available < requiredAmount) return false;
+            if (!available) return false;
         }
         return true;
     }
@@ -105,9 +112,15 @@ public record Recipe(Item result, int resultAmount, List<Ingredient> ingredients
                 .append("]");
 
         for (Ingredient ingredient : ingredients) {
-            sb.append(ingredient.craftable().getName())
-                    .append(" x ")
-                    .append(ingredient.amount())
+            List<Ingredient> options = ingredient.options();
+            for (int index = 0; index < options.size(); index++) {
+                if (index > 0) sb.append(" or ");
+                Ingredient option = options.get(index);
+                sb.append(option.craftable().getName())
+                        .append(" x ")
+                        .append(option.amount());
+            }
+            sb
                     .append(", ");
         }
         return sb.toString();

@@ -25,7 +25,11 @@ public class RecipeRegistry {
 
         create().result(new iBlock(BlockData.CHEST), 1).with(new Block(BlockData.OAK_PLANK), 8).add();
         create().result(new Material(Tier.NONE, MaterialID.STICK), 4).with(BlockData.fromIdTo(BlockData.OAK_PLANK.getId()), 1).add();
-        create().result(new Material(Tier.NONE, MaterialID.CHARCOAL), 1).with(new Material(Tier.NONE, MaterialID.STICK), 8).add();
+
+        create().result(new Material(Tier.NONE, MaterialID.CHARCOAL), 1)
+                .with(new Block(BlockData.OAK_LOG), 8)
+                .or(new Block(BlockData.SPRUCE_LOG), 8).add();
+
         create().result(new Book(false), 1).with(MaterialID.LEATHER, 3).with(MaterialID.PAPER, 2).add();
         create().result(new Backpack(), 1).with(MaterialID.LEATHER, 3).add();
         create().result(new Bucket(), 1).with(new MiningComponent(Tier.STEEL, MaterialID.INGOT), 3).add();
@@ -206,6 +210,25 @@ public class RecipeRegistry {
          */
         public RecipeBuilder with(Craftable craftable, int count) {
             this.ingredients.add(new Ingredient(craftable, count));
+            return this;
+        }
+
+        /**
+         * Adds an alternative for the immediately preceding required ingredient.
+         * It does not add another required ingredient to the recipe.
+         * @param craftable the {@link Craftable} supplied as {@code craftable}
+         * @param count the {@code int} supplied as {@code count}
+         * @return the {@link RecipeBuilder} representing the with result
+         */
+        public RecipeBuilder or(Craftable craftable, int count) {
+            if (ingredients.isEmpty()) {
+                throw new IllegalStateException("or(...) requires a preceding with(...)");
+            }
+            int lastIndex = ingredients.size() - 1;
+            Ingredient required = ingredients.get(lastIndex);
+            List<Ingredient> alternatives = new ArrayList<>(required.alternatives());
+            alternatives.add(new Ingredient(craftable, count));
+            ingredients.set(lastIndex, new Ingredient(required.craftable(), required.amount(), alternatives));
             return this;
         }
 

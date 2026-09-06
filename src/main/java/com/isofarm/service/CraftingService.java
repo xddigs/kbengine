@@ -26,7 +26,7 @@ public class CraftingService {
         if (inventory == null) return false;
 
         for (Ingredient ingredient : recipe.ingredients()) {
-            if (count(inventory, ingredient) < ingredient.amount()) {
+            if (selectAvailableOption(inventory, ingredient) == null) {
                 return false;
             }
         }
@@ -62,13 +62,15 @@ public class CraftingService {
      */
     private void consume(InventorySlot[] inputSlots, Recipe recipe) {
         for (Ingredient ingredient : recipe.ingredients()) {
-            int remainingToDeduct = ingredient.amount();
+            Ingredient selectedOption = selectAvailableOption(inputSlots, ingredient);
+            if (selectedOption == null) continue;
+            int remainingToDeduct = selectedOption.amount();
             for (InventorySlot slot : inputSlots) {
                 if (slot == null || slot.isEmpty()) {
                     continue;
                 }
 
-                if (!matchesIngredient(ingredient, slot.getItem())) {
+                if (!matchesIngredient(selectedOption, slot.getItem())) {
                     continue;
                 }
                 int amountInSlot = slot.getAmount();
@@ -121,6 +123,27 @@ public class CraftingService {
         return amount;
     }
 
+    /** Returns an option that the inventory can fully satisfy, if any. */
+    private Ingredient selectAvailableOption(Inventory inventory, Ingredient ingredient) {
+        if (inventory == null) return null;
+        return selectAvailableOption(inventory.getSlots().toArray(new InventorySlot[0]), ingredient);
+    }
+
+    /** Returns an option that the supplied slots can fully satisfy, if any. */
+    private Ingredient selectAvailableOption(InventorySlot[] slots, Ingredient ingredient) {
+        if (slots == null || ingredient == null) return null;
+        for (Ingredient option : ingredient.options()) {
+            int available = 0;
+            for (InventorySlot slot : slots) {
+                if (slot != null && !slot.isEmpty() && matchesIngredient(option, slot.getItem())) {
+                    available += slot.getAmount();
+                }
+            }
+            if (available >= option.amount()) return option;
+        }
+        return null;
+    }
+
     /**
      * Updates or derives runtime state for matches ingredient according to the supplied arguments.
      * @param ingredient the {@link Ingredient} supplied as {@code ingredient}
@@ -132,22 +155,16 @@ public class CraftingService {
             return false;
         }
 
-        Craftable craftable = ingredient.craftable();
-
-        if (craftable instanceof MaterialID materialID && item instanceof Material material) {
-            return material.getId() == materialID.getId();
+        for (Ingredient option : ingredient.options()) {
+            Craftable craftable = option.craftable();
+            if (craftable instanceof MaterialID materialID && item instanceof Material material
+                    && material.getId() == materialID.getId()) return true;
+            if (craftable instanceof MiningComponent miningComponent
+                    && item instanceof MiningComponent itemMiningComponent
+                    && miningComponent.getTier() == itemMiningComponent.getTier()
+                    && miningComponent.getId() == itemMiningComponent.getId()) return true;
+            if (craftable instanceof Item craftableItem && isSameType(craftableItem, item)) return true;
         }
-
-        if (craftable instanceof MiningComponent miningComponent
-                && item instanceof MiningComponent itemMiningComponent) {
-            return miningComponent.getTier() == itemMiningComponent.getTier()
-                    && miningComponent.getId() == itemMiningComponent.getId();
-        }
-
-        if (craftable instanceof Item craftableItem) {
-            return isSameType(craftableItem, item);
-        }
-
         return false;
     }
 
