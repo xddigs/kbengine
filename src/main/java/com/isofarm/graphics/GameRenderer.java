@@ -31,7 +31,6 @@ import static org.lwjgl.opengl.GL13.*;
  */
 public class GameRenderer {
     private static final int MAX_TORCH_LIGHTS = 32;
-    private static final float TORCH_LIGHT_RADIUS = 8.0f;
     public static final GameRenderer gamr = new GameRenderer();
     private final Matrix4f modelMatrix = new Matrix4f();
     private final Matrix4f viewProjMatrix = new Matrix4f();
@@ -384,7 +383,7 @@ public class GameRenderer {
         if (blockAtlas != null) blockAtlas.unbind();
 
         if (hoveredCell != null) {
-            Vector3f outlineColor = getOutlineColor(gameMaster);
+            Vector3f outlineColor = getOutlineColor();
             glEnable(GL_DEPTH_TEST);
             glLineWidth(2.0f);
             glDepthMask(false);
@@ -489,13 +488,12 @@ public class GameRenderer {
 
     /**
      * Returns the outline color.
-     * @param gameMaster the {@link GameMaster} supplied as {@code gameMaster}
      * @return the {@link Vector3f} representing the outline color
      */
-    private Vector3f getOutlineColor(GameMaster gameMaster) {
+    private Vector3f getOutlineColor() {
         boolean isSmartShift = GameInteraction.gami != null
                 && GameInteraction.gami.isSmartShiftActive();
-        return isSmartShift ? new Vector3f(1.0f, 1.0f, 0.2f) : K.Colors.OUTLINE_DEFAULT;
+        return isSmartShift ? new Vector3f(1.0f, 1.0f, 1.0f) : K.Colors.OUTLINE_DEFAULT;
     }
 
     /** Uploads nearby emissive blocks so the world shader can light them. */
