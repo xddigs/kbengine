@@ -501,25 +501,27 @@ public class GameRenderer {
     /** Uploads nearby emissive blocks so the world shader can light them. */
     private void collectTorchLights(GameMaster gameMaster, CameraView camera) {
         torchLights.clear();
-        Vector3f cameraPosition = camera.getPosition();
-        // The camera sits above and away from its target, so 24 blocks can exclude
-        // the torch directly beside the player. Keep a full visible lighting radius.
-        float searchDistance = TORCH_LIGHT_RADIUS * 8.0f;
+        Player player = Player.plyr;
+        Vector3f centerPosition = (player != null) ? player.getPosition() : camera.getPosition();
+        float searchDistance = 24.0f;
+        float searchDistanceSq = searchDistance * searchDistance;
+
         gameMaster.getWorld().forEachTorch(torch -> {
-            Vector3f position = new Vector3f(torch.x() + 0.5f, torch.y() + 0.65f,
-                    torch.z() + 0.5f);
-            if (position.distanceSquared(cameraPosition) <= searchDistance * searchDistance) {
+            Vector3f position = new Vector3f(torch.x() + 0.5f, torch.y() + 0.65f, torch.z() + 0.5f);
+            if (position.distanceSquared(centerPosition) <= searchDistanceSq) {
                 torchLights.add(position);
             }
         });
+
         gameMaster.getWorld().forEachLava(lava -> {
-            Vector3f position = new Vector3f(lava.x() + 0.5f, lava.y() + 0.5f,
-                    lava.z() + 0.5f);
-            if (position.distanceSquared(cameraPosition) <= searchDistance * searchDistance) {
+            Vector3f position = new Vector3f(lava.x() + 0.5f, lava.y() + 0.5f, lava.z() + 0.5f);
+            if (position.distanceSquared(centerPosition) <= searchDistanceSq) {
                 torchLights.add(position);
             }
         });
-        torchLights.sort(Comparator.comparingDouble(position -> position.distanceSquared(cameraPosition)));
+
+        torchLights.sort(Comparator.comparingDouble(position ->
+                position.distanceSquared(centerPosition)));
     }
 
     /** Uploads the collected artificial lights to the material shader. */

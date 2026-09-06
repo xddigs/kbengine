@@ -83,8 +83,6 @@ void main() {
                               vTexCoord.x >= uWaterUVBounds.x && vTexCoord.x <= uWaterUVBounds.z &&
                               vTexCoord.y >= uWaterUVBounds.y && vTexCoord.y <= uWaterUVBounds.w;
         if (isWaterSurface) {
-            // A greedy quad may cover many blocks; repeat the atlas tile once
-            // per world block instead of stretching it over the whole coast.
             sampleUV = mix(uWaterUVBounds.xy, uWaterUVBounds.zw, fract(vFragPos.xz));
         }
         texColor = texture(uTexture, sampleUV);
@@ -118,18 +116,21 @@ void main() {
     vec3 ambient = uSkyColor * uAmbientIntensity;
     vec3 directLight = uSunColor * diffuse * uLightIntensity * (1.0 - shadow);
     vec3 torchLight = vec3(0.0);
+
     for (int i = 0; i < uTorchCount; i++) {
         float distanceToTorch = distance(vFragPos, uTorchPositions[i]);
-        float attenuation = max(0.0, 1.0 - distanceToTorch / 8.0);
+        float attenuation = max(0.0, 1.0 - distanceToTorch / 10.0);
         float pointShadow = 0.0;
+
         if (i < uShadowedTorchCount && distanceToTorch > 0.12) {
             vec3 lightToFragment = vFragPos - uTorchPositions[i];
-            float closestDepth = torchShadowDepth(i, lightToFragment)
-                    * uTorchShadowFarPlane;
+            float closestDepth = torchShadowDepth(i, lightToFragment) * uTorchShadowFarPlane;
             pointShadow = distanceToTorch - 0.08 > closestDepth ? 1.0 : 0.0;
         }
-        torchLight += vec3(1.0, 0.62, 0.24) * attenuation * attenuation * (1.0 - pointShadow);
+
+        torchLight += vec3(1.0, 0.62, 0.24) * attenuation * 1.8 * (1.0 - pointShadow);
     }
+
     vec3 totalLight = ambient + directLight + torchLight;
     if (uIsTorch) totalLight = max(totalLight, vec3(1.0, 0.62, 0.24));
     float alpha = texColor.a * uParticleAlpha;
