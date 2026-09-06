@@ -24,6 +24,7 @@ public class World {
     private final Map<Long, Block> blocks = new HashMap<>();
     private final Map<Long, iBlock> interactiveBlocks = new HashMap<>();
     private final Map<Long, Chunk> chunks = new HashMap<>();
+    private final Map<Long, BlockPos> torches = new HashMap<>();
 
     /**
      * Creates a new private {@code World} instance.
@@ -302,6 +303,11 @@ public class World {
         }
     }
 
+    /** Visits every placed torch without scanning all loaded voxel cells. */
+    public void forEachTorch(Consumer<BlockPos> consumer) {
+        torches.values().forEach(consumer);
+    }
+
     /**
      * Returns the chunk block type at.
      * @param x the {@code int} supplied as {@code x}
@@ -379,6 +385,13 @@ public class World {
         int localZ = Math.floorMod(z, Chunk.SIZE_Z);
 
         chunk.setBlock(localX, y, localZ, blockId);
+
+        long blockKey = getBlockKey(x, y, z);
+        if (blockId == BlockData.TORCH.getId()) {
+            torches.put(blockKey, new BlockPos(BlockData.TORCH, x, y, z));
+        } else {
+            torches.remove(blockKey);
+        }
 
         if (blockId == BlockData.AIR.getId()) {
             removeBlockAt(x, y, z);

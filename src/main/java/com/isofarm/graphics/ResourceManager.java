@@ -26,6 +26,7 @@ public class ResourceManager {
     private static final SpriteSheet cropIcons = new SpriteSheet(K.Paths.CROP_ICONS, K.UI.ICON_SEED_CROPS_COLS, 1);
     private static final SpriteSheet toolIcons = new SpriteSheet(K.Paths.TOOL_ICONS, K.UI.ICON_TOOL_COLS, K.UI.ICON_TOOL_ROWS);
     private static final SpriteSheet blockIcons = new SpriteSheet(K.Paths.BLOCK_ICONS, K.UI.ICON_BLOCK_COLS, K.UI.ICON_BLOCK_ROWS);
+    private static final SpriteSheet torchIcons = new SpriteSheet(K.Paths.TORCH_ICONS, K.UI.TORCH_COLS, 1);
     private static final SpriteSheet materialIcons = new SpriteSheet(K.Paths.MATERIAL_ICONS, K.UI.ICON_MATERIAL_COLS, K.UI.ICON_MATERIAL_ROWS);
     private static final SpriteSheet usablesIcons = new SpriteSheet(K.Paths.USABLES_ICONS, K.UI.ICON_USABLES_COLS, 1);
     private static final SpriteSheet inventoryIcons = new SpriteSheet(K.Paths.INVENTORY_ICONS, K.UI.ICON_INV_COLS, 1);
@@ -54,6 +55,7 @@ public class ResourceManager {
     private static final Shader rainShader = new Shader(K.Paths.RAIN_VERT_SHADER, K.Paths.RAIN_FRAG_SHADER);
     private static final Shader motionBlurShader = new Shader(K.Paths.MOTION_BLUR_VERT_SHADER, K.Paths.MOTION_BLUR_FRAG_SHADER);
     private static final Shader shadowMapShader = new Shader(K.Paths.SHADOW_VERT_SHADER, K.Paths.SHADOW_FRAG_SHADER);
+    private static final Shader pointShadowShader = new Shader(K.Paths.POINT_SHADOW_VERT_SHADER, K.Paths.POINT_SHADOW_FRAG_SHADER);
     private static final Shader blurShader = new Shader(K.Paths.BLUR_VERT_SHADER, K.Paths.BLUR_FRAG_SHADER);
     private final Vector3f grassTint = new Vector3f(1.0f, 1.0f, 1.0f);
 
@@ -113,6 +115,7 @@ public class ResourceManager {
      */
     public static SpriteSheet getItemSpriteSheet(Item item) {
         return switch (item) {
+            case Block block when block.getType() == BlockData.TORCH -> torchIcons;
             case Crop crop -> cropSpritesheets.get(crop.getCropType());
             case Produce ignored -> cropIcons;
             case Seed seed when seed.getType() == CropType.SUGAR_CANE_CROP -> sugarCane;
@@ -163,6 +166,10 @@ public class ResourceManager {
      * @return {@code int}; the item frame
      */
     public static int getItemFrame(Item item) {
+        if (item instanceof Block block && block.getType() == BlockData.TORCH) {
+            return 0;
+        }
+
         if (item instanceof iBlock block && block.getType() != null) {
             return (block.getType().getRow() * K.UI.ICON_BLOCK_COLS)
                     + block.getType().getCol() - 1;
@@ -243,6 +250,7 @@ public class ResourceManager {
         seedIcons.dispose();
         toolIcons.dispose();
         blockIcons.dispose();
+        torchIcons.dispose();
         materialIcons.dispose();
         usablesIcons.dispose();
         inventoryIcons.dispose();
@@ -259,6 +267,7 @@ public class ResourceManager {
         motionBlurShader.dispose();
         rainShader.dispose();
         shadowMapShader.dispose();
+        pointShadowShader.dispose();
         blurShader.dispose();
     }
 
@@ -326,6 +335,9 @@ public class ResourceManager {
     public Shader getShadowMapShader() {
         return shadowMapShader;
     }
+
+    /** Returns the shader used to fill point-light depth cubemaps. */
+    public Shader getPointShadowShader() { return pointShadowShader; }
 
     /**
      * Returns the blur shader.
@@ -483,6 +495,14 @@ public class ResourceManager {
      */
     public SpriteSheet getBlockIcons() {
         return blockIcons;
+    }
+
+    /**
+     * Returns the torch frames/icons.
+     * @return the {@link SpriteSheet} representing the torch frames
+     */
+    public SpriteSheet getTorchIcons() {
+        return torchIcons;
     }
 
     /**
