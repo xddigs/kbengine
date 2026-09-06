@@ -30,6 +30,10 @@ public class RecipeRegistry {
                 .with(new Block(BlockData.OAK_LOG), 8)
                 .or(new Block(BlockData.SPRUCE_LOG), 8).add();
 
+        create().result(new Block(BlockData.TORCH), 4)
+                .with(new Material(Tier.NONE, MaterialID.STICK), 1)
+                .with(new Material(Tier.NONE, MaterialID.CHARCOAL), 2).add();
+
         create().result(new Book(false), 1).with(MaterialID.LEATHER, 3).with(MaterialID.PAPER, 2).add();
         create().result(new Backpack(), 1).with(MaterialID.LEATHER, 3).add();
         create().result(new Bucket(), 1).with(new MiningComponent(Tier.STEEL, MaterialID.INGOT), 3).add();
