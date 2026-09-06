@@ -79,7 +79,10 @@ void main() {
             vec3 lightToFragment = vFragPos - uTorchPositions[i];
             float closestDepth = torchShadowDepth(i, lightToFragment)
                     * uTorchShadowFarPlane;
-            pointShadow = distanceToTorch - 0.08 > closestDepth ? 1.0 : 0.0;
+            float normalDotLight = max(dot(normal, normalize(-lightToFragment)), 0.0);
+            float bias = max(0.025, 0.10 * (1.0 - normalDotLight));
+            pointShadow = smoothstep(-0.035, 0.035,
+                    distanceToTorch - bias - closestDepth);
         }
         torchLight += vec3(1.0, 0.62, 0.24) * attenuation * attenuation
                 * (1.0 - pointShadow);

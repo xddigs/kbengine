@@ -31,7 +31,7 @@ public class ShadowSystem {
     private static final float SHADOW_SIZE = 70.0f;
     private static final float SHADOW_NEAR = 1.0f;
     private static final float SHADOW_FAR = 220.0f;
-    private static final float SHADOW_UPDATE_INTERVAL = 1.0f / 30.0f;
+    private static final float SHADOW_UPDATE_INTERVAL = 1.0f / 60.0f;
 
     private final Matrix4f projection = new Matrix4f();
     private final Matrix4f view = new Matrix4f();

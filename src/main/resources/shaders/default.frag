@@ -42,18 +42,20 @@ float calculateShadow(vec4 lightSpacePosition, vec3 normal) {
     vec3 projectionCoordinates = lightSpacePosition.xyz / lightSpacePosition.w;
     projectionCoordinates = projectionCoordinates * 0.5 + 0.5;
 
-    if (projectionCoordinates.x < 0.0 ||
-        projectionCoordinates.x > 1.0 ||
-        projectionCoordinates.y < 0.0 ||
-        projectionCoordinates.y > 1.0 ||
-        projectionCoordinates.z < 0.0 ||
-        projectionCoordinates.z > 1.0) {
+    if (projectionCoordinates.x < 0.0 || projectionCoordinates.x > 1.0 ||
+        projectionCoordinates.y < 0.0 || projectionCoordinates.y > 1.0 ||
+        projectionCoordinates.z < 0.0 || projectionCoordinates.z > 1.0) {
         return 0.0;
     }
 
     vec3 lightDir = normalize(-uLightDirection);
-    float normalDotLight = max(dot(normal, lightDir), 0.0);
-    float bias = max(0.002, 0.008 * (1.0 - normalDotLight));
+    float normalDotLight = dot(normal, lightDir);
+
+    if (normalDotLight <= 0.0) {
+        return 1.0;
+    }
+
+    float bias = max(0.0015 * (1.0 - normalDotLight), 0.0005);
     float currentDepth = projectionCoordinates.z;
     vec2 texelSize = 1.0 / vec2(textureSize(uShadowMap, 0));
 
@@ -125,10 +127,13 @@ void main() {
         if (i < uShadowedTorchCount && distanceToTorch > 0.12) {
             vec3 lightToFragment = vFragPos - uTorchPositions[i];
             float closestDepth = torchShadowDepth(i, lightToFragment) * uTorchShadowFarPlane;
-            pointShadow = distanceToTorch - 0.08 > closestDepth ? 1.0 : 0.0;
+            float normalDotLight = max(dot(normal, normalize(-lightToFragment)), 0.0);
+            float bias = max(0.025, 0.10 * (1.0 - normalDotLight));
+            pointShadow = smoothstep(-0.035, 0.035,
+                    distanceToTorch - bias - closestDepth);
         }
 
-        torchLight += vec3(1.0, 0.62, 0.24) * attenuation * 1.8 * (1.0 - pointShadow);
+        torchLight += vec3(1.0, 0.62, 0.24) * attenuation * 0.4 * (1.0 - pointShadow);
     }
 
     vec3 totalLight = ambient + directLight + torchLight;
