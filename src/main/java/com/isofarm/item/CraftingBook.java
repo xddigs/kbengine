@@ -82,7 +82,8 @@ public class CraftingBook extends Book implements Undroppable {
 
     /**
      * Groups recipes as blocks, tools, usables, crafting materials and interactive
-     * blocks, in that order, then sorts each category by localized name.
+     * blocks, in that order. Tools are additionally grouped by ascending tier
+     * before sorting by localized name.
      */
     public void sortByType() {
         recipeOrder = RecipeOrder.TYPE;
@@ -92,13 +93,23 @@ public class CraftingBook extends Book implements Undroppable {
     /**
      * Returns the shared item ordering used by the crafting book and creative inventory.
      * Supported categories are blocks, tools, usables, crafting materials and interactive
-     * blocks, in that order.
+     * blocks, in that order. Tools are ordered by ascending tier within their category.
      * @return the category-first item comparator
      */
     public static Comparator<Item> itemTypeComparator() {
         return Comparator
                 .comparingInt(CraftingBook::itemTypeOrder)
+                .thenComparingInt(CraftingBook::toolTierOrder)
                 .thenComparing(Item::getDisplayName, String.CASE_INSENSITIVE_ORDER);
+    }
+
+    /**
+     * Returns the tier order for tools without affecting any other item category.
+     * @param item the item whose tool tier is inspected
+     * @return the ascending tool-tier position, or {@code 0} for non-tools
+     */
+    private static int toolTierOrder(Item item) {
+        return item instanceof Tool tool ? tool.getTier().ordinal() : 0;
     }
 
     /**
