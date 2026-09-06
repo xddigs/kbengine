@@ -124,7 +124,7 @@ public class InventoryUI extends UIElement {
                 + K.UI.INVENTORY_COLUMNS * Settings.getScaledSlot()
                 + K.UI.INVENTORY_COLUMNS * spacing;
         float y = Settings.getScaledPadding() + Settings.getScaledHeader();
-        float width = Settings.getScaledPadding() - spacing;
+        float width = Settings.getScaledSlot();
         float height = K.UI.INVENTORY_ROWS * Settings.getScaledSlot()
                 + (K.UI.INVENTORY_ROWS - 1) * spacing;
         UIScrollBar scrollBar = new UIScrollBar(x, y, width, height)
@@ -909,11 +909,18 @@ public class InventoryUI extends UIElement {
     }
 
     /**
-     * Renders the scalable inventory background.
+     * Renders the scalable inventory background. Creative mode omits the unused
+     * header strip that normally contains the inventory controls.
      */
     protected void renderBackground() {
         float width = getAbsoluteWidth();
         float height = getAbsoluteHeight();
+        float y = getAbsoluteY();
+        if (isGodmode) {
+            float headerHeight = Settings.getScaledHeader();
+            y += headerHeight;
+            height -= headerHeight;
+        }
         int textureWidth = Math.max(GUI_SLICE_SIZE * 2,
                 Math.round(width / Settings.getScale()));
         int textureHeight = Math.max(GUI_SLICE_SIZE * 2,
@@ -921,7 +928,7 @@ public class InventoryUI extends UIElement {
         Texture background = Frontend.createNineSliceTexture(
                 ResourceManager.rem.getBackgroundUI(), textureWidth,
                 textureHeight, GUI_SLICE_SIZE);
-        Frontend.drawTexture(background, getAbsoluteX(), getAbsoluteY(), width,
+        Frontend.drawTexture(background, getAbsoluteX(), y, width,
                 height, new Vector4f(1.0f, 1.0f, 1.0f, getWorldOpacity()));
     }
 
