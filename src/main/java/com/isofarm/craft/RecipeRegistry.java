@@ -129,9 +129,7 @@ public class RecipeRegistry {
         if (!primaryMat.equals(BlockData.STONE)) {
             create().with(new Block(primaryMat), 6)
                     .result(new iBlock(InteractiveBlocks.toDoor(primaryMat)), 1).add();
-        }
 
-        if (!primaryMat.equals(BlockData.STONE)) {
             create().with(new Block(primaryMat), 6)
                 .result(new Block(BlockData.toFence(primaryMat)), 4).add();
         }
