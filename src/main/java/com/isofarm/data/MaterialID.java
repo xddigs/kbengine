@@ -13,11 +13,12 @@ import java.util.Locale;
 public enum MaterialID implements Craftable {
     RAW_ORE((byte) 0, (byte) 0, 15),
     INGOT((byte) 1, (byte) 0, 50),
-    STICK((byte) 0, (byte) 1, 1),
-    PAPER((byte) 1, (byte) 1, 10),
-    LEATHER((byte) 2, (byte) 1, 40),
-    SUGAR_CANE((byte) 3, (byte) 1, 10),
-    SUGAR((byte) 4, (byte) 1, 20);
+    CHARCOAL((byte) 0, (byte) 1, 15),
+    STICK((byte) 1, (byte) 1, 1),
+    PAPER((byte) 2, (byte) 1, 10),
+    LEATHER((byte) 3, (byte) 1, 40),
+    SUGAR_CANE((byte) 4, (byte) 1, 10),
+    SUGAR((byte) 5, (byte) 1, 20);
 
     private final byte id;
     private final byte row;
