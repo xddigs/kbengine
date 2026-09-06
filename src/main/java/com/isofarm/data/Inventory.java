@@ -1,6 +1,8 @@
 package com.isofarm.data;
 
 import com.isofarm.item.*;
+import com.isofarm.entity.Player;
+import com.isofarm.service.BookService;
 import com.isofarm.service.SoundService;
 import com.isofarm.utils.K;
 
@@ -185,6 +187,10 @@ public class Inventory {
             remaining = addToEmptySlots(item, remaining, 0, hotbarStart);
         }
 
+        if (remaining < amount && Player.plyr != null
+                && Player.plyr.getInventory() == this) {
+            BookService.bs.reloadOpenCraftingBook();
+        }
         return remaining;
     }
 

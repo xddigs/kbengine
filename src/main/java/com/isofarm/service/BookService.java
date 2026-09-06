@@ -85,4 +85,13 @@ public class BookService implements Service<Book> {
                     craftingBook.isShowingOnlyCraftableRecipes());
         }
     }
+
+    /**
+     * Reloads the active crafting book after the player's available materials change.
+     */
+    public void reloadOpenCraftingBook() {
+        if (openedBook instanceof CraftingBook craftingBook) {
+            craftingBook.reload();
+        }
+    }
 }

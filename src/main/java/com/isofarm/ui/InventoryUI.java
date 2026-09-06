@@ -25,6 +25,7 @@ import java.util.*;
 @SuppressWarnings("all")
 @GodObject
 public class InventoryUI extends UIElement {
+    private static final float CRAFTING_BOOK_ICON_SCALE = 5.0f / 6.0f;
     private static final int BACKPACK_COLUMNS = 4;
     private static final int BACKPACK_ROWS = 4;
     private static final int GUI_SLICE_SIZE = 3;
@@ -171,13 +172,16 @@ public class InventoryUI extends UIElement {
     public void createButtons() {
         float btnWidth = Settings.getScaledSlot(), btnHeight = Settings.getScaledSlot();
         sortButton = new UIButton(Settings.getScaledPadding(),
-                Settings.getScaledPadding() - Settings.getScaledSpacing(), btnWidth, btnHeight);
+                Settings.getScaledPadding() - Settings.getScaledSpacing(), btnWidth, btnHeight)
+                .setIconScale(CRAFTING_BOOK_ICON_SCALE);
 
         groupButton = new UIButton(Settings.getScaledPadding() + btnWidth + Settings.getScaledSpacing(),
-                Settings.getScaledPadding() - Settings.getScaledSpacing(), btnWidth, btnHeight);
+                Settings.getScaledPadding() - Settings.getScaledSpacing(), btnWidth, btnHeight)
+                .setIconScale(CRAFTING_BOOK_ICON_SCALE);
 
         backpackButton = new UIButton(Settings.getScaledPadding() + btnWidth * 2 + Settings.getScaledSpacing() * 3,
-                Settings.getScaledPadding() - Settings.getScaledSpacing(), btnWidth, btnHeight);
+                Settings.getScaledPadding() - Settings.getScaledSpacing(), btnWidth, btnHeight)
+                .setIconScale(CRAFTING_BOOK_ICON_SCALE);
 
         sortButton.setOnClick(this::sortInventory);
         groupButton.setOnClick(this::groupInventory);
