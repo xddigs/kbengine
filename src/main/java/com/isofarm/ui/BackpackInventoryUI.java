@@ -33,14 +33,16 @@ public class BackpackInventoryUI extends InventoryUI {
     }
 
     /**
-     * Creates and returns the backpack slots.
+     * Creates the backpack slots directly below its top padding because this
+     * inventory has no control header.
      */
     private void createBackpackSlots() {
         for (int i = 0; i < BACKPACK_SLOTS; i++) {
             int column = i % 4;
             int row = i / 4;
             float x = Settings.getScaledPadding() + column * (Settings.getScaledSlot() + Settings.getScaledSpacing());
-            float y = Settings.getScaledPadding() + Settings.getScaledHeader() + row * (Settings.getScaledSlot() + Settings.getScaledSpacing());
+            float y = Settings.getScaledPadding()
+                    + row * (Settings.getScaledSlot() + Settings.getScaledSpacing());
 
             InventorySlotUI slotUI = new InventorySlotUI(x, y, Settings.getScaledSlot(), Settings.getScaledSlot(),
                     SlotType.BACKPACK);

@@ -40,6 +40,7 @@ public class InventoryUI extends UIElement {
     private UIButton sortButton;
     private UIButton groupButton;
     private UIButton backpackButton;
+    private UIButton inventoryModeButton;
     private final Player player = Player.plyr;
     private Inventory inventory;
     private iBlock containerBlock;
@@ -54,6 +55,7 @@ public class InventoryUI extends UIElement {
     private BackpackInventoryUI backpackUI;
     private int carriedAmount;
     private boolean isGodmode;
+    private boolean isCreativeInventoryVisible;
 
     private float defaultX;
     private float targetX;
@@ -87,8 +89,8 @@ public class InventoryUI extends UIElement {
         this.buttons = new ArrayList<>();
         this.creativeScrollBar = createCreativeScrollBar();
         setFocusable(true);
-        createButtons();
         addChild(creativeScrollBar);
+        createButtons();
 
         setLayer(150);
         hide();
@@ -145,11 +147,11 @@ public class InventoryUI extends UIElement {
     }
 
     /**
-     * Returns the backpack height.
+     * Returns the backpack height without an inventory-control header.
      * @return {@code float}; the backpack height
      */
     public static float getBackpackHeight() {
-        return Settings.getScaledPadding() * 2.0f + Settings.getScaledHeader() +
+        return Settings.getScaledPadding() * 2.0f +
                 BACKPACK_ROWS * Settings.getScaledSlot() +
                 (BACKPACK_ROWS - 1) * Settings.getScaledSpacing();
     }
@@ -165,7 +167,7 @@ public class InventoryUI extends UIElement {
     /**
      * Creates and returns the buttons.
      */
-    private void createButtons() {
+    public void createButtons() {
         float btnWidth = Settings.getScaledSlot(), btnHeight = Settings.getScaledSlot();
         sortButton = new UIButton(Settings.getScaledPadding(),
                 Settings.getScaledPadding() - Settings.getScaledSpacing(), btnWidth, btnHeight);
@@ -198,7 +200,26 @@ public class InventoryUI extends UIElement {
         addChild(sortButton);
         addChild(groupButton);
         addChild(backpackButton);
+        createInventoryModeButton();
 
+    }
+
+    /**
+     * Creates the large backgroundless toggle attached to the inventory's
+     * bottom-right corner. It is only exposed while the player is in godmode.
+     */
+    private void createInventoryModeButton() {
+        float offset = 48.0f;
+        float spacing = Settings.getScaledSpacing() + offset;
+        float size = Settings.getScaledSlot() * 2.0f;
+        inventoryModeButton = new UIButton(getWidth() - offset,
+                getHeight() - spacing, size, size)
+                .setCanDrawBackground(false)
+                .setOnClick(this::toggleGodmodeInventory);
+        inventoryModeButton.setZIndex(1);
+        inventoryModeButton.hide();
+        buttons.add(inventoryModeButton);
+        addChild(inventoryModeButton);
     }
 
     /**
@@ -431,7 +452,7 @@ public class InventoryUI extends UIElement {
         if (inventory == null) return;
 
         updateInventoryMode();
-        if (isGodmode) {
+        if (isGodmode && isCreativeInventoryVisible) {
             syncCreativeInventory();
             return;
         }
@@ -484,7 +505,8 @@ public class InventoryUI extends UIElement {
     @Override
     public boolean mouseScrolled(float mouseX, float mouseY,
                                  float scrollX, float scrollY) {
-        if (isGodmode && contains(mouseX, mouseY) && scrollY != 0.0f) {
+        if (isGodmode && isCreativeInventoryVisible
+                && contains(mouseX, mouseY) && scrollY != 0.0f) {
             creativeScrollBar.scrollBy(scrollY > 0.0f ? -1 : 1);
             return true;
         }
@@ -495,28 +517,81 @@ public class InventoryUI extends UIElement {
      * Switches the controls and contents when GODMODE changes.
      */
     private void updateInventoryMode() {
-        boolean creative = containerBlock == null
+        boolean creative = !(this instanceof BackpackInventoryUI)
+                && containerBlock == null
                 && player != null && player.getGamemode().isGodmode();
         if (creative == isGodmode) return;
 
         isGodmode = creative;
         if (creative) {
-            if (backpackUI != null) {
-                backpackUI.hide();
-                isBackpackOpen = false;
-                isBackpackClosing = false;
-                targetY = defaultY;
-            }
+            isCreativeInventoryVisible = true;
+            hideBackpackForCreativeInventory();
+            buildCreativeCatalog();
+        } else {
+            isCreativeInventoryVisible = false;
+        }
+        updateInventoryViewControls();
+    }
+
+    /**
+     * Toggles between the creative catalog and the player's survival inventory
+     * without changing the player's godmode setting.
+     */
+    private void toggleGodmodeInventory() {
+        if (!isGodmode) return;
+        if (isCreativeInventoryVisible) {
+            isCreativeInventoryVisible = false;
+        } else {
+            isCreativeInventoryVisible = true;
+            hideBackpackForCreativeInventory();
+        }
+        updateInventoryViewControls();
+        syncInventory();
+    }
+
+    /**
+     * Updates controls and the toggle's destination icon for the selected
+     * godmode inventory view.
+     */
+    private void updateInventoryViewControls() {
+        if (!isGodmode) {
+            inventoryModeButton.hide();
+            creativeScrollBar.hide();
+            sortButton.show();
+            groupButton.show();
+            return;
+        }
+
+        inventoryModeButton.show();
+        Item destination = isCreativeInventoryVisible
+                ? new Backpack()
+                : new Block(BlockData.GRASS);
+        inventoryModeButton.setSpriteSheet(
+                ResourceManager.getItemSpriteSheet(destination));
+        inventoryModeButton.setSpriteColumn(
+                ResourceManager.getItemFrame(destination));
+
+        if (isCreativeInventoryVisible) {
             sortButton.hide();
             groupButton.hide();
             backpackButton.hide();
-            buildCreativeCatalog();
             creativeScrollBar.show();
         } else {
             creativeScrollBar.hide();
             sortButton.show();
             groupButton.show();
         }
+    }
+
+    /**
+     * Closes the auxiliary backpack panel before displaying creative items.
+     */
+    private void hideBackpackForCreativeInventory() {
+        if (backpackUI == null) return;
+        backpackUI.hide();
+        isBackpackOpen = false;
+        isBackpackClosing = false;
+        targetY = defaultY;
     }
 
     /**
@@ -539,11 +614,40 @@ public class InventoryUI extends UIElement {
             creativeItems.add(new MiningComponent(tier, MaterialID.RAW_ORE));
             creativeItems.add(new MiningComponent(tier, MaterialID.INGOT));
         });
-        creativeItems.sort(CraftingBook.itemTypeComparator());
+        creativeItems.sort(creativeSorter());
         int totalRows = Math.ceilDiv(creativeItems.size(), K.UI.INVENTORY_COLUMNS);
         creativeScrollBar.setMaximum(Math.max(0,
                 totalRows - K.UI.INVENTORY_ROWS));
         creativeScrollBar.setValue(0);
+    }
+
+    /**
+     * Returns the creative catalog ordering by item category, numeric id and
+     * localized name, in that order.
+     * @return the creative item comparator
+     */
+    private Comparator<Item> creativeSorter() {
+        return Comparator
+                .comparingInt(InventoryUI::creativeItemTypeOrder)
+                .thenComparingInt(Item::getId)
+                .thenComparing(Item::getDisplayName,
+                        String.CASE_INSENSITIVE_ORDER);
+    }
+
+    /**
+     * Returns the category position used by the creative catalog.
+     * @param item the item to classify
+     * @return the item category position
+     */
+    private static int creativeItemTypeOrder(Item item) {
+        return switch (item) {
+            case Block ignored -> 0;
+            case Tool ignored -> 1;
+            case Usable ignored -> 2;
+            case Material ignored -> 3;
+            case iBlock ignored -> 4;
+            case null, default -> 5;
+        };
     }
 
     /**
@@ -679,7 +783,8 @@ public class InventoryUI extends UIElement {
             if (slot == null) continue;
 
             if (Controls.isPressed(ControlAction.UI_SELECT)) {
-                if (isGodmode && creativeSlots.contains(slot)) {
+                if (isGodmode && isCreativeInventoryVisible
+                        && creativeSlots.contains(slot)) {
                     takeCreativeItem(slot);
                     break;
                 }
@@ -688,7 +793,8 @@ public class InventoryUI extends UIElement {
             }
 
             if (Controls.isPressed(ControlAction.UI_CONTEXT)) {
-                if (isGodmode && creativeSlots.contains(slot)) {
+                if (isGodmode && isCreativeInventoryVisible
+                        && creativeSlots.contains(slot)) {
                     break;
                 }
                 rightClick(slot);
@@ -901,7 +1007,8 @@ public class InventoryUI extends UIElement {
         renderChildren();
         renderCarriedItem();
 
-        if (!isGodmode && inventory != null && inventory.getBackpackSlot() != null
+        if ((!isGodmode || !isCreativeInventoryVisible)
+                && inventory != null && inventory.getBackpackSlot() != null
                 && inventory.getBackpackSlot().getItem() != null) {
             backpackButton.show();
         } else {
@@ -917,7 +1024,7 @@ public class InventoryUI extends UIElement {
         float width = getAbsoluteWidth();
         float height = getAbsoluteHeight();
         float y = getAbsoluteY();
-        if (isGodmode) {
+        if (isGodmode && isCreativeInventoryVisible) {
             float headerHeight = Settings.getScaledHeader();
             y += headerHeight;
             height -= headerHeight;
