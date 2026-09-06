@@ -1,6 +1,7 @@
 package com.isofarm.entity;
 
 import com.isofarm.data.BlockPos;
+import com.isofarm.data.BlockData;
 import com.isofarm.data.Cause;
 import com.isofarm.data.Direction;
 import com.isofarm.data.PlayerState;
@@ -13,6 +14,7 @@ import com.isofarm.item.Item;
 import com.isofarm.pathfinding.GridPos;
 import com.isofarm.utils.DeathManager;
 import com.isofarm.wrld.GameMaster;
+import com.isofarm.wrld.World;
 import org.joml.Vector3f;
 
 import java.util.List;
@@ -22,6 +24,9 @@ import java.util.List;
  */
 @Singleton
 public class Player extends Character {
+    private static final float AUTO_JUMP_CLEARANCE = 1.05f;
+    private static final float WALKABLE_STEP_HEIGHT = 0.5f;
+    private static final float COLLISION_EPSILON = 0.001f;
     public static final Player plyr;
     static {
         plyr = new Player();
@@ -144,7 +149,89 @@ public class Player extends Character {
      * @param delta the {@code float} argument; frame time
      */
     public void autoJump(Vector3f velocity, float delta) {
-        manager.autoJump(velocity, delta);
+        if (!isOnGround() || (velocity.x == 0.0f && velocity.z == 0.0f)) return;
+
+        World world = World.wrld;
+        Vector3f originalPosition = new Vector3f(getPosition());
+        getPosition().add(velocity.x * delta, 0.0f, velocity.z * delta);
+        if (!checkCollision(world)) {
+            setPosition(originalPosition);
+            return;
+        }
+
+        if (collidesBlock(world)) {
+            float stepSurface = findSurface(world, originalPosition.y);
+            if (stepSurface != Float.NEGATIVE_INFINITY) {
+                getPosition().y = stepSurface;
+                boolean clear = !checkCollision(world);
+                setPosition(originalPosition);
+                if (clear) getPosition().y = stepSurface;
+            } else {
+                setPosition(originalPosition);
+            }
+            return;
+        }
+
+        getPosition().y += AUTO_JUMP_CLEARANCE;
+        boolean clear = !checkCollision(world);
+        setPosition(originalPosition);
+        if (clear) jump();
+    }
+
+    /**
+     * Returns whether the current prospective collision is with a slab, a
+     * staircase, or a fence. These shapes are never auto-jump targets.
+     */
+    private boolean collidesBlock(World world) {
+        float halfWidth = getDimensions().x / 2.0f - COLLISION_EPSILON;
+        float halfDepth = getDimensions().z / 2.0f - COLLISION_EPSILON;
+        int minX = (int) Math.floor(getPosition().x - halfWidth);
+        int maxX = (int) Math.floor(getPosition().x + halfWidth);
+        int minY = (int) Math.floor(getPosition().y + COLLISION_EPSILON);
+        int maxY = (int) Math.floor(getPosition().y + getDimensions().y - COLLISION_EPSILON);
+        int minZ = (int) Math.floor(getPosition().z - halfDepth);
+        int maxZ = (int) Math.floor(getPosition().z + halfDepth);
+        for (int x = minX; x <= maxX; x++) {
+            for (int y = minY; y <= maxY; y++) {
+                for (int z = minZ; z <= maxZ; z++) {
+                    BlockData block = BlockData.fromId(world.getBlockTypeAt(x, y, z));
+                    if (block != null && (block.isSlab() || block.isStaircase() || block.isFence())
+                            && intersectsBlock(world.getBlockShapeAt(x, y, z), x, y, z)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Finds a nearby special-block surface that can be walked up without a
+     * jump. A player may rise at most half a block per movement step.
+     */
+    private float findSurface(World world, float currentY) {
+        float halfWidth = getDimensions().x / 2.0f - COLLISION_EPSILON;
+        float halfDepth = getDimensions().z / 2.0f - COLLISION_EPSILON;
+        float[] xs = {getPosition().x - halfWidth, getPosition().x + halfWidth};
+        float[] zs = {getPosition().z - halfDepth, getPosition().z + halfDepth};
+        float highestSurface = Float.NEGATIVE_INFINITY;
+        int minY = (int) Math.floor(currentY - COLLISION_EPSILON);
+        int maxY = (int) Math.floor(currentY + WALKABLE_STEP_HEIGHT);
+        for (float x : xs) {
+            for (float z : zs) {
+                int blockX = (int) Math.floor(x);
+                int blockZ = (int) Math.floor(z);
+                for (int y = minY; y <= maxY; y++) {
+                    BlockData block = BlockData.fromId(world.getBlockTypeAt(blockX, y, blockZ));
+                    if (block == null || !(block.isSlab() || block.isStaircase())) continue;
+                    highestSurface = Math.max(highestSurface,
+                            world.getBlockSurfaceY(blockX, y, blockZ, x, z));
+                }
+            }
+        }
+        return highestSurface > currentY + COLLISION_EPSILON
+                && highestSurface <= currentY + WALKABLE_STEP_HEIGHT + COLLISION_EPSILON
+                ? highestSurface : Float.NEGATIVE_INFINITY;
     }
 
     /**

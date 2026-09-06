@@ -24,7 +24,6 @@ public final class PlayerManager {
     private static final float ZERO = 0.0f;
     private static final float EYE_HEIGHT = 1.6f;
     private static final float EYE_LERP_SPEED = 10.0f;
-    private static final float STEP_HEIGHT = 1.05f;
     private static final float PATH_DISTANCE_SQUARED = 0.01f;
     private static final float WAYPOINT_OFFSET = 0.5f;
 
@@ -57,9 +56,6 @@ public final class PlayerManager {
         currentState.update(delta);
         currentEyeHeight = lerp(currentEyeHeight, targetEyeHeight,
                 Math.clamp(delta * EYE_LERP_SPEED, ZERO, 1.0f));
-        if (!(currentState instanceof SneakingState)) {
-            autoJump(Player.plyr.getVelocity(), delta);
-        }
     }
 
     /**
@@ -70,27 +66,6 @@ public final class PlayerManager {
         if (currentState != null) currentState.exit();
         currentState = newState;
         currentState.enter();
-    }
-
-    /**
-     * Updates movement for auto jump according to the current physics and input state.
-     * @param velocity the {@link Vector3f} argument; intended velocity
-     * @param delta the {@code float} argument; frame time
-     */
-    public void autoJump(Vector3f velocity, float delta) {
-        Player player = Player.plyr;
-        World world = World.wrld;
-        if (!player.isOnGround() || (velocity.x == ZERO && velocity.z == ZERO)) return;
-        Vector3f original = new Vector3f(player.getPosition());
-        player.getPosition().add(velocity.x * delta, ZERO, velocity.z * delta);
-        boolean blocked = player.checkCollision(world);
-        player.setPosition(original);
-        if (blocked) {
-            player.getPosition().add(velocity.x * delta, STEP_HEIGHT, velocity.z * delta);
-            boolean clear = !player.checkCollision(world);
-            player.setPosition(original);
-            if (clear) player.jump();
-        }
     }
 
     /**
@@ -117,6 +92,7 @@ public final class PlayerManager {
                 player.setVelocity(velocity);
             }
         }
+        if (!(currentState instanceof SneakingState)) player.autoJump(player.getVelocity(), delta);
         player.collide(world, player.getVelocity(), delta);
     }
 
@@ -146,7 +122,10 @@ public final class PlayerManager {
                     (input.x * cos - input.z * sin) * player.getSpeed(),
                     player.getVelocity().y,
                     (input.x * sin + input.z * cos) * player.getSpeed());
-            if (!flying) player.collide(world, velocity, delta);
+            if (!flying) {
+                if (!(currentState instanceof SneakingState)) player.autoJump(velocity, delta);
+                player.collide(world, velocity, delta);
+            }
         } else if (!flying) {
             player.collide(world, new Vector3f(ZERO, player.getVelocity().y, ZERO), delta);
         }
