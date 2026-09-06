@@ -20,16 +20,18 @@ public class RecipeRegistry {
     public List<Recipe> init() {
         recipes.clear();
         registerBlocksRecipes();
-        registeriBlocksRecipes();
         registerSmeltingRecipes();
         registerMaterialRecipes();
 
-        create(Tier.LEATHER).result(new Block(BlockData.OAK_PLANK), 4).with(BlockData.fromIdTo(BlockData.OAK_LOG.getId()),1).add();
-        create(Tier.LEATHER).result(new Material(Tier.NONE, MaterialID.STICK), 4).with(BlockData.fromIdTo(BlockData.OAK_PLANK.getId()), 1).add();
-        create(Tier.LEATHER).result(new Book(false), 1).with(MaterialID.LEATHER, 3).with(MaterialID.PAPER, 2).add();
-        create(Tier.LEATHER).result(new Backpack(), 1).with(MaterialID.LEATHER, 3).add();
-        create(Tier.LEATHER).result(new Bucket(), 1).with(new MiningComponent(Tier.STEEL, MaterialID.INGOT), 3).add();
-        registerToolSet(Tier.LEATHER, BlockData.fromIdTo(BlockData.OAK_PLANK.getId()));
+        create().result(new Block(BlockData.OAK_PLANK), 4).with(BlockData.fromIdTo(BlockData.OAK_LOG.getId()),1).add();
+        create().result(new Block(BlockData.SPRUCE_PLANK), 4).with(BlockData.fromIdTo(BlockData.SPRUCE_LOG.getId()),1).add();
+        create().with(new Block(BlockData.OAK_PLANK), 8).result(new iBlock(InteractiveBlocks.CHEST), 1).add();
+
+        create().result(new Material(Tier.NONE, MaterialID.STICK), 4).with(BlockData.fromIdTo(BlockData.OAK_PLANK.getId()), 1).add();
+        create().result(new Book(false), 1).with(MaterialID.LEATHER, 3).with(MaterialID.PAPER, 2).add();
+        create().result(new Backpack(), 1).with(MaterialID.LEATHER, 3).add();
+        create().result(new Bucket(), 1).with(new MiningComponent(Tier.STEEL, MaterialID.INGOT), 3).add();
+        registerToolSet(BlockData.fromIdTo(BlockData.OAK_PLANK.getId()));
 
         Map<Tier, Tier> metalProgression = Map.of(
                 Tier.COPPER, Tier.COPPER,
@@ -41,7 +43,7 @@ public class RecipeRegistry {
 
         metalProgression.forEach((toolTier, requiredStationTier) -> {
             Craftable mainMaterial = new MiningComponent(toolTier, MaterialID.INGOT);
-            registerToolSet(requiredStationTier, mainMaterial);
+            registerToolSet(mainMaterial);
         });
 
         return recipes;
@@ -49,30 +51,26 @@ public class RecipeRegistry {
 
     /**
      * Adds tool set to the corresponding collection or processing queue.
-     * @param stationTier the {@link Tier} supplied as {@code stationTier}
      * @param primaryMat the {@link Craftable} supplied as {@code primaryMat}
      */
-    private void registerToolSet(Tier stationTier, Craftable primaryMat) {
-        if (stationTier.equals(Tier.NONE)) return;
-        registerTool(stationTier, primaryMat, 2, 1, Sword::new);
-        registerTool(stationTier, primaryMat, 3, 2, Pickaxe::new);
-        registerTool(stationTier, primaryMat, 3, 3, Axe::new);
-        registerTool(stationTier, primaryMat, 2, 2, Hoe::new);
-        registerTool(stationTier, primaryMat, 1, 2, Shovel::new);
+    private void registerToolSet(Craftable primaryMat) {
+        registerTool(primaryMat, 2, 1, Sword::new);
+        registerTool(primaryMat, 3, 2, Pickaxe::new);
+        registerTool(primaryMat, 3, 3, Axe::new);
+        registerTool(primaryMat, 2, 2, Hoe::new);
+        registerTool(primaryMat, 1, 2, Shovel::new);
     }
 
     /**
      * Adds tool to the corresponding collection or processing queue.
-     * @param stationTier the {@link Tier} supplied as {@code stationTier}
      * @param mat the {@link Craftable} supplied as {@code mat}
      * @param matAmount the {@code int} supplied as {@code matAmount}
      * @param stickAmount the {@code int} supplied as {@code stickAmount}
      * @param constructor the {@link Function} supplied as {@code constructor}
      */
-    private void registerTool(Tier stationTier, Craftable mat, int matAmount, int stickAmount,
+    private void registerTool(Craftable mat, int matAmount, int stickAmount,
                                      Function<Tier, Item> constructor) {
-        create(stationTier)
-                .result(constructor.apply(getTierFromMaterial(mat)), 1)
+        create().result(constructor.apply(getTierFromMaterial(mat)), 1)
                 .with(mat, matAmount)
                 .with(MaterialID.STICK, stickAmount)
                 .add();
@@ -91,35 +89,9 @@ public class RecipeRegistry {
      * Registers the recipes contributed by blocks.
      */
     private void registerBlocksRecipes() {
-        create(Tier.WOODEN)
-                .with(new Block(BlockData.OAK_PLANK), 3)
-                .result(new Block(BlockData.OAK_PLANK_SLAB), 6)
-                .add();
-
-        create(Tier.WOODEN)
-                .with(new Block(BlockData.OAK_PLANK), 3)
-                .result(new Block(BlockData.OAK_PLANK_VERTICAL_SLAB), 6)
-                .add();
-
-        create(Tier.WOODEN)
-                .with(new Block(BlockData.OAK_PLANK), 6)
-                .result(new Block(BlockData.OAK_PLANK_FENCE), 4)
-                .add();
-    }
-
-    /**
-     * Registers the recipes contributed by interactive block items.
-     */
-    private void registeriBlocksRecipes() {
-        create(Tier.WOODEN)
-                .with(new Block(BlockData.OAK_PLANK), 8)
-                .result(new iBlock(InteractiveBlocks.CHEST), 1)
-                .add();
-
-        create(Tier.WOODEN)
-                .with(new Block(BlockData.OAK_PLANK), 6)
-                .result(new iBlock(InteractiveBlocks.OAK_DOOR), 1)
-                .add();
+        registerSpecialBlocks(BlockData.OAK_PLANK);
+        registerSpecialBlocks(BlockData.SPRUCE_PLANK);
+        registerSpecialBlocks(BlockData.STONE);
     }
 
     /**
@@ -128,8 +100,7 @@ public class RecipeRegistry {
     private void registerSmeltingRecipes() {
         Tier[] metalTiers = {Tier.COPPER, Tier.IRON, Tier.STEEL, Tier.GOLDEN, Tier.PLATINUM, Tier.DIAMOND};
         for (Tier tier : metalTiers) {
-            create(tier)
-                    .result(new MiningComponent(tier, MaterialID.INGOT), 1)
+            create().result(new MiningComponent(tier, MaterialID.INGOT), 1)
                     .with(new MiningComponent(tier, MaterialID.RAW_ORE), 1).add();
         }
     }
@@ -139,12 +110,31 @@ public class RecipeRegistry {
      */
     private void registerMaterialRecipes() {
         Tier tier = Tier.NONE;
-        create(Tier.LEATHER)
-                .with(new Material(tier, MaterialID.SUGAR_CANE), 1)
+        create().with(new Material(tier, MaterialID.SUGAR_CANE), 1)
                 .result(new Material(tier, MaterialID.PAPER), 2).add();
-        create(Tier.LEATHER)
-                .with(new Material(tier, MaterialID.SUGAR_CANE), 1)
+        create().with(new Material(tier, MaterialID.SUGAR_CANE), 1)
                 .result(new Material(tier, MaterialID.SUGAR), 4).add();
+    }
+
+    private void registerSpecialBlocks(BlockData primaryMat) {
+        create().with(new Block(primaryMat), 3)
+                .result(new Block(BlockData.toSlab(primaryMat, false)), 6).add();
+
+        create().with(new Block(primaryMat), 3)
+                .result(new Block(BlockData.toSlab(primaryMat, true)), 6).add();
+
+        create().with(new Block(primaryMat), 7)
+                .result(new Block(BlockData.toStaircase(primaryMat)), 4).add();
+
+        if (!primaryMat.equals(BlockData.STONE)) {
+            create().with(new Block(primaryMat), 6)
+                    .result(new iBlock(InteractiveBlocks.toDoor(primaryMat)), 1).add();
+        }
+
+        if (!primaryMat.equals(BlockData.STONE)) {
+            create().with(new Block(primaryMat), 6)
+                .result(new Block(BlockData.toFence(primaryMat)), 4).add();
+        }
     }
 
     /**
@@ -162,29 +152,24 @@ public class RecipeRegistry {
 
     /**
      * Returns create.
-     * @param tier the {@link Tier} supplied as {@code tier}
      * @return the {@link RecipeBuilder} representing the create result
      */
-    public RecipeBuilder create(Tier tier) {
-        return new RecipeBuilder(tier);
+    public RecipeBuilder create() {
+        return new RecipeBuilder();
     }
 
     /**
      * Encapsulates the state and operations required by recipe builder within the game runtime.
      */
     public static class RecipeBuilder {
-        private final Tier tier;
         private final List<Ingredient> ingredients = new ArrayList<>();
         private Item result;
         private int amount = 1;
 
         /**
          * Creates a new {@code RecipeBuilder} instance.
-         * @param tier the {@link Tier} supplied as {@code tier}
          */
-        public RecipeBuilder(Tier tier) {
-            this.tier = tier;
-        }
+        public RecipeBuilder() {}
 
         /**
          * Creates or returns result from the supplied arguments.
@@ -214,7 +199,7 @@ public class RecipeRegistry {
          * @return the {@link Recipe} representing the add result
          */
         public Recipe add() {
-            Recipe recipe = new Recipe(tier, result, amount, List.copyOf(ingredients));
+            Recipe recipe = new Recipe(result, amount, List.copyOf(ingredients));
             recipes.add(recipe);
             return recipe;
         }
