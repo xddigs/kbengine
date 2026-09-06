@@ -662,8 +662,9 @@ public class GameInteraction {
                     Vector3f dropPos = new Vector3f(pos.x() + 0.5f, pos.y() + 0.5f, pos.z() + 0.5f);
 
                     int count = (int) (Math.random() * 2) + 1;
-                    WorldItem dropEntity = new WorldItem(itemToDrop, count, dropPos);
-                    GameMaster.game.addEntity(dropEntity);
+                    if (!Player.plyr.getGamemode().isGodmode()) {
+                        GameMaster.game.addEntity(new WorldItem(itemToDrop, count, dropPos));
+                    }
                 }
 
                 log.info("Tree chopped successfully at base {},{},{}", cell.x(), cell.y(), cell.z());

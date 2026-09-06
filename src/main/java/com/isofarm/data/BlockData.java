@@ -19,8 +19,9 @@ import java.util.Locale;
 public enum BlockData implements Blockable {
     AIR((byte) 0, (byte) 0, (byte) 0, false, false, 0, null, SoundGroup.SILENT, 0f, true, new Object[]{}, Tier.NONE),
     DIRT((byte) 1, (byte) 1, (byte) 0, true, false, 100, "assets/textures/blocks/dirt.png", SoundGroup.SOIL, 0.9f, false, new Object[]{}, Tier.NONE),
-    TILLED_DIRT((byte) 2, (byte) 2, (byte) 0, true, false,  110, "assets/textures/blocks/dirt_tilled.png", "assets/textures/blocks/dirt.png", "assets/textures/blocks/dirt.png", SoundGroup.SOIL, 0.9f, false, new Object[]{}, Tier.NONE),
-    GRASS((byte) 3, (byte) 3, (byte) 0, true, false, 120, "assets/textures/blocks/grass_top.png", "assets/textures/blocks/grass_bottom.png","assets/textures/blocks/grass.png",SoundGroup.SOIL, 1.0f, false, new Seed[]{new Seed()}, Tier.NONE),
+    GRASS((byte) 2, (byte) 2, (byte) 0, true, false, 120, "assets/textures/blocks/grass_top.png", "assets/textures/blocks/grass_bottom.png","assets/textures/blocks/grass.png",SoundGroup.SOIL, 1.0f, false, new Seed[]{new Seed()}, Tier.NONE),
+    TILLED_DIRT((byte) 3, (byte) 3, (byte) 0, true, false,  110, "assets/textures/blocks/dirt_tilled.png", "assets/textures/blocks/dirt.png", "assets/textures/blocks/dirt.png", SoundGroup.SOIL, 0.9f, false, new Object[]{}, Tier.NONE),
+
     STONE((byte) 4, (byte) 4, (byte) 0, false, false, 150, "assets/textures/blocks/stone.png", SoundGroup.STONE, 6.0f, false, new Object[]{}, Tier.NONE),
     STONE_SLAB((byte) 5, (byte) 5, (byte) 0, false, false, 100, "assets/textures/blocks/stone.png", SoundGroup.STONE, 6.0f, false, new Object[]{}, Tier.NONE, true, false, false),
     STONE_VERTICAL_SLAB((byte) 6, (byte) 6, (byte) 0, false, false, 100, "assets/textures/blocks/stone.png", SoundGroup.STONE, 6.0f, false, new Object[]{}, Tier.NONE, true, false, false),
