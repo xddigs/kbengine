@@ -32,17 +32,16 @@ public class InventoryUI extends UIElement {
     private final InventorySlotUI[] slotUIs;
     private final InventorySlot[] creativeSlotData;
     private final Set<InventorySlot> creativeSlots;
-    private final Map<Tab, List<Item>> creativeItems;
+    private final List<Item> creativeItems;
 
     private final List<UIButton> buttons;
-    private final List<UIButton> creativeTabButtons;
+    private final UIScrollBar creativeScrollBar;
     private UIButton sortButton;
     private UIButton groupButton;
     private UIButton backpackButton;
     private final Player player = Player.plyr;
     private Inventory inventory;
     private iBlock containerBlock;
-    private Tab currentTab;
     private SpriteSheet seedIcons;
     private SpriteSheet cropIcons;
     private SpriteSheet blockIcons;
@@ -83,12 +82,12 @@ public class InventoryUI extends UIElement {
         this.slotUIs = new InventorySlotUI[totalVisualSlots];
         this.creativeSlotData = new InventorySlot[totalVisualSlots];
         this.creativeSlots = Collections.newSetFromMap(new IdentityHashMap<>());
-        this.creativeItems = new EnumMap<>(Tab.class);
+        this.creativeItems = new ArrayList<>();
         this.buttons = new ArrayList<>();
-        this.creativeTabButtons = new ArrayList<>();
-        this.currentTab = Tab.INVENTORY;
+        this.creativeScrollBar = createCreativeScrollBar();
         setFocusable(true);
         createButtons();
+        addChild(creativeScrollBar);
 
         setLayer(150);
         hide();
@@ -112,6 +111,26 @@ public class InventoryUI extends UIElement {
         return Settings.getScaledPadding() * 2.0f + Settings.getScaledHeader() +
                 K.UI.INVENTORY_ROWS * Settings.getScaledSlot() +
                 (K.UI.INVENTORY_ROWS - 1) * Settings.getScaledSpacing();
+    }
+
+    /**
+     * Creates the row-aligned scroll bar used by the creative catalog.
+     * Its track covers only the slot rows and their intervening spacing.
+     * @return the configured creative scroll bar
+     */
+    private UIScrollBar createCreativeScrollBar() {
+        float spacing = Settings.getScaledSpacing();
+        float x = Settings.getScaledPadding()
+                + K.UI.INVENTORY_COLUMNS * Settings.getScaledSlot()
+                + K.UI.INVENTORY_COLUMNS * spacing;
+        float y = Settings.getScaledPadding() + Settings.getScaledHeader();
+        float width = Settings.getScaledPadding() - spacing;
+        float height = K.UI.INVENTORY_ROWS * Settings.getScaledSlot()
+                + (K.UI.INVENTORY_ROWS - 1) * spacing;
+        UIScrollBar scrollBar = new UIScrollBar(x, y, width, height)
+                .setOnValueChanged(ignored -> syncCreativeInventory());
+        scrollBar.hide();
+        return scrollBar;
     }
 
     /**
@@ -179,30 +198,6 @@ public class InventoryUI extends UIElement {
         addChild(groupButton);
         addChild(backpackButton);
 
-        createCreativeTabButtons(btnWidth, btnHeight);
-    }
-
-    /**
-     * Creates the five category buttons used by the creative inventory.
-     * @param width the {@code float} argument; the button width
-     * @param height the {@code float} argument; the button height
-     */
-    private void createCreativeTabButtons(float width, float height) {
-        Tab[] tabs = {Tab.BLOCKS, Tab.TOOLS_ITEMS, Tab.USABLES,
-                Tab.CROPS_SEEDS, Tab.MATERIALS};
-
-        for (int i = 0; i < tabs.length; i++) {
-            Tab tab = tabs[i];
-            UIButton button = new UIButton(
-                    Settings.getScaledPadding() + i * (width + Settings.getScaledSpacing()),
-                    Settings.getScaledPadding() - Settings.getScaledSpacing(),
-                    width, height);
-            button.setOnClick(() -> selectCreativeTab(tab));
-            button.hide();
-            creativeTabButtons.add(button);
-            buttons.add(button);
-            addChild(button);
-        }
     }
 
     /**
@@ -481,6 +476,21 @@ public class InventoryUI extends UIElement {
     }
 
     /**
+     * {@inheritDoc}
+     * Scrolls the creative catalog by complete inventory rows while the pointer
+     * is anywhere over this inventory.
+     */
+    @Override
+    public boolean mouseScrolled(float mouseX, float mouseY,
+                                 float scrollX, float scrollY) {
+        if (isGodmode && contains(mouseX, mouseY) && scrollY != 0.0f) {
+            creativeScrollBar.scrollBy(scrollY > 0.0f ? -1 : 1);
+            return true;
+        }
+        return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+    }
+
+    /**
      * Switches the controls and contents when GODMODE changes.
      */
     private void updateInventoryMode() {
@@ -490,7 +500,6 @@ public class InventoryUI extends UIElement {
 
         isGodmode = creative;
         if (creative) {
-            currentTab = Tab.BLOCKS;
             if (backpackUI != null) {
                 backpackUI.hide();
                 isBackpackOpen = false;
@@ -500,64 +509,69 @@ public class InventoryUI extends UIElement {
             sortButton.hide();
             groupButton.hide();
             backpackButton.hide();
-            creativeTabButtons.forEach(UIButton::show);
             buildCreativeCatalog();
-            configureCreativeTabIcons();
+            creativeScrollBar.show();
         } else {
-            currentTab = Tab.INVENTORY;
-            creativeTabButtons.forEach(UIButton::hide);
+            creativeScrollBar.hide();
             sortButton.show();
             groupButton.show();
         }
     }
 
     /**
-     * Builds the creative catalog from every item registered by the game.
+     * Builds the creative catalog from registered items that have a supported
+     * category, visible sprite and localized display name. The resulting order
+     * is shared with {@link CraftingBook#sortByType()}.
      */
     private void buildCreativeCatalog() {
         creativeItems.clear();
-        for (Tab tab : Tab.values()) {
-            creativeItems.put(tab, new ArrayList<>());
-        }
         if (GameMaster.game == null) return;
 
         for (String id : GameMaster.game.getItemRegistry().getIds()) {
             Item item = GameMaster.game.getItemRegistry().create(id);
-            Tab tab = getCreativeTab(item);
-            if (tab != null) creativeItems.get(tab).add(item);
+            if (isSupportedCreativeItem(item)) creativeItems.add(item);
         }
 
-        List<Item> materials = creativeItems.get(Tab.MATERIALS);
-        materials.removeIf(MiningComponent.class::isInstance);
+        creativeItems.removeIf(MiningComponent.class::isInstance);
         Tier.forEach(tier -> {
             if (tier.isInvalidTier()) return;
-            materials.add(new MiningComponent(tier, MaterialID.RAW_ORE));
-            materials.add(new MiningComponent(tier, MaterialID.INGOT));
+            creativeItems.add(new MiningComponent(tier, MaterialID.RAW_ORE));
+            creativeItems.add(new MiningComponent(tier, MaterialID.INGOT));
         });
+        creativeItems.sort(CraftingBook.itemTypeComparator());
+        int totalRows = Math.ceilDiv(creativeItems.size(), K.UI.INVENTORY_COLUMNS);
+        creativeScrollBar.setMaximum(Math.max(0,
+                totalRows - K.UI.INVENTORY_ROWS));
+        creativeScrollBar.setValue(0);
     }
 
     /**
-     * Returns the creative category for an item.
-     * @param item the {@link Item} argument; the item to classify
-     * @return the {@link Tab} result; its creative tab, or {@code null} when unsupported
+     * Checks whether an item belongs to one of the five creative categories and
+     * has a drawable, translated inventory representation.
+     * @param item the item to validate
+     * @return {@code true} when the item may be shown in the creative catalog
      */
-    private Tab getCreativeTab(Item item) {
-        return switch (item) {
-            case Block ignored -> Tab.BLOCKS;
-            case Tool ignored -> Tab.TOOLS_ITEMS;
-            case Usable ignored -> Tab.USABLES;
-            case Produce ignored -> Tab.CROPS_SEEDS;
-            case Seed ignored -> Tab.CROPS_SEEDS;
-            case Material ignored -> Tab.MATERIALS;
-            case null, default -> null;
-        };
+    private boolean isSupportedCreativeItem(Item item) {
+        boolean supportedCategory = item instanceof Block
+                || item instanceof Tool
+                || item instanceof Usable
+                || item instanceof Material
+                || item instanceof iBlock;
+        if (!supportedCategory || ResourceManager.getItemSpriteSheet(item) == null
+                || ResourceManager.getItemFrame(item) < 0) {
+            return false;
+        }
+        String displayName = item.getDisplayName();
+        return displayName != null && !displayName.isBlank()
+                && !displayName.equals("block." + item.getName())
+                && !displayName.startsWith("item.");
     }
 
     /**
-     * Displays the selected creative category in the virtual slots.
+     * Displays the currently visible creative rows in the virtual slots.
      */
     private void syncCreativeInventory() {
-        List<Item> items = creativeItems.getOrDefault(currentTab, List.of());
+        int firstItem = creativeScrollBar.getValue() * K.UI.INVENTORY_COLUMNS;
         for (int i = 0; i < slotUIs.length; i++) {
             InventorySlotUI slotUI = slotUIs[i];
             if (slotUI == null) continue;
@@ -569,8 +583,9 @@ public class InventoryUI extends UIElement {
                 creativeSlots.add(slot);
             }
 
-            if (i < items.size()) {
-                Item item = items.get(i);
+            int itemIndex = firstItem + i;
+            if (itemIndex < creativeItems.size()) {
+                Item item = creativeItems.get(itemIndex);
                 slot.setItem(item);
                 slot.setAmount(1);
             } else {
@@ -578,35 +593,6 @@ public class InventoryUI extends UIElement {
             }
             slotUI.setSlot(slot);
             updateItemSprite(slotUI);
-        }
-    }
-
-    /**
-     * Selects one of the creative inventory filters.
-     */
-    private void selectCreativeTab(Tab tab) {
-        if (!isGodmode || !tab.isCreative()) return;
-        currentTab = tab;
-        syncCreativeInventory();
-    }
-
-    /**
-     * Assigns the requested representative item icon to every creative tab.
-     */
-    private void configureCreativeTabIcons() {
-        Item[] icons = {
-                new Block(BlockData.GRASS),
-                new Hoe(Tier.DIAMOND),
-                new Backpack(),
-                new Produce(CropType.WHEAT),
-                new Material(Tier.NONE, MaterialID.LEATHER)
-        };
-
-        for (int i = 0; i < creativeTabButtons.size(); i++) {
-            UIButton button = creativeTabButtons.get(i);
-            Item icon = icons[i];
-            button.setSpriteSheet(ResourceManager.getItemSpriteSheet(icon));
-            button.setSpriteColumn(ResourceManager.getItemFrame(icon));
         }
     }
 
@@ -1062,24 +1048,4 @@ public class InventoryUI extends UIElement {
         this.backpackUI = backpackUI;
     }
 
-    /**
-     * Enumerates the supported tab values.
-     */
-    public enum Tab {
-        INVENTORY,
-        CRAFTING,
-        BLOCKS,
-        TOOLS_ITEMS,
-        USABLES,
-        CROPS_SEEDS,
-        MATERIALS;
-
-        /**
-         * Checks whether this tab belongs to the creative inventory.
-         * @return {@code true} for creative category tabs
-         */
-        public boolean isCreative() {
-            return this != INVENTORY && this != CRAFTING;
-        }
-    }
 }

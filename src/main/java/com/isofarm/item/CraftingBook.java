@@ -81,13 +81,46 @@ public class CraftingBook extends Book implements Undroppable {
     }
 
     /**
-     * Groups recipes by result type and crafting tier, then sorts each group by name.
+     * Groups recipes as blocks, tools, usables, crafting materials and interactive
+     * blocks, in that order, then sorts each category by localized name.
      */
     public void sortByType() {
         recipeOrder = RecipeOrder.TYPE;
         reload();
     }
 
+    /**
+     * Returns the shared item ordering used by the crafting book and creative inventory.
+     * Supported categories are blocks, tools, usables, crafting materials and interactive
+     * blocks, in that order.
+     * @return the category-first item comparator
+     */
+    public static Comparator<Item> itemTypeComparator() {
+        return Comparator
+                .comparingInt(CraftingBook::itemTypeOrder)
+                .thenComparing(Item::getDisplayName, String.CASE_INSENSITIVE_ORDER);
+    }
+
+    /**
+     * Returns the ordering of the item type used by the crafting book and creative inventory.
+     * @param item the {@link Item} supplied as {@code item}
+     * @return {@link Integer} the item type order
+     */
+    private static int itemTypeOrder(Item item) {
+        return switch (item) {
+            case Block ignored -> 0;
+            case Tool ignored -> 1;
+            case Usable ignored -> 2;
+            case Material ignored -> 3;
+            case iBlock ignored -> 4;
+            case null, default -> 5;
+        };
+    }
+
+    /**
+     * Returns the comparator used to sort recipes.
+     * @return the {@link Comparator} used to sort recipes
+     */
     private Comparator<Recipe> recipeComparator() {
         Comparator<Recipe> byName = Comparator.comparing(
                 recipe -> recipe.result().getDisplayName(),
@@ -96,10 +129,7 @@ public class CraftingBook extends Book implements Undroppable {
             return byName;
         }
 
-        return Comparator
-                .comparing((Recipe recipe) -> recipe.result().getClass().getSimpleName())
-                .thenComparingInt(recipe -> recipe.tier().getId())
-                .thenComparing(byName);
+        return Comparator.comparing(Recipe::result, itemTypeComparator());
     }
 
     /**

@@ -63,6 +63,8 @@ public class ResourceManager {
     private static final Mesh destroyOverlayMesh = Mesh.createDestroyOverlayMesh();
     private static final Texture backgroundUI = new Texture(K.Paths.DEFAULT_BACKGROUND_UI);
     private static final Texture selectorUI = new Texture(K.Paths.DEFAULT_SELECTOR_UI);
+    private static final Texture scrollBar = new Texture(K.Paths.SCROLL_BAR);
+    private static final Texture scrollKnob = new Texture(K.Paths.SCROLL_KNOB);
     private static final TextureAtlas blocksAtlas;
 
     static {
@@ -224,6 +226,8 @@ public class ResourceManager {
 
         backgroundUI.dispose();
         selectorUI.dispose();
+        scrollBar.dispose();
+        scrollKnob.dispose();
         blocksAtlas.dispose();
 
         wheat.dispose();
@@ -377,6 +381,22 @@ public class ResourceManager {
      */
     public Texture getSelectorUI() {
         return selectorUI;
+    }
+
+    /**
+     * Returns the texture used as the scalable scroll-bar track.
+     * @return the {@link Texture} representing the scroll-bar track
+     */
+    public Texture getScrollBar() {
+        return scrollBar;
+    }
+
+    /**
+     * Returns the texture used by draggable scroll-bar knobs.
+     * @return the {@link Texture} representing the scroll-bar knob
+     */
+    public Texture getScrollKnob() {
+        return scrollKnob;
     }
 
     /**
