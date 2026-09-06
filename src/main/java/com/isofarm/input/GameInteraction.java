@@ -797,6 +797,9 @@ public class GameInteraction {
             int placeY = cell.y() + normalY;
             int placeZ = cell.z() + normalZ;
 
+            if (block.getType().isTorch()
+                    && normalY != 1 && normalX == 0 && normalZ == 0) return;
+
             BlockShape placedShape = block.getType().getShape();
             if (block.getType().isSlab() && placedShape.isVerticalSlab()) {
                 Vector3f playerPosition = player.getPosition();

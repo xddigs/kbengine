@@ -18,6 +18,9 @@ import com.isofarm.wrld.GameMaster;
 import org.joml.*;
 
 import java.lang.Math;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 
 import static org.lwjgl.opengl.GL11.*;
@@ -27,6 +30,8 @@ import static org.lwjgl.opengl.GL13.*;
  * Encapsulates the state and operations required by game renderer within the game runtime.
  */
 public class GameRenderer {
+    private static final int MAX_TORCH_LIGHTS = 32;
+    private static final float TORCH_LIGHT_RADIUS = 8.0f;
     public static final GameRenderer gamr = new GameRenderer();
     private final Matrix4f modelMatrix = new Matrix4f();
     private final Matrix4f viewProjMatrix = new Matrix4f();
@@ -36,6 +41,7 @@ public class GameRenderer {
     private float blurX;
     private float blurY;
     private float waterTime;
+    private final List<Vector3f> torchLights = new ArrayList<>();
 
     /**
      * Renders this object in the requested render pass.
@@ -46,6 +52,8 @@ public class GameRenderer {
         ShadowSystem.sys.render(gameMaster, chunkMeshes);
         waterTime += gameMaster.getGenDelta();
         CameraView camera = gameMaster.getActiveCamera();
+        collectTorchLights(gameMaster, camera);
+        PointShadowSystem.sys.render(gameMaster, chunkMeshes, torchLights);
         float windowWidth = gameMaster.getWindowWidth();
         float windowHeight = gameMaster.getWindowHeight();
         Framebuffer sceneFbo = gameMaster.getSceneFbo();
@@ -90,6 +98,9 @@ public class GameRenderer {
         defaultShader.setUniform("uAtlasScale", new Vector2f(1.0f, 1.0f));
         defaultShader.setUniform("uAtlasOffset", new Vector2f(0.0f, 0.0f));
         defaultShader.setUniform("uIsSprite", false);
+        defaultShader.setUniform("uIsTorch", false);
+        uploadTorchLights(defaultShader);
+        PointShadowSystem.sys.bind(defaultShader, 2);
 
         TextureAtlas blockAtlas = ResourceManager.rem.getBlocksAtlas();
         if (blockAtlas != null) {
@@ -227,6 +238,8 @@ public class GameRenderer {
         glEnable(GL_DEPTH_TEST);
 
         BlockPos hoveredCell = HoveredCell.get(gameMaster);
+
+        renderTorches(gameMaster, camera, defaultShader);
 
         defaultShader.setUniform("uIsWater", false);
         defaultShader.setUniform("uIsSubmergedEntity", false);
@@ -481,6 +494,64 @@ public class GameRenderer {
         boolean isSmartShift = GameInteraction.gami != null
                 && GameInteraction.gami.isSmartShiftActive();
         return isSmartShift ? new Vector3f(1.0f, 1.0f, 0.2f) : K.Colors.OUTLINE_DEFAULT;
+    }
+
+    /** Uploads the closest torch emitters so the world shader can light them. */
+    private void collectTorchLights(GameMaster gameMaster, CameraView camera) {
+        torchLights.clear();
+        Vector3f cameraPosition = camera.getPosition();
+        float searchDistance = TORCH_LIGHT_RADIUS * 3.0f;
+        gameMaster.getWorld().forEachTorch(torch -> {
+            Vector3f position = new Vector3f(torch.x() + 0.5f, torch.y() + 0.65f,
+                    torch.z() + 0.5f);
+            if (position.distanceSquared(cameraPosition) <= searchDistance * searchDistance) {
+                torchLights.add(position);
+            }
+        });
+        torchLights.sort(Comparator.comparingDouble(position -> position.distanceSquared(cameraPosition)));
+    }
+
+    /** Uploads the collected artificial lights to the material shader. */
+    private void uploadTorchLights(Shader shader) {
+        int lightCount = Math.min(torchLights.size(), MAX_TORCH_LIGHTS);
+        shader.setUniform("uTorchCount", lightCount);
+        for (int index = 0; index < lightCount; index++) {
+            shader.setUniform("uTorchPositions[" + index + "]", torchLights.get(index));
+        }
+    }
+
+    /** Renders every torch as an animated, camera-facing billboard. */
+    private void renderTorches(GameMaster gameMaster, CameraView camera, Shader shader) {
+        SpriteSheet torchFrames = ResourceManager.rem.getTorchIcons();
+        if (torchFrames == null) return;
+
+        shader.bind();
+        shader.setUniform("uIsWater", false);
+        shader.setUniform("uIsSubmergedEntity", false);
+        shader.setUniform("uIsSprite", true);
+        shader.setUniform("uIsTorch", true);
+        shader.setUniform("uUseTexture", true);
+        shader.setUniform("uUseFaceAtlas", false);
+        shader.setUniform("uUVBounds", torchFrames.getUVBounds(
+                (int) ((System.nanoTime() / 125_000_000L) % torchFrames.getTotalFrames())));
+
+        glActiveTexture(GL_TEXTURE0 + K.Render.PRIMARY_TEXTURE_UNIT);
+        torchFrames.bind();
+        glDisable(GL_CULL_FACE);
+        gameMaster.getWorld().forEachTorch(torch -> {
+            float centerX = torch.x() + 0.5f;
+            float centerZ = torch.z() + 0.5f;
+            float angle = (float) Math.atan2(camera.getPosition().x - centerX,
+                    camera.getPosition().z - centerZ);
+            modelMatrix.identity().translate(centerX, torch.y(), centerZ)
+                    .rotateY(angle).scale(0.45f, 0.8f, 0.45f);
+            shader.setUniform("uModel", modelMatrix);
+            ResourceManager.rem.getPlayerMesh().render();
+        });
+        glEnable(GL_CULL_FACE);
+        torchFrames.unbind();
+        shader.setUniform("uIsTorch", false);
+        shader.setUniform("uIsSprite", false);
     }
 
     /**

@@ -84,6 +84,8 @@ public final class K {
 
         public static final int ICON_BLOCK_COLS = 10;
         public static final int ICON_BLOCK_ROWS = 7;
+        public static final int TORCH_COLS = 4;
+
         public static final int ICON_TOOL_COLS = 5;
         public static final int ICON_TOOL_ROWS = 7;
         public static final int ICON_USABLES_COLS = 6;
@@ -154,6 +156,8 @@ public final class K {
 
         public static final String SHADOW_FRAG_SHADER = "shaders/shadow.frag";
         public static final String SHADOW_VERT_SHADER = "shaders/shadow.vert";
+        public static final String POINT_SHADOW_FRAG_SHADER = "shaders/point_shadow.frag";
+        public static final String POINT_SHADOW_VERT_SHADER = "shaders/point_shadow.vert";
 
         public static final String BLUR_VERT_SHADER = "shaders/blur.vert";
         public static final String BLUR_FRAG_SHADER = "shaders/blur.frag";
@@ -168,6 +172,7 @@ public final class K {
         public static final String CROP_ICONS = "assets/sprites/crops.png";
         public static final String TOOL_ICONS = "assets/sprites/tools.png";
         public static final String BLOCK_ICONS = "assets/sprites/blocks.png";
+        public static final String TORCH_ICONS = "assets/sprites/torch.png";
         public static final String MATERIAL_ICONS = "assets/sprites/materials.png";
         public static final String USABLES_ICONS = "assets/sprites/usables.png";
         public static final String INVENTORY_ICONS = "assets/sprites/inventory.png";

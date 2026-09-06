@@ -48,21 +48,21 @@ public enum BlockData implements Blockable {
     SPRUCE_PLANK_STAIRCASE((byte) 25, (byte) 6, (byte) 2, false, false, 80, "assets/textures/blocks/spruce_plank.png", SoundGroup.WOOD, 4.0f, false, new Object[]{}, Tier.WOODEN, false, true, false),
     SPRUCE_DOOR((byte) 26, (byte) 7, (byte) 2, 15, "assets/models/blocks/spruce_door.gltf", SoundGroup.DOOR, 2.0f, 2),
     SPRUCE_PLANK_FENCE((byte) 27, (byte) 8, (byte) 2, false, false, 100, "assets/textures/blocks/spruce_plank.png", SoundGroup.WOOD, 4.0f, false, new Object[]{}, Tier.WOODEN, false, false, true),
+    TORCH((byte) 28, (byte) 9, (byte) 2, false, false, 50, "assets/sprites/torch.png", SoundGroup.WOOD, 0.01f, false, new Object[]{}, Tier.WOODEN, false, false, false),
 
+    COPPER_ORE((byte) 29, (byte) 1, (byte) 4, false, false, 150, "assets/textures/blocks/copper_ore.png", SoundGroup.STONE, 6.0f, false, new MiningComponent[]{new MiningComponent(Tier.COPPER, MaterialID.RAW_ORE)}, Tier.COPPER),
+    IRON_ORE((byte) 30, (byte) 2, (byte) 4, false, false, 150, "assets/textures/blocks/iron_ore.png", SoundGroup.STONE, 8.0f, false, new MiningComponent[]{new MiningComponent(Tier.IRON, MaterialID.RAW_ORE)}, Tier.IRON),
+    STEEL_ORE((byte) 31, (byte) 3, (byte) 4, false, false, 200, "assets/textures/blocks/steel_ore.png", SoundGroup.STONE, 10.0f, false,new MiningComponent[]{new MiningComponent(Tier.STEEL, MaterialID.RAW_ORE)}, Tier.STEEL),
+    GOLD_ORE((byte) 32, (byte) 4, (byte) 4, false, false, 500, "assets/textures/blocks/gold_ore.png", SoundGroup.STONE, 12.0f, false, new MiningComponent[]{new MiningComponent(Tier.GOLDEN, MaterialID.RAW_ORE)}, Tier.GOLDEN),
+    PLATINUM_ORE((byte) 33, (byte) 5, (byte) 4, false, false, 800, "assets/textures/blocks/platinum_ore.png", SoundGroup.STONE, 14.0f, false, new MiningComponent[]{new MiningComponent(Tier.PLATINUM, MaterialID.RAW_ORE)}, Tier.PLATINUM),
+    DIAMOND_ORE((byte) 34, (byte) 6, (byte) 4, false, false, 1000, "assets/textures/blocks/diamond_ore.png", SoundGroup.STONE, 16.0f, false, new MiningComponent[]{new MiningComponent(Tier.DIAMOND, MaterialID.RAW_ORE)}, Tier.DIAMOND),
+    SAND((byte) 35, (byte) 7, (byte) 4, false, false, 100, "assets/textures/blocks/sand.png", SoundGroup.SOIL, 0.7f, false, new Object[]{}, Tier.NONE),
+    GRAVEL((byte) 36, (byte) 8, (byte) 4, false, false, 100, "assets/textures/blocks/gravel.png", SoundGroup.SOIL, 0.9f, false, new Object[]{}, Tier.NONE),
+    FOSSIL((byte) 37, (byte) 9, (byte) 4, false, false, 100, "assets/textures/blocks/fossil.png", SoundGroup.STONE, 8.0f, false, new Object[]{}, Tier.NONE),
+    OBSIDIAN((byte) 38,(byte) 10,(byte) 4, false,  false, 100, "assets/textures/blocks/obsidian.png", SoundGroup.STONE, 48.0f, false, new Object[]{}, Tier.NONE),
 
-    COPPER_ORE((byte) 28, (byte) 1, (byte) 4, false, false, 150, "assets/textures/blocks/copper_ore.png", SoundGroup.STONE, 6.0f, false, new MiningComponent[]{new MiningComponent(Tier.COPPER, MaterialID.RAW_ORE)}, Tier.COPPER),
-    IRON_ORE((byte) 29, (byte) 2, (byte) 4, false, false, 150, "assets/textures/blocks/iron_ore.png", SoundGroup.STONE, 8.0f, false, new MiningComponent[]{new MiningComponent(Tier.IRON, MaterialID.RAW_ORE)}, Tier.IRON),
-    STEEL_ORE((byte) 30, (byte) 3, (byte) 4, false, false, 200, "assets/textures/blocks/steel_ore.png", SoundGroup.STONE, 10.0f, false,new MiningComponent[]{new MiningComponent(Tier.STEEL, MaterialID.RAW_ORE)}, Tier.STEEL),
-    GOLD_ORE((byte) 31, (byte) 4, (byte) 4, false, false, 500, "assets/textures/blocks/gold_ore.png", SoundGroup.STONE, 12.0f, false, new MiningComponent[]{new MiningComponent(Tier.GOLDEN, MaterialID.RAW_ORE)}, Tier.GOLDEN),
-    PLATINUM_ORE((byte) 32, (byte) 5, (byte) 4, false, false, 800, "assets/textures/blocks/platinum_ore.png", SoundGroup.STONE, 14.0f, false, new MiningComponent[]{new MiningComponent(Tier.PLATINUM, MaterialID.RAW_ORE)}, Tier.PLATINUM),
-    DIAMOND_ORE((byte) 33, (byte) 6, (byte) 4, false, false, 1000, "assets/textures/blocks/diamond_ore.png", SoundGroup.STONE, 16.0f, false, new MiningComponent[]{new MiningComponent(Tier.DIAMOND, MaterialID.RAW_ORE)}, Tier.DIAMOND),
-    SAND((byte) 34, (byte) 7, (byte) 4, false, false, 100, "assets/textures/blocks/sand.png", SoundGroup.SOIL, 0.7f, false, new Object[]{}, Tier.NONE),
-    GRAVEL((byte) 35, (byte) 8, (byte) 4, false, false, 100, "assets/textures/blocks/gravel.png", SoundGroup.SOIL, 0.9f, false, new Object[]{}, Tier.NONE),
-    FOSSIL((byte) 36, (byte) 9, (byte) 4, false, false, 100, "assets/textures/blocks/fossil.png", SoundGroup.STONE, 8.0f, false, new Object[]{}, Tier.NONE),
-    OBSIDIAN((byte) 37,(byte) 10,(byte) 4, false,  false, 100, "assets/textures/blocks/obsidian.png", SoundGroup.STONE, 48.0f, false, new Object[]{}, Tier.NONE),
-
-    OAK_BONSAI((byte) 38, (byte) 1, (byte) (K.UI.ICON_BLOCK_ROWS - 2), false, true, 100, "assets/textures/blocks/oak_bonsai.png", SoundGroup.SOIL, 0.01f, true, new Object[]{}, Tier.NONE),
-    SPRUCE_BONSAI((byte) 39, (byte) 2, (byte) (K.UI.ICON_BLOCK_ROWS - 2), false, true, 100, "assets/textures/blocks/spruce_bonsai.png", SoundGroup.SOIL, 0.01f, true, new Object[]{}, Tier.NONE),
+    OAK_BONSAI((byte) 39, (byte) 1, (byte) (K.UI.ICON_BLOCK_ROWS - 2), false, true, 100, "assets/textures/blocks/oak_bonsai.png", SoundGroup.SOIL, 0.01f, true, new Object[]{}, Tier.NONE),
+    SPRUCE_BONSAI((byte) 40, (byte) 2, (byte) (K.UI.ICON_BLOCK_ROWS - 2), false, true, 100, "assets/textures/blocks/spruce_bonsai.png", SoundGroup.SOIL, 0.01f, true, new Object[]{}, Tier.NONE),
 
     TALL_GRASS((byte) 50, (byte) 1, (byte) (K.UI.ICON_BLOCK_ROWS - 1), false, true, 5, "assets/textures/blocks/tall_grass.png", SoundGroup.SOIL, 0.01f, true, new Object[]{new Seed(CropType.WHEAT)}, Tier.NONE),
     ROSE((byte) 51, (byte) 2, (byte) (K.UI.ICON_BLOCK_ROWS - 1), false, true, 10, "assets/textures/blocks/rose.png", SoundGroup.SOIL, 0.01f, true, new Object[]{}, Tier.NONE),
@@ -534,8 +534,11 @@ public enum BlockData implements Blockable {
      * @return {@code true} if solid; otherwise {@code false}
      */
     public boolean isSolid() {
-        return this != AIR && !isInteractive && !isPlant && !isFluid();
+        return this != AIR && this != TORCH && !isInteractive && !isPlant && !isFluid();
     }
+
+    /** Returns whether this block is rendered as an animated torch billboard. */
+    public boolean isTorch() { return this == TORCH; }
 
     /**
      * Checks whether the fluid condition is met.

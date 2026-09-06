@@ -543,6 +543,7 @@ public class GameMaster {
 
         rainEngine.dispose();
         shadowMap.dispose();
+        PointShadowSystem.sys.dispose();
 
         cameraController.release(this);
         SoundService.fx.cleanup();

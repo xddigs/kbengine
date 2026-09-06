@@ -22,6 +22,14 @@ uniform float uLightIntensity;
 uniform vec3 uLightDirection;
 uniform float uAmbientIntensity;
 
+const int MAX_TORCH_LIGHTS = 32;
+uniform int uTorchCount;
+uniform vec3 uTorchPositions[MAX_TORCH_LIGHTS];
+uniform bool uIsTorch;
+uniform int uShadowedTorchCount;
+uniform samplerCube uTorchShadowMaps[4];
+uniform float uTorchShadowFarPlane;
+
 uniform bool uIsMaskPass;
 uniform float uParticleAlpha;
 uniform bool uEnableShadows;
@@ -57,6 +65,13 @@ float calculateShadow(vec4 lightSpacePosition, vec3 normal) {
         }
     }
     return shadow / 9.0;
+}
+
+float torchShadowDepth(int index, vec3 lightToFragment) {
+    if (index == 0) return texture(uTorchShadowMaps[0], lightToFragment).r;
+    if (index == 1) return texture(uTorchShadowMaps[1], lightToFragment).r;
+    if (index == 2) return texture(uTorchShadowMaps[2], lightToFragment).r;
+    return texture(uTorchShadowMaps[3], lightToFragment).r;
 }
 
 void main() {
@@ -102,7 +117,21 @@ void main() {
 
     vec3 ambient = uSkyColor * uAmbientIntensity;
     vec3 directLight = uSunColor * diffuse * uLightIntensity * (1.0 - shadow);
-    vec3 totalLight = ambient + directLight;
+    vec3 torchLight = vec3(0.0);
+    for (int i = 0; i < uTorchCount; i++) {
+        float distanceToTorch = distance(vFragPos, uTorchPositions[i]);
+        float attenuation = max(0.0, 1.0 - distanceToTorch / 8.0);
+        float pointShadow = 0.0;
+        if (i < uShadowedTorchCount && distanceToTorch > 0.12) {
+            vec3 lightToFragment = vFragPos - uTorchPositions[i];
+            float closestDepth = torchShadowDepth(i, lightToFragment)
+                    * uTorchShadowFarPlane;
+            pointShadow = distanceToTorch - 0.08 > closestDepth ? 1.0 : 0.0;
+        }
+        torchLight += vec3(1.0, 0.62, 0.24) * attenuation * attenuation * (1.0 - pointShadow);
+    }
+    vec3 totalLight = ambient + directLight + torchLight;
+    if (uIsTorch) totalLight = max(totalLight, vec3(1.0, 0.62, 0.24));
     float alpha = texColor.a * uParticleAlpha;
     vec3 finalColor = texColor.rgb * totalLight;
 
