@@ -82,21 +82,20 @@ public class CraftingBook extends Book implements Undroppable {
                         } else {
                             CraftingService.cs.craft(recipe);
                         }
-                    }, tooltip)
-                    .setFavorite(recipe.isFavorite());
+                    }, tooltip).setFavorite(recipe.isFavorite());
             lineCount++;
         }
     }
 
     /**
-     * Reloads recipes in their canonical ID/type order.
+     * Reloads recipes in the shared creative-inventory order.
      */
     public void sortByName() {
         reload();
     }
 
     /**
-     * Reloads recipes in their canonical ID/type order.
+     * Reloads recipes in the shared creative-inventory order.
      */
     public void sortByType() {
         reload();
@@ -134,8 +133,7 @@ public class CraftingBook extends Book implements Undroppable {
      * @return the {@link Comparator} used to sort recipes
      */
     private Comparator<Recipe> recipeComparator() {
-        return Comparator.comparingInt((Recipe recipe) -> recipe.result().getId())
-                .thenComparing(recipe -> recipe.result().getClass().getSimpleName());
+        return Comparator.comparing(Recipe::result, Inventory.sorter());
     }
 
     /**

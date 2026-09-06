@@ -7,7 +7,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Immutable value object containing recipe.
+ * The object representing a recipe, a group of ingredients
+ * that can be used to craft an item.
  */
 public final class Recipe {
     private final Item result;
@@ -15,10 +16,23 @@ public final class Recipe {
     private final List<Ingredient> ingredients;
     private boolean isFavorite;
 
+    /**
+     * Creates a new {@code Recipe} instance.
+     * @param result the {@link Item} supplied as {@code result}
+     * @param resultAmount the {@code int} supplied as {@code resultAmount}
+     * @param ingredients the {@link List} of {@link Ingredient} values supplied as {@code ingredients}
+     */
     public Recipe(Item result, int resultAmount, List<Ingredient> ingredients) {
         this(result, resultAmount, ingredients, false);
     }
 
+    /**
+     * Creates a new {@code Recipe} instance.
+     * @param result the {@link Item} supplied as {@code result}
+     * @param resultAmount the {@code int} supplied as {@code resultAmount}
+     * @param ingredients the {@link List} of {@link Ingredient} values supplied as {@code ingredients}
+     * @param isFavorite the {@code boolean} supplied as {@code isFavorite}
+     */
     public Recipe(Item result, int resultAmount, List<Ingredient> ingredients, boolean isFavorite) {
         this.result = result;
         this.resultAmount = resultAmount;
