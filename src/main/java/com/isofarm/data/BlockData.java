@@ -314,6 +314,7 @@ public enum BlockData implements Blockable {
         for (BlockData block : values()) {
             if (block.isPlant) result.add(block);
         }
+
         return result.toArray(new BlockData[0]);
     }
 
