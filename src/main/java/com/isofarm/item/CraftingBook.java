@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
  */
 public class CraftingBook extends Book implements Undroppable {
     private static final int LINES_PER_PAGE = 16;
+    private Inventory.SortOrder recipeOrder = Inventory.SortOrder.CREATIVE;
     private boolean areOnlyCraftableRecipes;
     private boolean areOnlyFavoriteRecipes;
 
@@ -88,16 +89,18 @@ public class CraftingBook extends Book implements Undroppable {
     }
 
     /**
-     * Reloads recipes in the shared creative-inventory order.
+     * Sorts recipes alphabetically by their localized result name.
      */
     public void sortByName() {
+        recipeOrder = Inventory.SortOrder.NAME;
         reload();
     }
 
     /**
-     * Reloads recipes in the shared creative-inventory order.
+     * Sorts recipes by their shared item type order.
      */
     public void sortByType() {
+        recipeOrder = Inventory.SortOrder.TYPE;
         reload();
     }
 
@@ -133,7 +136,7 @@ public class CraftingBook extends Book implements Undroppable {
      * @return the {@link Comparator} used to sort recipes
      */
     private Comparator<Recipe> recipeComparator() {
-        return Comparator.comparing(Recipe::result, Inventory.sorter());
+        return Comparator.comparing(Recipe::result, Inventory.sorter(recipeOrder));
     }
 
     /**
