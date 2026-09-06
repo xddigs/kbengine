@@ -27,7 +27,7 @@ public class BookUI extends UIElement {
     private static final int TOTAL_ANIM_FRAMES = 16;
     private static final int GRID_COLUMNS = 4;
     private static final int GRID_ROWS = 4;
-    private static final float GRID_ICON_SIZE = 48.0f;
+    private static final float GRID_ICON_SIZE = Settings.getScaledSlot();
     private static final float GRID_GAP = 16.0f;
     private static final float GRID_OUTLINE_SIZE = 3.0f;
     private static final float PAGE_CONTENT_CURVE = 18.0f;
