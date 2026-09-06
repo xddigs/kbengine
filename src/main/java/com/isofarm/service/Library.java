@@ -77,6 +77,7 @@ public class Library implements Service<GameMaster> {
         if (item instanceof Tool tool && tool.getTier() != null && tool.getTier() != Tier.NONE) {
             rawName = tool.getTier().getName() + " " + rawName;
         }
+
         itemR.register(getFormattedName(rawName), supplier);
     }
 
