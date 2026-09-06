@@ -21,7 +21,6 @@ public class UIButton extends UIElement {
     private int spriteFrame;
     private Runnable onClick;
     private boolean canDrawBackground = true;
-    private float iconScale = -1.0f;
 
     private Vector4f normalColor = new Vector4f(1.0f);
     private Vector4f hoverColor = new Vector4f(0.25f, 0.25f, 0.25f, 1.0f);
@@ -79,9 +78,8 @@ public class UIButton extends UIElement {
         }
 
         if (spriteSheet != null) {
-            float effectiveIconScale = iconScale > 0.0f ? iconScale
-                    : (canDrawBackground ? ICON_SCALE : BACKGROUNDLESS_ICON_SCALE);
-            float size = Math.min(getAbsoluteWidth(), getAbsoluteHeight()) * effectiveIconScale;
+            float iconScale = canDrawBackground ? ICON_SCALE : BACKGROUNDLESS_ICON_SCALE;
+            float size = Math.min(getAbsoluteWidth(), getAbsoluteHeight()) * iconScale;
             float x = getAbsoluteX() + (getAbsoluteWidth() - size) * 0.5f;
             float y = getAbsoluteY() + (getAbsoluteHeight() - size) * 0.5f;
 
@@ -116,16 +114,6 @@ public class UIButton extends UIElement {
      */
     public void setSpriteSheet(SpriteSheet spriteSheet) {
         this.spriteSheet = spriteSheet;
-    }
-
-    /**
-     * Overrides the proportion of the button occupied by its icon.
-     * @param iconScale the icon scale relative to the smallest button dimension
-     * @return this button
-     */
-    public UIButton setIconScale(float iconScale) {
-        this.iconScale = Math.max(0.0f, iconScale);
-        return this;
     }
 
     /**

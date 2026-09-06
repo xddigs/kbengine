@@ -13,6 +13,7 @@ import com.isofarm.item.Item;
 import com.isofarm.item.Page;
 import com.isofarm.service.BookService;
 import com.isofarm.utils.K;
+import com.isofarm.utils.Settings;
 import org.joml.Vector4f;
 import org.lwjgl.stb.STBTTBakedChar;
 
@@ -33,7 +34,7 @@ public class BookUI extends UIElement {
     private static final float PAGE_STATIC_CONTENT_HIDE_PROGRESS = 0.99f;
     private static final float BASE_CONTENT_HEIGHT_OFFSET = 0.15f;
     private static final float MOUSE_OFFSET = 32.0f;
-    private static final float BUTTON_SIZE = 48.0f;
+    private static final float BUTTON_SIZE = Settings.getScaledSlot();
     private static final float BUTTON_GAP = 10.0f;
     private static final float BUTTON_TOP_PADDING = 44.0f;
 
