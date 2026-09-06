@@ -1,28 +1,25 @@
 package com.isofarm.craft;
 
 import com.isofarm.data.MaterialID;
-import com.isofarm.data.Tier;
 import com.isofarm.item.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 /**
  * Immutable value object containing recipe.
  */
-public record Recipe(Tier tier, Item result, int resultAmount, List<Ingredient> ingredients) {
+public record Recipe(Item result, int resultAmount, List<Ingredient> ingredients) {
 
     /**
      * Creates or returns of from the supplied arguments.
-     * @param tier the {@link Tier} supplied as {@code tier}
      * @param result the {@link Item} supplied as {@code result}
      * @param resultAmount the {@code int} supplied as {@code resultAmount}
      * @param ingredients an array of {@link Ingredient} values supplied as {@code ingredients}
      * @return the {@link Recipe} representing the of result
      */
-    public static Recipe of(Tier tier, Item result, int resultAmount, Ingredient... ingredients) {
-        return new Recipe(tier, result, resultAmount, List.of(ingredients));
+    public static Recipe of(Item result, int resultAmount, Ingredient... ingredients) {
+        return new Recipe(result, resultAmount, List.of(ingredients));
     }
 
     /**
@@ -92,20 +89,6 @@ public record Recipe(Tier tier, Item result, int resultAmount, List<Ingredient> 
             default -> a.getId() == b.getId();
         };
 
-    }
-
-    /**
-     * Produces the textual or converted representation for to book lines.
-     * @return the {@link List} representing the to book lines result
-     */
-    public List<String> toBookLines() {
-        List<String> lines = new ArrayList<>();
-        lines.add("**" + result.getDisplayName());
-        for (Ingredient ingredient : ingredients) {
-            lines.add(ingredient.craftable().getDisplayName() + " x " + ingredient.amount());
-        }
-        lines.add("-");
-        return lines;
     }
 
     /**

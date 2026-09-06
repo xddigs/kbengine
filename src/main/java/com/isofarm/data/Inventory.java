@@ -2,9 +2,11 @@ package com.isofarm.data;
 
 import com.isofarm.item.*;
 import com.isofarm.service.SoundService;
+import com.isofarm.ui.InventoryUI;
 import com.isofarm.utils.K;
 
 import java.util.*;
+import java.util.function.ToIntFunction;
 
 /**
  * Encapsulates the state and operations required by inventory within the game runtime.
@@ -309,6 +311,35 @@ public class Inventory {
                 remaining -= amount;
             }
         }
+    }
+
+    /**
+     * Returns the creative catalog ordering by item category, numeric id and
+     * localized name, in that order.
+     * @return the creative item comparator
+     */
+    public Comparator<Item> sorter() {
+        return Comparator
+                .comparingInt(Inventory::sortByOrder)
+                .thenComparingInt(Item::getId)
+                .thenComparing(Item::getDisplayName,
+                        String.CASE_INSENSITIVE_ORDER);
+    }
+
+    /**
+     * Returns the category position used by the creative catalog.
+     * @param item the item to classify
+     * @return the item category position
+     */
+    public static int sortByOrder(Item item) {
+        return switch (item) {
+            case Block ignored -> 0;
+            case iBlock ignored -> 1;
+            case Tool ignored -> 2;
+            case Usable ignored -> 3;
+            case Material ignored -> 4;
+            case null, default -> 5;
+        };
     }
 
     /**

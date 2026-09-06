@@ -13,6 +13,12 @@ public enum BlockShape {
     VERTICAL_SLAB_EAST(new Box(0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f)),
     VERTICAL_SLAB_NORTH(new Box(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.5f)),
     VERTICAL_SLAB_SOUTH(new Box(0.0f, 0.0f, 0.5f, 1.0f, 1.0f, 1.0f)),
+
+    STAIRCASE_WEST(new Box(0.0f, 0.0f, 0.0f, 1.0f, 0.5f, 1.0f), new Box(0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 1.0f)),
+    STAIRCASE_EAST(new Box(0.0f, 0.0f, 0.0f, 1.0f, 0.5f, 1.0f), new Box(0.0f, 0.5f, 0.0f, 0.5f, 1.0f, 1.0f)),
+    STAIRCASE_NORTH(new Box(0.0f, 0.0f, 0.0f, 1.0f, 0.5f, 1.0f), new Box(0.0f, 0.5f, 0.5f, 1.0f, 1.0f, 1.0f)),
+    STAIRCASE_SOUTH(new Box(0.0f, 0.0f, 0.0f, 1.0f, 0.5f, 1.0f), new Box(0.0f, 0.5f, 0.0f, 1.0f, 1.0f, 0.5f)),
+
     FENCE_NONE(0),
     FENCE_N(1), FENCE_S(2), FENCE_NS(3),
     FENCE_W(4), FENCE_NW(5), FENCE_SW(6), FENCE_NSW(7),
@@ -67,6 +73,11 @@ public enum BlockShape {
         return ordinal() >= FENCE_NONE.ordinal();
     }
 
+    public boolean isStaircase() {
+        return this == STAIRCASE_WEST || this == STAIRCASE_EAST
+                || this == STAIRCASE_NORTH || this == STAIRCASE_SOUTH;
+    }
+
     public static BlockShape fence(int mask) {
         return switch (mask & 15) {
             case 1 -> FENCE_N; case 2 -> FENCE_S; case 3 -> FENCE_NS;
@@ -78,7 +89,6 @@ public enum BlockShape {
         };
     }
 
-    /** Chooses the half-cell closest to the supplied world-space point. */
     public static BlockShape verticalSlabFacing(float pointX, float pointZ,
                                                 int blockX, int blockZ) {
         float offsetX = pointX - (blockX + 0.5f);
@@ -89,13 +99,22 @@ public enum BlockShape {
         return offsetZ < 0.0f ? VERTICAL_SLAB_NORTH : VERTICAL_SLAB_SOUTH;
     }
 
+    public static BlockShape staircaseFacing(float pointX, float pointZ,
+                                             int blockX, int blockZ) {
+        float offsetX = pointX - (blockX + 0.5f);
+        float offsetZ = pointZ - (blockZ + 0.5f);
+        if (Math.abs(offsetX) > Math.abs(offsetZ)) {
+            return offsetX < 0.0f ? STAIRCASE_WEST : STAIRCASE_EAST;
+        }
+        return offsetZ < 0.0f ? STAIRCASE_NORTH : STAIRCASE_SOUTH;
+    }
+
     public float getTop() {
         float top = 0.0f;
         for (Box box : boxes) top = Math.max(top, box.maxY());
         return top;
     }
 
-    /** Returns the top occupied height at a local horizontal point, or zero. */
     public float getTopAt(float localX, float localZ) {
         float top = 0.0f;
         for (Box box : boxes) {
@@ -131,6 +150,7 @@ public enum BlockShape {
         }
         return closest;
     }
+
 
     private static RayHit raycastBox(Vector3f origin, Vector3f direction, Box box,
                                      int blockX, int blockY, int blockZ) {
@@ -169,8 +189,24 @@ public enum BlockShape {
         return new RayHit(Math.max(near, 0.0f), normalX, normalY, normalZ);
     }
 
+    /**
+     * The Box object which represents the block
+     * @param minX {@link Float} supplied as {@code minX}
+     * @param minY {@link Float} supplied as {@code minY}
+     * @param minZ {@link Float} supplied as {@code minZ}
+     * @param maxX {@link Float} supplied as {@code maxX}
+     * @param maxY {@link Float} supplied as {@code maxY}
+     * @param maxZ {@link Float} supplied as {@code maxZ}
+     */
     public record Box(float minX, float minY, float minZ,
                       float maxX, float maxY, float maxZ) { }
 
+    /**
+     * The collision ray with an object, raycasting
+     * @param distance {@link Float} supplied as {@code distance}
+     * @param normalX {@link Integer} supplied as {@code normalX}
+     * @param normalY {@link Integer} supplied as {@code normalY}
+     * @param normalZ {@link Integer} supplied as {@code normalZ}
+     */
     public record RayHit(float distance, int normalX, int normalY, int normalZ) { }
 }

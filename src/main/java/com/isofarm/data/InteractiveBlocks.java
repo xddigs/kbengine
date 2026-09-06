@@ -10,8 +10,9 @@ import java.util.Locale;
 @DataClass
 public enum InteractiveBlocks implements Blockable {
     EMPTY(null, null, (byte) 0, (byte) -1, (byte) -1, -1, 0.0f, 0),
-    CHEST("assets/models/blocks/chest.gltf", SoundGroup.CHEST, (byte) 1, (byte) 7, (byte) 1, 10, 2.5f, 1),
-    OAK_DOOR("assets/models/blocks/oak_door.gltf", SoundGroup.DOOR, (byte) 2, (byte) 5, (byte) 1, 15, 2.0f, 2);
+    CHEST("assets/models/blocks/chest.gltf", SoundGroup.CHEST, (byte) 1, (byte) 8, (byte) 1, 10, 2.5f, 1),
+    OAK_DOOR("assets/models/blocks/oak_door.gltf", SoundGroup.DOOR, (byte) 2, (byte) 6, (byte) 1, 15, 2.0f, 2),
+    SPRUCE_DOOR("assets/models/blocks/spruce_door.gltf", SoundGroup.DOOR, (byte) 2, (byte) 6, (byte) 2, 15, 2.0f, 2);
 
     private final String modelPath;
     private final SoundGroup soundGroup;
@@ -32,6 +33,19 @@ public enum InteractiveBlocks implements Blockable {
         this.value = value;
         this.destroyTime = destroyTime;
         this.height = height;
+    }
+
+    /**
+     * Returns the matching {@link InteractiveBlocks} {@code primaryMat} with the corresponding door
+     * @param primaryMat {@link BlockData} supplied as {@code primary material}
+     * @return {@link InteractiveBlocks} the matching door
+     */
+    public static InteractiveBlocks toDoor(BlockData primaryMat) {
+        return switch (primaryMat) {
+            case OAK_PLANK -> OAK_DOOR;
+            case SPRUCE_PLANK -> SPRUCE_DOOR;
+            default -> throw new IllegalStateException("Unknown BlockData " + primaryMat);
+        };
     }
 
     /**

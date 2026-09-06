@@ -23,6 +23,7 @@ import java.util.*;
  * Encapsulates the state and operations required by inventory ui within the game runtime.
  */
 @SuppressWarnings("all")
+@GodObject
 public class InventoryUI extends UIElement {
     private static final int BACKPACK_COLUMNS = 4;
     private static final int BACKPACK_ROWS = 4;
@@ -614,40 +615,12 @@ public class InventoryUI extends UIElement {
             creativeItems.add(new MiningComponent(tier, MaterialID.RAW_ORE));
             creativeItems.add(new MiningComponent(tier, MaterialID.INGOT));
         });
-        creativeItems.sort(creativeSorter());
+
+        creativeItems.sort(inventory.sorter());
         int totalRows = Math.ceilDiv(creativeItems.size(), K.UI.INVENTORY_COLUMNS);
         creativeScrollBar.setMaximum(Math.max(0,
                 totalRows - K.UI.INVENTORY_ROWS));
         creativeScrollBar.setValue(0);
-    }
-
-    /**
-     * Returns the creative catalog ordering by item category, numeric id and
-     * localized name, in that order.
-     * @return the creative item comparator
-     */
-    private Comparator<Item> creativeSorter() {
-        return Comparator
-                .comparingInt(InventoryUI::creativeItemTypeOrder)
-                .thenComparingInt(Item::getId)
-                .thenComparing(Item::getDisplayName,
-                        String.CASE_INSENSITIVE_ORDER);
-    }
-
-    /**
-     * Returns the category position used by the creative catalog.
-     * @param item the item to classify
-     * @return the item category position
-     */
-    private static int creativeItemTypeOrder(Item item) {
-        return switch (item) {
-            case Block ignored -> 0;
-            case Tool ignored -> 1;
-            case Usable ignored -> 2;
-            case Material ignored -> 3;
-            case iBlock ignored -> 4;
-            case null, default -> 5;
-        };
     }
 
     /**
