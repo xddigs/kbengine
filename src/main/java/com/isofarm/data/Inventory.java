@@ -2,11 +2,9 @@ package com.isofarm.data;
 
 import com.isofarm.item.*;
 import com.isofarm.service.SoundService;
-import com.isofarm.ui.InventoryUI;
 import com.isofarm.utils.K;
 
 import java.util.*;
-import java.util.function.ToIntFunction;
 
 /**
  * Encapsulates the state and operations required by inventory within the game runtime.

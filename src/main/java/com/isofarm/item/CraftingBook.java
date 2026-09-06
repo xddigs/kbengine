@@ -120,10 +120,10 @@ public class CraftingBook extends Book implements Undroppable {
     private static int itemTypeOrder(Item item) {
         return switch (item) {
             case Block ignored -> 0;
-            case Tool ignored -> 1;
-            case Usable ignored -> 2;
-            case Material ignored -> 3;
-            case iBlock ignored -> 4;
+            case iBlock ignored -> 1;
+            case Tool ignored -> 2;
+            case Usable ignored -> 3;
+            case Material ignored -> 4;
             case null, default -> 5;
         };
     }
