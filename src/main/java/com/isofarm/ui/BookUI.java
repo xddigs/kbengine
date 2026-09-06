@@ -87,7 +87,8 @@ public class BookUI extends UIElement {
 
     private void layoutButtons(float bookWidth) {
         float totalWidth = BUTTON_SIZE * 3.0f + BUTTON_GAP * 2.0f;
-        float startX = bookWidth - K.UI.UI_BOOK_PADDING_X - totalWidth;
+        float extraOffset = 10.0f;
+        float startX = bookWidth - K.UI.UI_BOOK_PADDING_X - totalWidth - extraOffset;
         sortNameButton.setPosition(startX, BUTTON_TOP_PADDING);
         sortTypeButton.setPosition(startX + BUTTON_SIZE + BUTTON_GAP, BUTTON_TOP_PADDING);
         homeCraftingsButton.setPosition(startX + (BUTTON_SIZE + BUTTON_GAP) * 2.0f, BUTTON_TOP_PADDING);
@@ -387,21 +388,16 @@ public class BookUI extends UIElement {
 
     private void updateButtonState() {
         Book openedBook = BookService.bs.getOpenedBook();
-        boolean hasRightPage = openedBook != null
-                && openedBook.getCurrentPage() + 1 < openedBook.getPages().size();
-        boolean buttonsCanRender = hasRightPage || isFlippingPage;
-        boolean bookIsReady = isOpen() && !isFlippingPage && hasRightPage;
+        boolean bookIsReady = isOpen() && !isFlippingPage;
         boolean isCraftingBook = openedBook instanceof CraftingBook;
-        setButtonState(sortNameButton, buttonsCanRender && isCraftingBook,
-                bookIsReady && isCraftingBook);
-        setButtonState(sortTypeButton, buttonsCanRender && isCraftingBook,
-                bookIsReady && isCraftingBook);
-        // Filtering must remain available even when the filtered result fits on one page.
+        // Recipe controls stay visible even when no recipe currently matches the filter.
+        setButtonState(sortNameButton, isCraftingBook, bookIsReady && isCraftingBook);
+        setButtonState(sortTypeButton, isCraftingBook, bookIsReady && isCraftingBook);
         setButtonState(homeCraftingsButton, isCraftingBook,
                 isOpen() && !isFlippingPage && isCraftingBook);
         homeCraftingsButton.setSpriteColumn(isCraftingBook
                 && ((CraftingBook) openedBook).isShowingOnlyCraftableRecipes() ? 1 : 0);
-        setButtonState(closeButton, buttonsCanRender, bookIsReady);
+        setButtonState(closeButton, openedBook != null, bookIsReady);
     }
 
     /**
