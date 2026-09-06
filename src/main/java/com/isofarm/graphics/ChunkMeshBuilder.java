@@ -606,12 +606,12 @@ public class ChunkMeshBuilder {
         if (neighborData == null) return true;
 
         if (currentBlock.isFluid()) {
-            return (!neighborData.isSolid() || !neighborData.isFullCube())
+            return (!neighborData.isSolid() || neighborData.isFullCube())
                     && neighborData != currentBlock;
         }
 
         if (neighborData.isFluid()) return true;
-        if (!neighborData.isFullCube()) return true;
+        if (neighborData.isFullCube()) return true;
         return neighborData.isTransparent() && neighborData != currentBlock;
     }
 

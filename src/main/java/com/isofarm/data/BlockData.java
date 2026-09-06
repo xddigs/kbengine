@@ -26,7 +26,7 @@ public enum BlockData implements Blockable {
     STONE_SLAB((byte) 5, (byte) 5, (byte) 0, false, false, 100, "assets/textures/blocks/stone.png", SoundGroup.STONE, 6.0f, false, new Object[]{}, Tier.NONE, true, false, false),
     STONE_VERTICAL_SLAB((byte) 6, (byte) 6, (byte) 0, false, false, 100, "assets/textures/blocks/stone.png", SoundGroup.STONE, 6.0f, false, new Object[]{}, Tier.NONE, true, false, false),
     STONE_STAIRCASE((byte) 7, (byte) 7, (byte) 0, false, false, 100, "assets/textures/blocks/stone.png", SoundGroup.STONE, 6.0f, false, new Object[]{}, Tier.NONE, false, true, false),
-    VOIDSTONE((byte) 8, (byte) 8, (byte) 0, false, false, 999, "assets/textures/blocks/voidstone.png", SoundGroup.STONE, 999999.0f, false, new Object[]{}, Tier.NONE),
+    COBBLESTONE((byte) 8, (byte) 8, (byte) 0, false, false, 50, "assets/textures/blocks/cobblestone.png", SoundGroup.STONE, 4.0f, false, new Object[]{}, Tier.NONE),
     SNOW((byte) 9, (byte) 9, (byte) 0, false, false, 120, "assets/textures/blocks/snow.png", SoundGroup.SNOW, 0.8f, false, new Object[]{}, Tier.NONE),
     GLASS((byte) 10, (byte) 10, (byte) 0, false, false, 200, "assets/textures/blocks/glass.png", SoundGroup.GLASS, 1.2f, true, new Object[]{}, Tier.NONE),
 
@@ -48,7 +48,7 @@ public enum BlockData implements Blockable {
     SPRUCE_PLANK_STAIRCASE((byte) 25, (byte) 6, (byte) 2, false, false, 80, "assets/textures/blocks/spruce_plank.png", SoundGroup.WOOD, 4.0f, false, new Object[]{}, Tier.WOODEN, false, true, false),
     SPRUCE_DOOR((byte) 26, (byte) 7, (byte) 2, 15, "assets/models/blocks/spruce_door.gltf", SoundGroup.DOOR, 2.0f, 2),
     SPRUCE_PLANK_FENCE((byte) 27, (byte) 8, (byte) 2, false, false, 100, "assets/textures/blocks/spruce_plank.png", SoundGroup.WOOD, 4.0f, false, new Object[]{}, Tier.WOODEN, false, false, true),
-    TORCH((byte) 28, (byte) 9, (byte) 2, false, false, 50, "assets/sprites/torch.png", SoundGroup.WOOD, 0.01f, false, new Object[]{}, Tier.WOODEN, false, false, false),
+    TORCH((byte) 28, (byte) 9, (byte) 2, false, false, 50, "assets/sprites/torch.png", SoundGroup.WOOD, 0.01f, false, new Object[]{}, Tier.WOODEN),
 
     COPPER_ORE((byte) 29, (byte) 1, (byte) 4, false, false, 150, "assets/textures/blocks/copper_ore.png", SoundGroup.STONE, 6.0f, false, new MiningComponent[]{new MiningComponent(Tier.COPPER, MaterialID.RAW_ORE)}, Tier.COPPER),
     IRON_ORE((byte) 30, (byte) 2, (byte) 4, false, false, 150, "assets/textures/blocks/iron_ore.png", SoundGroup.STONE, 8.0f, false, new MiningComponent[]{new MiningComponent(Tier.IRON, MaterialID.RAW_ORE)}, Tier.IRON),
@@ -602,7 +602,7 @@ public enum BlockData implements Blockable {
 
     /** Returns whether this block completely occludes each face of its cell. */
     public boolean isFullCube() {
-        return isSolid() && getShape().isFullCube();
+        return !isSolid() || !getShape().isFullCube();
     }
 
     /**
