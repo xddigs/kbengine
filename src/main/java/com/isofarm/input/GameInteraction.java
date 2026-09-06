@@ -801,13 +801,18 @@ public class GameInteraction {
             int placeZ = cell.z() + normalZ;
 
             BlockShape placedShape = block.getType().getShape();
-            if (block.getType() == BlockData.OAK_PLANK_VERTICAL_SLAB) {
+            if (placedShape.isVerticalSlab()) {
                 Vector3f playerPosition = player.getPosition();
                 placedShape = BlockShape.verticalSlabFacing(
                         playerPosition.x, playerPosition.z, placeX, placeZ);
             }
-            if (player.intersectsBlock(placedShape, placeX, placeY, placeZ)) return;
+            if (placedShape.isStaircase()) {
+                Vector3f playerPosition = player.getPosition();
+                placedShape = BlockShape.staircaseFacing(
+                        playerPosition.x, playerPosition.z, placeX, placeZ);
+            }
 
+            if (player.intersectsBlock(placedShape, placeX, placeY, placeZ)) return;
             byte targetBlock = world.getBlockTypeAt(placeX, placeY, placeZ);
             BlockData target = BlockData.fromId(targetBlock);
             FluidSimulation targetFluid = FluidSimulation.forBlock(target);
