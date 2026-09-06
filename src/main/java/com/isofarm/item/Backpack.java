@@ -10,7 +10,8 @@ import com.isofarm.wrld.GameMaster;
 /**
  * Encapsulates the state and operations required by backpack within the game runtime.
  */
-public class Backpack extends Usable implements Undroppable {
+public class Backpack extends Usable implements Equippable,
+        Undroppable {
 
     /**
      * Creates a new {@code Backpack} instance.
