@@ -22,6 +22,10 @@ public enum BlockShape {
     STAIRCASE_EAST(new Box(0.0f, 0.0f, 0.0f, 1.0f, 0.5f, 1.0f), new Box(0.0f, 0.5f, 0.0f, 0.5f, 1.0f, 1.0f)),
     STAIRCASE_NORTH(new Box(0.0f, 0.0f, 0.0f, 1.0f, 0.5f, 1.0f), new Box(0.0f, 0.5f, 0.5f, 1.0f, 1.0f, 1.0f)),
     STAIRCASE_SOUTH(new Box(0.0f, 0.0f, 0.0f, 1.0f, 0.5f, 1.0f), new Box(0.0f, 0.5f, 0.0f, 1.0f, 1.0f, 0.5f)),
+    STAIRCASE_CORNER_NW(new Box(0.0f, 0.0f, 0.0f, 1.0f, 0.5f, 1.0f), new Box(0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 1.0f), new Box(0.0f, 0.5f, 0.0f, 0.5f, 1.0f, 0.5f)),
+    STAIRCASE_CORNER_SW(new Box(0.0f, 0.0f, 0.0f, 1.0f, 0.5f, 1.0f), new Box(0.0f, 0.5f, 0.5f, 0.5f, 1.0f, 1.0f), new Box(0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 0.5f)),
+    STAIRCASE_CORNER_NE(new Box(0.0f, 0.0f, 0.0f, 1.0f, 0.5f, 1.0f), new Box(0.0f, 0.5f, 0.5f, 0.5f, 1.0f, 1.0f), new Box(0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 1.0f)),
+    STAIRCASE_CORNER_SE(new Box(0.0f, 0.0f, 0.0f, 1.0f, 0.5f, 1.0f), new Box(0.0f, 0.5f, 0.0f, 0.5f, 1.0f, 0.5f), new Box(0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 0.5f)),
 
     FENCE_NONE(0),
     FENCE_N(1), FENCE_S(2), FENCE_NS(3),
@@ -125,7 +129,9 @@ public enum BlockShape {
      */
     public boolean isStaircase() {
         return this == STAIRCASE_WEST || this == STAIRCASE_EAST
-                || this == STAIRCASE_NORTH || this == STAIRCASE_SOUTH;
+                || this == STAIRCASE_NORTH || this == STAIRCASE_SOUTH
+                || this == STAIRCASE_CORNER_NW || this == STAIRCASE_CORNER_SW
+                || this == STAIRCASE_CORNER_NE || this == STAIRCASE_CORNER_SE;
     }
 
     /**
@@ -173,13 +179,29 @@ public enum BlockShape {
      * @return The facing {@link BlockShape} for the staircase.
      */
     public static BlockShape staircaseFacing(float pointX, float pointZ,
-                                             int blockX, int blockZ) {
+                                              int blockX, int blockZ) {
         float offsetX = pointX - (blockX + 0.5f);
         float offsetZ = pointZ - (blockZ + 0.5f);
         if (Math.abs(offsetX) > Math.abs(offsetZ)) {
             return offsetX < 0.0f ? STAIRCASE_WEST : STAIRCASE_EAST;
         }
         return offsetZ < 0.0f ? STAIRCASE_NORTH : STAIRCASE_SOUTH;
+    }
+
+    /**
+     * Builds the connected mesh variant for a staircase. The mask uses the
+     * same bits as fences: north, south, west and east (1, 2, 4 and 8).
+     * Connections are intentionally type-agnostic so stone and wood stairs join.
+     */
+    public static BlockShape staircaseConnected(BlockShape orientation, int mask) {
+        if (!orientation.isStaircase()) return orientation;
+        return switch (mask & 15) {
+            case 5 -> STAIRCASE_CORNER_NW;
+            case 6 -> STAIRCASE_CORNER_SW;
+            case 9 -> STAIRCASE_CORNER_NE;
+            case 10 -> STAIRCASE_CORNER_SE;
+            default -> orientation;
+        };
     }
 
     /**

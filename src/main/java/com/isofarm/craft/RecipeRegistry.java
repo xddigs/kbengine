@@ -116,6 +116,11 @@ public class RecipeRegistry {
                 .result(new Material(tier, MaterialID.SUGAR), 4).add();
     }
 
+    /**
+     * Adds the {@code primaryMat} to the list and builds with it whatever
+     * special blocks they have
+     * @param primaryMat {@link BlockData} supplied as {@code primaryMat}
+     */
     private void registerSpecialBlocks(BlockData primaryMat) {
         if (primaryMat.isLog()) {
             create().result(new Block(BlockData.toPlanks(primaryMat)), 4)

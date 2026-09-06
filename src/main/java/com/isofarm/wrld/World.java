@@ -122,8 +122,24 @@ public class World {
             return BlockShape.fence(connections);
         }
         Block registeredBlock = blocks.get(getBlockKey(x, y, z));
-        if (registeredBlock != null) return registeredBlock.getShape();
+        if (registeredBlock != null) {
+            BlockShape shape = registeredBlock.getShape();
+            if (data.isStaircase()) {
+                int connections = 0;
+                if (isStaircaseAt(x, y, z - 1)) connections |= 1;
+                if (isStaircaseAt(x, y, z + 1)) connections |= 2;
+                if (isStaircaseAt(x - 1, y, z)) connections |= 4;
+                if (isStaircaseAt(x + 1, y, z)) connections |= 8;
+                return BlockShape.staircaseConnected(shape, connections);
+            }
+            return shape;
+        }
         return data == null ? BlockShape.FULL_CUBE : data.getShape();
+    }
+
+    private boolean isStaircaseAt(int x, int y, int z) {
+        BlockData neighbor = BlockData.fromId(getBlockTypeAt(x, y, z));
+        return neighbor != null && neighbor.isStaircase();
     }
 
     private boolean canFenceConnectTo(int x, int y, int z) {
