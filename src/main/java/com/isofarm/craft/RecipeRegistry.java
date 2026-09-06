@@ -114,7 +114,7 @@ public class RecipeRegistry {
                     .add();
         }
 
-        create().result(new iBlock(BlockData.STONE), 1)
+        create().result(new Block(BlockData.STONE), 1)
                 .with(new Block(BlockData.COBBLESTONE), 1)
                 .with(new Material(Tier.NONE, MaterialID.CHARCOAL), 1).add();
 
