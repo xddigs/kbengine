@@ -166,6 +166,8 @@ public class GameRenderer {
         grassShader.setUniform("uLightSpaceMatrix", ShadowSystem.sys.getLightSpaceMatrix());
         grassShader.setUniform("uEnableShadows", Settings.doEnableShadows());
         grassShader.setUniform("uGrassTint", ResourceManager.rem.getGrassTint());
+        uploadTorchLights(grassShader);
+        PointShadowSystem.sys.bind(grassShader, 2);
         TextureAtlas.TextureRegion grassTopRegion = BlockData.GRASS.getTopRegion();
         TextureAtlas.TextureRegion grassSideRegion = BlockData.GRASS.getSideRegion();
         if (grassTopRegion != null && grassSideRegion != null) {
@@ -496,14 +498,23 @@ public class GameRenderer {
         return isSmartShift ? new Vector3f(1.0f, 1.0f, 0.2f) : K.Colors.OUTLINE_DEFAULT;
     }
 
-    /** Uploads the closest torch emitters so the world shader can light them. */
+    /** Uploads nearby emissive blocks so the world shader can light them. */
     private void collectTorchLights(GameMaster gameMaster, CameraView camera) {
         torchLights.clear();
         Vector3f cameraPosition = camera.getPosition();
-        float searchDistance = TORCH_LIGHT_RADIUS * 3.0f;
+        // The camera sits above and away from its target, so 24 blocks can exclude
+        // the torch directly beside the player. Keep a full visible lighting radius.
+        float searchDistance = TORCH_LIGHT_RADIUS * 8.0f;
         gameMaster.getWorld().forEachTorch(torch -> {
             Vector3f position = new Vector3f(torch.x() + 0.5f, torch.y() + 0.65f,
                     torch.z() + 0.5f);
+            if (position.distanceSquared(cameraPosition) <= searchDistance * searchDistance) {
+                torchLights.add(position);
+            }
+        });
+        gameMaster.getWorld().forEachLava(lava -> {
+            Vector3f position = new Vector3f(lava.x() + 0.5f, lava.y() + 0.5f,
+                    lava.z() + 0.5f);
             if (position.distanceSquared(cameraPosition) <= searchDistance * searchDistance) {
                 torchLights.add(position);
             }

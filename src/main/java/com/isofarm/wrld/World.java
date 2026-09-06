@@ -25,6 +25,7 @@ public class World {
     private final Map<Long, iBlock> interactiveBlocks = new HashMap<>();
     private final Map<Long, Chunk> chunks = new HashMap<>();
     private final Map<Long, BlockPos> torches = new HashMap<>();
+    private final Map<Long, BlockPos> lavaCells = new HashMap<>();
 
     /**
      * Creates a new private {@code World} instance.
@@ -308,6 +309,11 @@ public class World {
         torches.values().forEach(consumer);
     }
 
+    /** Visits every lava cell that can act as an artificial light source. */
+    public void forEachLava(Consumer<BlockPos> consumer) {
+        lavaCells.values().forEach(consumer);
+    }
+
     /**
      * Returns the chunk block type at.
      * @param x the {@code int} supplied as {@code x}
@@ -391,6 +397,12 @@ public class World {
             torches.put(blockKey, new BlockPos(BlockData.TORCH, x, y, z));
         } else {
             torches.remove(blockKey);
+        }
+
+        if (blockId == BlockData.LAVA.getId()) {
+            lavaCells.put(blockKey, new BlockPos(BlockData.LAVA, x, y, z));
+        } else {
+            lavaCells.remove(blockKey);
         }
 
         if (blockId == BlockData.AIR.getId()) {

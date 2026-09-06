@@ -22,6 +22,8 @@ public class CraftingBook extends Book implements Undroppable {
     private Inventory.SortOrder recipeOrder = Inventory.SortOrder.CREATIVE;
     private boolean areOnlyCraftableRecipes;
     private boolean areOnlyFavoriteRecipes;
+    private boolean isSortedByType;
+    private boolean isSortedByName;
 
     /**
      * Creates a new {@code CraftingBook} instance.
@@ -92,7 +94,12 @@ public class CraftingBook extends Book implements Undroppable {
      * Sorts recipes alphabetically by their localized result name.
      */
     public void sortByName() {
-        recipeOrder = Inventory.SortOrder.NAME;
+        isSortedByName = !isSortedByName;
+        if (isSortedByName) {
+            recipeOrder = Inventory.SortOrder.CREATIVE;
+        } else {
+            recipeOrder = Inventory.SortOrder.NAME;
+        }
         reload();
     }
 
@@ -100,7 +107,12 @@ public class CraftingBook extends Book implements Undroppable {
      * Sorts recipes by their shared item type order.
      */
     public void sortByType() {
-        recipeOrder = Inventory.SortOrder.TYPE;
+        isSortedByType = !isSortedByType;
+        if (isSortedByType) {
+            recipeOrder = Inventory.SortOrder.CREATIVE;
+        } else {
+            recipeOrder = Inventory.SortOrder.TYPE;
+        }
         reload();
     }
 

@@ -2,6 +2,7 @@
 
 in vec2 vTexCoord;
 in vec3 vNormal;
+in vec3 vFragPos;
 in vec4 vLightSpacePosition;
 
 out vec4 FragColor;
@@ -17,6 +18,13 @@ uniform float uLightIntensity;
 uniform vec3 uLightDirection;
 uniform float uAmbientIntensity;
 uniform bool uEnableShadows;
+
+const int MAX_TORCH_LIGHTS = 32;
+uniform int uTorchCount;
+uniform vec3 uTorchPositions[MAX_TORCH_LIGHTS];
+uniform int uShadowedTorchCount;
+uniform samplerCube uTorchShadowMaps[4];
+uniform float uTorchShadowFarPlane;
 
 bool isInside(vec2 uv, vec4 bounds) {
     return uv.x >= bounds.x && uv.x <= bounds.z
@@ -41,6 +49,13 @@ float calculateShadow(vec4 lightSpacePosition, vec3 normal) {
     return shadow / 9.0;
 }
 
+float torchShadowDepth(int index, vec3 lightToFragment) {
+    if (index == 0) return texture(uTorchShadowMaps[0], lightToFragment).r;
+    if (index == 1) return texture(uTorchShadowMaps[1], lightToFragment).r;
+    if (index == 2) return texture(uTorchShadowMaps[2], lightToFragment).r;
+    return texture(uTorchShadowMaps[3], lightToFragment).r;
+}
+
 void main() {
     // UV filtering confines this pass to GRASS, not every green texture in the atlas.
     if (!isInside(vTexCoord, uGrassTopUVBounds) && !isInside(vTexCoord, uGrassSideUVBounds)) discard;
@@ -55,5 +70,19 @@ void main() {
     float shadow = uEnableShadows ? calculateShadow(vLightSpacePosition, normal) : 0.0;
     vec3 light = uSkyColor * uAmbientIntensity
             + uSunColor * diffuse * uLightIntensity * (1.0 - shadow);
-    FragColor = vec4(texColor.rgb * uGrassTint * light, texColor.a);
+    vec3 torchLight = vec3(0.0);
+    for (int i = 0; i < uTorchCount; i++) {
+        float distanceToTorch = distance(vFragPos, uTorchPositions[i]);
+        float attenuation = max(0.0, 1.0 - distanceToTorch / 8.0);
+        float pointShadow = 0.0;
+        if (i < uShadowedTorchCount && distanceToTorch > 0.12) {
+            vec3 lightToFragment = vFragPos - uTorchPositions[i];
+            float closestDepth = torchShadowDepth(i, lightToFragment)
+                    * uTorchShadowFarPlane;
+            pointShadow = distanceToTorch - 0.08 > closestDepth ? 1.0 : 0.0;
+        }
+        torchLight += vec3(1.0, 0.62, 0.24) * attenuation * attenuation
+                * (1.0 - pointShadow);
+    }
+    FragColor = vec4(texColor.rgb * uGrassTint * (light + torchLight), texColor.a);
 }
