@@ -23,8 +23,6 @@ public class RecipeRegistry {
         registerSmeltingRecipes();
         registerMaterialRecipes();
 
-        create().result(new Block(BlockData.OAK_PLANK), 4).with(BlockData.fromIdTo(BlockData.OAK_LOG.getId()),1).add();
-        create().result(new Block(BlockData.SPRUCE_PLANK), 4).with(BlockData.fromIdTo(BlockData.SPRUCE_LOG.getId()),1).add();
         create().with(new Block(BlockData.OAK_PLANK), 8).result(new iBlock(InteractiveBlocks.CHEST), 1).add();
 
         create().result(new Material(Tier.NONE, MaterialID.STICK), 4).with(BlockData.fromIdTo(BlockData.OAK_PLANK.getId()), 1).add();
@@ -89,7 +87,9 @@ public class RecipeRegistry {
      * Registers the recipes contributed by blocks.
      */
     private void registerBlocksRecipes() {
+        registerSpecialBlocks(BlockData.OAK_LOG);
         registerSpecialBlocks(BlockData.OAK_PLANK);
+        registerSpecialBlocks(BlockData.SPRUCE_LOG);
         registerSpecialBlocks(BlockData.SPRUCE_PLANK);
         registerSpecialBlocks(BlockData.STONE);
     }
@@ -117,6 +117,12 @@ public class RecipeRegistry {
     }
 
     private void registerSpecialBlocks(BlockData primaryMat) {
+        if (primaryMat.isLog()) {
+            create().result(new Block(BlockData.toPlanks(primaryMat)), 4)
+                    .with(BlockData.fromIdTo(primaryMat.getId()),1).add();
+            return;
+        }
+
         create().with(new Block(primaryMat), 3)
                 .result(new Block(BlockData.toSlab(primaryMat, false)), 6).add();
 

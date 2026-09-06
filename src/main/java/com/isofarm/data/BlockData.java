@@ -308,6 +308,19 @@ public enum BlockData implements Blockable {
     }
 
     /**
+     * Returns the matching {@link BlockData} {@code primaryMat} with the corresponding plank
+     * @param primaryMat {@link BlockData} supplied as {@code primary material}
+     * @return {@link BlockData} the matching planks
+     */
+    public static BlockData toPlanks(BlockData primaryMat) {
+        return switch (primaryMat) {
+            case OAK_LOG -> OAK_PLANK;
+            case SPRUCE_LOG -> SPRUCE_PLANK;
+            default -> throw new IllegalStateException("Unknown BlockData " + primaryMat);
+        };
+    }
+
+    /**
      * Returns the matching {@link BlockData} {@code primaryMat} with the corresponding slab
      * @param primaryMat {@link BlockData} supplied as {@code primary material}
      * @param isVertical {@link Boolean} supplied as {@code isVertical}
@@ -431,6 +444,14 @@ public enum BlockData implements Blockable {
      */
     public boolean isPlant() {
         return isPlant;
+    }
+
+    /**
+     * Checks whether the block is a log type of block
+     * @return {@code true} if a log; otherwise {@code false}
+     */
+    public boolean isLog() {
+        return this.equals(OAK_LOG) || this.equals(SPRUCE_LOG);
     }
 
     /**
