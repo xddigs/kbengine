@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 public class CraftingBook extends Book implements Undroppable {
     private static final int LINES_PER_PAGE = 16;
     private Inventory.SortOrder recipeOrder = Inventory.SortOrder.NAME;
+    private boolean areOnlyCraftableRecipes;
 
     /**
      * Creates a new {@code CraftingBook} instance.
@@ -38,7 +39,13 @@ public class CraftingBook extends Book implements Undroppable {
     @Override
     public void reload() {
         clearPages();
+        resetCurrentPage();
         List<Recipe> recipes = RecipeRegistry.reg.getRecipes();
+        if (areOnlyCraftableRecipes) {
+            recipes = recipes.stream()
+                    .filter(CraftingService.cs::canCraft)
+                    .collect(Collectors.toList());
+        }
         recipes.sort(recipeComparator());
         if (recipes.isEmpty()) return;
 
@@ -83,6 +90,22 @@ public class CraftingBook extends Book implements Undroppable {
     public void sortByType() {
         recipeOrder = Inventory.SortOrder.TYPE;
         reload();
+    }
+
+    /**
+     * Alternates between every registered recipe and only recipes the player can craft.
+     */
+    public void toggleCraftableRecipes() {
+        areOnlyCraftableRecipes = !areOnlyCraftableRecipes;
+        reload();
+    }
+
+    /**
+     * Checks whether this book currently filters to craftable recipes.
+     * @return {@code true} when only craftable recipes are shown
+     */
+    public boolean isShowingOnlyCraftableRecipes() {
+        return areOnlyCraftableRecipes;
     }
 
     /**

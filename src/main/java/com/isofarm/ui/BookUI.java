@@ -381,7 +381,8 @@ public class BookUI extends UIElement {
     }
 
     private boolean isAnyButtonHovered() {
-        return sortNameButton.isHovered() || sortTypeButton.isHovered() || closeButton.isHovered();
+        return sortNameButton.isHovered() || sortTypeButton.isHovered()
+                || homeCraftingsButton.isHovered() || closeButton.isHovered();
     }
 
     private void updateButtonState() {
@@ -395,7 +396,20 @@ public class BookUI extends UIElement {
                 bookIsReady && isCraftingBook);
         setButtonState(sortTypeButton, buttonsCanRender && isCraftingBook,
                 bookIsReady && isCraftingBook);
+        // Filtering must remain available even when the filtered result fits on one page.
+        setButtonState(homeCraftingsButton, isCraftingBook,
+                isOpen() && !isFlippingPage && isCraftingBook);
+        homeCraftingsButton.setSpriteColumn(isCraftingBook
+                && ((CraftingBook) openedBook).isShowingOnlyCraftableRecipes() ? 1 : 0);
         setButtonState(closeButton, buttonsCanRender, bookIsReady);
+    }
+
+    /**
+     * Updates the crafting-filter icon after the player toggles the recipe list.
+     * @param onlyCraftableRecipes whether the craftable-only filter is active
+     */
+    public void setCraftableRecipesSelected(boolean onlyCraftableRecipes) {
+        homeCraftingsButton.setSpriteColumn(onlyCraftableRecipes ? 1 : 0);
     }
 
     private void setButtonState(UIButton button, boolean visible, boolean enabled) {

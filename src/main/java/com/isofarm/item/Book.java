@@ -168,6 +168,14 @@ public class Book extends Usable {
     }
 
     /**
+     * Returns the book to its first page without playing a page-turn animation.
+     * This is used after reloading dynamic book contents.
+     */
+    public void resetCurrentPage() {
+        currentPage = 0;
+    }
+
+    /**
      * Updates text or selection state for next page.
      */
     public void nextPage() {

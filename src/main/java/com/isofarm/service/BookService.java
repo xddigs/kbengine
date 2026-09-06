@@ -3,6 +3,7 @@ package com.isofarm.service;
 import com.isofarm.data.Singleton;
 import com.isofarm.ui.BookUI;
 import com.isofarm.item.Book;
+import com.isofarm.item.CraftingBook;
 
 /**
  * Encapsulates the state and operations required by book service within the game runtime.
@@ -74,7 +75,14 @@ public class BookService implements Service<Book> {
     }
 
     public void toggleRecipes() {
-        // TODO toggle recipes that can only be crafted,
-        //  whilst the alternative is showing all recipes
+        if (!(openedBook instanceof CraftingBook craftingBook)) {
+            return;
+        }
+
+        craftingBook.toggleCraftableRecipes();
+        if (BookUI.bui != null) {
+            BookUI.bui.setCraftableRecipesSelected(
+                    craftingBook.isShowingOnlyCraftableRecipes());
+        }
     }
 }
