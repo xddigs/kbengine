@@ -189,6 +189,7 @@ public final class K {
         public static final String SCROLL_KNOB = "assets/ui/scroll_knob.png";
         public static final String BOOK_ANIMATION = "assets/ui/book.png";
         public static final String BOOK_SORT_NAME = "assets/ui/sort_name.png";
+        public static final String BOOK_FAVORITE = "assets/ui/favorite.png";
         public static final String BOOK_SORT_TYPE = "assets/ui/sort_type.png";
         public static final String BOOK_LOCAL_CRAFTINGS = "assets/ui/home_recipes.png";
         public static final String BOOK_CLOSE = "assets/ui/close.png";

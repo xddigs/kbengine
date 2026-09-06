@@ -62,10 +62,11 @@ public class Page {
      * @param action the {@link Consumer} supplied as {@code action}
      * @param tooltipText the {@link String} supplied as {@code tooltipText}
      */
-    public void addItem(Item item, Consumer<BookLine> action, String tooltipText) {
+    public BookLine addItem(Item item, Consumer<BookLine> action, String tooltipText) {
         BookLine bookLine = new BookLine(item, action);
         bookLine.setTooltipText(tooltipText);
         bookLines.add(bookLine);
+        return bookLine;
     }
 
     /**

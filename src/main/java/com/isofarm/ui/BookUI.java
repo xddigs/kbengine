@@ -56,6 +56,7 @@ public class BookUI extends UIElement {
     private float pageFlipTimer = 0.0f;
 
     private BookLine hoveredBookLine;
+    private final UIButton favoriteButton;
     private final UIButton sortNameButton;
     private final UIButton sortTypeButton;
     private final UIButton homeCraftingsButton;
@@ -70,11 +71,13 @@ public class BookUI extends UIElement {
      */
     public BookUI(float x, float y, float width, float height) {
         super(x, y, width, height);
+        favoriteButton = createButton(ResourceManager.rem.getBookFavoriteIcon(), "book.toggle_favorites", this::toggleFavoriteRecipes);
         sortNameButton = createButton(ResourceManager.rem.getBookSortNameIcon(), "book.sort_name", () -> sortCraftingBook(true));
         sortTypeButton = createButton(ResourceManager.rem.getBookSortTypeIcon(), "book.sort_type", () -> sortCraftingBook(false));
         homeCraftingsButton = createButton(ResourceManager.rem.getBookHomeCraftings(), "book.toggle_recipes", BookService.bs::toggleRecipes);
         closeButton = createButton(ResourceManager.rem.getBookCloseIcon(), "book.close", BookService.bs::close);
 
+        addChild(favoriteButton);
         addChild(sortNameButton);
         addChild(sortTypeButton);
         addChild(homeCraftingsButton);
@@ -93,13 +96,14 @@ public class BookUI extends UIElement {
     }
 
     private void layoutButtons(float bookWidth) {
-        float totalWidth = BUTTON_SIZE * 4.0f + BUTTON_GAP * 3.0f;
+        float totalWidth = BUTTON_SIZE * 5.0f + BUTTON_GAP * 4.0f;
         float extraOffset = 10.0f;
         float startX = bookWidth - K.UI.UI_BOOK_PADDING_X - totalWidth - extraOffset;
-        sortNameButton.setPosition(startX, BUTTON_TOP_PADDING);
-        sortTypeButton.setPosition(startX + BUTTON_SIZE + BUTTON_GAP, BUTTON_TOP_PADDING);
-        homeCraftingsButton.setPosition(startX + (BUTTON_SIZE + BUTTON_GAP) * 2.0f, BUTTON_TOP_PADDING);
-        closeButton.setPosition(startX + (BUTTON_SIZE + BUTTON_GAP) * 3.0f, BUTTON_TOP_PADDING);
+        favoriteButton.setPosition(startX, BUTTON_TOP_PADDING);
+        sortNameButton.setPosition(startX + BUTTON_SIZE + BUTTON_GAP, BUTTON_TOP_PADDING);
+        sortTypeButton.setPosition(startX + (BUTTON_SIZE + BUTTON_GAP) * 2.0f, BUTTON_TOP_PADDING);
+        homeCraftingsButton.setPosition(startX + (BUTTON_SIZE + BUTTON_GAP) * 3.0f, BUTTON_TOP_PADDING);
+        closeButton.setPosition(startX + (BUTTON_SIZE + BUTTON_GAP) * 4.0f, BUTTON_TOP_PADDING);
     }
 
     private void sortCraftingBook(boolean byName) {
@@ -114,6 +118,13 @@ public class BookUI extends UIElement {
             book.sortByType();
         }
         hoveredBookLine = null;
+    }
+
+    private void toggleFavoriteRecipes() {
+        if (BookService.bs.getOpenedBook() instanceof CraftingBook book) {
+            book.toggleFavoriteRecipes();
+            hoveredBookLine = null;
+        }
     }
 
     /**
@@ -406,7 +417,7 @@ public class BookUI extends UIElement {
     }
 
     private boolean isAnyButtonHovered() {
-        return sortNameButton.isHovered() || sortTypeButton.isHovered()
+        return favoriteButton.isHovered() || sortNameButton.isHovered() || sortTypeButton.isHovered()
                 || homeCraftingsButton.isHovered() || closeButton.isHovered();
     }
 
@@ -415,6 +426,7 @@ public class BookUI extends UIElement {
         boolean bookIsReady = isOpen() && !isFlippingPage;
         boolean isCraftingBook = openedBook instanceof CraftingBook;
         // Recipe controls stay visible even when no recipe currently matches the filter.
+        setButtonState(favoriteButton, isCraftingBook, bookIsReady && isCraftingBook);
         setButtonState(sortNameButton, isCraftingBook, bookIsReady && isCraftingBook);
         setButtonState(sortTypeButton, isCraftingBook, bookIsReady && isCraftingBook);
         setButtonState(homeCraftingsButton, isCraftingBook,
@@ -648,10 +660,13 @@ public class BookUI extends UIElement {
             float iconY = gridY + row * (GRID_ICON_SIZE + GRID_GAP);
             int frame = ResourceManager.getItemFrame(item);
 
-            if (bookLine == hoveredBookLine) {
+            if (bookLine == hoveredBookLine || bookLine.isFavorite()) {
+                Vector4f outlineColor = bookLine.isFavorite()
+                        ? new Vector4f(1.0f, 0.85f, 0.2f, alpha)
+                        : new Vector4f(1.0f, 1.0f, 1.0f, alpha);
                 Frontend.drawSpriteOutline(spriteSheet, frame, iconX, iconY,
                         GRID_ICON_SIZE, GRID_ICON_SIZE, GRID_OUTLINE_SIZE,
-                        new Vector4f(1.0f, 1.0f, 1.0f, alpha));
+                        outlineColor);
             }
 
             Frontend.drawSprite(spriteSheet, frame, iconX, iconY,

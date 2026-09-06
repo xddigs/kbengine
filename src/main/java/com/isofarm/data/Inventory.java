@@ -350,7 +350,6 @@ public class Inventory {
         Comparator<Item> comparator = Comparator.comparingInt(Inventory::sortByOrder);
         if (order == SortOrder.TYPE) {
             comparator = comparator.thenComparingInt(Inventory::toolTierOrder);
-        } else {
             comparator = comparator.thenComparingInt(Item::getId);
         }
         return comparator.thenComparing(byName);

@@ -12,6 +12,7 @@ public class BookLine {
     private Consumer<BookLine> action;
     private String tooltipText;
     private Item item;
+    private boolean favorite;
 
     /**
      * Creates a new {@code BookLine} instance.
@@ -106,5 +107,14 @@ public class BookLine {
      */
     public Item getItem() {
         return item;
+    }
+
+    /** Returns whether the represented recipe is marked as a favorite. */
+    public boolean isFavorite() { return favorite; }
+
+    /** Sets the visual favorite state associated with this recipe line. */
+    public BookLine setFavorite(boolean favorite) {
+        this.favorite = favorite;
+        return this;
     }
 }

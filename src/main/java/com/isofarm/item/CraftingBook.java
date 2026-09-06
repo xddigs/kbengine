@@ -4,6 +4,8 @@ import com.isofarm.craft.Recipe;
 import com.isofarm.craft.RecipeRegistry;
 import com.isofarm.data.Inventory;
 import com.isofarm.entity.Player;
+import com.isofarm.input.ControlAction;
+import com.isofarm.input.Controls;
 import com.isofarm.service.CraftingService;
 import com.isofarm.ui.GameUIService;
 import com.isofarm.wrld.GameMaster;
@@ -17,8 +19,8 @@ import java.util.stream.Collectors;
  */
 public class CraftingBook extends Book implements Undroppable {
     private static final int LINES_PER_PAGE = 16;
-    private Inventory.SortOrder recipeOrder = Inventory.SortOrder.NAME;
     private boolean areOnlyCraftableRecipes;
+    private boolean areOnlyFavoriteRecipes;
 
     /**
      * Creates a new {@code CraftingBook} instance.
@@ -46,6 +48,9 @@ public class CraftingBook extends Book implements Undroppable {
                     .filter(CraftingService.cs::canCraft)
                     .collect(Collectors.toList());
         }
+        if (areOnlyFavoriteRecipes) {
+            recipes = recipes.stream().filter(Recipe::isFavorite).collect(Collectors.toList());
+        }
         recipes.sort(recipeComparator());
         if (recipes.isEmpty()) return;
 
@@ -70,27 +75,30 @@ public class CraftingBook extends Book implements Undroppable {
             String tooltip = recipe.result().getDisplayName()
                     + (ingredients.isEmpty() ? "" : "\n" + ingredients);
 
-            page.addItem(recipe.result(),
-                    line -> CraftingService.cs.craft(recipe), tooltip);
+            page.addItem(recipe.result(), line -> {
+                        if (Controls.isDown(ControlAction.SMART_SHIFT)) {
+                            recipe.toggleFavorite();
+                            reload();
+                        } else {
+                            CraftingService.cs.craft(recipe);
+                        }
+                    }, tooltip)
+                    .setFavorite(recipe.isFavorite());
             lineCount++;
         }
     }
 
     /**
-     * Sorts the recipes alphabetically by their localized result name.
+     * Reloads recipes in their canonical ID/type order.
      */
     public void sortByName() {
-        recipeOrder = Inventory.SortOrder.NAME;
         reload();
     }
 
     /**
-     * Groups recipes as blocks, tools, usables, crafting materials and interactive
-     * blocks, in that order. Tools are additionally grouped by ascending tier
-     * before sorting by localized name.
+     * Reloads recipes in their canonical ID/type order.
      */
     public void sortByType() {
-        recipeOrder = Inventory.SortOrder.TYPE;
         reload();
     }
 
@@ -110,13 +118,24 @@ public class CraftingBook extends Book implements Undroppable {
         return areOnlyCraftableRecipes;
     }
 
+    /** Toggles the in-memory filter that shows only favorited recipes. */
+    public void toggleFavoriteRecipes() {
+        areOnlyFavoriteRecipes = !areOnlyFavoriteRecipes;
+        reload();
+    }
+
+    /** Returns whether the favorite-only filter is enabled. */
+    public boolean isShowingOnlyFavoriteRecipes() {
+        return areOnlyFavoriteRecipes;
+    }
+
     /**
      * Returns the comparator used to sort recipes.
      * @return the {@link Comparator} used to sort recipes
      */
     private Comparator<Recipe> recipeComparator() {
-        return Comparator.comparing(
-                Recipe::result, Inventory.sorter(recipeOrder));
+        return Comparator.comparingInt((Recipe recipe) -> recipe.result().getId())
+                .thenComparing(recipe -> recipe.result().getClass().getSimpleName());
     }
 
     /**

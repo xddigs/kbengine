@@ -9,7 +9,28 @@ import java.util.Map;
 /**
  * Immutable value object containing recipe.
  */
-public record Recipe(Item result, int resultAmount, List<Ingredient> ingredients) {
+public final class Recipe {
+    private final Item result;
+    private final int resultAmount;
+    private final List<Ingredient> ingredients;
+    private boolean isFavorite;
+
+    public Recipe(Item result, int resultAmount, List<Ingredient> ingredients) {
+        this(result, resultAmount, ingredients, false);
+    }
+
+    public Recipe(Item result, int resultAmount, List<Ingredient> ingredients, boolean isFavorite) {
+        this.result = result;
+        this.resultAmount = resultAmount;
+        this.ingredients = List.copyOf(ingredients);
+        this.isFavorite = isFavorite;
+    }
+
+    public Item result() { return result; }
+    public int resultAmount() { return resultAmount; }
+    public List<Ingredient> ingredients() { return ingredients; }
+    public boolean isFavorite() { return isFavorite; }
+    public void toggleFavorite() { isFavorite = !isFavorite; }
 
     /**
      * Creates or returns of from the supplied arguments.
