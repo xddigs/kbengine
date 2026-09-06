@@ -14,7 +14,7 @@ public class Settings {
     private static final float SHADOW_MAP_SIZE = 4096.0f;
     public static Item selectedItem = null;
     private static float fov = 80f;
-    private static float ticks = 12000f;
+    private static int ticks = 1200;
     private static float mouseSensitivity = 0.4f;
     private static int renderDistance = 16;
     private static int unloadMargin = 4;
@@ -359,7 +359,7 @@ public class Settings {
      * Returns the ticks.
      * @return {@code float}; the ticks
      */
-    public static float getTicks() {
+    public static int getTicks() {
         return ticks;
     }
 }

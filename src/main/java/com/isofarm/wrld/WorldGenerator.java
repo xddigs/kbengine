@@ -1,6 +1,9 @@
 package com.isofarm.wrld;
 
 import com.isofarm.data.BlockData;
+import com.isofarm.data.Lake;
+import com.isofarm.data.LavaPuddle;
+import com.isofarm.data.Tree;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +32,6 @@ public class WorldGenerator implements Generator {
     private static final float LAVA_CLEARANCE = 4.0f;
     private static final int PLANT_ATTEMPTS = 24;
 
-    private static World world;
     private static FluidSimulation fluidSimulation;
     private final long seed;
     private final List<Lake> lakes = new ArrayList<>();
@@ -40,21 +42,18 @@ public class WorldGenerator implements Generator {
 
     /**
      * Creates a new {@code WorldGenerator} instance with a random seed.
-     * @param world the {@link World} supplied as {@code world}
      * @param fluidSimulation the {@link FluidSimulation} argument; the fluid simulation used for generated lakes
      */
-    public WorldGenerator(World world, FluidSimulation fluidSimulation) {
-        this(world, fluidSimulation, new Random().nextLong());
+    public WorldGenerator(FluidSimulation fluidSimulation) {
+        this(fluidSimulation, new Random().nextLong());
     }
 
     /**
      * Creates a new {@code WorldGenerator} instance.
-     * @param world the {@link World} supplied as {@code world}
      * @param fluidSimulation the {@link FluidSimulation} argument; the fluid simulation used for generated lakes
      * @param seed the {@code long} supplied as {@code seed}
      */
-    public WorldGenerator(World world, FluidSimulation fluidSimulation, long seed) {
-        WorldGenerator.world = world;
+    public WorldGenerator(FluidSimulation fluidSimulation, long seed) {
         WorldGenerator.fluidSimulation = fluidSimulation;
         this.seed = seed;
 
@@ -74,7 +73,7 @@ public class WorldGenerator implements Generator {
      */
     @Override
     public void generateChunk(int chunkX, int chunkZ) {
-        Chunk chunk = world.getOrCreateChunk(chunkX, chunkZ);
+        Chunk chunk = World.wrld.getOrCreateChunk(chunkX, chunkZ);
         long chunkSeed = seed ^ ((long) chunkX * 341873128712L + (long) chunkZ * 132897987541L);
         Random random = new Random(chunkSeed);
 
@@ -89,7 +88,7 @@ public class WorldGenerator implements Generator {
                 boolean lakeShore = lake == null && isLakeShore(worldX, worldZ);
                 int terrainY = terrainHeight(worldX, worldZ);
                 boolean lavaBlock = isLavaPuddle(worldX, worldZ);
-                int topY = lavaBlock ? lavaPuddle.y - 1 : lake == null ? terrainY : SURFACE_Y - 1;
+                int topY = lavaBlock ? lavaPuddle.y() - 1 : lake == null ? terrainY : SURFACE_Y - 1;
 
                 for (int y = topY; y >= Math.max(1, topY - MAX_DEPTH); y--) {
                     float depthFactor = (float) (y - (SURFACE_Y - MAX_DEPTH)) / MAX_DEPTH;
@@ -112,8 +111,8 @@ public class WorldGenerator implements Generator {
                     chunk.setBlock(x, SURFACE_Y, z, fluidSimulation.getFluidType().getId());
                     chunk.setFluidLevel(x, SURFACE_Y, z, (byte) 8);
                 } else if (lavaBlock) {
-                    chunk.setBlock(x, lavaPuddle.y, z, BlockData.LAVA.getId());
-                    chunk.setFluidLevel(x, lavaPuddle.y, z, (byte) 8);
+                    chunk.setBlock(x, lavaPuddle.y(), z, BlockData.LAVA.getId());
+                    chunk.setFluidLevel(x, lavaPuddle.y(), z, (byte) 8);
                 }
             }
         }
@@ -125,9 +124,9 @@ public class WorldGenerator implements Generator {
     }
 
     /**
-     * Returns the generated surface height at a world position.
-     * @param x the {@code int} argument; the world x value
-     * @param z the {@code int} argument; the world z value
+     * Returns the generated surface height at a World.wrld position.
+     * @param x the {@code int} argument; the World.wrld x value
+     * @param z the {@code int} argument; the World.wrld z value
      * @return {@code int}; the generated terrain height
      */
     private int terrainHeight(int x, int z) {
@@ -161,7 +160,7 @@ public class WorldGenerator implements Generator {
     private boolean isLakeTooCloseToLava(int x, int z) {
         float maximumVariation = LAKE_RADIUS * 0.55f
                 * (Math.clamp(LAKE_ORGANICITY_PERCENT, 0, 100) / 100.0f);
-        return distance(x, z, lavaPuddle.x, lavaPuddle.z)
+        return distance(x, z, lavaPuddle.x(), lavaPuddle.z())
                 < LAKE_RADIUS + maximumVariation + LAKE_SHORE_WIDTH + LAVA_CLEARANCE;
     }
 
@@ -173,7 +172,7 @@ public class WorldGenerator implements Generator {
      */
     private boolean overlapsLake(int x, int z) {
         for (Lake lake : lakes) {
-            if (distance(x, z, lake.x, lake.z) < lake.radius * 2 + 3) return true;
+            if (distance(x, z, lake.x(), lake.z()) < lake.radius() * 2 + 3) return true;
         }
         return false;
     }
@@ -208,22 +207,22 @@ public class WorldGenerator implements Generator {
 
     /**
      * Checks whether a horizontal position contains the generated lava puddle.
-     * @param x the {@code int} argument; the world x value
-     * @param z the {@code int} argument; the world z value
+     * @param x the {@code int} argument; the World.wrld x value
+     * @param z the {@code int} argument; the World.wrld z value
      * @return {@code true} if the position contains lava; otherwise {@code false}
      */
     private boolean isLavaPuddle(int x, int z) {
-        return lavaPuddle.x == x && lavaPuddle.z == z;
+        return lavaPuddle.x() == x && lavaPuddle.z() == z;
     }
 
     /**
      * Checks whether a position must remain clear around the lava puddle.
-     * @param x the {@code int} argument; the world x value
-     * @param z the {@code int} argument; the world z value
+     * @param x the {@code int} argument; the World.wrld x value
+     * @param z the {@code int} argument; the World.wrld z value
      * @return {@code true} if the position is near lava; otherwise {@code false}
      */
     private boolean nearLavaPuddle(int x, int z) {
-        return distance(x, z, lavaPuddle.x, lavaPuddle.z) < 5;
+        return distance(x, z, lavaPuddle.x(), lavaPuddle.z()) < 5;
     }
 
     /**
@@ -246,38 +245,38 @@ public class WorldGenerator implements Generator {
 
     /**
      * Checks whether a position is too close to a selected tree.
-     * @param x the {@code int} argument; the world x value
-     * @param z the {@code int} argument; the world z value
+     * @param x the {@code int} argument; the World.wrld x value
+     * @param z the {@code int} argument; the World.wrld z value
      * @return {@code true} if a tree is nearby; otherwise {@code false}
      */
     private boolean nearTree(int x, int z) {
-        for (Tree tree : trees) if (distance(x, z, tree.x, tree.z) < 5) return true;
+        for (Tree tree : trees) if (distance(x, z, tree.x(), tree.z()) < 5) return true;
         return false;
     }
 
     /**
-     * Returns the lake occupying a world position.
-     * @param x the {@code int} argument; the world x value
-     * @param z the {@code int} argument; the world z value
+     * Returns the lake occupying a World.wrld position.
+     * @param x the {@code int} argument; the World.wrld x value
+     * @param z the {@code int} argument; the World.wrld z value
      * @return the {@link Lake} representing the lake at the position, or {@code null} when none is present
      */
     private Lake lakeAt(int x, int z) {
         for (Lake lake : lakes) {
-            if (distance(x, z, lake.x, lake.z) <= lakeBoundaryAt(lake, x, z)) return lake;
+            if (distance(x, z, lake.x(), lake.z()) <= lakeBoundaryAt(lake, x, z)) return lake;
         }
         return null;
     }
 
     /**
      * Checks whether a position belongs to the conditional sand shore around a lake.
-     * @param x the {@code int} argument; the world x value
-     * @param z the {@code int} argument; the world z value
+     * @param x the {@code int} argument; the World.wrld x value
+     * @param z the {@code int} argument; the World.wrld z value
      * @return {@code true} if sand should be generated at the position; otherwise {@code false}
      */
     private boolean isLakeShore(int x, int z) {
         if (!GENERATE_LAKE_SAND_SHORES || lakeAt(x, z) != null) return false;
         for (Lake lake : lakes) {
-            float distance = distance(x, z, lake.x, lake.z);
+            float distance = distance(x, z, lake.x(), lake.z());
             float boundary = lakeBoundaryAt(lake, x, z);
             if (distance > boundary && distance <= boundary + LAKE_SHORE_WIDTH) return true;
         }
@@ -285,15 +284,15 @@ public class WorldGenerator implements Generator {
     }
 
     /**
-     * Returns the organic shoreline radius for a lake at a world position.
+     * Returns the organic shoreline radius for a lake at a World.wrld position.
      * @param lake the {@link Lake} supplied as {@code lake}
-     * @param x the {@code int} argument; the world x value
-     * @param z the {@code int} argument; the world z value
+     * @param x the {@code int} argument; the World.wrld x value
+     * @param z the {@code int} argument; the World.wrld z value
      * @return {@code float}; the shoreline radius at the position
      */
     private float lakeBoundaryAt(Lake lake, int x, int z) {
         float organicity = Math.clamp(LAKE_ORGANICITY_PERCENT, 0, 100) / 100.0f;
-        return lake.radius + noise(x, z, 3) * lake.radius * 0.55f * organicity;
+        return lake.radius() + noise(x, z, 3) * lake.radius() * 0.55f * organicity;
     }
 
     /**
@@ -317,9 +316,9 @@ public class WorldGenerator implements Generator {
      * @param chunkZ the {@code int} supplied as {@code chunkZ}
      */
     private void registerLavaSource(int chunkX, int chunkZ) {
-        if (Math.floorDiv(lavaPuddle.x, Chunk.SIZE_X) == chunkX
-                && Math.floorDiv(lavaPuddle.z, Chunk.SIZE_Z) == chunkZ) {
-            LavaSimulation.ls.addSource(lavaPuddle.x, lavaPuddle.y, lavaPuddle.z);
+        if (Math.floorDiv(lavaPuddle.x(), Chunk.SIZE_X) == chunkX
+                && Math.floorDiv(lavaPuddle.z(), Chunk.SIZE_Z) == chunkZ) {
+            LavaSimulation.ls.addSource(lavaPuddle.x(), lavaPuddle.y(), lavaPuddle.z());
         }
     }
 
@@ -331,9 +330,9 @@ public class WorldGenerator implements Generator {
      */
     private void generateTreesInChunk(int chunkX, int chunkZ, Random random) {
         for (Tree tree : trees) {
-            if (Math.floorDiv(tree.x, Chunk.SIZE_X) == chunkX
-                    && Math.floorDiv(tree.z, Chunk.SIZE_Z) == chunkZ) {
-                generateTree(tree.x, tree.y, tree.z, random, BlockData.OAK_LOG);
+            if (Math.floorDiv(tree.x(), Chunk.SIZE_X) == chunkX
+                    && Math.floorDiv(tree.z(), Chunk.SIZE_Z) == chunkZ) {
+                generateTree(tree.x(), tree.y(), tree.z(), random, BlockData.OAK_LOG);
             }
         }
     }
@@ -352,9 +351,9 @@ public class WorldGenerator implements Generator {
             BlockData[] plants = BlockData.allPlants();
             BlockData plant = plants[random.nextInt(plants.length)];
             if (plant != BlockData.OAK_BONSAI && plant != BlockData.SPRUCE_BONSAI
-                    && world.getBlockTypeAt(x, y, z) == BlockData.GRASS.getId()
-                    && world.getBlockTypeAt(x, y + 1, z) == BlockData.AIR.getId()) {
-                world.setBlockTypeAt(x, y + 1, z, plant.getId());
+                    && World.wrld.getBlockTypeAt(x, y, z) == BlockData.GRASS.getId()
+                    && World.wrld.getBlockTypeAt(x, y + 1, z) == BlockData.AIR.getId()) {
+                World.wrld.setBlockTypeAt(x, y + 1, z, plant.getId());
                 if (plant == BlockData.TALL_GRASS) generateCluster(x, y, z, plant, random);
             }
         }
@@ -388,9 +387,9 @@ public class WorldGenerator implements Generator {
             if (lakeAt(x, z) == null && !isLakeShore(x, z) && !nearLavaPuddle(x, z)
                     && !nearTree(x, z)
                     && Math.abs(y - surfaceY) <= 2
-                    && world.getBlockTypeAt(x, y, z) == BlockData.GRASS.getId()
-                    && world.getBlockTypeAt(x, y + 1, z) == BlockData.AIR.getId()) {
-                world.setBlockTypeAt(x, y + 1, z, plant.getId());
+                    && World.wrld.getBlockTypeAt(x, y, z) == BlockData.GRASS.getId()
+                    && World.wrld.getBlockTypeAt(x, y + 1, z) == BlockData.AIR.getId()) {
+                World.wrld.setBlockTypeAt(x, y + 1, z, plant.getId());
                 placed++;
             }
         }
@@ -410,7 +409,7 @@ public class WorldGenerator implements Generator {
             case OAK_LOG -> {
                 int trunkHeight = 4 + random.nextInt(5);
                 for (int y = 1; y <= trunkHeight; y++) {
-                    world.setBlockTypeAt(
+                    World.wrld.setBlockTypeAt(
                             worldX, surfaceY + y, worldZ, BlockData.OAK_LOG.getId());
                 }
 
@@ -421,9 +420,9 @@ public class WorldGenerator implements Generator {
                         for (int dz = -radius; dz <= radius; dz++) {
                             if (Math.abs(dx) == radius && Math.abs(dz) == radius
                                     && random.nextDouble() < 0.4) continue;
-                            if (world.getBlockTypeAt(worldX + dx, y, worldZ + dz)
+                            if (World.wrld.getBlockTypeAt(worldX + dx, y, worldZ + dz)
                                     == BlockData.AIR.getId()) {
-                                world.setBlockTypeAt(worldX + dx, y, worldZ + dz,
+                                World.wrld.setBlockTypeAt(worldX + dx, y, worldZ + dz,
                                         BlockData.OAK_LEAVES.getId());
                             }
                         }
@@ -431,9 +430,9 @@ public class WorldGenerator implements Generator {
                 }
             }
             case SPRUCE_LOG -> {
-                int trunkHeight = 8 + random.nextInt(4);
+                int trunkHeight = 12 + random.nextInt(4);
                 for (int y = 1; y <= trunkHeight; y++) {
-                    world.setBlockTypeAt(
+                    World.wrld.setBlockTypeAt(
                             worldX, surfaceY + y, worldZ, BlockData.SPRUCE_LOG.getId());
                 }
 
@@ -446,26 +445,29 @@ public class WorldGenerator implements Generator {
                             if (Math.abs(dx) + Math.abs(dz) > radius + 1) continue;
                             if (Math.abs(dx) == radius && Math.abs(dz) == radius
                                     && random.nextDouble() < 0.35) continue;
-                            if (world.getBlockTypeAt(worldX + dx, y, worldZ + dz)
+                            if (World.wrld.getBlockTypeAt(worldX + dx, y, worldZ + dz)
                                     == BlockData.AIR.getId()) {
-                                world.setBlockTypeAt(worldX + dx, y, worldZ + dz,
+                                World.wrld.setBlockTypeAt(worldX + dx, y, worldZ + dz,
                                         BlockData.SPRUCE_LEAVES.getId());
                             }
                         }
                     }
                 }
-                world.setBlockTypeAt(
+                World.wrld.setBlockTypeAt(
                         worldX, topY + 1, worldZ, BlockData.SPRUCE_LEAVES.getId());
             }
             default -> throw new IllegalArgumentException(
                     "Unsupported tree log type: " + logType);
         }
+
+        GameMaster.game
+                .rebuildChunkMeshAt(worldX, worldZ);
     }
 
     /**
-     * Returns deterministic value noise for a world position.
-     * @param x the {@code int} argument; the world x value
-     * @param z the {@code int} argument; the world z value
+     * Returns deterministic value noise for a World.wrld position.
+     * @param x the {@code int} argument; the World.wrld x value
+     * @param z the {@code int} argument; the World.wrld z value
      * @param scale the {@code int} argument; the noise cell scale
      * @return {@code float}; a noise value between {@code -1} and {@code 1}
      */
@@ -489,19 +491,4 @@ public class WorldGenerator implements Generator {
     private static float distance(int x1, int z1, int x2, int z2) {
         return (float) Math.hypot(x1 - x2, z1 - z2);
     }
-
-    /**
-     * Stores the center and radius of a generated lake.
-     */
-    private record Lake(int x, int z, float radius) {}
-
-    /**
-     * Stores the base position of a generated tree.
-     */
-    private record Tree(int x, int y, int z) {}
-
-    /**
-     * Stores the position of the guaranteed one-block lava puddle.
-     */
-    private record LavaPuddle(int x, int y, int z) {}
 }

@@ -22,7 +22,7 @@ public class TreeService {
     public static final TreeService ts = new TreeService();
     private static final int LEAF_DECAY_CHECK_DISTANCE = 4;
     private static final int RANDOM_TICKS_PER_CHUNK = 3;
-    private static final int SAPLING_GROWTH_TICKS = (int) Settings.getTicks();
+    private static final int SAPLING_GROWTH_TICKS = Settings.getTicks();
     private final List<TreeSapling> saplings = new ArrayList<>();
     private final Random random = new Random();
 
