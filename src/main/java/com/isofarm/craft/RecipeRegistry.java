@@ -23,9 +23,9 @@ public class RecipeRegistry {
         registerSmeltingRecipes();
         registerMaterialRecipes();
 
-        create().with(new Block(BlockData.OAK_PLANK), 8).result(new iBlock(BlockData.CHEST), 1).add();
-
+        create().result(new iBlock(BlockData.CHEST), 1).with(new Block(BlockData.OAK_PLANK), 8).add();
         create().result(new Material(Tier.NONE, MaterialID.STICK), 4).with(BlockData.fromIdTo(BlockData.OAK_PLANK.getId()), 1).add();
+        create().result(new Material(Tier.NONE, MaterialID.CHARCOAL), 1).with(new Material(Tier.NONE, MaterialID.STICK), 8).add();
         create().result(new Book(false), 1).with(MaterialID.LEATHER, 3).with(MaterialID.PAPER, 2).add();
         create().result(new Backpack(), 1).with(MaterialID.LEATHER, 3).add();
         create().result(new Bucket(), 1).with(new MiningComponent(Tier.STEEL, MaterialID.INGOT), 3).add();
@@ -101,7 +101,9 @@ public class RecipeRegistry {
         Tier[] metalTiers = {Tier.COPPER, Tier.IRON, Tier.STEEL, Tier.GOLDEN, Tier.PLATINUM, Tier.DIAMOND};
         for (Tier tier : metalTiers) {
             create().result(new MiningComponent(tier, MaterialID.INGOT), 1)
-                    .with(new MiningComponent(tier, MaterialID.RAW_ORE), 1).add();
+                    .with(new MiningComponent(tier, MaterialID.RAW_ORE), 1)
+                    .with(new Material(Tier.NONE, MaterialID.CHARCOAL), 2)
+                    .add();
         }
     }
 
@@ -128,21 +130,21 @@ public class RecipeRegistry {
             return;
         }
 
-        create().with(new Block(primaryMat), 3)
-                .result(new Block(BlockData.toSlab(primaryMat, false)), 6).add();
+        create().result(new Block(BlockData.toSlab(primaryMat, false)), 6)
+                .with(new Block(primaryMat), 3).add();
 
-        create().with(new Block(primaryMat), 3)
-                .result(new Block(BlockData.toSlab(primaryMat, true)), 6).add();
+        create().result(new Block(BlockData.toSlab(primaryMat, true)), 6)
+                .with(new Block(primaryMat), 3).add();
 
-        create().with(new Block(primaryMat), 7)
-                .result(new Block(BlockData.toStaircase(primaryMat)), 4).add();
+        create().result(new Block(BlockData.toStaircase(primaryMat)), 4)
+                .with(new Block(primaryMat), 7).add();
 
         if (!primaryMat.equals(BlockData.STONE)) {
-            create().with(new Block(primaryMat), 6)
-                    .result(new iBlock(BlockData.toDoor(primaryMat)), 2).add();
+            create().result(new iBlock(BlockData.toDoor(primaryMat)), 2)
+                    .with(new Block(primaryMat), 6).add();
 
-            create().with(new Block(primaryMat), 6)
-                .result(new Block(BlockData.toFence(primaryMat)), 4).add();
+            create().result(new Block(BlockData.toFence(primaryMat)), 4)
+                    .with(new Block(primaryMat), 6).add();
         }
     }
 
