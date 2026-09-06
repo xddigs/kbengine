@@ -38,6 +38,8 @@ public class Frontend {
     private static final float FONT_SMALL = 16.0f;
     private static final float FONT_NORMAL = 24.0f;
     private static final float FONT_BIG = 32.0f;
+    private static final float TEXT_SHADOW_OFFSET = 2.0f;
+    private static final float TEXT_SHADOW_ALPHA = 0.65f;
 
     private static final UIFont small = new UIFont(K.Paths.FONT, FONT_SMALL);
     private static final UIFont normal = new UIFont(K.Paths.FONT, FONT_NORMAL);
@@ -471,7 +473,7 @@ public class Frontend {
     }
 
     /**
-     * Draws the string.
+     * Draws the string with a dark offset shadow.
      * @param text the {@link String} supplied as {@code text}
      * @param x the {@code float} supplied as {@code x}
      * @param y the {@code float} supplied as {@code y}
@@ -484,7 +486,7 @@ public class Frontend {
     }
 
     /**
-     * Draws the string.
+     * Draws the scaled string with a dark offset shadow.
      * @param text the {@link String} supplied as {@code text}
      * @param x the {@code float} supplied as {@code x}
      * @param y the {@code float} supplied as {@code y}
@@ -503,6 +505,29 @@ public class Frontend {
         shader.setUniform("uUseFont", true);
         shader.setUniform("uFrameIndex", 0);
         shader.setUniform("uTotalFrames", 1);
+
+        float shadowOffset = TEXT_SHADOW_OFFSET * textScale;
+        drawStringPass(text, x + shadowOffset, y + shadowOffset, font,
+                new Vector4f(0.0f, 0.0f, 0.0f,
+                        color.w * TEXT_SHADOW_ALPHA), textScale);
+        drawStringPass(text, x, y, font, color, textScale);
+
+        font.unbind();
+        shader.setUniform("uUseFont", false);
+    }
+
+    /**
+     * Renders one text-color pass using the currently bound font atlas.
+     * @param text the text to render
+     * @param x the horizontal origin
+     * @param y the vertical origin
+     * @param font the bound font
+     * @param color the pass color
+     * @param textScale the glyph scale
+     */
+    private static void drawStringPass(String text, float x, float y,
+                                       UIFont font, Vector4f color,
+                                       float textScale) {
         shader.setUniform("uColor", color);
 
         float cursorX = x;
@@ -540,9 +565,6 @@ public class Frontend {
             cursorX += glyph.xadvance() * textScale;
             i += Character.charCount(codePoint);
         }
-
-        font.unbind();
-        shader.setUniform("uUseFont", false);
     }
 
     /**
