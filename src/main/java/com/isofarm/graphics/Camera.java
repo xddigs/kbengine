@@ -3,7 +3,6 @@ package com.isofarm.graphics;
 import com.isofarm.data.BlockData;
 import com.isofarm.data.BlockPos;
 import com.isofarm.data.BlockShape;
-import com.isofarm.data.InteractiveBlocks;
 import com.isofarm.data.Ray;
 import com.isofarm.item.Bucket;
 import com.isofarm.utils.K;

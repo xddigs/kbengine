@@ -215,7 +215,7 @@ public class GameInteraction {
             if (player != null && !player.isAttacking()) {
                 player.interact();
             }
-            if (hoveredCell.data() instanceof InteractiveBlocks) {
+            if (hoveredCell.data() instanceof BlockData data && data.isInteractive()) {
                 iBlock interactiveBlock = GameMaster.game.getWorld().getInteractiveBlockAt(
                         hoveredCell.x(), hoveredCell.y(), hoveredCell.z());
                 if (interactiveBlock != null) {
@@ -607,18 +607,9 @@ public class GameInteraction {
     private void breakBlock(GameMaster gameMaster, BlockPos cell, Blockable blockable,
                             byte blockId, Item selectedItem) {
         World world = GameMaster.game.getWorld();
-
-        BlockData blockData = blockable instanceof BlockData ? (BlockData) blockable :
-                BlockData.fromId(blockId);
-        InteractiveBlocks interactive = blockable instanceof InteractiveBlocks ?
-                (InteractiveBlocks) blockable : null;
-
+        BlockData blockData = blockable instanceof BlockData data ? data : BlockData.fromId(blockId);
         if (blockData.getSoundGroup() != null) {
             SoundService.fx.playBreakSound(blockData.getSoundGroup());
-        }
-
-        if (interactive != null) {
-            SoundService.fx.playBreakSound(interactive.getSoundGroup());
         }
 
         Vector3f position = new Vector3f(cell.x() + 0.5f, cell.y() + 0.5f, cell.z() + 0.5f);

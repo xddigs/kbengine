@@ -43,7 +43,7 @@ public class ResourceManager {
 
     private static final GLTFModel playerModel = GLTFLoader.load(K.Paths.PLAYER_MODEL);
 
-    private static final Map<Blockable, GLTFModel> blockModels = new LinkedHashMap<>();
+    private static final Map<BlockData, GLTFModel> blockModels = new LinkedHashMap<>();
     private static final Map<CropType, SpriteSheet> cropSpritesheets = new EnumMap<>(CropType.class);
 
     private static final Shader defaultShader = new Shader(K.Paths.DEFAULT_VERT_SHADER, K.Paths.DEFAULT_FRAG_SHADER);
@@ -75,8 +75,8 @@ public class ResourceManager {
             block.initRegions(blocksAtlas);
         }
 
-        for (InteractiveBlocks block : InteractiveBlocks.values()) {
-            if (block.getModelPath() != null) {
+        for (BlockData block : BlockData.values()) {
+            if (block.isInteractive() && block.getModelPath() != null) {
                 blockModels.put(block, GLTFLoader.load(block.getModelPath()));
             }
         }
@@ -161,7 +161,7 @@ public class ResourceManager {
     public static int getItemFrame(Item item) {
         if (item instanceof iBlock block && block.getType() != null) {
             return (block.getType().getRow() * K.UI.ICON_BLOCK_COLS)
-                    + block.getType().getCol();
+                    + block.getType().getCol() - 1;
         }
 
         if (item instanceof Block block && block.getType() != null) {
@@ -532,7 +532,7 @@ public class ResourceManager {
      *
      * @return the {@link Map} representing the interactive block model map
      */
-    public Map<Blockable, GLTFModel> getBlockModels() {
+    public Map<BlockData, GLTFModel> getBlockModels() {
         return blockModels;
     }
 

@@ -2,7 +2,7 @@ package com.isofarm.item;
 
 import com.isofarm.data.BlockPos;
 import com.isofarm.data.Inventory;
-import com.isofarm.data.InteractiveBlocks;
+import com.isofarm.data.BlockData;
 import com.isofarm.graphics.ResourceManager;
 import com.isofarm.graphics.gltf.GLTFNode;
 import com.isofarm.graphics.gltf.GLTFModel;
@@ -24,7 +24,7 @@ public class iBlock implements Craftable {
     private static final float DOOR_MIN_Z = 0.0625f;
     private static final float DOOR_DEPTH = 0.0625f;
 
-    private final InteractiveBlocks type;
+    private final BlockData type;
     private final GLTFModel blockModel;
     private final Inventory inventory;
     private int x, y, z;
@@ -33,20 +33,30 @@ public class iBlock implements Craftable {
     private float animationProgress;
     private float orientation;
 
-    public iBlock(InteractiveBlocks type, int x, int y, int z) {
+    /**
+     * Creates an interactive block at the supplied position.
+     * @param type interactive {@link BlockData} type
+     * @param x world x coordinate
+     * @param y world y coordinate
+     * @param z world z coordinate
+     */
+    public iBlock(BlockData type, int x, int y, int z) {
         this(type, x, y, z, 0.0f);
     }
 
     /**
      * Creates an interactive block at the supplied position and orientation.
      *
-     * @param type the {@link InteractiveBlocks} argument; the interactive block type
+     * @param type the {@link BlockData} argument; the interactive block type
      * @param x the {@code int} argument; the x coordinate
      * @param y the {@code int} argument; the y coordinate
      * @param z the {@code int} argument; the z coordinate
      * @param orientation the {@code float} argument; the rotation around the vertical axis, in radians
      */
-    public iBlock(InteractiveBlocks type, int x, int y, int z, float orientation) {
+    public iBlock(BlockData type, int x, int y, int z, float orientation) {
+        if (type == null || !type.isInteractive()) {
+            throw new IllegalArgumentException("Interactive BlockData required");
+        }
         this.type = type;
         this.blockModel = ResourceManager.rem.getBlockModels().get(type);
         this.inventory = new Inventory();
@@ -59,11 +69,20 @@ public class iBlock implements Craftable {
         this.orientation = orientation;
     }
 
-    public iBlock(InteractiveBlocks type, BlockPos pos) {
+    /**
+     * Creates an interactive block at a stored block position.
+     * @param type interactive {@link BlockData} type
+     * @param pos world position
+     */
+    public iBlock(BlockData type, BlockPos pos) {
         this(type, pos.x(), pos.y(), pos.z());
     }
 
-    public iBlock(InteractiveBlocks type) {
+    /**
+     * Creates an unplaced interactive inventory item.
+     * @param type interactive {@link BlockData} type
+     */
+    public iBlock(BlockData type) {
         this(type, 0, 0, 0);
     }
 
@@ -125,9 +144,9 @@ public class iBlock implements Craftable {
     /**
      * Returns the type of block
      *
-     * @return {@link InteractiveBlocks} the type of block
+     * @return {@link BlockData} the type of block
      */
-    public InteractiveBlocks getType() {
+    public BlockData getType() {
         return type;
     }
 
@@ -368,7 +387,7 @@ public class iBlock implements Craftable {
     }
 
     private void applyAnimation() {
-        if (type != InteractiveBlocks.CHEST) {
+        if (type != BlockData.CHEST) {
             return;
         }
 

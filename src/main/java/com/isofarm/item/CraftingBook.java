@@ -17,12 +17,7 @@ import java.util.stream.Collectors;
  */
 public class CraftingBook extends Book implements Undroppable {
     private static final int LINES_PER_PAGE = 16;
-    private RecipeOrder recipeOrder = RecipeOrder.NAME;
-
-    private enum RecipeOrder {
-        NAME,
-        TYPE
-    }
+    private Inventory.SortOrder recipeOrder = Inventory.SortOrder.NAME;
 
     /**
      * Creates a new {@code CraftingBook} instance.
@@ -76,7 +71,7 @@ public class CraftingBook extends Book implements Undroppable {
      * Sorts the recipes alphabetically by their localized result name.
      */
     public void sortByName() {
-        recipeOrder = RecipeOrder.NAME;
+        recipeOrder = Inventory.SortOrder.NAME;
         reload();
     }
 
@@ -86,46 +81,8 @@ public class CraftingBook extends Book implements Undroppable {
      * before sorting by localized name.
      */
     public void sortByType() {
-        recipeOrder = RecipeOrder.TYPE;
+        recipeOrder = Inventory.SortOrder.TYPE;
         reload();
-    }
-
-    /**
-     * Returns the shared item ordering used by the crafting book and creative inventory.
-     * Supported categories are blocks, tools, usables, crafting materials and interactive
-     * blocks, in that order. Tools are ordered by ascending tier within their category.
-     * @return the category-first item comparator
-     */
-    public static Comparator<Item> itemTypeComparator() {
-        return Comparator
-                .comparingInt(CraftingBook::itemTypeOrder)
-                .thenComparingInt(CraftingBook::toolTierOrder)
-                .thenComparing(Item::getDisplayName, String.CASE_INSENSITIVE_ORDER);
-    }
-
-    /**
-     * Returns the tier order for tools without affecting any other item category.
-     * @param item the item whose tool tier is inspected
-     * @return the ascending tool-tier position, or {@code 0} for non-tools
-     */
-    private static int toolTierOrder(Item item) {
-        return item instanceof Tool tool ? tool.getTier().ordinal() : 0;
-    }
-
-    /**
-     * Returns the ordering of the item type used by the crafting book and creative inventory.
-     * @param item the {@link Item} supplied as {@code item}
-     * @return {@link Integer} the item type order
-     */
-    private static int itemTypeOrder(Item item) {
-        return switch (item) {
-            case Block ignored -> 0;
-            case iBlock ignored -> 1;
-            case Tool ignored -> 2;
-            case Usable ignored -> 3;
-            case Material ignored -> 4;
-            case null, default -> 5;
-        };
     }
 
     /**
@@ -133,14 +90,8 @@ public class CraftingBook extends Book implements Undroppable {
      * @return the {@link Comparator} used to sort recipes
      */
     private Comparator<Recipe> recipeComparator() {
-        Comparator<Recipe> byName = Comparator.comparing(
-                recipe -> recipe.result().getDisplayName(),
-                String.CASE_INSENSITIVE_ORDER);
-        if (recipeOrder == RecipeOrder.NAME) {
-            return byName;
-        }
-
-        return Comparator.comparing(Recipe::result, itemTypeComparator());
+        return Comparator.comparing(
+                Recipe::result, Inventory.sorter(recipeOrder));
     }
 
     /**

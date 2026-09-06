@@ -11,6 +11,13 @@ import java.util.*;
  */
 @DataClass
 public class Inventory {
+    /** Supported global item ordering strategies. */
+    public enum SortOrder {
+        NAME,
+        TYPE,
+        CREATIVE
+    }
+
     private final List<InventorySlot> slots;
     private final List<InventorySlot> equippedExtraItems = new ArrayList<>();
     private final InventorySlot backpackSlot;
@@ -316,12 +323,27 @@ public class Inventory {
      * localized name, in that order.
      * @return the creative item comparator
      */
-    public Comparator<Item> sorter() {
-        return Comparator
-                .comparingInt(Inventory::sortByOrder)
-                .thenComparingInt(Item::getId)
-                .thenComparing(Item::getDisplayName,
-                        String.CASE_INSENSITIVE_ORDER);
+    public static Comparator<Item> sorter() {
+        return sorter(SortOrder.CREATIVE);
+    }
+
+    /**
+     * Returns the shared item comparator for inventories and crafting books.
+     * @param order ordering strategy to apply
+     * @return comparator implementing the selected ordering
+     */
+    public static Comparator<Item> sorter(SortOrder order) {
+        Comparator<Item> byName = Comparator.comparing(
+                Item::getDisplayName, String.CASE_INSENSITIVE_ORDER);
+        if (order == SortOrder.NAME) return byName;
+
+        Comparator<Item> comparator = Comparator.comparingInt(Inventory::sortByOrder);
+        if (order == SortOrder.TYPE) {
+            comparator = comparator.thenComparingInt(Inventory::toolTierOrder);
+        } else {
+            comparator = comparator.thenComparingInt(Item::getId);
+        }
+        return comparator.thenComparing(byName);
     }
 
     /**
@@ -332,12 +354,21 @@ public class Inventory {
     public static int sortByOrder(Item item) {
         return switch (item) {
             case Block ignored -> 0;
-            case iBlock ignored -> 1;
-            case Tool ignored -> 2;
-            case Usable ignored -> 3;
-            case Material ignored -> 4;
+            case Tool ignored -> 1;
+            case Usable ignored -> 2;
+            case Material ignored -> 3;
+            case iBlock ignored -> 4;
             case null, default -> 5;
         };
+    }
+
+    /**
+     * Returns the ascending tier position for tools without affecting other categories.
+     * @param item item whose tool tier is inspected
+     * @return tier ordinal, or zero for non-tools
+     */
+    private static int toolTierOrder(Item item) {
+        return item instanceof Tool tool ? tool.getTier().ordinal() : 0;
     }
 
     /**

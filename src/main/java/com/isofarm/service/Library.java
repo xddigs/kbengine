@@ -57,13 +57,10 @@ public class Library implements Service<GameMaster> {
         }
 
         for (BlockData block : BlockData.values()) {
-            if (block.getId() > 0) {
+            if (block.getId() > 0 && !block.isInteractive()) {
                 registerDefault(itemR, () -> new Block(block));
             }
-        }
-
-        for (InteractiveBlocks block : InteractiveBlocks.values()) {
-            if (block.getId() > 0) {
+            if (block.isInteractive()) {
                 registerDefault(itemR, () -> new iBlock(block));
             }
         }

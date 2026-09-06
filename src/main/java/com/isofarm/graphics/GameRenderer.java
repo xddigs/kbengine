@@ -4,7 +4,6 @@ import com.isofarm.data.BlockData;
 import com.isofarm.data.BlockPos;
 import com.isofarm.data.BlockShape;
 import com.isofarm.data.Crop;
-import com.isofarm.data.InteractiveBlocks;
 import com.isofarm.data.RenderPass;
 import com.isofarm.entity.Player;
 import com.isofarm.input.GameInteraction;

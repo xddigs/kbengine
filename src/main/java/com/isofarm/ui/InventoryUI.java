@@ -598,7 +598,7 @@ public class InventoryUI extends UIElement {
     /**
      * Builds the creative catalog from registered items that have a supported
      * category, visible sprite and localized display name. The resulting order
-     * is shared with {@link CraftingBook#sortByType()}.
+     * is supplied globally by {@link Inventory#sorter()}.
      */
     private void buildCreativeCatalog() {
         creativeItems.clear();
@@ -616,7 +616,7 @@ public class InventoryUI extends UIElement {
             creativeItems.add(new MiningComponent(tier, MaterialID.INGOT));
         });
 
-        creativeItems.sort(inventory.sorter());
+        creativeItems.sort(Inventory.sorter());
         int totalRows = Math.ceilDiv(creativeItems.size(), K.UI.INVENTORY_COLUMNS);
         creativeScrollBar.setMaximum(Math.max(0,
                 totalRows - K.UI.INVENTORY_ROWS));

@@ -192,6 +192,9 @@ public enum BlockShape {
      * Builds the connected mesh variant for a staircase. The mask uses the
      * same bits as fences: north, south, west and east (1, 2, 4 and 8).
      * Connections are intentionally type-agnostic so stone and wood stairs join.
+     * @param orientation original placed staircase orientation
+     * @param mask four-bit neighboring-staircase connection mask
+     * @return the straight or corner staircase shape matching the connections
      */
     public static BlockShape staircaseConnected(BlockShape orientation, int mask) {
         if (!orientation.isStaircase()) return orientation;
