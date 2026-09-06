@@ -4,6 +4,7 @@ import com.isofarm.data.BlockData;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 
 /**
@@ -332,7 +333,7 @@ public class WorldGenerator implements Generator {
         for (Tree tree : trees) {
             if (Math.floorDiv(tree.x, Chunk.SIZE_X) == chunkX
                     && Math.floorDiv(tree.z, Chunk.SIZE_Z) == chunkZ) {
-                generateTree(tree.x, tree.y, tree.z, random);
+                generateTree(tree.x, tree.y, tree.z, random, BlockData.OAK_LOG);
             }
         }
     }
@@ -403,7 +404,19 @@ public class WorldGenerator implements Generator {
      */
     public static void generateTree(int worldX, int worldZ, Random random) {
         int surfaceY = findSurface(worldX, worldZ);
-        generateTree(worldX, surfaceY, worldZ, random);
+        generateTree(worldX, surfaceY, worldZ, random, BlockData.OAK_LOG);
+    }
+
+    /**
+     * Generates a tree using the log and matching leaves branch selected by {@code logType}.
+     * @param worldX the world x value
+     * @param worldZ the world z value
+     * @param random source of shape variation
+     * @param logType trunk block type; spruce selects the spruce tree variant
+     */
+    public static void generateTree(int worldX, int worldZ, Random random, BlockData logType) {
+        int surfaceY = findSurface(worldX, worldZ);
+        generateTree(worldX, surfaceY, worldZ, random, logType);
     }
 
     /**
@@ -427,8 +440,15 @@ public class WorldGenerator implements Generator {
      * @param surfaceY the {@code int} supplied as {@code surfaceY}
      * @param worldZ the {@code int} supplied as {@code worldZ}
      * @param random the {@link Random} supplied as {@code random}
+     * @param logType the trunk block type selecting the tree variant
      */
-    private static void generateTree(int worldX, int surfaceY, int worldZ, Random random) {
+    private static void generateTree(int worldX, int surfaceY, int worldZ, Random random,
+                                     BlockData logType) {
+        if (Objects.requireNonNull(logType) == BlockData.SPRUCE_LOG) {
+            generateSpruceTree(worldX, surfaceY, worldZ, random);
+            return;
+        }
+
         int trunkHeight = 4 + random.nextInt(5);
         for (int y = 1; y <= trunkHeight; y++)
             world.setBlockTypeAt(worldX, surfaceY + y, worldZ, BlockData.OAK_LOG.getId());
@@ -442,6 +462,32 @@ public class WorldGenerator implements Generator {
                     world.setBlockTypeAt(worldX + dx, y, worldZ + dz, BlockData.OAK_LEAVES.getId());
             }
         }
+    }
+
+    /** Generates a tall, pointed spruce with several progressively narrower foliage layers. */
+    private static void generateSpruceTree(int worldX, int surfaceY, int worldZ, Random random) {
+        int trunkHeight = 8 + random.nextInt(4);
+        for (int y = 1; y <= trunkHeight; y++) {
+            world.setBlockTypeAt(worldX, surfaceY + y, worldZ, BlockData.SPRUCE_LOG.getId());
+        }
+
+        int topY = surfaceY + trunkHeight;
+        for (int layer = 0; layer < trunkHeight - 1; layer++) {
+            int y = topY - layer;
+            int radius = layer < 2 ? 1 : Math.min(3, 1 + layer / 2);
+            for (int dx = -radius; dx <= radius; dx++) {
+                for (int dz = -radius; dz <= radius; dz++) {
+                    if (Math.abs(dx) + Math.abs(dz) > radius + 1) continue;
+                    if (Math.abs(dx) == radius && Math.abs(dz) == radius
+                            && random.nextDouble() < 0.35) continue;
+                    if (world.getBlockTypeAt(worldX + dx, y, worldZ + dz) == BlockData.AIR.getId()) {
+                        world.setBlockTypeAt(worldX + dx, y, worldZ + dz,
+                                BlockData.SPRUCE_LEAVES.getId());
+                    }
+                }
+            }
+        }
+        world.setBlockTypeAt(worldX, topY + 1, worldZ, BlockData.SPRUCE_LEAVES.getId());
     }
 
     /**
