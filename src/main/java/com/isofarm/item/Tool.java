@@ -11,7 +11,7 @@ import com.isofarm.utils.Local;
  * Encapsulates the state and operations required by tool within the game runtime.
  */
 @DataClass
-public abstract class Tool implements Item,
+public abstract class Tool implements Craftable,
         Enchantable, Equippable {
     private final byte id;
     private final String name;
