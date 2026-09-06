@@ -22,7 +22,7 @@ public class TreeService {
     public static final TreeService ts = new TreeService();
     private static final int LEAF_DECAY_CHECK_DISTANCE = 4;
     private static final int RANDOM_TICKS_PER_CHUNK = 3;
-    private static final int SAPLING_GROWTH_TICKS = 600;
+    private static final int SAPLING_GROWTH_TICKS = (int) Settings.getTicks();
     private final List<TreeSapling> saplings = new ArrayList<>();
     private final Random random = new Random();
 
@@ -115,10 +115,8 @@ public class TreeService {
      */
     public void plant(int x, int y, int z, BlockData saplingBlock) {
         World.wrld.setBlockTypeAt(x, y, z, saplingBlock.getId());
-        // TreeSapling counts from zero, so the target must be relative to the
-        // current world tick rather than the absolute tick counter.
-        saplings.add(new TreeSapling(x, y, z, saplingBlock,
-                (int) Settings.getTicks() + SAPLING_GROWTH_TICKS));
+        saplings.add(new TreeSapling(
+                x, y, z, saplingBlock, SAPLING_GROWTH_TICKS));
     }
 
     /**
@@ -155,7 +153,7 @@ public class TreeService {
             case OAK_BONSAI -> BlockData.OAK_LOG;
             default -> BlockData.OAK_LOG;
         };
-        WorldGenerator.generateTree(x, z, random, logType);
+        WorldGenerator.generateTree(x, y - 1, z, random, logType);
         GameMaster.game.rebuildChunkMeshAt(x, z);
     }
 
