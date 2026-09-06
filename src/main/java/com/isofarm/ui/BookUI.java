@@ -79,7 +79,7 @@ public class BookUI extends UIElement {
     private UIButton createButton(SpriteSheet icon, String tooltip, Runnable action) {
         UIButton button = new UIButton(0.0f, 0.0f, BUTTON_SIZE, BUTTON_SIZE)
                 .setOnClick(action)
-                .setDrawBackground(false);
+                .setCanDrawBackground(false);
         button.setSpriteSheet(icon);
         button.setTooltipText(tooltip);
         return button;
