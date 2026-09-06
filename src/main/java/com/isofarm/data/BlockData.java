@@ -49,6 +49,7 @@ public enum BlockData implements Blockable {
     SPRUCE_DOOR((byte) 26, (byte) 7, (byte) 2, 15, "assets/models/blocks/spruce_door.gltf", SoundGroup.DOOR, 2.0f, 2),
     SPRUCE_PLANK_FENCE((byte) 27, (byte) 8, (byte) 2, false, false, 100, "assets/textures/blocks/spruce_plank.png", SoundGroup.WOOD, 4.0f, false, new Object[]{}, Tier.WOODEN, false, false, true),
 
+
     COPPER_ORE((byte) 28, (byte) 1, (byte) 4, false, false, 150, "assets/textures/blocks/copper_ore.png", SoundGroup.STONE, 6.0f, false, new MiningComponent[]{new MiningComponent(Tier.COPPER, MaterialID.RAW_ORE)}, Tier.COPPER),
     IRON_ORE((byte) 29, (byte) 2, (byte) 4, false, false, 150, "assets/textures/blocks/iron_ore.png", SoundGroup.STONE, 8.0f, false, new MiningComponent[]{new MiningComponent(Tier.IRON, MaterialID.RAW_ORE)}, Tier.IRON),
     STEEL_ORE((byte) 30, (byte) 3, (byte) 4, false, false, 200, "assets/textures/blocks/steel_ore.png", SoundGroup.STONE, 10.0f, false,new MiningComponent[]{new MiningComponent(Tier.STEEL, MaterialID.RAW_ORE)}, Tier.STEEL),
