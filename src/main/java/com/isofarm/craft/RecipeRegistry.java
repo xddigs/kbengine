@@ -105,6 +105,10 @@ public class RecipeRegistry {
                     .with(new Material(Tier.NONE, MaterialID.CHARCOAL), 2)
                     .add();
         }
+
+        create().result(new Block(BlockData.GLASS), 4)
+                .with(new Block(BlockData.SAND), 1)
+                .with(new Material(Tier.NONE, MaterialID.CHARCOAL), 1).add();
     }
 
     /**
