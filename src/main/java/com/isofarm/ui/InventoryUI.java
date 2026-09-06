@@ -27,6 +27,7 @@ public class InventoryUI extends UIElement {
     private static final int BACKPACK_COLUMNS = 4;
     private static final int BACKPACK_ROWS = 4;
     private static final int GUI_SLICE_SIZE = 3;
+
     private static final Logger log = LoggerFactory.getLogger(InventoryUI.class);
 
     private final InventorySlotUI[] slotUIs;

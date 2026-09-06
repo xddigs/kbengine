@@ -160,7 +160,7 @@ public class UIScrollBar extends UIElement {
         Texture track = Frontend.createNineSliceTexture(
                 ResourceManager.rem.getScrollBar(), textureWidth,
                 textureHeight, TRACK_SLICE_SIZE);
-        Vector4f color = new Vector4f(1.0f, 1.0f, 1.0f, getWorldOpacity());
+        Vector4f color = new Vector4f(1.0f);
         Frontend.drawTexture(track, getAbsoluteX(), getAbsoluteY(),
                 getAbsoluteWidth(), getAbsoluteHeight(), color);
         Frontend.drawTexture(ResourceManager.rem.getScrollKnob(),

@@ -942,5 +942,12 @@ public class Frontend {
         shader.dispose();
     }
 
+    /**
+     * Draws a texture.
+     * @param sourceId the {@code int} supplied as {@code sourceId}
+     * @param width the {@code float} supplied as {@code width}
+     * @param height the {@code float} supplied as {@code height}
+     * @param sliceSize the {@code float} supplied as {@code sliceSize}
+     */
     private record NineSliceKey(int sourceId, int width, int height, int sliceSize) {}
 }

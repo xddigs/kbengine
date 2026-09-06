@@ -32,6 +32,7 @@ public class UITooltip extends UIElement {
     @Override
     public void render() {
         if (!isActuallyVisible() || text == null || text.isBlank()) return;
+
         Frontend.drawRect(getAbsoluteX(), getAbsoluteY(), getAbsoluteWidth(), getAbsoluteHeight(),
                 K.UI.UI_BACKGROUND_COLOR, Settings.getScaledCornerRadius(),
                 K.UI.UI_BORDER_COLOR, Settings.getScaledThickness());
