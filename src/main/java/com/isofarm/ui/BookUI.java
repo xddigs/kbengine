@@ -272,6 +272,19 @@ public class BookUI extends UIElement {
             checkHover(book.getPage(rightPageIndex), centerX + pageWidth, y,
                     pageWidth, bookHeight, lineHeight);
         }
+
+        // The page surface itself is not interactive; only actionable book lines
+        // and icon entries should switch to the hover cursor frame.
+        Mouse.setCursorHovered(hoveredBookLine != null);
+    }
+
+    /**
+     * Lets the UI manager hit-test the book's children without treating the
+     * entire decorative book surface as an interactive control.
+     */
+    @Override
+    public boolean contains(float mouseX, float mouseY) {
+        return false;
     }
 
     /**
