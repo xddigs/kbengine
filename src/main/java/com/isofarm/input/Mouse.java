@@ -16,7 +16,6 @@ import static org.lwjgl.system.MemoryUtil.NULL;
  * Encapsulates the state and operations required by mouse within the game runtime.
  */
 public final class Mouse {
-    /** Preferred hotspot of pointer.png: the tip of the raised index finger. */
     private static final int CURSOR_HOTSPOT_X = 20;
     private static final int CURSOR_HOTSPOT_Y = 8;
 
@@ -242,9 +241,6 @@ public final class Mouse {
                 }
             }
 
-            // GLFW requires the hotspot to be inside the image. The current
-            // spritesheet uses 12x12 frames, whereas older pointer art used a
-            // wider frame, so retain the preferred point but clamp it safely.
             int hotspotX = Math.clamp(CURSOR_HOTSPOT_X, 0, frameWidth - 1);
             int hotspotY = Math.clamp(CURSOR_HOTSPOT_Y, 0, frameHeight - 1);
             GLFWImage image = GLFWImage.malloc(stack)
