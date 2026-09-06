@@ -411,28 +411,6 @@ public class Inventory {
     }
 
     /**
-     * Transfers or creates the relevant entity or item for take.
-     * @param index the {@code int} supplied as {@code index}
-     * @param amount the {@code int} supplied as {@code amount}
-     * @return {@code int}; the take result
-     */
-    public int take(int index, int amount) {
-        if (!isValidIndex(index) || amount <= 0) {
-            return 0;
-        }
-
-        InventorySlot slot = slots.get(index);
-
-        if (slot.isEmpty()) {
-            return 0;
-        }
-
-        int taken = Math.min(amount, slot.getAmount());
-        slot.setAmount(slot.getAmount() - taken);
-        return taken;
-    }
-
-    /**
      * Adds the to stack.
      * @param targetIndex the {@code int} supplied as {@code targetIndex}
      * @param item the {@link Item} supplied as {@code item}
@@ -440,7 +418,7 @@ public class Inventory {
      * @return {@code int}; the add to stack result
      */
     public int addToStack(int targetIndex, Item item, int amount) {
-        if (!isValidIndex(targetIndex) || item == null || amount <= 0) {
+        if (isValidIndex(targetIndex) || item == null || amount <= 0) {
             return 0;
         }
 
@@ -667,7 +645,7 @@ public class Inventory {
      * @return the {@link InventorySlot} representing the slot
      */
     public InventorySlot getSlot(int index) {
-        if (!isValidIndex(index)) {
+        if (isValidIndex(index)) {
             throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + slots.size());
         }
 
@@ -743,6 +721,6 @@ public class Inventory {
      * @return {@code true} if valid index; otherwise {@code false}
      */
     private boolean isValidIndex(int index) {
-        return index >= 0 && index < slots.size();
+        return index < 0 || index >= slots.size();
     }
 }

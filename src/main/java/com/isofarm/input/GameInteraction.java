@@ -663,6 +663,8 @@ public class GameInteraction {
             }
         }
 
+        boolean grassBrokenInSurvival = blockData == BlockData.GRASS
+                && Player.plyr.getGamemode().isSurvival();
         world.setBlockTypeAt(cell, BlockData.AIR.getId());
         world.setFluidLevelAt(cell.x(), cell.y(), cell.z(), (byte) 0);
         breakAbove(cell.x(), cell.y(), cell.z());
@@ -670,7 +672,10 @@ public class GameInteraction {
         GameMaster.game.rebuildChunkMeshAt(cell);
         ParticleEngine.peng.spawnBlock(cell, blockData);
 
-        if (removedBlock.getType().hasDrops()) {
+        // Turf yields a dirt block in survival, rather than the grass block itself.
+        if (grassBrokenInSurvival) {
+            itemToDrop = new Block(BlockData.DIRT, cell);
+        } else if (removedBlock.getType().hasDrops()) {
             Object dropObj = removedBlock.getType().getRandomDrop();
             if (dropObj instanceof MaterialID mid) {
                 itemToDrop = new Material(removedBlock.getType().getTier(), mid);

@@ -139,6 +139,47 @@ public class GameRenderer {
             }
         });
 
+        // The grass shader is an overlay pass: it discards every fragment except
+        // green texels belonging to the grass block's top or side atlas regions.
+        Shader grassShader = ResourceManager.rem.getGrassShader();
+        grassShader.bind();
+        grassShader.setUniform("uTexture", textureUnit);
+        grassShader.setUniform("uShadowMap", shadowUnit);
+        grassShader.setUniform("uProjection", camera.getProjectionMatrix());
+        grassShader.setUniform("uView", camera.getViewMatrix());
+        grassShader.setUniform("uSunColor", lighting.getColor());
+        grassShader.setUniform("uLightIntensity", lighting.getIntensity());
+        grassShader.setUniform("uLightDirection", lighting.getDirection());
+        grassShader.setUniform("uAmbientIntensity", lighting.getAmbientIntensity());
+        grassShader.setUniform("uSkyColor", TimeService.getSkyColor());
+        grassShader.setUniform("uLightSpaceMatrix", ShadowSystem.sys.getLightSpaceMatrix());
+        grassShader.setUniform("uEnableShadows", Settings.doEnableShadows());
+        grassShader.setUniform("uGrassTint", ResourceManager.rem.getGrassTint());
+        TextureAtlas.TextureRegion grassTopRegion = BlockData.GRASS.getTopRegion();
+        TextureAtlas.TextureRegion grassSideRegion = BlockData.GRASS.getSideRegion();
+        if (grassTopRegion != null && grassSideRegion != null) {
+            grassShader.setUniform("uGrassTopUVBounds", new Vector4f(
+                    grassTopRegion.uvMin().x, grassTopRegion.uvMin().y,
+                    grassTopRegion.uvMax().x, grassTopRegion.uvMax().y));
+            grassShader.setUniform("uGrassSideUVBounds", new Vector4f(
+                    grassSideRegion.uvMin().x, grassSideRegion.uvMin().y,
+                    grassSideRegion.uvMax().x, grassSideRegion.uvMax().y));
+            glDepthFunc(GL_LEQUAL);
+            chunkMeshes.forEach((chunk, chunkMesh) -> {
+                if (chunkMesh == null || chunkMesh.solidMesh() == null
+                        || chunkMesh.solidMesh().getIndicesCount() <= 0) return;
+                float minX = chunk.getChunkX() * Chunk.SIZE_X;
+                float minZ = chunk.getChunkZ() * Chunk.SIZE_Z;
+                if (frustum.testAab(minX, 0, minZ, minX + Chunk.SIZE_X,
+                        Chunk.SIZE_Y, minZ + Chunk.SIZE_Z)) {
+                    modelMatrix.identity().translate(minX, 0, minZ);
+                    grassShader.setUniform("uModel", modelMatrix);
+                    chunkMesh.solidMesh().render();
+                }
+            });
+            glDepthFunc(GL_LESS);
+        }
+
         // Draw the player before the translucent water. The depth buffer then
         // keeps the dry part unobscured while water blends over submerged parts.
         if (player != null) {

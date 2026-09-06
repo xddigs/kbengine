@@ -51,6 +51,7 @@ public class BookUI extends UIElement {
     private BookLine hoveredBookLine;
     private final UIButton sortNameButton;
     private final UIButton sortTypeButton;
+    private final UIButton homeCraftingsButton;
     private final UIButton closeButton;
 
     /**
@@ -62,15 +63,14 @@ public class BookUI extends UIElement {
      */
     public BookUI(float x, float y, float width, float height) {
         super(x, y, width, height);
-        sortNameButton = createButton(ResourceManager.rem.getBookSortNameIcon(),
-                "book.sort_name", () -> sortCraftingBook(true));
-        sortTypeButton = createButton(ResourceManager.rem.getBookSortTypeIcon(),
-                "book.sort_type", () -> sortCraftingBook(false));
-        closeButton = createButton(ResourceManager.rem.getBookCloseIcon(),
-                "book.close", BookService.bs::close);
+        sortNameButton = createButton(ResourceManager.rem.getBookSortNameIcon(), "book.sort_name", () -> sortCraftingBook(true));
+        sortTypeButton = createButton(ResourceManager.rem.getBookSortTypeIcon(), "book.sort_type", () -> sortCraftingBook(false));
+        homeCraftingsButton = createButton(ResourceManager.rem.getBookHomeCraftings(), "book.toggle_recipes", BookService.bs::toggleRecipes);
+        closeButton = createButton(ResourceManager.rem.getBookCloseIcon(), "book.close", BookService.bs::close);
 
         addChild(sortNameButton);
         addChild(sortTypeButton);
+        addChild(homeCraftingsButton);
         addChild(closeButton);
         layoutButtons(width);
         hide();
@@ -90,8 +90,8 @@ public class BookUI extends UIElement {
         float startX = bookWidth - K.UI.UI_BOOK_PADDING_X - totalWidth;
         sortNameButton.setPosition(startX, BUTTON_TOP_PADDING);
         sortTypeButton.setPosition(startX + BUTTON_SIZE + BUTTON_GAP, BUTTON_TOP_PADDING);
-        closeButton.setPosition(startX + (BUTTON_SIZE + BUTTON_GAP) * 2.0f,
-                BUTTON_TOP_PADDING);
+        homeCraftingsButton.setPosition(startX + (BUTTON_SIZE + BUTTON_GAP) * 2.0f, BUTTON_TOP_PADDING);
+        closeButton.setPosition(startX + (BUTTON_SIZE + BUTTON_GAP) * 3.0f, BUTTON_TOP_PADDING);
     }
 
     private void sortCraftingBook(boolean byName) {

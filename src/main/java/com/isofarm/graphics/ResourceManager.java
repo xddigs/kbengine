@@ -5,6 +5,7 @@ import com.isofarm.graphics.gltf.GLTFLoader;
 import com.isofarm.graphics.gltf.GLTFModel;
 import com.isofarm.item.*;
 import com.isofarm.utils.K;
+import org.joml.Vector3f;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,6 +32,7 @@ public class ResourceManager {
     private static final SpriteSheet bookAnimationSheet = new SpriteSheet(K.Paths.BOOK_ANIMATION, 16, 1);
     private static final SpriteSheet bookSortNameIcon = new SpriteSheet(K.Paths.BOOK_SORT_NAME, 1, 1);
     private static final SpriteSheet bookSortTypeIcon = new SpriteSheet(K.Paths.BOOK_SORT_TYPE, 1, 1);
+    private static final SpriteSheet bookHomeCraftings = new SpriteSheet(K.Paths.BOOK_LOCAL_CRAFTINGS, 2, 1);
     private static final SpriteSheet bookCloseIcon = new SpriteSheet(K.Paths.BOOK_CLOSE, 1, 1);
     private static final SpriteSheet heartsSpriteSheet = new SpriteSheet(K.Paths.HEARTS_SPRITESHEET, 1, K.UI.ICON_HEARTS_ROWS);
     private static final SpriteSheet destroyTexture = new SpriteSheet(K.Paths.DESTROY_STAGES, K.UI.DESTROY_FRAMES, 1);
@@ -47,11 +49,13 @@ public class ResourceManager {
     private static final Map<CropType, SpriteSheet> cropSpritesheets = new EnumMap<>(CropType.class);
 
     private static final Shader defaultShader = new Shader(K.Paths.DEFAULT_VERT_SHADER, K.Paths.DEFAULT_FRAG_SHADER);
+    private static final Shader grassShader = new Shader(K.Paths.GRASS_VERT_SHADER, K.Paths.GRASS_FRAG_SHADER);
     private static final Shader destroyShader = new Shader(K.Paths.DESTROY_VERT_SHADER, K.Paths.DESTROY_FRAG_SHADER);
     private static final Shader rainShader = new Shader(K.Paths.RAIN_VERT_SHADER, K.Paths.RAIN_FRAG_SHADER);
     private static final Shader motionBlurShader = new Shader(K.Paths.MOTION_BLUR_VERT_SHADER, K.Paths.MOTION_BLUR_FRAG_SHADER);
     private static final Shader shadowMapShader = new Shader(K.Paths.SHADOW_VERT_SHADER, K.Paths.SHADOW_FRAG_SHADER);
     private static final Shader blurShader = new Shader(K.Paths.BLUR_VERT_SHADER, K.Paths.BLUR_FRAG_SHADER);
+    private final Vector3f grassTint = new Vector3f(1.0f, 1.0f, 1.0f);
 
     private static final Mesh screenQuadMesh = Mesh.screenQuad();
     private static final Mesh blockMesh = Mesh.createMesh(K.World.DEFAULT_BLOCK_DEPTH);
@@ -250,6 +254,7 @@ public class ResourceManager {
         heartsSpriteSheet.dispose();
 
         defaultShader.dispose();
+        grassShader.dispose();
         destroyShader.dispose();
         motionBlurShader.dispose();
         rainShader.dispose();
@@ -263,6 +268,31 @@ public class ResourceManager {
      */
     public Shader getDefaultShader() {
         return defaultShader;
+    }
+
+    /**
+     * Returns the shader that recolors only the green pixels in grass-block textures.
+     * @return the {@link Shader} used for the grass tint pass
+     */
+    public Shader getGrassShader() {
+        return grassShader;
+    }
+
+    /**
+     * Sets the multiplicative grass tint used by the terrain renderer.
+     * A value of {@code (1, 1, 1)} preserves the source texture and is the default.
+     * @param tint the biome-specific RGB tint
+     */
+    public void setGrassTint(Vector3f tint) {
+        grassTint.set(tint == null ? new Vector3f(1.0f) : tint);
+    }
+
+    /**
+     * Returns a copy of the configured grass tint.
+     * @return the current grass tint
+     */
+    public Vector3f getGrassTint() {
+        return new Vector3f(grassTint);
     }
 
     /**
@@ -504,6 +534,14 @@ public class ResourceManager {
     }
 
     /**
+     * Returns the icon used to toggle local recipes (available ones)
+     * @return the {@link SpriteSheet} representing toggle-local-recipes
+     */
+    public SpriteSheet getBookHomeCraftings() {
+        return bookHomeCraftings;
+    }
+
+    /**
      * Returns the icon used to close a book.
      * @return the {@link SpriteSheet} representing the close icon
      */
@@ -549,6 +587,7 @@ public class ResourceManager {
             case "motion_blur" -> motionBlurShader;
             case "blur" -> blurShader;
             case "shadow" -> shadowMapShader;
+            case "grass" -> grassShader;
             case "default", "item" -> defaultShader;
             default -> {
                 log.warn("Shader '{}' not found, using defaultShader", name);

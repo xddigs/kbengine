@@ -72,4 +72,9 @@ public class BookService implements Service<Book> {
             openedBook = null;
         }
     }
+
+    public void toggleRecipes() {
+        // TODO toggle recipes that can only be crafted,
+        //  whilst the alternative is showing all recipes
+    }
 }
