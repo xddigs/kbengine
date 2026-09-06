@@ -36,7 +36,13 @@ public class BookUI extends UIElement {
     private static final float MOUSE_OFFSET = 32.0f;
     private static final float BUTTON_SIZE = Settings.getScaledSlot();
     private static final float BUTTON_GAP = 10.0f;
-    private static final float BUTTON_TOP_PADDING = 44.0f;
+    private static final float BUTTON_TOP_PADDING = 96.0f;
+    private static final float LEFT_PAGE_CONTENT_INSET = 0.154f;
+    private static final float RIGHT_PAGE_CONTENT_INSET = 0.038f;
+    private static final float PAGE_CONTENT_WIDTH = 0.808f;
+    private static final float PAGE_CONTENT_TOP = 0.154f;
+    private static final float PAGE_CONTENT_HEIGHT = 0.692f;
+    private static final float PAGE_TEXT_INSET = 0.092f;
 
     public static BookUI bui;
     private float animationProgress = 0.0f;
@@ -97,7 +103,8 @@ public class BookUI extends UIElement {
     }
 
     private void sortCraftingBook(boolean byName) {
-        if (!isOpen() || !(BookService.bs.getOpenedBook() instanceof CraftingBook book)) {
+        if (!isOpen() || !(BookService.bs.getOpenedBook()
+                instanceof CraftingBook book)) {
             return;
         }
 
@@ -244,8 +251,6 @@ public class BookUI extends UIElement {
         float easedProgress = easeInOutCubic(animationProgress);
         float y = lerp(screenHeight, centerY, easedProgress);
 
-        float paddingX = K.UI.UI_BOOK_PADDING_X;
-        float paddingTop = K.UI.UI_BOOK_PADDING_TOP;
         float lineHeight = Frontend.getNormalFont().getSize();
 
         setTooltipText(null);
@@ -259,13 +264,13 @@ public class BookUI extends UIElement {
 
         if (leftPageIndex < book.getPages().size()) {
             checkHover(book.getPage(leftPageIndex), centerX, y,
-                    pageWidth, bookHeight, paddingX, paddingTop, lineHeight);
+                    pageWidth, bookHeight, lineHeight);
         }
 
         int rightPageIndex = leftPageIndex + 1;
         if (hoveredBookLine == null && rightPageIndex < book.getPages().size()) {
             checkHover(book.getPage(rightPageIndex), centerX + pageWidth, y,
-                    pageWidth, bookHeight, paddingX, paddingTop, lineHeight);
+                    pageWidth, bookHeight, lineHeight);
         }
     }
 
@@ -276,20 +281,18 @@ public class BookUI extends UIElement {
      * @param pageY the {@code float} supplied as {@code pageY}
      * @param pageWidth the {@code float} supplied as {@code pageWidth}
      * @param pageHeight the {@code float} supplied as {@code pageHeight}
-     * @param paddingX the {@code float} argument; the horizontal text padding
-     * @param paddingTop the {@code float} argument; the vertical text padding
      * @param lineHeight the {@code float} supplied as {@code lineHeight}
      */
     private void checkHover(Page page, float pageX, float pageY,
                             float pageWidth, float pageHeight,
-                            float paddingX, float paddingTop, float lineHeight) {
+                            float lineHeight) {
         if (hasItemIcons(page)) {
             checkGridHover(page, pageX, pageY, pageWidth, pageHeight);
             return;
         }
 
-        float textX = pageX + paddingX;
-        float textY = pageY + paddingTop;
+        float textX = getPageTextX(pageX, pageWidth);
+        float textY = getPageContentTop(pageY, pageHeight);
         for (BookLine bookLine : page.getLines()) {
             if (bookLine.isInteractive() && isMouseHovering(textX, textY, bookLine.getText())) {
                 hoveredBookLine = bookLine;
@@ -310,8 +313,10 @@ public class BookUI extends UIElement {
                                 float pageWidth, float pageHeight) {
         float gridWidth = getGridWidth();
         float gridHeight = getGridHeight();
-        float gridX = pageX + (pageWidth - gridWidth) * 0.5f;
-        float gridY = pageY + (pageHeight - gridHeight) * 0.5f;
+        float gridX = getPageContentX(pageX, pageWidth)
+                + (getPageContentWidth(pageWidth) - gridWidth) * 0.5f;
+        float gridY = getPageContentTop(pageY, pageHeight)
+                + (getPageContentHeight(pageHeight) - gridHeight) * 0.5f;
 
         int count = Math.min(page.getLines().size(), GRID_COLUMNS * GRID_ROWS);
         for (int index = 0; index < count; index++) {
@@ -362,7 +367,8 @@ public class BookUI extends UIElement {
         updateButtonState();
 
         Vector4f color = new Vector4f(0.8706f, 0.8196f, 0.6745f, 1.0f);
-        Frontend.drawRect(centerX, y + BASE_CONTENT_HEIGHT_OFFSET + BASE_CONTENT_HEIGHT_OFFSET/2f, bookWidth, bookHeight + BASE_CONTENT_HEIGHT_OFFSET, color);
+        Frontend.drawRect(centerX, y + BASE_CONTENT_HEIGHT_OFFSET + BASE_CONTENT_HEIGHT_OFFSET/2f,
+                bookWidth, bookHeight + BASE_CONTENT_HEIGHT_OFFSET, color);
 
         if (isFlippingPage) {
             pageFlipTimer += delta;
@@ -587,8 +593,8 @@ public class BookUI extends UIElement {
             return;
         }
 
-        float textX = pageX + K.UI.UI_BOOK_PADDING_X;
-        float textY = pageY + K.UI.UI_BOOK_PADDING_TOP;
+        float textX = getPageTextX(pageX, pageWidth);
+        float textY = getPageContentTop(pageY, pageHeight);
         float lineHeight = Frontend.getNormalFont().getSize();
         for (BookLine bookLine : page.getLines()) {
             String renderText = bookLine.getText();
@@ -617,8 +623,10 @@ public class BookUI extends UIElement {
      */
     private void renderItemGrid(Page page, float pageX, float pageY,
                                 float pageWidth, float pageHeight, float alpha) {
-        float gridX = pageX + (pageWidth - getGridWidth()) * 0.5f;
-        float gridY = pageY + (pageHeight - getGridHeight()) * 0.5f;
+        float gridX = getPageContentX(pageX, pageWidth)
+                + (getPageContentWidth(pageWidth) - getGridWidth()) * 0.5f;
+        float gridY = getPageContentTop(pageY, pageHeight)
+                + (getPageContentHeight(pageHeight) - getGridHeight()) * 0.5f;
         int count = Math.min(page.getLines().size(), GRID_COLUMNS * GRID_ROWS);
 
         for (int index = 0; index < count; index++) {
@@ -656,6 +664,33 @@ public class BookUI extends UIElement {
 
     private float getGridHeight() {
         return GRID_ROWS * GRID_ICON_SIZE + (GRID_ROWS - 1) * GRID_GAP;
+    }
+
+    private float getPageContentX(float pageX, float pageWidth) {
+        float inset = isRightPage(pageX, pageWidth)
+                ? RIGHT_PAGE_CONTENT_INSET : LEFT_PAGE_CONTENT_INSET;
+        return pageX + pageWidth * inset;
+    }
+
+    private float getPageContentWidth(float pageWidth) {
+        return pageWidth * PAGE_CONTENT_WIDTH;
+    }
+
+    private float getPageContentTop(float pageY, float pageHeight) {
+        return pageY + pageHeight * PAGE_CONTENT_TOP;
+    }
+
+    private float getPageContentHeight(float pageHeight) {
+        return pageHeight * PAGE_CONTENT_HEIGHT;
+    }
+
+    private float getPageTextX(float pageX, float pageWidth) {
+        return getPageContentX(pageX, pageWidth) + pageWidth * PAGE_TEXT_INSET;
+    }
+
+    private boolean isRightPage(float pageX, float pageWidth) {
+        float bookLeft = (Frontend.getScreenWidth() - pageWidth * 2.0f) * 0.5f;
+        return pageX >= bookLeft + pageWidth * 0.5f;
     }
 
     /**

@@ -112,8 +112,7 @@ public final class K {
         public static final float HOTBAR_LABEL_OFFSET_Y = 20.0f;
         public static final float HOTBAR_OFFSET = 20;
 
-        public static final float UI_BOOK_PADDING_X = 125.0f;
-        public static final float UI_BOOK_PADDING_TOP = 100.0f;
+        public static final float UI_BOOK_PADDING_X = 150.0f;
 
         public static final float CHAT_HISTORY_X = 10.0f;
         public static final float CHAT_HISTORY_OFFSET_Y = 20.0f;
