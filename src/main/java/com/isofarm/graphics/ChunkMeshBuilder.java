@@ -110,7 +110,7 @@ public class ChunkMeshBuilder {
                     int worldX = chunkX * Chunk.SIZE_X + x;
                     int worldZ = chunkZ * Chunk.SIZE_Z + z;
                     BlockShape shape = world.getBlockShapeAt(worldX, y, worldZ);
-                    if (!shape.isFullCube()) {
+                    if (data.hasCustomShape()) {
                         MeshCursor cursor = addBlockShape(data, shape, x, y, z,
                                 posBuf, normBuf, uvBuf, idxBuf,
                                 posIdx, normIdx, uvIdx, elemIdx, vertexCount);

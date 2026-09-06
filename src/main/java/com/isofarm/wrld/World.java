@@ -113,7 +113,7 @@ public class World {
     /** Returns the placed shape state, falling back to the block type default. */
     public BlockShape getBlockShapeAt(int x, int y, int z) {
         BlockData data = BlockData.fromId(getBlockTypeAt(x, y, z));
-        if (data == BlockData.OAK_PLANK_FENCE) {
+        if (data != null && data.isFence()) {
             int connections = 0;
             if (canFenceConnectTo(x, y, z - 1)) connections |= 1;
             if (canFenceConnectTo(x, y, z + 1)) connections |= 2;
@@ -549,7 +549,7 @@ public class World {
     public boolean isFullCubeSolid(int x, int y, int z) {
         iBlock interactiveBlock = getInteractiveBlockAt(x, y, z);
         if (interactiveBlock != null) {
-            return interactiveBlock.getType() != InteractiveBlocks.OAK_DOOR;
+            return !interactiveBlock.getType().isDoor();
         }
         BlockData block = BlockData.fromId(getBlockTypeAt(x, y, z));
         return block != null && block.isSolid() && getBlockShapeAt(x, y, z).isFullCube();

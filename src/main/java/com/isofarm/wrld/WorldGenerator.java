@@ -350,7 +350,8 @@ public class WorldGenerator implements Generator {
                     || nearTree(x, z)) continue;
             BlockData[] plants = BlockData.allPlants();
             BlockData plant = plants[random.nextInt(plants.length)];
-            if (plant != BlockData.OAK_BONSAI && world.getBlockTypeAt(x, y, z) == BlockData.GRASS.getId()
+            if (plant != BlockData.OAK_BONSAI && plant != BlockData.SPRUCE_BONSAI
+                    && world.getBlockTypeAt(x, y, z) == BlockData.GRASS.getId()
                     && world.getBlockTypeAt(x, y + 1, z) == BlockData.AIR.getId()) {
                 world.setBlockTypeAt(x, y + 1, z, plant.getId());
                 if (plant == BlockData.TALL_GRASS) generateCluster(x, y, z, plant, random);

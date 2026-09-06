@@ -201,7 +201,7 @@ public class iBlock implements Craftable {
                 setActivated(true);
                 GameUIService.ui.getInventoryUI().openContainer(this);
             }
-            case OAK_DOOR -> {
+            case OAK_DOOR, SPRUCE_DOOR -> {
                 setActivated(!isActivated);
                 SoundService.fx.playUseSound(type.getSoundGroup(), isActivated ? 0 : 1);
             }
@@ -245,7 +245,7 @@ public class iBlock implements Craftable {
      * @return the populated matrix
      */
     public Matrix4f getModelTransform(Matrix4f destination) {
-        if (type != InteractiveBlocks.OAK_DOOR) {
+        if (!type.isDoor()) {
             return destination.identity()
                     .translate(x + 0.5f, y, z + 0.5f)
                     .rotateY(orientation);
@@ -273,7 +273,7 @@ public class iBlock implements Craftable {
      */
     public boolean intersects(float minX, float minY, float minZ,
                               float maxX, float maxY, float maxZ) {
-        if (type != InteractiveBlocks.OAK_DOOR
+        if (!type.isDoor()
                 || maxY <= y || minY >= y + 2.0f) return false;
 
         float angle = orientation + DOOR_OPEN_ANGLE * animationProgress;
@@ -315,7 +315,7 @@ public class iBlock implements Craftable {
      * Returns the distance along a ray to the animated door model.
      */
     public float rayIntersection(Vector3f origin, Vector3f direction) {
-        if (type != InteractiveBlocks.OAK_DOOR) return Float.POSITIVE_INFINITY;
+        if (!type.isDoor()) return Float.POSITIVE_INFINITY;
 
         Matrix4f inverse = getModelTransform(new Matrix4f()).invert();
         Vector3f localOrigin = inverse.transformPosition(new Vector3f(origin));
@@ -354,7 +354,7 @@ public class iBlock implements Craftable {
      * Returns whether this block currently blocks movement.
      */
     public boolean isSolid() {
-        return type != InteractiveBlocks.OAK_DOOR || !isActivated;
+        return !type.isDoor() || !isActivated;
     }
 
     private float getDoorHingeX() {

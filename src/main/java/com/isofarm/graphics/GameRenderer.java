@@ -349,7 +349,7 @@ public class GameRenderer {
             var selectedInteractiveBlock = gameMaster.getWorld().getInteractiveBlockAt(
                     hoveredCell.x(), hoveredCell.y(), hoveredCell.z());
             if (selectedInteractiveBlock != null
-                    && selectedInteractiveBlock.getType() == InteractiveBlocks.OAK_DOOR) {
+                    && selectedInteractiveBlock.getType().isDoor()) {
                 selectedInteractiveBlock.getSelectionTransform(modelMatrix);
             } else {
                 modelMatrix.identity().translate(

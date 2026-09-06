@@ -752,12 +752,12 @@ public class GameInteraction {
                     interactiveBlock.getType(), placeX, placeY, placeZ, orientation);
 
             if (placeY < 0 || placeY + blockHeight > Chunk.SIZE_Y) return;
-            if (interactiveBlock.getType() == InteractiveBlocks.OAK_DOOR
+            if (interactiveBlock.getType().isDoor()
                     && !world.isBlockSolid(placeX, placeY - 1, placeZ)) return;
 
             for (int offsetY = 0; offsetY < blockHeight; offsetY++) {
                 int occupiedY = placeY + offsetY;
-                if (interactiveBlock.getType() != InteractiveBlocks.OAK_DOOR
+                if (!interactiveBlock.getType().isDoor()
                         && player.intersectsBlock(placeX, occupiedY, placeZ)) return;
                 if (world.getInteractiveBlockAt(placeX, occupiedY, placeZ) != null) return;
 
@@ -769,7 +769,7 @@ public class GameInteraction {
                     return;
                 }
             }
-            if (interactiveBlock.getType() == InteractiveBlocks.OAK_DOOR
+            if (interactiveBlock.getType().isDoor()
                     && player.intersects(placedBlock)) return;
 
             for (int offsetY = 0; offsetY < blockHeight; offsetY++) {
@@ -801,12 +801,13 @@ public class GameInteraction {
             int placeZ = cell.z() + normalZ;
 
             BlockShape placedShape = block.getType().getShape();
-            if (placedShape.isVerticalSlab()) {
+            if (block.getType().isSlab() && placedShape.isVerticalSlab()) {
                 Vector3f playerPosition = player.getPosition();
                 placedShape = BlockShape.verticalSlabFacing(
                         playerPosition.x, playerPosition.z, placeX, placeZ);
             }
-            if (placedShape.isStaircase()) {
+
+            if (block.getType().isStaircase()) {
                 Vector3f playerPosition = player.getPosition();
                 placedShape = BlockShape.staircaseFacing(
                         playerPosition.x, playerPosition.z, placeX, placeZ);
@@ -840,14 +841,14 @@ public class GameInteraction {
 
             Block newBlock = new Block(block.getType(), placeX, placeY, placeZ);
             newBlock.setShape(placedShape);
-            if (block.getType().equals(BlockData.OAK_BONSAI)) {
-                TreeService.ts.plant(placeX, placeY, placeZ, BlockData.OAK_BONSAI);
+            if (block.getType() == BlockData.OAK_BONSAI || block.getType() == BlockData.SPRUCE_BONSAI) {
+                TreeService.ts.plant(placeX, placeY, placeZ, block.getType());
             } else if (block.getType().isFluid()) {
                 FluidSimulation placedFluid = FluidSimulation.forBlock(block.getType());
                 if (placedFluid == null || !placedFluid.addSource(placeX, placeY, placeZ)) return;
             } else {
                 world.setBlockTypeAt(placeX, placeY, placeZ, block.getType().getId());
-                if (!placedShape.isFullCube()) world.addBlock(newBlock);
+                if (block.getType().hasCustomShape()) world.addBlock(newBlock);
             }
             if (!block.getType().isFluid()) {
                 FluidSimulation.notifyBlockPlaced(placeX, placeY, placeZ);
@@ -915,7 +916,7 @@ public class GameInteraction {
 
         iBlock interactiveBlock = World.wrld.getInteractiveBlockAt(x, aboveY, z);
         if (interactiveBlock != null
-                && interactiveBlock.getType() == InteractiveBlocks.OAK_DOOR
+                && interactiveBlock.getType().isDoor()
                 && interactiveBlock.getY() == aboveY) {
             destroyInteractiveBlock(GameMaster.game, World.wrld, interactiveBlock);
             return;

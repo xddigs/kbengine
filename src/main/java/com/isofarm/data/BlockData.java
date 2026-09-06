@@ -35,7 +35,7 @@ public enum BlockData implements Blockable {
     OAK_PLANK_SLAB((byte) 14, (byte) 4, (byte) 1, false, false, 50, "assets/textures/blocks/oak_plank.png", SoundGroup.WOOD, 4.0f, false, new Object[]{}, Tier.WOODEN, true, false, false),
     OAK_PLANK_VERTICAL_SLAB((byte) 15, (byte) 5, (byte) 1, false, false, 80, "assets/textures/blocks/oak_plank.png", SoundGroup.WOOD, 4.0f, false, new Object[]{}, Tier.WOODEN, true, false, false),
     OAK_PLANK_STAIRCASE((byte) 16, (byte) 6, (byte) 1, false, false, 80, "assets/textures/blocks/oak_plank.png", SoundGroup.WOOD, 4.0f, false, new Object[]{}, Tier.WOODEN, false, true, false),
-    OAK_PLANK_FENCE((byte) 17, (byte) 7, (byte) 1, false, false, 100, "assets/textures/blocks/oak_plank.png", SoundGroup.WOOD, 4.0f, false, new Object[]{}, Tier.WOODEN, false, false, true),
+    OAK_PLANK_FENCE((byte) 17, (byte) 8, (byte) 1, false, false, 100, "assets/textures/blocks/oak_plank.png", SoundGroup.WOOD, 4.0f, false, new Object[]{}, Tier.WOODEN, false, false, true),
 
     SPRUCE_LEAVES((byte) 18, (byte) 1, (byte) 2, false, false, 50, "assets/textures/blocks/spruce_leaves.png", SoundGroup.SOIL, 1.1f, false, new Object[]{MaterialID.STICK, "SPRUCE_BONSAI"}, Tier.NONE),
     SPRUCE_LOG((byte) 19, (byte) 2, (byte) 2, false, false, 150, "assets/textures/blocks/spruce_log_top.png", "assets/textures/blocks/spruce_log_bottom.png", "assets/textures/blocks/spruce_log_side.png", SoundGroup.WOOD, 2.2f, false, new Object[]{}, Tier.WOODEN),
@@ -43,7 +43,7 @@ public enum BlockData implements Blockable {
     SPRUCE_PLANK_SLAB((byte) 21, (byte) 4, (byte) 2, false, false, 50, "assets/textures/blocks/spruce_plank.png", SoundGroup.WOOD, 4.0f, false, new Object[]{}, Tier.WOODEN, true, false, false),
     SPRUCE_PLANK_VERTICAL_SLAB((byte) 22, (byte) 5, (byte) 2, false, false, 80, "assets/textures/blocks/spruce_plank.png", SoundGroup.WOOD, 4.0f, false, new Object[]{}, Tier.WOODEN, true, false, false),
     SPRUCE_PLANK_STAIRCASE((byte) 23, (byte) 6, (byte) 2, false, false, 80, "assets/textures/blocks/spruce_plank.png", SoundGroup.WOOD, 4.0f, false, new Object[]{}, Tier.WOODEN, false, true, false),
-    SPRUCE_PLANK_FENCE((byte) 24, (byte) 7, (byte) 2, false, false, 100, "assets/textures/blocks/spruce_plank.png", SoundGroup.WOOD, 4.0f, false, new Object[]{}, Tier.WOODEN, false, false, true),
+    SPRUCE_PLANK_FENCE((byte) 24, (byte) 8, (byte) 2, false, false, 100, "assets/textures/blocks/spruce_plank.png", SoundGroup.WOOD, 4.0f, false, new Object[]{}, Tier.WOODEN, false, false, true),
 
     COPPER_ORE((byte) 25, (byte) 1, (byte) 4, false, false, 150, "assets/textures/blocks/copper_ore.png", SoundGroup.STONE, 6.0f, false, new MiningComponent[]{new MiningComponent(Tier.COPPER, MaterialID.RAW_ORE)}, Tier.COPPER),
     IRON_ORE((byte) 26, (byte) 2, (byte) 4, false, false, 150, "assets/textures/blocks/iron_ore.png", SoundGroup.STONE, 8.0f, false, new MiningComponent[]{new MiningComponent(Tier.IRON, MaterialID.RAW_ORE)}, Tier.IRON),

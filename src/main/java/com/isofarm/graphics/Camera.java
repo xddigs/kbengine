@@ -311,7 +311,7 @@ public class Camera implements CameraView {
         do {
             var interactiveBlock = world.getInteractiveBlockAt(x, y, z);
             if (interactiveBlock != null
-                    && interactiveBlock.getType() != InteractiveBlocks.OAK_DOOR) {
+                    && !interactiveBlock.getType().isDoor()) {
                 float distToPlayer = playerPos.distance(x + 0.5f, y + 0.5f, z + 0.5f);
                 if (distToPlayer > Settings.getMaxInteractionDistance()) return null;
 

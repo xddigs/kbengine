@@ -13,17 +13,22 @@ public enum ToolType implements Item {
             BlockData.ROSEBUSH, BlockData.LILY, BlockData.GHOSTFLOWER,
             BlockData.RED_MUSHROOM, BlockData.BRIGHT_FLOWER,
             BlockData.BLUE_FLOWER, BlockData.ROSES, BlockData.TULIP,
-            BlockData.OAK_BONSAI
+            BlockData.OAK_BONSAI, BlockData.SPRUCE_LEAVES, BlockData.SPRUCE_BONSAI
     }, 10, 1.5f),
     PICKAXE((byte) 1, "Pickaxe", 6, new BlockData[]{
-            BlockData.STONE, BlockData.VOIDSTONE, BlockData.GLASS,
+            BlockData.STONE, BlockData.STONE_SLAB, BlockData.STONE_VERTICAL_SLAB,
+            BlockData.STONE_STAIRCASE, BlockData.VOIDSTONE, BlockData.GLASS,
             BlockData.COPPER_ORE, BlockData.IRON_ORE, BlockData.STEEL_ORE,
             BlockData.GOLD_ORE, BlockData.PLATINUM_ORE,
             BlockData.DIAMOND_ORE, BlockData.FOSSIL, BlockData.OBSIDIAN
     }, 7, 2.5f),
     AXE((byte) 2, "Axe", 8, new BlockData[]{
             BlockData.OAK_LOG, BlockData.OAK_PLANK, BlockData.OAK_PLANK_SLAB,
-            BlockData.OAK_PLANK_VERTICAL_SLAB, BlockData.OAK_PLANK_FENCE, BlockData.OAK_LEAVES
+            BlockData.OAK_PLANK_VERTICAL_SLAB, BlockData.OAK_PLANK_STAIRCASE,
+            BlockData.OAK_PLANK_FENCE, BlockData.OAK_LEAVES,
+            BlockData.SPRUCE_LOG, BlockData.SPRUCE_PLANK, BlockData.SPRUCE_PLANK_SLAB,
+            BlockData.SPRUCE_PLANK_VERTICAL_SLAB, BlockData.SPRUCE_PLANK_STAIRCASE,
+            BlockData.SPRUCE_PLANK_FENCE, BlockData.SPRUCE_LEAVES
     }, 10, 2.5f),
     HOE((byte) 3, "Hoe", 5, new BlockData[]{
             BlockData.GRASS, BlockData.DIRT, BlockData.TILLED_DIRT,

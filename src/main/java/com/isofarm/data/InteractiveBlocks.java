@@ -12,7 +12,7 @@ public enum InteractiveBlocks implements Blockable {
     EMPTY(null, null, (byte) 0, (byte) -1, (byte) -1, -1, 0.0f, 0),
     CHEST("assets/models/blocks/chest.gltf", SoundGroup.CHEST, (byte) 1, (byte) 8, (byte) 1, 10, 2.5f, 1),
     OAK_DOOR("assets/models/blocks/oak_door.gltf", SoundGroup.DOOR, (byte) 2, (byte) 6, (byte) 1, 15, 2.0f, 2),
-    SPRUCE_DOOR("assets/models/blocks/spruce_door.gltf", SoundGroup.DOOR, (byte) 2, (byte) 6, (byte) 2, 15, 2.0f, 2);
+    SPRUCE_DOOR("assets/models/blocks/spruce_door.gltf", SoundGroup.DOOR, (byte) 3, (byte) 6, (byte) 2, 15, 2.0f, 2);
 
     private final String modelPath;
     private final SoundGroup soundGroup;
@@ -128,5 +128,10 @@ public enum InteractiveBlocks implements Blockable {
      */
     public int getHeight() {
         return height;
+    }
+
+    /** Returns whether this interactive block is a door. */
+    public boolean isDoor() {
+        return this == OAK_DOOR || this == SPRUCE_DOOR;
     }
 }
