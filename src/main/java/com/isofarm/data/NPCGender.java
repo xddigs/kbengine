@@ -19,23 +19,4 @@ public enum NPCGender {
         return Local.lang.t("npc.gender." + name().toLowerCase(Locale.ROOT));
     }
 
-    /**
-     * Selects the matching NPC voice from {@link SoundGroup#NPC}. Non-binary
-     * characters alternate between the two available voice sets until a
-     * dedicated recording is supplied.
-     *
-     * @param disapproving whether the disapproving variant should be selected
-     * @return the index of the matching sound in the NPC sound group
-     */
-    public int getSoundIndex(boolean disapproving, boolean hurt) {
-        int voiceOffset = switch (this) {
-            case FEMALE -> 0;
-            case MALE -> 3;
-            case NON_BINARY -> Math.random() < 0.5 ? 0 : 3;
-        };
-
-        voiceOffset += disapproving ? 1 : 0;
-        voiceOffset += hurt && this.equals(FEMALE) || this.equals(NON_BINARY)? 3 : 0;
-        return voiceOffset;
-    }
 }

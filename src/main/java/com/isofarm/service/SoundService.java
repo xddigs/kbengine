@@ -1,6 +1,7 @@
 package com.isofarm.service;
 
 import com.isofarm.data.Singleton;
+import com.isofarm.data.NPCVoice;
 import com.isofarm.data.SoundGroup;
 import org.lwjgl.openal.AL;
 import org.lwjgl.openal.AL10;
@@ -43,6 +44,7 @@ public class SoundService implements Service<SoundGroup> {
     private int loopingSource;
     private int useSource;
     private int genderSource;
+    private int hitSource;
 
     private String currentBackgroundSound;
     private SoundGroup currentBreakingSoundGroup;
@@ -68,6 +70,9 @@ public class SoundService implements Service<SoundGroup> {
             loadSoundArray(group.getLoopingSounds());
             loadSoundArray(group.getUseSounds());
             loadSoundArray(group.getGenderSounds());
+        }
+        for (NPCVoice voice : NPCVoice.values()) {
+            loadSoundArray(new String[]{voice.getSoundPath()});
         }
     }
 
@@ -108,6 +113,7 @@ public class SoundService implements Service<SoundGroup> {
         loopingSource = alGenSources();
         useSource = alGenSources();
         genderSource = alGenSources();
+        hitSource = alGenSources();
 
         alSourcef(breakSource, AL_GAIN, 1.0f);
         alSourcef(breakingSource, AL_GAIN, 1.0f);
@@ -118,6 +124,7 @@ public class SoundService implements Service<SoundGroup> {
         alSourcef(loopingSource, AL_GAIN, 1.0f);
         alSourcef(useSource, AL_GAIN, 1.0f);
         alSourcef(genderSource, AL_GAIN, 1.0f);
+        alSourcef(hitSource, AL_GAIN, 1.0f);
     }
 
     /**
@@ -184,6 +191,22 @@ public class SoundService implements Service<SoundGroup> {
     }
 
     /**
+     * Plays a specific entity sound without randomizing either the selected effect
+     * @param group the {@link SoundGroup} argument; the sound group
+     * @param soundIndex the {@code int} argument; the index within the group's entity sounds
+     */
+    public void playEntitySound(SoundGroup group, int soundIndex) {
+        playSound(entitySource, group != null ? group.getEntitySounds() : null,
+                1.0f, 0.2f, soundIndex);
+    }
+
+    /** Plays the dedicated entity hit response without interrupting other entity sounds. */
+    public void playHitSound() {
+        playSound(hitSource, SoundGroup.ENTITY.getEntitySounds(),
+                1.0f, 1.0f, 1);
+    }
+
+    /**
      * Updates audio playback for play looping sound.
      * @param group the {@link SoundGroup} supplied as {@code group}
      */
@@ -227,6 +250,12 @@ public class SoundService implements Service<SoundGroup> {
     public void playGenderSound(SoundGroup group, int soundIndex) {
         if (group == null) return;
         playSound(genderSource, group.getGenderSounds(), 1.0f, 1.0f, soundIndex);
+    }
+
+    /** Plays a concrete NPC voice without relying on array indices. */
+    public void playNPCVoice(NPCVoice voice) {
+        if (voice == null) return;
+        playSoundBuffer(genderSource, voice.getSoundPath(), 1.0f, 1.0f);
     }
 
     /**
@@ -394,6 +423,7 @@ public class SoundService implements Service<SoundGroup> {
         alDeleteSources(loopingSource);
         alDeleteSources(useSource);
         alDeleteSources(genderSource);
+        alDeleteSources(hitSource);
         soundBuffers.values().forEach(AL10::alDeleteBuffers);
         alcMakeContextCurrent(MemoryUtil.NULL);
         alcDestroyContext(context);

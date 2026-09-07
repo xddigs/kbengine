@@ -1,12 +1,15 @@
 package com.isofarm.service;
 
 import com.isofarm.data.Job;
+import com.isofarm.data.BlockPos;
+import com.isofarm.data.BlockShape;
 import com.isofarm.data.NPCGender;
 import com.isofarm.data.Ray;
 import com.isofarm.data.Singleton;
 import com.isofarm.entity.NPC;
 import com.isofarm.entity.Player;
 import com.isofarm.input.Mouse;
+import com.isofarm.item.iBlock;
 import com.isofarm.ui.GameUIService;
 import com.isofarm.utils.Settings;
 import com.isofarm.wrld.GameMaster;
@@ -34,7 +37,7 @@ public class NPCService implements Service<NPC> {
         clear();
         NPCGender[] genders = NPCGender.values();
         NPCGender gender = genders[(int) (Math.random() * genders.length)];
-        add(new NPC(gender, Job.FARMER));
+        add(new NPC(gender, Job.TRADER));
     }
 
     /**
@@ -61,6 +64,16 @@ public class NPCService implements Service<NPC> {
      */
     public boolean interact(GameMaster gameMaster) {
         NPC closest = getClosest();
+        return interact(closest);
+    }
+
+    /** Interacts with the closest NPC that is not occluded by the targeted block. */
+    public boolean interact(GameMaster gameMaster, BlockPos blockTarget) {
+        NPC closest = getClosestBeforeBlock(gameMaster, blockTarget);
+        return interact(closest);
+    }
+
+    private boolean interact(NPC closest) {
         if (closest == null) return false;
         closest.interactWith(Player.plyr);
         closest.speak();
@@ -78,9 +91,18 @@ public class NPCService implements Service<NPC> {
      */
     public boolean attack(GameMaster gameMaster) {
         NPC closest = getClosest();
+        return attack(closest);
+    }
+
+    /** Attacks the closest NPC only when it is in front of the targeted block. */
+    public boolean attack(GameMaster gameMaster, BlockPos blockTarget) {
+        NPC closest = getClosestBeforeBlock(gameMaster, blockTarget);
+        return attack(closest);
+    }
+
+    private boolean attack(NPC closest) {
         if (closest == null) return false;
         closest.damage(Player.plyr.getAttack(), Player.plyr);
-        closest.grunt(closest.getGender());
         return true;
     }
 
@@ -91,8 +113,18 @@ public class NPCService implements Service<NPC> {
     public NPC getClosest() {
         GameMaster gameMaster = GameMaster.game;
         if (gameMaster == null || Player.plyr == null) return null;
+        return getClosestBeforeBlock(gameMaster, null);
+    }
+
+    /**
+     * Returns the closest NPC hit by the cursor, provided it is closer than the
+     * block currently hit by that same cursor ray.
+     */
+    public NPC getClosestBeforeBlock(GameMaster gameMaster, BlockPos blockTarget) {
+        if (gameMaster == null || Player.plyr == null) return null;
         Ray ray = gameMaster.getCamera().getMouseRay(Mouse.getX(), Mouse.getY(),
                 gameMaster.getWindowWidth(), gameMaster.getWindowHeight());
+        float blockRayDistance = getBlockRayDistance(gameMaster, blockTarget, ray);
         NPC closest = null;
         float closestRayDistance = Float.POSITIVE_INFINITY;
         for (NPC npc : npcsList) {
@@ -100,12 +132,27 @@ public class NPCService implements Service<NPC> {
             float playerDistance = Player.plyr.getPosition().distance(npc.getPosition());
             if (playerDistance > Settings.getMaxInteractionDistance()) continue;
             float rayDistance = npc.rayIntersection(ray.origin(), ray.direction());
-            if (rayDistance < closestRayDistance) {
+            if (rayDistance < closestRayDistance && rayDistance < blockRayDistance) {
                 closest = npc;
                 closestRayDistance = rayDistance;
             }
         }
         return closest;
+    }
+
+    private float getBlockRayDistance(GameMaster gameMaster, BlockPos blockTarget, Ray ray) {
+        if (blockTarget == null) return Float.POSITIVE_INFINITY;
+        iBlock interactiveBlock = gameMaster.getWorld().getInteractiveBlockAt(
+                blockTarget.x(), blockTarget.y(), blockTarget.z());
+        if (interactiveBlock != null && interactiveBlock.getType().isDoor()) {
+            return interactiveBlock.rayIntersection(ray.origin(), ray.direction());
+        }
+        BlockShape shape = gameMaster.getWorld().getBlockShapeAt(
+                blockTarget.x(), blockTarget.y(), blockTarget.z());
+        if (shape == null) shape = BlockShape.FULL_CUBE;
+        BlockShape.RayHit hit = shape.raycast(ray.origin(), ray.direction(),
+                blockTarget.x(), blockTarget.y(), blockTarget.z());
+        return hit == null ? Float.POSITIVE_INFINITY : hit.distance();
     }
 
     /**
