@@ -70,7 +70,6 @@ public class FallingState implements PlayerState {
 
         float yaw = GameMaster.game.getActiveCamera().getYaw();
         player.wasd(delta, yaw, false);
-        applyVoidDamage(delta);
 
         if (!player.isAlive()) return;
 
