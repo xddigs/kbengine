@@ -3,10 +3,15 @@ package com.isofarm.entity;
 import com.isofarm.data.*;
 import com.isofarm.graphics.gltf.GLTFLoader;
 import com.isofarm.graphics.gltf.GLTFModel;
+import com.isofarm.item.Item;
 import com.isofarm.service.SoundService;
+import com.isofarm.service.TimeService;
+import com.isofarm.utils.K;
 import com.isofarm.utils.Naming;
 import com.isofarm.wrld.GameMaster;
 import org.joml.Vector3f;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Represents an NPC, with their own state and behavior, in contrast to {@link Player},
@@ -14,11 +19,13 @@ import org.joml.Vector3f;
  */
 @DataClass
 public class NPC extends Character {
+    private static final Logger log = LoggerFactory.getLogger(NPC.class);
     private static final float WALK_SPEED = 1.25f;
     private static final float MIN_IDLE_TIME = 2.0f;
     private static final float IDLE_TIME_VARIATION = 4.0f;
     private static final float WANDER_RADIUS = 5.0f;
     private static final float KNOCKBACK_DAMPING = 12.0f;
+    private static final float DEFAULT_KNOCKBACK_TIMER = 0.25f;
     private final CharacterAnimator animator = new CharacterAnimator(this);
     private final NPCGender gender;
     private final Job job;
@@ -27,7 +34,7 @@ public class NPC extends Character {
     private final Vector3f destination = new Vector3f();
     private float idleTimer;
     private boolean isWalking;
-    private float knockbackTimer;
+    private float knockbackTimer = DEFAULT_KNOCKBACK_TIMER;
 
     private Character lastInteractor = null;
     private float interactionTimer = 0.0f;
@@ -52,6 +59,9 @@ public class NPC extends Character {
         setGamemode(Gamemode.SURVIVAL);
         setSpeed(WALK_SPEED);
         chooseIdleDuration();
+        if (job == Job.TRADER) {
+            resetShop();
+        }
     }
 
     /**
@@ -89,7 +99,7 @@ public class NPC extends Character {
     @Override
     public void applyKnockback(Vector3f sourcePosition, float strength, float upwardForce) {
         super.applyKnockback(sourcePosition, strength, upwardForce);
-        this.knockbackTimer = 0.25f;
+        this.knockbackTimer = DEFAULT_KNOCKBACK_TIMER;
     }
 
     /** {@inheritDoc} */
@@ -278,6 +288,93 @@ public class NPC extends Character {
      */
     public GLTFModel getNpcModel() {
         return npcModel;
+    }
+
+    /** Returns this NPC's display name as the shop owner name. */
+    public String getOwner() {
+        return getName();
+    }
+
+    /** Returns the trader inventory, which is also the shop stock. */
+    public Inventory getStock() {
+        return getInventory();
+    }
+
+    /** Adds currency to this NPC's purse. */
+    public void earn(int amount) {
+        getPurse().add(amount);
+    }
+
+    /** Resets the trader's stock on the configured schedule. */
+    public void updateShop(TimeService timeService) {
+        if (job == Job.TRADER && timeService.getDay() % 10 == 0) {
+            resetShop();
+        }
+    }
+
+    /** Adds an item to the trader's stock. */
+    public void add(Item item, int amount) {
+        if (item == null || amount <= 0) return;
+        getInventory().add(item, amount);
+        log.info("Added x{} of {} to {}'s stock", amount, item.getName(), getOwner());
+    }
+
+    /** Processes a player selling an item to this trader. */
+    public void sell(Item item, int amount) {
+        if (item == null || amount <= 0) return;
+        getInventory().remove(item, amount);
+        earn(amount);
+        log.info("Sold x{} of {} to player", amount, item.getName());
+    }
+
+    /** Processes a player buying an item from this trader. */
+    public void buy(Item item, int amount) {
+        if (item == null || amount <= 0) return;
+        int totalPrice = item.getValue() * amount;
+        if (!hasMoney() || purse() < totalPrice) {
+            log.warn("Not enough money to buy x{} of {}", amount, item.getName());
+            return;
+        }
+        getInventory().add(item, amount);
+        getPurse().remove(totalPrice);
+        log.info("Bought x{} of {} from player", amount, item.getName());
+    }
+
+    /** Removes all items from the trader's stock. */
+    public void clear() {
+        getInventory().clear();
+        log.info("Cleared {}'s stock", getOwner());
+    }
+
+    /** Returns whether this trader has coins available. */
+    public boolean hasMoney() {
+        return purse() > 0;
+    }
+
+    /** Returns the number of non-empty stock slots. */
+    public int size() {
+        return getInventory().size();
+    }
+
+    /** Returns the item in a stock slot. */
+    public Item get(int index) {
+        return getInventory().get(index);
+    }
+
+    /** Returns the amount of an item in the stock. */
+    public int getAmount(Item item) {
+        return getInventory().getAmount(item);
+    }
+
+    /** Returns whether this trader's stock is empty. */
+    public boolean isEmpty() {
+        return getInventory().isEmpty();
+    }
+
+    /** Restores the trader's initial stock and currency state. */
+    public void resetShop() {
+        clear();
+        earn(K.World.STARTING_COINS);
     }
 
     /**

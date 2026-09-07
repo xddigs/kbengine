@@ -1,6 +1,7 @@
 package com.isofarm.ui;
 
 import com.isofarm.data.*;
+import com.isofarm.entity.NPC;
 import com.isofarm.entity.Player;
 import com.isofarm.graphics.Framebuffer;
 import com.isofarm.graphics.ResourceManager;
@@ -68,7 +69,7 @@ public final class GameUIService implements Service<GameMaster> {
     private final Player player = Player.plyr;
     private final float startingX = 20.0f;
     private final float startingY = 25.0f;
-    private Shop shop;
+    private NPC trader;
     private float windowWidth;
     private float windowHeight;
     private Vector2i lastActionCell = null;
@@ -250,13 +251,9 @@ public final class GameUIService implements Service<GameMaster> {
         return backpackUI;
     }
 
-    /**
-     * Sets the shop.
-     *
-     * @param shop the {@link Shop} supplied as {@code shop}
-     */
-    public void setShop(Shop shop) {
-        this.shop = shop;
+    /** Sets the trader whose inventory is exposed as the shop stock. */
+    public void setTrader(NPC trader) {
+        this.trader = trader;
     }
 
     /**
@@ -822,6 +819,7 @@ public final class GameUIService implements Service<GameMaster> {
      * @param item the {@link Item} supplied as {@code item}
      */
     private void sellItem(Inventory inv, Item item) {
+        if (trader == null) return;
         Item targetItem = null;
         int cumulativeAmount = 0;
 
@@ -835,7 +833,7 @@ public final class GameUIService implements Service<GameMaster> {
         }
 
         if (targetItem != null && cumulativeAmount > 0) {
-            shop.buy(targetItem, cumulativeAmount);
+            trader.buy(targetItem, cumulativeAmount);
         }
     }
 
@@ -847,7 +845,7 @@ public final class GameUIService implements Service<GameMaster> {
      * @param amount the {@code int} supplied as {@code amount}
      */
     private void buyItem(Inventory stock, Item item, int amount) {
-        if (amount <= 0) return;
+        if (trader == null || amount <= 0) return;
 
         int totalPrice = item.getValue() * amount;
         if (player.purse() < totalPrice) {
@@ -858,7 +856,7 @@ public final class GameUIService implements Service<GameMaster> {
         }
 
         player.spend(totalPrice);
-        shop.earn(totalPrice);
+        trader.earn(totalPrice);
 
         stock.remove(item, amount);
         player.getInventory().add(item, amount);

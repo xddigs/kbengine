@@ -56,7 +56,6 @@ public class GameMaster {
     private CameraController cameraController;
     private float windowWidth = K.Window.DEFAULT_WIDTH;
     private float windowHeight = K.Window.DEFAULT_HEIGHT;
-    private Shop shop;
     private Difficulty difficulty = Difficulty.NORMAL;
 
     private boolean isChatOpen = false;
@@ -96,7 +95,6 @@ public class GameMaster {
 
         this.chunkManager = new ChunkManager(world, FluidSimulation.forBlock(BlockData.WATER));
         this.itemRenderer = new ItemRenderer();
-        this.shop = new Shop();
         notifyProgress(progressCallback, ++currentStep / totalSteps);
 
         this.camera = new Camera(windowWidth, windowHeight, Settings.getRenderDistance());
@@ -144,7 +142,7 @@ public class GameMaster {
                 ResourceManager.rem.getMaterialIcons(),
                 ResourceManager.rem.getInventoryIcons());
 
-        GameUIService.ui.setShop(shop);
+        GameUIService.ui.setTrader(NPCService.npcs.getTrader());
 
     }
 
@@ -508,7 +506,10 @@ public class GameMaster {
         TimeService.ts.update(delta, WeatherService.wes);
         float timeOfDay = TimeService.ts.getHour() + (TimeService.ts.getMinute() / 60.0f);
         celestialLighting.update(HoveredCell.get(this), timeOfDay);
-        shop.update(TimeService.ts);
+        NPC trader = NPCService.npcs.getTrader();
+        if (trader != null) {
+            trader.updateShop(TimeService.ts);
+        }
         CropService.cs.update(delta, WeatherService.wes.getWeather());
         TreeService.ts.update(this);
         world.forEachInteractiveBlock(iBlock::animate);

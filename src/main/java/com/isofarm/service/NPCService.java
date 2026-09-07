@@ -194,4 +194,12 @@ public class NPCService implements Service<NPC> {
     public List<NPC> getNpcs() {
         return npcsList;
     }
+
+    /** Returns the first trader NPC, or {@code null} when none is registered. */
+    public NPC getTrader() {
+        for (NPC npc : npcsList) {
+            if (npc.getJob() == Job.TRADER) return npc;
+        }
+        return null;
+    }
 }

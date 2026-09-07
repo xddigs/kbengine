@@ -22,6 +22,8 @@ public abstract class Entity {
     protected static final float INVULNERABILITY_DURATION = 0.4f;
     private static final float LAVA_DAMAGE_INTERVAL = 1.0f;
     private static final float LAVA_DAMAGE_STEP = 0.1f;
+    private static final float KNOCKBACK_STRENGTH = 8.0f;
+    private static final float UPWARD_FORCE = 4.0f;
 
     private final byte id;
     protected Vector3f position;
@@ -97,8 +99,8 @@ public abstract class Entity {
     public void damage(float amount, Entity attacker) {
         damage(amount, Cause.ENTITY);
         if (attacker != null) {
-            float knockbackStrength = 8.0f;
-            float upwardForce = 4.0f;
+            float knockbackStrength = KNOCKBACK_STRENGTH;
+            float upwardForce = UPWARD_FORCE;
             applyKnockback(attacker.getPosition(), knockbackStrength, upwardForce);
         }
     }
