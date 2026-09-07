@@ -99,8 +99,6 @@ public class CommandCompletionProvider implements CompletionProvider {
         }
 
         String inputPrefix = args[argumentIndex];
-        // Completion providers expect a cursor position within the argument text,
-        // not the ordinal of the argument in the command.
         return argument.complete(inputPrefix, inputPrefix.length());
     }
 }

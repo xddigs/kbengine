@@ -848,7 +848,7 @@ public final class GameUIService implements Service<GameMaster> {
         if (trader == null || amount <= 0) return;
 
         int totalPrice = item.getValue() * amount;
-        if (player.purse() < totalPrice) {
+        if (player.hasWallet() == null || player.hasWallet().coins() < totalPrice) {
             log.warn("Player doesn't have enough money to buy {} x{}",
                     item.getName(), amount);
             ToastFactory.warning(Local.lang.t("toast.item_not_enough_coins"));

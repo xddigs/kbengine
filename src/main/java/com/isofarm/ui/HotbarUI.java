@@ -13,6 +13,7 @@ import com.isofarm.input.Mouse;
 import com.isofarm.item.Backpack;
 import com.isofarm.item.Book;
 import com.isofarm.item.Item;
+import com.isofarm.item.Wallet;
 import com.isofarm.utils.K;
 import com.isofarm.utils.Settings;
 import com.isofarm.wrld.GameMaster;
@@ -29,6 +30,7 @@ public class HotbarUI extends UIElement {
     private Inventory inventory;
     private InventorySlotUI backpackSlotUI;
     private InventorySlotUI bookSlotUI;
+    private InventorySlotUI walletSlotUI;
     private Item lastSelectedItem;
 
     private SpriteSheet seedIcons;
@@ -140,6 +142,11 @@ public class HotbarUI extends UIElement {
             width += slot;
         }
 
+        if (inventory != null && inventory.hasWalletEquipped()) {
+            width += spacing * 2.0f;
+            width += slot;
+        }
+
         return width;
     }
 
@@ -162,6 +169,9 @@ public class HotbarUI extends UIElement {
             max++;
         }
         if (inventory != null && inventory.hasBookEquipped()) {
+            max++;
+        }
+        if (inventory != null && inventory.hasWalletEquipped()) {
             max++;
         }
         return max;
@@ -212,7 +222,7 @@ public class HotbarUI extends UIElement {
         }
         List<InventorySlot> extras = inventory.getEquippedExtraItems();
         for (int i = 0; i < extras.size(); i++) {
-            if (extras.get(i).getItem().equals(item)) {
+            if (extras.get(i).getItem() != null && extras.get(i).getItem().equals(item)) {
                 return K.UI.INVENTORY_COLUMNS + i;
             }
         }
@@ -243,6 +253,9 @@ public class HotbarUI extends UIElement {
 
         if (item instanceof Book) {
             return bookSlotUI;
+        }
+        if (item instanceof Wallet) {
+            return walletSlotUI;
         }
         return null;
     }
@@ -283,6 +296,12 @@ public class HotbarUI extends UIElement {
 
         bookSlotUI.hide();
         addChild(bookSlotUI);
+
+        float walletX = bookX + Settings.getScaledSlot() + Settings.getScaledSpacing();
+        walletSlotUI = new InventorySlotUI(walletX, Settings.getScaledPadding(),
+                Settings.getScaledSlot(), Settings.getScaledSlot(), SlotType.HOTBAR);
+        walletSlotUI.hide();
+        addChild(walletSlotUI);
     }
 
     /**
@@ -333,6 +352,7 @@ public class HotbarUI extends UIElement {
     private void syncExtraSlots() {
         backpackSlotUI.hide();
         bookSlotUI.hide();
+        walletSlotUI.hide();
 
         if (inventory == null) {
             return;
@@ -351,7 +371,17 @@ public class HotbarUI extends UIElement {
                 bookSlotUI.setSlot(inventory.getBookSlot());
                 updateItemSprite(bookSlotUI);
                 bookSlotUI.show();
+
+            } else if (item instanceof Wallet) {
+                walletSlotUI.setSlot(inventory.getWalletSlot());
+                updateItemSprite(walletSlotUI);
+                walletSlotUI.show();
             }
+        }
+
+        int maxSlots = getMaxSelectableSlots();
+        if (selectedSlot >= maxSlots) {
+            selectedSlot = Math.max(0, maxSlots - 1);
         }
     }
 
@@ -396,6 +426,8 @@ public class HotbarUI extends UIElement {
 
         bookSlotUI.setSelected(false);
         bookSlotUI.setHovered(isSlotHovered(bookSlotUI));
+        walletSlotUI.setSelected(false);
+        walletSlotUI.setHovered(isSlotHovered(walletSlotUI));
 
         if (player == null || inventory == null) {
             return;
@@ -423,6 +455,8 @@ public class HotbarUI extends UIElement {
             backpackSlotUI.setSelected(true);
         } else if (item instanceof Book) {
             bookSlotUI.setSelected(true);
+        } else if (item instanceof Wallet) {
+            walletSlotUI.setSelected(true);
         }
     }
 
@@ -452,6 +486,17 @@ public class HotbarUI extends UIElement {
                 }
                 if (bookSlotUI.getItem() instanceof Book book) {
                     book.use(GameMaster.game, isCtrlHeld);
+                }
+                return;
+            }
+
+            if (walletSlotUI.isVisible() && isSlotHovered(walletSlotUI)) {
+                int index = getExtraSlotIndex(walletSlotUI.getItem());
+                if (index >= 0) {
+                    selectSlot(index);
+                }
+                if (walletSlotUI.getItem() instanceof Wallet wallet) {
+                    wallet.use(GameMaster.game, isCtrlHeld);
                 }
                 return;
             }
@@ -507,6 +552,9 @@ public class HotbarUI extends UIElement {
 
             if (item instanceof Book) {
                 return inventory.getBookSlot();
+            }
+            if (item instanceof Wallet) {
+                return inventory.getWalletSlot();
             }
             return null;
         }

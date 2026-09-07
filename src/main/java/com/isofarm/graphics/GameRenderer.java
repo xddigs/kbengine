@@ -149,8 +149,6 @@ public class GameRenderer {
             }
         });
 
-        // The grass shader is an overlay pass: it discards every fragment except
-        // green texels belonging to the grass block's top or side atlas regions.
         Shader grassShader = ResourceManager.rem.getGrassShader();
         grassShader.bind();
         grassShader.setUniform("uTexture", textureUnit);
@@ -192,8 +190,6 @@ public class GameRenderer {
             glDepthFunc(GL_LESS);
         }
 
-        // Draw the player before the translucent water. The depth buffer then
-        // keeps the dry part unobscured while water blends over submerged parts.
         if (player != null) {
             player.render(gameMaster, RenderPass.NORMAL);
             defaultShader.bind();
@@ -626,8 +622,6 @@ public class GameRenderer {
         glDepthMask(true);
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
-        // Blending is the normal state for the remaining scene passes.
-        // In particular, do not let the temporary crack pass alter them.
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glActiveTexture(GL_TEXTURE0);

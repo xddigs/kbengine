@@ -296,8 +296,6 @@ public class BookUI extends UIElement {
                     pageWidth, bookHeight, lineHeight);
         }
 
-        // The page surface itself is not interactive; only actionable book lines
-        // and icon entries should switch to the hover cursor frame.
         Mouse.setCursorHovered(hoveredBookLine != null);
     }
 
@@ -437,7 +435,6 @@ public class BookUI extends UIElement {
         Book openedBook = BookService.bs.getOpenedBook();
         boolean bookIsReady = isOpen() && !isFlippingPage;
         boolean isCraftingBook = openedBook instanceof CraftingBook;
-        // Recipe controls stay visible even when no recipe currently matches the filter.
         setButtonState(favoriteButton, isCraftingBook, bookIsReady && isCraftingBook);
         setButtonState(sortNameButton, isCraftingBook, bookIsReady && isCraftingBook);
         setButtonState(sortTypeButton, isCraftingBook, bookIsReady && isCraftingBook);
@@ -482,16 +479,12 @@ public class BookUI extends UIElement {
                 renderTransformedBookButtons(spineX, pageWidth,
                         1.0f - fold, foldCurve);
             } else {
-                // The new right page is already stationary while the new left
-                // page finishes unfolding.
                 renderBookButtons();
             }
             return;
         }
 
         if (progress < 0.5f) {
-            // The old right page remains stationary until the returning page
-            // crosses the spine.
             renderBookButtons();
         } else {
             float unfold = easeInOutCubic((progress - 0.5f) * 2.0f);

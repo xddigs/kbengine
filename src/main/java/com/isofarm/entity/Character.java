@@ -196,13 +196,24 @@ public abstract class Character extends Entity implements Levelable {
     }
 
     /**
-     * Checks whether the character has a wallet in their inventory.
+     * Returns the wallet carried by the character, including the equipped slot.
      * @return {@code true} if wallet; otherwise {@code false}
      */
     public Wallet hasWallet() {
+        Wallet equipped = getInventory().getWallet();
+        if (equipped != null) {
+            return equipped;
+        }
         for (InventorySlot slot : getInventory().getSlots()) {
             if (slot.getItem() instanceof Wallet wallet) {
                 return wallet;
+            }
+        }
+        if (getBackpack() != null) {
+            for (InventorySlot slot : getBackpack().getSlots()) {
+                if (slot.getItem() instanceof Wallet wallet) {
+                    return wallet;
+                }
             }
         }
         return null;

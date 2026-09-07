@@ -162,8 +162,6 @@ public final class IslandGenerator implements Generator {
         float generatedHeight = SEA_LEVEL + ISLAND_HEIGHT * inland * inland
                 + noise(x, z, 5) * inland;
 
-        // Keep the complete NPC spawn area broad and level. The smooth transition
-        // prevents a hard cliff where the protected spawn terrain meets the island.
         float spawnDistance = distance(x, z, CENTER_X, CENTER_Z);
         if (spawnDistance < SPAWN_PLATFORM_RADIUS + SPAWN_PLATFORM_TRANSITION) {
             float transition = Math.clamp((spawnDistance - SPAWN_PLATFORM_RADIUS)

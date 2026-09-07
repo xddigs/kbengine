@@ -70,9 +70,6 @@ public class ShadowSystem {
         Shader shadowShader = ResourceManager.rem.getShadowMapShader();
         shadowShader.bind();
         shadowShader.setUniform("uLightSpaceMatrix", lightSpace);
-        // Alpha testing is enabled later for textured cutouts. Reset it before
-        // opaque geometry so state from the previous shadow pass cannot punch
-        // unstable holes into the terrain depth map.
         shadowShader.setUniform("uAlphaTest", false);
         Player player = Player.plyr;
         for (Map.Entry<Chunk, ChunkMeshBuilder.ChunkRenderMesh> entry : chunkMeshes.entrySet()) {

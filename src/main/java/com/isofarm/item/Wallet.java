@@ -2,8 +2,9 @@ package com.isofarm.item;
 
 import com.isofarm.data.DataClass;
 import com.isofarm.data.Enchantment;
-import com.isofarm.data.Task;
 import com.isofarm.data.Usables;
+import com.isofarm.entity.Player;
+import com.isofarm.ui.GameUIService;
 import com.isofarm.utils.ToastFactory;
 import com.isofarm.wrld.GameMaster;
 
@@ -11,7 +12,6 @@ import com.isofarm.wrld.GameMaster;
  * Encapsulates the state and operations required by wallet within the game runtime.
  */
 @DataClass
-@Task(reason="Wallets are not implemented yet")
 public class Wallet extends Usable
         implements Craftable, Equippable {
     private Integer coins;
@@ -25,6 +25,18 @@ public class Wallet extends Usable
     /** {@inheritDoc} */
     @Override
     public boolean use(GameMaster gameMaster, boolean isCtrlHeld) {
+        if (isCtrlHeld) {
+            if (isEquipped()) {
+                return unequip();
+            }
+            if (equip()) {
+                if (GameUIService.ui != null) {
+                    GameUIService.ui.resetHotbarPosition();
+                }
+                return true;
+            }
+            return false;
+        }
         ToastFactory.info("$" + coins.toString());
         return true;
     }
@@ -44,25 +56,34 @@ public class Wallet extends Usable
     /** {@inheritDoc} */
     @Override
     public Item copy() {
-        return new Wallet();
+        return new Wallet().earn(coins);
     }
 
     /** {@inheritDoc} */
     @Override
     public boolean equip() {
-        return false;
+        if (Player.plyr == null || isEquipped()) return false;
+        Player.plyr.getInventory().equipWallet(this);
+        return isEquipped();
     }
 
     /** {@inheritDoc} */
     @Override
     public boolean unequip() {
-        return false;
+        if (Player.plyr == null || !isEquipped()) return false;
+        Player.plyr.getInventory().unequipWallet();
+        boolean unequipped = !isEquipped();
+        if (unequipped && GameUIService.ui != null) {
+            GameUIService.ui.resetHotbarPosition();
+        }
+        return unequipped;
     }
 
     /** {@inheritDoc} */
     @Override
     public boolean isEquipped() {
-        return false;
+        return Player.plyr != null
+                && Player.plyr.getInventory().getWallet() == this;
     }
 
     /**
@@ -79,7 +100,9 @@ public class Wallet extends Usable
      * @return {@link Wallet}
      */
     public Wallet earn(Integer coins) {
-        this.coins += coins;
+        if (coins != null && coins > 0) {
+            this.coins += coins;
+        }
         return this;
     }
 
@@ -89,7 +112,9 @@ public class Wallet extends Usable
      * @return {@link Wallet}
      */
     public Wallet spend(Integer coins) {
-        this.coins -= coins;
+        if (coins != null && coins > 0) {
+            this.coins = Math.max(0, this.coins - coins);
+        }
         return this;
     }
 

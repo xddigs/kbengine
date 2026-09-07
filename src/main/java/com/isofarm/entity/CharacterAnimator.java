@@ -294,7 +294,6 @@ public final class CharacterAnimator {
      * Updates equipment based on held tool/weapon
      */
     private void updateEquipment() {
-        // NPCs do not use the player's global hotbar selection.
         if (!(character instanceof Player)) {
             equipmentController.equip(null, null);
             return;
@@ -338,8 +337,6 @@ public final class CharacterAnimator {
             glEnable(GL_DEPTH_TEST);
             glDepthFunc(GL_LESS);
             glDepthMask(true);
-            // Back faces provide a stable depth offset for this closed, layered
-            // model and prevent its outer skin from shadowing the body beneath it.
             glCullFace(GL_FRONT);
             model.render(shader, modelMatrix);
             glCullFace(GL_BACK);

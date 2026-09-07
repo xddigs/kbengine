@@ -280,12 +280,21 @@ public final class PlayerGameplay {
      * Processes earn and updates the affected inventory or currency balances.
      * @param amount the {@code int} argument; currency amount
      */
-    public void earn(int amount) { log.info("Earned ${}", amount); player.getPurse().add(amount); }
+    public void earn(int amount) {
+        if (amount <= 0 || player.hasWallet() == null) return;
+        log.info("Earned ${}", amount);
+        player.hasWallet().earn(amount);
+    }
     /**
      * Processes spend and updates the affected inventory or currency balances.
      * @param amount the {@code int} argument; currency amount
      */
-    public void spend(int amount) { if (amount > 0) { log.info("Spent ${}", amount); player.getPurse().remove(amount); } }
+    public void spend(int amount) {
+        if (amount <= 0 || player.hasWallet() == null
+                || player.hasWallet().coins() < amount) return;
+        log.info("Spent ${}", amount);
+        player.hasWallet().spend(amount);
+    }
     /**
      * Determines whether space is satisfied by the current state.
      * @return {@code true} if storage has space; otherwise {@code false}

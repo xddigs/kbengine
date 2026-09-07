@@ -57,7 +57,6 @@ float torchShadowDepth(int index, vec3 lightToFragment) {
 }
 
 void main() {
-    // UV filtering confines this pass to GRASS, not every green texture in the atlas.
     if (!isInside(vTexCoord, uGrassTopUVBounds) && !isInside(vTexCoord, uGrassSideUVBounds)) discard;
 
     vec4 texColor = texture(uTexture, vTexCoord);

@@ -6,6 +6,7 @@ import com.isofarm.graphics.gltf.GLTFModel;
 import com.isofarm.item.Item;
 import com.isofarm.item.Material;
 import com.isofarm.item.MiningComponent;
+import com.isofarm.item.Wallet;
 import com.isofarm.service.SoundService;
 import com.isofarm.service.TimeService;
 import com.isofarm.utils.K;
@@ -65,6 +66,7 @@ public class NPC extends Character {
         setSpeed(WALK_SPEED);
         chooseIdleDuration();
         if (job == Job.TRADER) {
+            getInventory().equipWallet(new Wallet());
             resetShop();
         }
     }
