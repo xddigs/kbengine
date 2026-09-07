@@ -18,6 +18,7 @@ import java.util.function.Consumer;
 /**
  * Encapsulates the state and operations required by world within the game runtime.
  */
+@SuppressWarnings("all")
 @Singleton
 public class World {
     public static final World wrld = new World();

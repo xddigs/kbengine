@@ -14,6 +14,7 @@ import java.util.Random;
  * Generates a configurable island, including terrain, lakes, mountains and
  * vegetation. Worlds created with the same seed and settings are deterministic.
  */
+@SuppressWarnings("all")
 public class WorldGenerator implements Generator {
     public static final int TREE_COUNT = 6;
     public static final int LAKE_COUNT = 2;
