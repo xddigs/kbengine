@@ -206,7 +206,7 @@ public class NPC extends Character {
     public void grunt(NPCGender gender) {
         SoundService fx = SoundService.fx;
         if (gender.equals(NPCGender.MALE)) fx.playEntitySound(SoundGroup.ENTITY);
-        fx.playGenderSound(SoundGroup.NPC, gender.getSoundIndex(true, false));
+        fx.playGenderSound(SoundGroup.NPC, gender.getSoundIndex(false, true));
     }
 
     /**

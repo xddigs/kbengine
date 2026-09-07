@@ -11,7 +11,6 @@ import java.util.Locale;
 @DataClass
 public enum Job {
     FARMER((byte) 0, "assets/models/npcs/farmer.gltf"),
-    MINER((byte) 1, "assets/models/npcs/miner.gltf"),
     TRADER((byte) 2, "assets/models/npcs/trader.gltf");
 
     private final byte id;

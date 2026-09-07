@@ -17,13 +17,13 @@ public final class IslandGenerator implements Generator {
     private static final int OCEAN_FLOOR_Y = 1;
     private static final int CENTER_X = 0;
     private static final int CENTER_Z = 0;
-    private static final float ISLAND_RADIUS = 18.0f;
+    private static final float ISLAND_RADIUS = 24.0f;
     private static final float COAST_WIDTH = 3.0f;
     private static final float SEABED_TERRACE_WIDTH = 2.0f;
-    private static final int ISLAND_HEIGHT = 7;
-    private static final float LAKE_RADIUS = 3.5f;
+    private static final int ISLAND_HEIGHT = 8;
+    private static final float LAKE_RADIUS = 2.0f;
     private static final float LAVA_RADIUS = 1.75f;
-    private static final float LAVA_CHANCE = 0.35f;
+    private static final float LAVA_CHANCE = 0.25f;
 
     private final World world;
     private final FluidSimulation waterSimulation;

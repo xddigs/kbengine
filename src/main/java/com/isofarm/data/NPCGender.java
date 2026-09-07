@@ -35,7 +35,7 @@ public enum NPCGender {
         };
 
         voiceOffset += disapproving ? 1 : 0;
-        voiceOffset += hurt && this.equals(FEMALE)? 2 : 0;
+        voiceOffset += hurt && this.equals(FEMALE) || this.equals(NON_BINARY)? 3 : 0;
         return voiceOffset;
     }
 }
