@@ -707,6 +707,11 @@ public class GameInteraction {
         this.breakTimeout = TIMEOUT;
     }
 
+    /**
+     * Decides whether a block should yield another one
+     * @param blockData the {@link BlockData} supplied as {@code blockData}
+     * @return {@code true} if the block was broken; otherwise {@code false}
+     */
     private BlockData wasBrokenInSurvival(BlockData blockData) {
         return switch (blockData) {
             case GRASS -> BlockData.DIRT;
