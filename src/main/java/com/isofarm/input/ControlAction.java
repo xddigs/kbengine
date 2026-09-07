@@ -14,6 +14,8 @@ public enum ControlAction {
     SWIM_DOWN("swim_down"),
     SNEAK("sneak"),
     ZOOM("zoom"),
+    CAMERA_ROTATE_LEFT("camera_rotate_left"),
+    CAMERA_ROTATE_RIGHT("camera_rotate_right"),
     PRIMARY_ACTION("primary_action"),
     SECONDARY_ACTION("secondary_action"),
     PATHFIND("pathfind"),

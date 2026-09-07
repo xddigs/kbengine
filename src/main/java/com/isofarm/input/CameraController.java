@@ -7,6 +7,7 @@ import com.isofarm.entity.states.SwimmingState;
 import com.isofarm.graphics.Camera;
 import com.isofarm.pathfinding.GridPos;
 import com.isofarm.pathfinding.PathFinder;
+import com.isofarm.service.BookService;
 import com.isofarm.service.Service;
 import com.isofarm.wrld.GameMaster;
 import com.isofarm.wrld.World;
@@ -18,6 +19,7 @@ import static org.lwjgl.glfw.GLFW.*;
 /**
  * Immutable value object containing camera controller.
  */
+@SuppressWarnings("all")
 public record CameraController(Camera camera) implements Service<Camera> {
     private static final float NORMAL_ZOOM = 18.0f;
     private static final float ZOOMED_ZOOM = NORMAL_ZOOM / 2.5f;
@@ -27,6 +29,7 @@ public record CameraController(Camera camera) implements Service<Camera> {
     private static final float NORMAL_CURSOR_WEIGHT = 0.35f;
     private static final float ZOOMED_CURSOR_WEIGHT = 0.50f;
     private static final float MAX_CURSOR_OFFSET_DISTANCE = 8.0f;
+    private static final float ROTATION_STEP = 30.0f;
     private static boolean mouseCaptured = false;
     private static GridPos lastGoal = null;
 
@@ -44,6 +47,9 @@ public record CameraController(Camera camera) implements Service<Camera> {
         }
 
         Player player = Player.plyr;
+        if (!BookService.bs.isOpen()) {
+            rotateAroundPlayer(player, delta);
+        }
         if (Controls.isDown(ControlAction.MOVE_FORWARD)
                 || Controls.isDown(ControlAction.MOVE_BACKWARD)
                 || Controls.isDown(ControlAction.MOVE_LEFT)
@@ -64,6 +70,28 @@ public record CameraController(Camera camera) implements Service<Camera> {
         boolean isZoomed = Controls.isToggled(ControlAction.ZOOM);
         updateZoom(isZoomed);
         followPlayer(gameMaster, delta, isZoomed);
+    }
+
+    /**
+     * Rotates the camera in quarter turns around the player. The cursor offset
+     * rotates with the camera so it does not displace the orbit's pivot.
+     *
+     * @param player the player used as the orbit pivot
+     * @param delta the time since the last frame
+     */
+    private void rotateAroundPlayer(Player player, float delta) {
+        float rotation = 0.0f;
+        if (Controls.isDown(ControlAction.CAMERA_ROTATE_LEFT)) {
+            rotation -= ROTATION_STEP * delta;
+        }
+        if (Controls.isDown(ControlAction.CAMERA_ROTATE_RIGHT)) {
+            rotation += ROTATION_STEP * delta;
+        }
+        if (rotation == 0.0f) return;
+
+        camera.rotateYaw(rotation);
+        currentOffset.rotateY((float) Math.toRadians(-rotation));
+        positionCamera(player.getPosition(), currentOffset);
     }
 
     /**
@@ -110,7 +138,12 @@ public record CameraController(Camera camera) implements Service<Camera> {
         currentOffset.x = lerp(currentOffset.x, targetOffset.x, lerpFactor);
         currentOffset.z = lerp(currentOffset.z, targetOffset.z, lerpFactor);
 
-        Vector3f targetFocus = new Vector3f(playerPos).add(currentOffset);
+        positionCamera(playerPos, currentOffset);
+    }
+
+    /** Positions the camera behind a focus offset relative to the player. */
+    private void positionCamera(Vector3f playerPos, Vector3f focusOffset) {
+        Vector3f targetFocus = new Vector3f(playerPos).add(focusOffset);
         Vector3f camForward = camera.getForwardVector();
         Vector3f camUp = camera.getUpVector();
         Vector3f cameraPos = new Vector3f(targetFocus)

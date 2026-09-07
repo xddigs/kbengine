@@ -285,18 +285,24 @@ public final class PlayerAnimator {
         float scale = Settings.getScaledEntity();
         float deathRoll = (float) Math.toRadians(82.0f) * deathWeight;
         float deathDrop = 0.35f * deathWeight;
+        float bob = (float) Math.sin(idleTime) * .025f * idleWeight;
         if (pass == RenderPass.SHADOW) {
             Shader shader = ResourceManager.rem.getShadowMapShader();
             if (shader == null) return;
             shader.bind();
             shader.setUniform("uLightSpaceMatrix", ShadowSystem.sys.getLightSpaceMatrix());
-            modelMatrix.identity().translate(player.getPosition().x, player.getPosition().y - deathDrop,
+            shader.setUniform("uAlphaTest", true);
+            modelMatrix.identity().translate(player.getPosition().x, player.getPosition().y + bob - deathDrop,
                     player.getPosition().z).rotateY((float) Math.toRadians(modelYaw)).rotateZ(deathRoll).scale(scale);
             shader.setUniform("uModel", modelMatrix);
             glEnable(GL_DEPTH_TEST);
             glDepthFunc(GL_LESS);
             glDepthMask(true);
+            // Back faces provide a stable depth offset for this closed, layered
+            // model and prevent its outer skin from shadowing the body beneath it.
+            glCullFace(GL_FRONT);
             model.render(shader, modelMatrix);
+            glCullFace(GL_BACK);
             glDepthMask(true);
             glDepthFunc(GL_LESS);
             shader.unbind();
@@ -321,7 +327,6 @@ public final class PlayerAnimator {
         shader.setUniform("uEnableShadows", Settings.doEnableShadows());
         shader.setUniform("uLightSpaceMatrix", ShadowSystem.sys.getLightSpaceMatrix());
         shader.setUniform("uIsSubmergedEntity", pass == RenderPass.SUBMERGED);
-        float bob = (float) Math.sin(idleTime) * .025f * idleWeight;
         modelMatrix.identity().translate(player.getPosition().x, player.getPosition().y + bob - deathDrop,
                 player.getPosition().z).rotateY((float) Math.toRadians(modelYaw)).rotateZ(deathRoll).scale(scale);
         shader.setUniform("uModel", modelMatrix);

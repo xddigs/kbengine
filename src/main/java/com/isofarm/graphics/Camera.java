@@ -28,7 +28,7 @@ public class Camera implements CameraView {
     private static final float NEAR_PLANE = 0.1f;
     private static final float FAR_PLANE = 2000.0f;
     private static final float ZOOM_SPEED = 0.2f;
-    private final float yaw = DEFAULT_YAW;
+    private float yaw = DEFAULT_YAW;
     private final Vector3f position;
     private final Matrix4f projectionMatrix;
     private float zoom = 25.0f;
@@ -125,6 +125,16 @@ public class Camera implements CameraView {
     @Override
     public float getYaw() {
         return yaw;
+    }
+
+    /**
+     * Rotates the camera horizontally by the supplied number of degrees.
+     *
+     * @param degrees signed horizontal rotation in degrees
+     */
+    public void rotateYaw(float degrees) {
+        yaw = (yaw + degrees) % K.Camera.FULL_DEGREES;
+        if (yaw < 0.0f) yaw += K.Camera.FULL_DEGREES;
     }
 
     /**

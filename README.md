@@ -12,6 +12,7 @@ environment driven by custom 3D mesh rendering, particle systems, and dynamic da
 | **Interact/Place Blocks**      | `Mouse RB`<br>       |
 | **Attack/Break Blocks**        | `Mouse LB`<br>       |
 | **Zoom Camera**                | `C`<br>              |
+| **Rotate Camera 90°**          | `Left / Right Arrow`<br> |
 | **Open / Close Inventory**     | `E`<br>              |
 | **Open / Close Crafting Book** | `Tab`<br>          
 | **Toggle Chat / Console**      | `Enter` <br>         |
