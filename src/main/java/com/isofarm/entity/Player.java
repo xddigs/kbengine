@@ -62,6 +62,7 @@ public class Player extends Character {
      */
     @Override
     public void update(BlockPos blockPos, float delta) {
+        super.update(blockPos, delta);
         if (!gameplay.updateLifeCycle(delta)) {
             animator.update(playerModel, delta);
             return;

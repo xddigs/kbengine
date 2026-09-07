@@ -19,19 +19,17 @@ import org.joml.Vector3f;
 @SuppressWarnings("all")
 @DataClass
 public abstract class Entity {
+    protected static final float INVULNERABILITY_DURATION = 0.4f;
     private static final float LAVA_DAMAGE_INTERVAL = 1.0f;
     private static final float LAVA_DAMAGE_STEP = 0.1f;
 
     private final byte id;
-    private String name;
-
     protected Vector3f position;
     protected Vector3f velocity;
     protected Vector3f dimensions;
-
     protected float hitpoints;
     protected float maxHitpoints;
-
+    private String name;
     private float standingHeight;
     private float crouchingHeight;
     private boolean onGround;
@@ -40,6 +38,7 @@ public abstract class Entity {
     private float speed;
     private float lavaDamageTimer;
     private int lavaDamageTicks;
+    private float invulnerabilityTimer = 0.0f;
 
     /**
      * Creates a new {@code Entity} instance.
@@ -98,8 +97,8 @@ public abstract class Entity {
     public void damage(float amount, Entity attacker) {
         damage(amount, Cause.ENTITY);
         if (attacker != null) {
-            float knockbackStrength = 16.0f;
-            float upwardForce = 2.0f;
+            float knockbackStrength = 8.0f;
+            float upwardForce = 4.0f;
             applyKnockback(attacker.getPosition(), knockbackStrength, upwardForce);
         }
     }
@@ -663,7 +662,11 @@ public abstract class Entity {
      * @param blockPos the {@link BlockPos} supplied as {@code blockPos}
      * @param delta the {@code float} supplied as {@code delta}
      */
-    public abstract void update(BlockPos blockPos, float delta);
+    public void update(BlockPos blockPos, float delta) {
+        if (invulnerabilityTimer > 0.0f) {
+            invulnerabilityTimer = Math.max(0.0f, invulnerabilityTimer - delta);
+        }
+    }
 
     /**
      * Renders this object in the requested render pass.
@@ -684,4 +687,21 @@ public abstract class Entity {
      * Transfers or creates the relevant entity or item for drop loot.
      */
     protected void dropLoot() {}
+
+    /**
+     * Retrieves {@code invulnerabilityTimer}
+     * @return {@link float} value of invulnerabilityTimer
+     */
+    public float getInvulnerabilityTimer() {
+        return invulnerabilityTimer;
+    }
+
+    /**
+     * Sets the invulnerabilityTimer value
+     * @return {@link Entity} value of invulnerabilityTimer
+     */
+    public Entity setInvulnerabilityTimer(float invulnerabilityTimer) {
+        this.invulnerabilityTimer = invulnerabilityTimer;
+        return this;
+    }
 }

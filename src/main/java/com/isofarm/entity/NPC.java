@@ -18,7 +18,6 @@ public class NPC extends Character {
     private static final float MIN_IDLE_TIME = 2.0f;
     private static final float IDLE_TIME_VARIATION = 4.0f;
     private static final float WANDER_RADIUS = 5.0f;
-    private static final float KNOCKBACK_DURATION = 0.30f;
     private static final float KNOCKBACK_DAMPING = 12.0f;
     private final CharacterAnimator animator = new CharacterAnimator(this);
     private final NPCGender gender;
@@ -73,7 +72,8 @@ public class NPC extends Character {
      */
     @Override
     public void update(BlockPos blockPos, float delta) {
-        if (!isAlive() || delta <= 0.0f) return;
+        super.update(blockPos, delta);
+        super.update();
         updateBehavior(delta);
         animator.update(npcModel, delta);
     }
@@ -87,13 +87,22 @@ public class NPC extends Character {
 
     /** {@inheritDoc} */
     @Override
+    public void applyKnockback(Vector3f sourcePosition, float strength, float upwardForce) {
+        super.applyKnockback(sourcePosition, strength, upwardForce);
+        this.knockbackTimer = 0.25f;
+    }
+
+    /** {@inheritDoc} */
+    @Override
     public void damage(float amount, Entity attacker) {
-        float previousHitpoints = getHitpoints();
-        super.damage(amount, attacker);
-        if (getHitpoints() < previousHitpoints) {
-            knockbackTimer = KNOCKBACK_DURATION;
-            grunt();
+        if (getInvulnerabilityTimer() > 0.0f) {
+            return;
         }
+
+        super.damage(amount, attacker);
+        setInvulnerabilityTimer(INVULNERABILITY_DURATION);
+        grunt();
+
         if (attacker instanceof Character character) {
             interactWith(character);
         }
@@ -122,8 +131,8 @@ public class NPC extends Character {
 
         if (knockbackTimer > 0.0f) {
             knockbackTimer = Math.max(0.0f, knockbackTimer - delta);
-            collide(GameMaster.game.getWorld(),
-                    new Vector3f(velocity.x, 0.0f, velocity.z), delta);
+            collide(GameMaster.game.getWorld(), new Vector3f(velocity.x, velocity.y, velocity.z), delta);
+
             float damping = (float) Math.exp(-KNOCKBACK_DAMPING * delta);
             velocity.x *= damping;
             velocity.z *= damping;
@@ -146,7 +155,7 @@ public class NPC extends Character {
             setVelocity(0.0f, getVelocity().y, 0.0f);
             if (idleTimer <= 0.0f) chooseDestination();
         }
-        collide(GameMaster.game.getWorld(), new Vector3f(velocity.x, 0.0f, velocity.z), delta);
+        collide(GameMaster.game.getWorld(), new Vector3f(velocity.x, velocity.y, velocity.z), delta);
     }
 
     /** Wanders randomly around the NPC's home point. */
@@ -257,7 +266,6 @@ public class NPC extends Character {
 
     /**
      * Returns this NPC's gender.
-     *
      * @return the NPC gender used for localization and voice selection
      */
     public NPCGender getGender() {
