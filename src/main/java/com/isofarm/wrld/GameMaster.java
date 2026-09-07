@@ -506,10 +506,12 @@ public class GameMaster {
         TimeService.ts.update(delta, WeatherService.wes);
         float timeOfDay = TimeService.ts.getHour() + (TimeService.ts.getMinute() / 60.0f);
         celestialLighting.update(HoveredCell.get(this), timeOfDay);
+
         NPC trader = NPCService.npcs.getTrader();
         if (trader != null) {
             trader.updateShop(TimeService.ts);
         }
+
         CropService.cs.update(delta, WeatherService.wes.getWeather());
         TreeService.ts.update(this);
         world.forEachInteractiveBlock(iBlock::animate);

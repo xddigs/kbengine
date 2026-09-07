@@ -30,6 +30,8 @@ public final class CharacterAnimator {
     private static final float DEATH_FALL_DURATION = 0.75f;
     private static final float DEATH_FADE_DURATION = 0.75f;
     private final Character character;
+    /** Equipment state is per model; sharing it makes NPC nodes mirror the player weapon. */
+    private final EquipmentController equipmentController = new EquipmentController();
     private final Matrix4f modelMatrix = new Matrix4f();
     private GLTFNode head, torso, backpack, rightArm, leftArm, rightLeg, leftLeg;
     private Quaternionf baseHeadRotation;
@@ -58,7 +60,7 @@ public final class CharacterAnimator {
         leftArm = node(model, "Left Arm");
         rightLeg = node(model, "Right Leg");
         leftLeg = node(model, "Left Leg");
-        EquipmentController.ec.init(model);
+        equipmentController.init(model);
 
         if (head != null) {
             headPosition = copy(head);
@@ -188,7 +190,7 @@ public final class CharacterAnimator {
         rotate(rightLeg, new Quaternionf().rotateX((float) Math.toRadians(-12.0f) * loosen));
 
         if (model != null) model.updateTransforms();
-        EquipmentController.ec.equip(null, null);
+        equipmentController.equip(null, null);
     }
 
     private static void translate(GLTFNode node, Vector3f base, float x, float y, float z) {
@@ -292,9 +294,14 @@ public final class CharacterAnimator {
      * Updates equipment based on held tool/weapon
      */
     private void updateEquipment() {
+        // NPCs do not use the player's global hotbar selection.
+        if (!(character instanceof Player)) {
+            equipmentController.equip(null, null);
+            return;
+        }
         Item item = Settings.selectedItem;
         if (!(item instanceof Tool tool)) {
-            EquipmentController.ec.equip(null, null);
+            equipmentController.equip(null, null);
             return;
         }
         String type = switch (item) {
@@ -305,7 +312,7 @@ public final class CharacterAnimator {
             case Shovel ignored -> "shovel";
             default -> null;
         };
-        EquipmentController.ec.equip(tool.getTier().getName(), type);
+        equipmentController.equip(tool.getTier().getName(), type);
     }
 
     /**

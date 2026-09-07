@@ -5,6 +5,7 @@ import com.isofarm.item.Item;
 import com.isofarm.utils.Local;
 
 import java.util.Locale;
+import java.util.function.Consumer;
 
 /**
  * Enumerates the supported material id values.
@@ -83,5 +84,15 @@ public enum MaterialID implements Craftable {
     @Override
     public Item copy() {
         return this;
+    }
+
+    /**
+     * Performs the given action for each {@code MaterialID} in the specified {@code Iterable}.
+     * @param consumer the {@link Consumer} supplied as {@code consumer}
+     */
+    public static void forEach(Consumer<MaterialID> consumer) {
+        for (MaterialID materialID : values()) {
+            consumer.accept(materialID);
+        }
     }
 }

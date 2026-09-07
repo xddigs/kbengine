@@ -1,6 +1,5 @@
 package com.isofarm.graphics;
 
-import com.isofarm.data.Singleton;
 import com.isofarm.data.Tier;
 import com.isofarm.data.ToolType;
 import com.isofarm.graphics.gltf.GLTFModel;
@@ -12,9 +11,7 @@ import java.util.Map;
 /**
  * Encapsulates the state and operations required by equipment controller within the game runtime.
  */
-@Singleton
 public class EquipmentController {
-    public static final EquipmentController ec = new EquipmentController();
     private final Map<String, GLTFNode> equipmentNodes = new HashMap<>();
     private GLTFNode currentActiveNode = null;
 

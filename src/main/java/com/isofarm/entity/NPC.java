@@ -3,8 +3,9 @@ package com.isofarm.entity;
 import com.isofarm.data.*;
 import com.isofarm.graphics.gltf.GLTFLoader;
 import com.isofarm.graphics.gltf.GLTFModel;
-import com.isofarm.item.Block;
 import com.isofarm.item.Item;
+import com.isofarm.item.Material;
+import com.isofarm.item.MiningComponent;
 import com.isofarm.service.SoundService;
 import com.isofarm.service.TimeService;
 import com.isofarm.utils.K;
@@ -13,6 +14,8 @@ import com.isofarm.wrld.GameMaster;
 import org.joml.Vector3f;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Represents an NPC, with their own state and behavior, in contrast to {@link Player},
@@ -317,9 +320,29 @@ public class NPC extends Character {
         getPurse().add(amount);
     }
 
+    /**
+     * Dynamically generates a random trader stock, with random amounts and types
+     */
     public void setUpStock() {
         if (job != Job.TRADER) return;
-        add(new Block(BlockData.OAK_LOG), 64);
+        ThreadLocalRandom random = ThreadLocalRandom.current();
+        MaterialID.forEach(material -> {
+            if (material.equals(MaterialID.INGOT) || material.equals(MaterialID.RAW_ORE)) return;
+            if (random.nextFloat() < 0.70f) {
+                int amount = random.nextInt(5, 33);
+                add(new Material(material), amount);
+            }
+        });
+
+        Tier.forEach(tier -> {
+            if (tier.isInvalidTier()) return;
+            if (random.nextBoolean()) {
+                int amount = random.nextInt(4, 21);
+                add(new MiningComponent(tier, MaterialID.RAW_ORE), amount);
+            }
+        });
+
+        add(new Material(MaterialID.CHARCOAL), random.nextInt(16, 65));
     }
 
     /** Resets the trader's stock on the configured schedule. */
@@ -337,14 +360,11 @@ public class NPC extends Character {
     }
 
     /** Processes this trader selling an item to the player. */
-    public void sell(Item item, int amount) {
+    public boolean sell(Item item, int amount) {
         if (item == null || amount <= 0
-                || getInventory().getAmount(item) < amount) return;
+                || getInventory().getAmount(item) < amount) return false;
         getInventory().remove(item, amount);
         earn(item.getValue() * amount);
-
-        Player.plyr.add(item, amount);
-        Player.plyr.getPurse().remove(item.getValue() * amount);
 
         if (item.getValue() < 50) {
             SoundService.fx.playNPCVoice(disapprovingVoice());
@@ -353,23 +373,28 @@ public class NPC extends Character {
         }
 
         log.info("Sold x{} of {} to player", amount, item.getName());
+        return true;
     }
 
-    /** Processes this trader buying from the player. */
-    public void buy(Item item, int amount) {
-        if (item == null || amount <= 0) return;
+    /**
+     * Processes this trader buying an item from the player.
+     * @return {@link Boolean} true if successful, false if not enough money or stock space
+     */
+    public boolean buy(Item item, int amount) {
+        if (item == null || amount <= 0) return false;
         int totalPrice = item.getValue() * amount;
 
         if (purse() < totalPrice) {
             log.warn("Not enough money to buy x{} of {}", amount, item.getName());
-            return;
+            return false;
         }
 
+        if (!canStore(item, amount)) {
+            log.warn("Not enough stock space to buy x{} of {}", amount, item.getName());
+            return false;
+        }
         getInventory().add(item, amount);
         getPurse().remove(totalPrice);
-
-        Player.plyr.remove(item, amount);
-        Player.plyr.earn(totalPrice);
 
         if (item.getValue() > 100) {
             SoundService.fx.playNPCVoice(disapprovingVoice());
@@ -377,6 +402,38 @@ public class NPC extends Character {
             SoundService.fx.playNPCVoice(normalVoice());
         }
         log.info("Bought x{} of {} from player", amount, item.getName());
+        return true;
+    }
+
+    /** Checks stock capacity before a purchase is committed. */
+    private boolean canStore(Item item, int amount) {
+        int remaining = amount;
+        int maxStack = getInventory().getMaxStack(item);
+        for (InventorySlot slot : getInventory().getSlots()) {
+            if (!slot.isEmpty() && sameStackType(slot.getItem(), item)) {
+                remaining -= Math.max(0, maxStack - slot.getAmount());
+                if (remaining <= 0) return true;
+            }
+        }
+        for (InventorySlot slot : getInventory().getSlots()) {
+            if (slot.isEmpty()) {
+                remaining -= maxStack;
+                if (remaining <= 0) return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Checks if two items are of the same type.
+     * @param first 1st item to compare, or {@code null}
+     * @param second 2nd item to compare or {@code null}
+     * @return {@link Boolean} true if the items are of the same type, false otherwise
+     */
+    private boolean sameStackType(Item first, Item second) {
+        return first != null && second != null
+                && first.getClass() == second.getClass()
+                && first.getId() == second.getId();
     }
 
     /** Removes all items from the trader's stock. */
@@ -413,8 +470,12 @@ public class NPC extends Character {
     /** Restores the trader's initial stock and currency state. */
     public void resetShop() {
         clear();
+        getPurse().empty();
         setUpStock();
-        earn(K.World.STARTING_COINS);
+        long stockValue = getInventory().getItems().entrySet().stream()
+                .mapToLong(entry -> (long) entry.getKey().getValue() * entry.getValue())
+                .sum();
+        earn(Math.clamp(stockValue, K.World.STARTING_COINS, Integer.MAX_VALUE));
     }
 
     /**

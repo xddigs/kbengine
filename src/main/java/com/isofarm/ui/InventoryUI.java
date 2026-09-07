@@ -1222,7 +1222,7 @@ public class InventoryUI extends UIElement {
             return;
         }
 
-        trader.sell(item, amount);
+        if (!trader.sell(item, amount)) return;
         player.spend(totalPrice);
         addToPlayerInventories(item, amount);
     }
@@ -1232,17 +1232,25 @@ public class InventoryUI extends UIElement {
         if (trader == null || player == null || sourceSlot == null
                 || item == null || amount <= 0) return;
 
-        int totalPrice = item.getValue() * amount;
         if (sourceSlot.isEmpty() || !isSameType(sourceSlot.getItem(), item)
-                || sourceSlot.getAmount() < amount
-                || trader.purse() < totalPrice
-                || !canFit(trader.getStock(), item, amount)) {
+                || sourceSlot.getAmount() < amount) {
             return;
         }
 
-        trader.buy(item, amount);
-        sourceSlot.setAmount(sourceSlot.getAmount() - amount);
-        player.earn(totalPrice);
+        int amountToSell = affordableAmount(trader, item, amount);
+        while (amountToSell > 0 && !canFit(trader.getStock(), item, amountToSell)) {
+            amountToSell--;
+        }
+        if (amountToSell <= 0 || !trader.buy(item, amountToSell)) return;
+
+        sourceSlot.setAmount(sourceSlot.getAmount() - amountToSell);
+        player.earn(item.getValue() * amountToSell);
+    }
+
+    /** Returns the largest quantity the trader can pay for right now. */
+    private int affordableAmount(NPC trader, Item item, int requested) {
+        if (item.getValue() <= 0) return requested;
+        return Math.min(requested, trader.purse() / item.getValue());
     }
 
     /** Checks whether an inventory can receive the requested amount without loss. */

@@ -30,10 +30,10 @@ public class Library implements Service<GameMaster> {
         registerDefault(itemR, CraftingBook::new);
         registerDefault(itemR, () -> new Bucket(BlockData.AIR));
 
-        for (MaterialID material : MaterialID.values()) {
-            if (material.equals(MaterialID.INGOT) || material.equals(MaterialID.RAW_ORE)) continue;
-            registerDefault(itemR, () -> new Material(Tier.NONE, material));
-        }
+        MaterialID.forEach(material -> {
+            if (material.equals(MaterialID.INGOT) || material.equals(MaterialID.RAW_ORE)) return;
+            registerDefault(itemR, () -> new Material(material));
+        });
 
         Tier.forEach(tier -> {
             if (tier.isInvalidTier()) return;

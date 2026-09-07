@@ -24,6 +24,15 @@ public class Material implements Craftable, Plantable {
     }
 
     /**
+     * Creates a new {@code Material} instance. Specifically, this constructor
+     * creates a material with a tier of {@link Tier#NONE}.
+     * @param materialID the {@link MaterialID} supplied as {@code materialID}
+     */
+    public Material(MaterialID materialID) {
+        this(Tier.NONE, materialID);
+    }
+
+    /**
      * {@inheritDoc}
      * Returns the id.
      * @return {@code byte}; the id
