@@ -18,7 +18,7 @@ import static org.joml.Math.lerp;
  */
 public class Camera implements CameraView {
     private static final float MIN_ZOOM = 1.0f;
-    private static final float MAX_ZOOM = 50.0f;
+    private static final float MAX_ZOOM = 80.0f;
 
     private static final float DEFAULT_YAW = 45.0f;
     private static final float PITCH = 35.2643897f;
