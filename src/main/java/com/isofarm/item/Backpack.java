@@ -20,13 +20,7 @@ public class Backpack extends Usable implements Equippable,
         super(Usables.BACKPACK, Local.lang.t("item.usable.backpack"));
     }
 
-    /**
-     * {@inheritDoc}
-     * Handles use and applies its effect to the current interaction state.
-     * @param gameMaster the {@link GameMaster} supplied as {@code gameMaster}
-     * @param isCtrlHeld the {@code boolean} supplied as {@code isCtrlHeld}
-     * @return {@code boolean}; the use result
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean use(GameMaster gameMaster,  boolean isCtrlHeld) {
         Player player = Player.plyr;
@@ -43,40 +37,44 @@ public class Backpack extends Usable implements Equippable,
         return false;
     }
 
-    /**
-     * {@inheritDoc}
-     * Updates the current state.
-     */
+    /** {@inheritDoc} */
     @Override
     public void update() {}
 
-    /**
-     * Applies unequip and updates the affected character or item state.
-     */
-    public void unequip() {
+    /** {@inheritDoc} */
+    @Override
+    public boolean equip() {
+        if (!Player.plyr.getInventory().hasBackpackEquipped()) {
+            Player.plyr.getInventory().equipBackpack(this);
+            return true;
+        }
+        return false;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean unequip() {
         if (Player.plyr.getInventory().hasBackpackEquipped()) {
             Player.plyr.getInventory().unequipBackpack();
             GameUIService.ui.resetHotbarPosition();
+            return true;
         }
+        return false;
     }
 
+    /** {@inheritDoc} */
+    @Override
+    public boolean isEquipped() {
+        return Player.plyr.getInventory().hasBackpackEquipped();
+    }
 
-    /**
-     * {@inheritDoc}
-     * Creates an independent copy that preserves the relevant state of this object.
-     * @return the {@link Item} representing the copy result
-     */
+    /** {@inheritDoc} */
     @Override
     public Item copy() {
         return new Backpack();
     }
 
-    /**
-     * {@inheritDoc}
-     * Applies enchanting and updates the affected character or item state.
-     * @param enchantment the {@link Enchantment} supplied as {@code enchantment}
-     * @return {@code boolean}; the enchanting result
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean enchanting(Enchantment enchantment) {
         return false;

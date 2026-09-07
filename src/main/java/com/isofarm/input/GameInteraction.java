@@ -180,6 +180,13 @@ public class GameInteraction {
                         isRightPressed = false;
                     }
                 }
+
+                case Wallet wallet -> {
+                    if (isRightPressed && !GameMaster.game.isInventoryOpen()) {
+                        wallet.use(gameMaster, isCtrlHeld);
+                        isRightPressed = false;
+                    }
+                }
                 default -> throw new IllegalStateException(
                         "Unexpected value: " + usable);
             }

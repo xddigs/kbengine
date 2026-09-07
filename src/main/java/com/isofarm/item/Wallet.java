@@ -4,6 +4,7 @@ import com.isofarm.data.DataClass;
 import com.isofarm.data.Enchantment;
 import com.isofarm.data.Task;
 import com.isofarm.data.Usables;
+import com.isofarm.utils.ToastFactory;
 import com.isofarm.wrld.GameMaster;
 
 /**
@@ -11,8 +12,8 @@ import com.isofarm.wrld.GameMaster;
  */
 @DataClass
 @Task(reason="Wallets are not implemented yet")
-public class Wallet extends Usable implements Craftable,
-        Equippable {
+public class Wallet extends Usable
+        implements Craftable, Equippable {
     private Integer coins;
 
     /** {@inheritDoc} */
@@ -21,25 +22,18 @@ public class Wallet extends Usable implements Craftable,
         this.coins = 0;
     }
 
-    /**
-     * Handles use and applies its effect to the current interaction state.
-     *
-     * @param gameMaster the {@link GameMaster} supplied as {@code gameMaster}
-     * @param isCtrlHeld the {@code boolean} supplied as {@code isCtrlHeld}
-     * @return {@code boolean}; the use result
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean use(GameMaster gameMaster, boolean isCtrlHeld) {
-        return false;
+        ToastFactory.info("$" + coins.toString());
+        return true;
     }
 
     /**
      * Updates the current state.
      */
     @Override
-    public void update() {
-
-    }
+    public void update() {}
 
     /** {@inheritDoc} */
     @Override
@@ -53,6 +47,24 @@ public class Wallet extends Usable implements Craftable,
         return new Wallet();
     }
 
+    /** {@inheritDoc} */
+    @Override
+    public boolean equip() {
+        return false;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean unequip() {
+        return false;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean isEquipped() {
+        return false;
+    }
+
     /**
      * Returns the {@code coins} value
      * @return {@link Integer} value of coins
@@ -62,11 +74,22 @@ public class Wallet extends Usable implements Craftable,
     }
 
     /**
-     * Sets the coins value
-     * @return {@link Integer} value of coins
+     * Adds coins to the wallet
+     * @param coins the {@link Integer} value to add
+     * @return {@link Wallet}
      */
-    public Wallet setCoins(Integer coins) {
-        this.coins = coins;
+    public Wallet earn(Integer coins) {
+        this.coins += coins;
+        return this;
+    }
+
+    /**
+     * Spend coins from the wallet
+     * @param coins the {@link Integer} value to spend
+     * @return {@link Wallet}
+     */
+    public Wallet spend(Integer coins) {
+        this.coins -= coins;
         return this;
     }
 }

@@ -76,6 +76,36 @@ public abstract class Tool implements Craftable,
         );
     }
 
+    /** {@inheritDoc} */
+    @Override
+    public boolean enchanting(Enchantment enchantment) {
+        return false;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean equip() {
+        return false;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean unequip() {
+        return false;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean isEquipped() {
+        return false;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public Item copy() {
+        return this;
+    }
+
     /**
      * {@inheritDoc}
      * Returns the value.

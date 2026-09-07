@@ -17,7 +17,8 @@ import java.util.stream.Collectors;
 /**
  * Encapsulates the state and operations required by crafting book within the game runtime.
  */
-public class CraftingBook extends Book implements Undroppable {
+public class CraftingBook extends Book implements Equippable,
+        Undroppable {
     private static final int LINES_PER_PAGE = 16;
     private Inventory.SortOrder recipeOrder = Inventory.SortOrder.CREATIVE;
     private boolean areOnlyCraftableRecipes;
@@ -88,6 +89,32 @@ public class CraftingBook extends Book implements Undroppable {
                     }, tooltip).setFavorite(recipe.isFavorite());
             lineCount++;
         }
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean equip() {
+        if (!Player.plyr.getInventory().hasBookEquipped()) {
+            Player.plyr.getInventory().equipBook(this);
+            return true;
+        }
+        return false;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean unequip() {
+        if (Player.plyr.getInventory().hasBookEquipped()) {
+            Player.plyr.getInventory().unequipBook();
+            return true;
+        }
+        return false;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean isEquipped() {
+        return Player.plyr.getInventory().hasBookEquipped();
     }
 
     /**
