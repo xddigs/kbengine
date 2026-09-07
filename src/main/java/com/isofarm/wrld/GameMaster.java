@@ -28,6 +28,7 @@ import static org.lwjgl.opengl.GL13.GL_MULTISAMPLE;
 /**
  * Encapsulates the state and operations required by game master within the game runtime.
  */
+@SuppressWarnings("all")
 @Singleton
 public class GameMaster {
     public static final GameMaster game = new GameMaster();
