@@ -23,6 +23,7 @@ public final class GameRules {
         RULES.put("fov", Settings.getFov());
         RULES.put("unloadMargin", Settings.getUnloadMargin());
         RULES.put("doEnableShadows", Settings.doEnableShadows());
+        RULES.put("doBookAnimation", Settings.doBookAnimation());
         RULES.put("maxInteractionDistance", Settings.getMaxInteractionDistance());
     }
 
@@ -161,6 +162,10 @@ public final class GameRules {
 
                 case "doEnableShadows" -> {
                     Settings.setDoEnableShadows((Boolean) value);
+                }
+
+                case "doBookAnimation" -> {
+                    Settings.setDoBookAnimation((Boolean) value);
                 }
 
                 case "maxInteractionDistance" -> {

@@ -25,6 +25,7 @@ public class Settings {
     private static boolean doEnableMusic = true;
     private static boolean doEnableDebugInfo = true;
     private static boolean doEnableShadows = true;
+    private static boolean doBookAnimation = false;
 
     /**
      * Creates a new {@code Settings} instance.
@@ -313,6 +314,23 @@ public class Settings {
      */
     public static boolean doEnableDebugInfo() {
         return doEnableDebugInfo;
+    }
+
+    /**
+     * Retrieves doBookAnimation
+     * @return {@link boolean} value of doBookAnimation
+     */
+    public static boolean doBookAnimation() {
+        return doBookAnimation;
+    }
+
+    /**
+     * Sets the doBookAnimation value
+     * @return {@link boolean} value of doBookAnimation
+     */
+    public static boolean setDoBookAnimation(boolean doBookAnimation) {
+        Settings.doBookAnimation = doBookAnimation;
+        return Settings.doBookAnimation;
     }
 
     /**

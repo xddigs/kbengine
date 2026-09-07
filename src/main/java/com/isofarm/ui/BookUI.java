@@ -22,7 +22,6 @@ import org.lwjgl.stb.STBTTBakedChar;
  */
 @Singleton
 public class BookUI extends UIElement {
-    public static boolean canBeAnimated = false;
     private static final float BOOK_SCALE = 8.0f;
     private static final float ANIMATION_DURATION = 0.35f;
     private static final float PAGE_FLIP_DURATION = 0.4f;
@@ -177,7 +176,7 @@ public class BookUI extends UIElement {
      * Activates this object and prepares any state it requires.
      */
     public void open() {
-        if (!canBeAnimated) {
+        if (!Settings.doBookAnimation()) {
             animationProgress = 1.0f;
             isClosing = false;
             isOpening = false;
@@ -198,7 +197,7 @@ public class BookUI extends UIElement {
     public void close() {
         if (isClosing) return;
 
-        if (!canBeAnimated) {
+        if (!Settings.doBookAnimation()) {
             animationProgress = 0.0f;
             isClosing = false;
             isOpening = false;
@@ -233,7 +232,7 @@ public class BookUI extends UIElement {
      * @return {@code true} when book animations are enabled
      */
     public static boolean canBeAnimated() {
-        return canBeAnimated;
+        return Settings.doBookAnimation();
     }
 
     /**
@@ -408,11 +407,9 @@ public class BookUI extends UIElement {
         float centerX = (screenWidth - bookWidth) * 0.5f;
         float centerY = (screenHeight - bookHeight) * 0.5f;
 
-        if (canBeAnimated) {
-            updateAnimation(delta);
-        }
-        float alpha = canBeAnimated ? easeInOutCubic(animationProgress) : 1.0f;
-        float y = canBeAnimated ? lerp(screenHeight, centerY, alpha) : centerY;
+        updateAnimation(delta);
+        float alpha = Settings.doBookAnimation() ? easeInOutCubic(animationProgress) : 1.0f;
+        float y = Settings.doBookAnimation() ? lerp(screenHeight, centerY, alpha) : centerY;
 
         setPosition(centerX, y);
         setSize(bookWidth, bookHeight);
@@ -420,13 +417,13 @@ public class BookUI extends UIElement {
         layoutButtons(bookWidth);
         updateButtonState();
 
-        if (canBeAnimated) {
+        if (Settings.doBookAnimation()) {
             Vector4f color = new Vector4f(0.8706f, 0.8196f, 0.6745f, 1.0f);
             Frontend.drawRect(centerX, y + BASE_CONTENT_HEIGHT_OFFSET + BASE_CONTENT_HEIGHT_OFFSET/2f,
                     bookWidth, bookHeight + BASE_CONTENT_HEIGHT_OFFSET, color);
         }
 
-        if (canBeAnimated && isFlippingPage) {
+        if (Settings.doBookAnimation() && isFlippingPage) {
             pageFlipTimer += delta;
             float progress = Math.min(1.0f, pageFlipTimer / PAGE_FLIP_DURATION);
             float animFrameProgress = isFlippingNext ? progress : (1.0f - progress);
@@ -628,7 +625,7 @@ public class BookUI extends UIElement {
      * Updates text or selection state for next page.
      */
     public void nextPage() {
-        if (!canBeAnimated) {
+        if (!Settings.doBookAnimation()) {
             isFlippingPage = false;
             return;
         }
@@ -644,7 +641,7 @@ public class BookUI extends UIElement {
      * Updates text or selection state for previous page.
      */
     public void previousPage() {
-        if (!canBeAnimated) {
+        if (!Settings.doBookAnimation()) {
             isFlippingPage = false;
             return;
         }
