@@ -5,13 +5,9 @@ import com.isofarm.data.BlockPos;
 import com.isofarm.data.BlockShape;
 import com.isofarm.data.Crop;
 import com.isofarm.data.RenderPass;
-import com.isofarm.entity.NPC;
 import com.isofarm.entity.Player;
-import com.isofarm.input.ControlAction;
-import com.isofarm.input.Controls;
 import com.isofarm.input.GameInteraction;
 import com.isofarm.service.BookService;
-import com.isofarm.service.NPCService;
 import com.isofarm.service.TimeService;
 import com.isofarm.service.WeatherService;
 import com.isofarm.utils.HoveredCell;
@@ -354,8 +350,6 @@ public class GameRenderer {
                 .filter(entity -> entity != player)
                 .forEach(entity -> entity.render(gameMaster, RenderPass.NORMAL));
 
-        renderNpcHoverOutline(gameMaster, hoveredCell, defaultShader);
-
         glDepthFunc(GL_LESS);
         glDepthMask(true);
 
@@ -490,55 +484,6 @@ public class GameRenderer {
             glCullFace(GL_BACK);
             glEnable(GL_DEPTH_TEST);
         }
-    }
-
-    /** Draws the white hover outline around the NPC currently under the cursor. */
-    private void renderNpcHoverOutline(GameMaster gameMaster, BlockPos hoveredCell,
-                                       Shader defaultShader) {
-        Player player = Player.plyr;
-        if (player == null || player.getGamemode().isNoClip()
-                || gameMaster.isInventoryOpen() || gameMaster.isChatOpen()
-                || Controls.isDown(ControlAction.PRIMARY_ACTION)) {
-            return;
-        }
-
-        NPC npc = NPCService.npcs.getClosestBeforeBlock(gameMaster, hoveredCell);
-        if (npc == null || npc.getInvulnerabilityTimer() > 0.0f) return;
-
-        Vector3f position = npc.getPosition();
-        Vector3f dimensions = npc.getDimensions();
-        float padding = 0.04f;
-        float width = dimensions.x + padding * 2.0f;
-        float height = dimensions.y + padding * 2.0f;
-        float depth = dimensions.z + padding * 2.0f;
-
-        defaultShader.bind();
-        defaultShader.setUniform("uProjection", gameMaster.getActiveCamera().getProjectionMatrix());
-        defaultShader.setUniform("uView", gameMaster.getActiveCamera().getViewMatrix());
-        defaultShader.setUniform("uUseTexture", false);
-        defaultShader.setUniform("uUseFaceAtlas", false);
-        defaultShader.setUniform("uIsWater", false);
-        defaultShader.setUniform("uIsSprite", true);
-        defaultShader.setUniform("uIsSubmergedEntity", false);
-        defaultShader.setUniform("uEnableShadows", false);
-        defaultShader.setUniform("uIsMaskPass", true);
-        defaultShader.setUniform("uParticleAlpha", 1.0f);
-        defaultShader.setUniform("uBaseColor", new Vector3f(1.0f));
-
-        modelMatrix.identity().translate(
-                position.x - dimensions.x * 0.5f - padding,
-                position.y - padding,
-                position.z - dimensions.z * 0.5f - padding)
-                .scale(width, height, depth);
-        defaultShader.setUniform("uModel", modelMatrix);
-
-        glEnable(GL_DEPTH_TEST);
-        glDepthFunc(GL_LESS);
-        glDepthMask(false);
-        glLineWidth(K.Render.LINE_WIDTH);
-        ResourceManager.rem.getSelectionMesh(BlockShape.FULL_CUBE).renderLines();
-        glDepthMask(true);
-        defaultShader.setUniform("uIsMaskPass", false);
     }
 
     /**
