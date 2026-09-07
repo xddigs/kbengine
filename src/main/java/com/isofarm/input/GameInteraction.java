@@ -619,14 +619,9 @@ public class GameInteraction {
         if (selectedItem instanceof Tool tool) {
             boolean isUsableOn = tool.getType().isUsableOn(blockData);
 
-            if (!isUsableOn) {
-                tool.misuse();
-            } else {
-                tool.use();
-            }
-
-            if (tool instanceof Axe axe && isSmartShift) {
-                List<BlockPos> destroyedBlocks = TreeService.chop(gameMaster, axe);
+            if (tool instanceof Axe axe && isSmartShift
+                    && blockData.isLog() && isUsableOn) {
+                List<BlockPos> destroyedBlocks = TreeService.chop(gameMaster, axe, cell);
                 for (BlockPos pos : destroyedBlocks) {
                     GameUIService.ui.logAction(new BlockPos(blockData, pos.x(), pos.y(), pos.z()));
                     if (!(pos.data() instanceof BlockData bData)) {
@@ -660,6 +655,12 @@ public class GameInteraction {
 
                 log.info("Tree chopped successfully at base {},{},{}", cell.x(), cell.y(), cell.z());
                 return;
+            }
+
+            if (!isUsableOn) {
+                tool.misuse();
+            } else {
+                tool.use();
             }
         }
 

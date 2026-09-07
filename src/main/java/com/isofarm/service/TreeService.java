@@ -4,7 +4,6 @@ import com.isofarm.data.*;
 import com.isofarm.entity.WorldItem;
 import com.isofarm.item.*;
 import com.isofarm.ui.GameUIService;
-import com.isofarm.utils.HoveredCell;
 import com.isofarm.utils.Settings;
 import com.isofarm.wrld.Chunk;
 import com.isofarm.wrld.GameMaster;
@@ -35,18 +34,18 @@ public class TreeService {
      * Applies the world or inventory action represented by chop.
      * @param gamemaster the {@link GameMaster} supplied as {@code gamemaster}
      * @param axe the {@link Axe} supplied as {@code axe}
+     * @param cell the already resolved block selected by the player
      * @return the {@link List} representing the chop result
      */
-    public static List<BlockPos> chop(GameMaster gamemaster, Axe axe) {
+    public static List<BlockPos> chop(GameMaster gamemaster, Axe axe, BlockPos cell) {
         List<BlockPos> choppedBlocks = new ArrayList<>();
-        BlockPos cell = HoveredCell.get(gamemaster);
         if (cell == null) return choppedBlocks;
 
         World world = gamemaster.getWorld();
         byte startId = world.getBlockTypeAt(cell.x(), cell.y(), cell.z());
         BlockData startBlock = BlockData.fromId(startId);
 
-        if (!BlockData.OAK_LOG.equals(startBlock)) {
+        if (startBlock == null || !startBlock.isLog()) {
             return choppedBlocks;
         }
 
@@ -65,7 +64,7 @@ public class TreeService {
             BlockPos current = toProcess.poll();
             byte currentId = World.wrld.getBlockTypeAt(current.x(), current.y(), current.z());
             BlockData currentBlock = BlockData.fromId(currentId);
-            boolean isLog = BlockData.OAK_LOG.equals(currentBlock);
+            boolean isLog = startBlock == currentBlock;
 
             if (isLog) {
                 World.wrld.setBlockTypeAt(current.x(), current.y(), current.z(), BlockData.AIR.getId());
