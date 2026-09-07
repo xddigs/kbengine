@@ -147,6 +147,8 @@ public class GameInteraction {
         if (isRightPressed && canInteract && NPCService.npcs.interact(gameMaster)) {
             if (!player.isAttacking()) player.interact();
             isRightPressed = false;
+        } else if (isLeftPressed && NPCService.npcs.attack(gameMaster)) {
+            if (player.isAttacking()) return null;
         }
 
         if (selectedItem instanceof Usable usable) {

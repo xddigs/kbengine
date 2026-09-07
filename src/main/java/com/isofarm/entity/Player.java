@@ -1,18 +1,13 @@
 package com.isofarm.entity;
 
-import com.isofarm.data.BlockPos;
-import com.isofarm.data.BlockData;
-import com.isofarm.data.Cause;
-import com.isofarm.data.Direction;
-import com.isofarm.data.PlayerState;
-import com.isofarm.data.RenderPass;
-import com.isofarm.data.Singleton;
+import com.isofarm.data.*;
 import com.isofarm.entity.plyr.PlayerAnimator;
 import com.isofarm.entity.plyr.PlayerGameplay;
 import com.isofarm.entity.plyr.PlayerManager;
 import com.isofarm.item.Item;
 import com.isofarm.pathfinding.GridPos;
 import com.isofarm.utils.DeathManager;
+import com.isofarm.utils.Settings;
 import com.isofarm.wrld.GameMaster;
 import com.isofarm.wrld.World;
 import org.joml.Vector3f;
@@ -135,6 +130,18 @@ public class Player extends Character {
      */
     public boolean isAttacking() {
         return animator.isAttacking();
+    }
+
+    /**
+     * Determines whether aiming is satisfied by the state and damage
+     * @return {@code true} if aiming has damage; otherwise {@code false}
+     */
+    public float getAttack() {
+        Item selectedItem = Settings.selectedItem;
+        if (selectedItem == null) return 0.0f;
+        if (!(selectedItem instanceof ToolType toolType)) return 1.0f;
+        if (toolType.getBaseDamage() <= 0) return 1.0f;
+        return getStrength() * toolType.getBaseDamage();
     }
 
     /**

@@ -137,6 +137,18 @@ public class NPC extends Character {
         shader.unbind();
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void damage(float amount) {
+        super.damage(amount);
+        grunt(gender);
+    }
+
+    /**
+     * Binds the NPC's model nodes to their respective names
+     */
     private void bindNodes() {
         head = npcModel.findNode("Head");
         body = npcModel.findNode("Body");
@@ -152,11 +164,19 @@ public class NPC extends Character {
         if (head != null) baseHeadRotation = new Quaternionf(head.getRotation());
     }
 
+    /**
+     * Hides the node with the supplied name.
+     * @param name the name of the node to hide
+     */
     private void hideNode(String name) {
         GLTFNode node = npcModel.findNode(name);
         if (node != null) node.setVisible(false);
     }
 
+    /**
+     * Updates the NPC's behavior.
+     * @param delta the {@code float} argument; frame time in seconds
+     */
     private void updateBehavior(float delta) {
         if (walking) {
             Vector3f offset = new Vector3f(destination).sub(position);
@@ -178,6 +198,7 @@ public class NPC extends Character {
         collide(GameMaster.game.getWorld(), new Vector3f(velocity.x, 0.0f, velocity.z), delta);
     }
 
+    /** Wanders randomly around the NPC's home point. */
     private void chooseDestination() {
         float angle = (float) (Math.random() * Math.PI * 2.0);
         float radius = (float) Math.sqrt(Math.random()) * WANDER_RADIUS;
@@ -186,10 +207,17 @@ public class NPC extends Character {
         walking = true;
     }
 
+    /**
+     * Chooses a random duration for the NPC to idle.
+     */
     private void chooseIdleDuration() {
         idleTimer = MIN_IDLE_TIME + (float) Math.random() * IDLE_TIME_VARIATION;
     }
 
+    /**
+     * Animates the NPC's model based on its current velocity.
+     * @param delta the {@code float} argument; frame time in seconds
+     */
     private void animate(float delta) {
         boolean moving = walking && (Math.abs(velocity.x) > MOVE_THRESHOLD
                 || Math.abs(velocity.z) > MOVE_THRESHOLD);
@@ -209,13 +237,17 @@ public class NPC extends Character {
         npcModel.updateTransforms();
     }
 
+    /**
+     * Translates the supplied node by the supplied offset.
+     * @param node the {@link GLTFNode} to translate
+     * @param rotation the {@link Quaternionf} to rotate the node by
+     */
     private static void rotate(GLTFNode node, Quaternionf rotation) {
         if (node != null) node.setRotation(rotation);
     }
 
     /**
      * Sets the center point used by the NPC's wandering behavior.
-     *
      * @param position the new world-space home and current position
      */
     public void setHome(Vector3f position) {
@@ -226,7 +258,6 @@ public class NPC extends Character {
 
     /**
      * Returns the distance where a ray enters this NPC's collision box.
-     *
      * @param origin the world-space ray origin
      * @param direction the normalized world-space ray direction
      * @return the ray distance, or positive infinity when it misses
@@ -267,7 +298,14 @@ public class NPC extends Character {
 
     /** Plays this character's normal gender-specific voice response. */
     public void speak() {
-        SoundService.fx.playGenderSound(SoundGroup.NPC, gender.getSoundIndex(false));
+        SoundService.fx.playGenderSound(SoundGroup.NPC, gender.getSoundIndex(false, false));
+    }
+
+    /** Plays this character's male gender-specific voice response. */
+    public void grunt(NPCGender gender) {
+        SoundService fx = SoundService.fx;
+        if (gender.equals(NPCGender.MALE)) fx.playEntitySound(SoundGroup.ENTITY);
+        fx.playGenderSound(SoundGroup.NPC, gender.getSoundIndex(true, false));
     }
 
     /**

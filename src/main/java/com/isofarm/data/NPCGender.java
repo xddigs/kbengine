@@ -27,12 +27,15 @@ public enum NPCGender {
      * @param disapproving whether the disapproving variant should be selected
      * @return the index of the matching sound in the NPC sound group
      */
-    public int getSoundIndex(boolean disapproving) {
+    public int getSoundIndex(boolean disapproving, boolean hurt) {
         int voiceOffset = switch (this) {
             case FEMALE -> 0;
             case MALE -> 2;
             case NON_BINARY -> Math.random() < 0.5 ? 0 : 2;
         };
-        return voiceOffset + (disapproving ? 1 : 0);
+
+        voiceOffset += disapproving ? 1 : 0;
+        voiceOffset += hurt && this.equals(FEMALE)? 2 : 0;
+        return voiceOffset;
     }
 }

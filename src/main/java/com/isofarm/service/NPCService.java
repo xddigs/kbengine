@@ -60,7 +60,35 @@ public class NPCService implements Service<NPC> {
      * @return {@code true} when an NPC consumed the click
      */
     public boolean interact(GameMaster gameMaster) {
-        if (gameMaster == null || Player.plyr == null) return false;
+        NPC closest = getClosest();
+        if (closest == null) return false;
+        closest.speak();
+        if (closest.getJob() == Job.TRADER && GameUIService.ui != null) {
+            GameUIService.ui.getInventoryUI().openExternalInventory(closest.getInventory());
+        }
+        return true;
+    }
+
+    /**
+     * Attacks with the closest NPC under the pointer when it lies within the
+     * same reach used for block placement and breaking.
+     * @param gameMaster the active game and camera owner
+     * @return {@code true} when an NPC consumed the click
+     */
+    public boolean attack(GameMaster gameMaster) {
+        NPC closest = getClosest();
+        if (closest == null) return false;
+        closest.damage(Player.plyr.getAttack());
+        return true;
+    }
+
+    /**
+     * Returns the closest {@link NPC} to the {@link Player}.
+     * @return the closest {@link NPC}
+     */
+    public NPC getClosest() {
+        GameMaster gameMaster = GameMaster.game;
+        if (gameMaster == null || Player.plyr == null) return null;
         Ray ray = gameMaster.getCamera().getMouseRay(Mouse.getX(), Mouse.getY(),
                 gameMaster.getWindowWidth(), gameMaster.getWindowHeight());
         NPC closest = null;
@@ -75,13 +103,7 @@ public class NPCService implements Service<NPC> {
                 closestRayDistance = rayDistance;
             }
         }
-        if (closest == null) return false;
-
-        closest.speak();
-        if (closest.getJob() == Job.TRADER && GameUIService.ui != null) {
-            GameUIService.ui.getInventoryUI().openExternalInventory(closest.getInventory());
-        }
-        return true;
+        return closest;
     }
 
     /**
