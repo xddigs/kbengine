@@ -18,12 +18,20 @@ public final class IslandGenerator implements Generator {
     private static final int CENTER_X = 0;
     private static final int CENTER_Z = 0;
     private static final float ISLAND_RADIUS = 24.0f;
-    private static final float COAST_WIDTH = 3.0f;
+    private static final float COAST_WIDTH = 2.0f;
     private static final float SEABED_TERRACE_WIDTH = 2.0f;
     private static final int ISLAND_HEIGHT = 8;
-    private static final float LAKE_RADIUS = 2.0f;
+
+    private static final float LAKE_RADIUS = 4.0f;
     private static final float LAVA_RADIUS = 1.75f;
+    private static final float LAKE_CHANCE = 0.50f;
     private static final float LAVA_CHANCE = 0.25f;
+    /** Maximum horizontal reach of NPC spawning and wandering around the origin. */
+    private static final float NPC_SAFE_RADIUS = 12.0f;
+    /** Radius of the level spawn platform before its terrain transition begins. */
+    private static final float SPAWN_PLATFORM_RADIUS = 6.0f;
+    /** Width of the smooth terrain transition outside the spawn platform. */
+    private static final float SPAWN_PLATFORM_TRANSITION = 6.0f;
 
     private final World world;
     private final FluidSimulation waterSimulation;
@@ -35,7 +43,8 @@ public final class IslandGenerator implements Generator {
     /**
      * Creates a generator with a random world seed.
      * @param world the {@link World} supplied as {@code world}
-     * @param waterSimulation the {@link FluidSimulation} argument; the fluid simulation used for generated ocean and lakes
+     * @param waterSimulation the {@link FluidSimulation} argument; the fluid simulation
+     *                        used for generated ocean and lakes
      */
     public IslandGenerator(World world, FluidSimulation waterSimulation) {
         this(world, waterSimulation, new Random().nextLong());
@@ -44,7 +53,8 @@ public final class IslandGenerator implements Generator {
     /**
      * Creates a deterministic generator for the supplied seed.
      * @param world the {@link World} supplied as {@code world}
-     * @param waterSimulation the {@link FluidSimulation} argument; the fluid simulation used for generated ocean and lakes
+     * @param waterSimulation the {@link FluidSimulation} argument; the fluid simulation
+     *                        used for generated ocean and lakes
      * @param seed the {@code long} supplied as {@code seed}
      */
     public IslandGenerator(World world, FluidSimulation waterSimulation, long seed) {
@@ -53,7 +63,7 @@ public final class IslandGenerator implements Generator {
         this.seed = seed;
 
         Random random = new Random(seed);
-        lake = chooseLake(random);
+        lake = random.nextFloat() < LAKE_CHANCE ? chooseLake(random) : null;
         lavaPool = random.nextFloat() < LAVA_CHANCE ? chooseLavaPool(random) : null;
         chooseTrees(random);
     }
@@ -149,8 +159,21 @@ public final class IslandGenerator implements Generator {
         float boundary = islandBoundary(x, z);
         float inland = Math.clamp(1.0f - distance(x, z, CENTER_X, CENTER_Z) / boundary,
                 0.0f, 1.0f);
-        return SEA_LEVEL + Math.round(ISLAND_HEIGHT * inland * inland
-                + noise(x, z, 5) * inland);
+        float generatedHeight = SEA_LEVEL + ISLAND_HEIGHT * inland * inland
+                + noise(x, z, 5) * inland;
+
+        // Keep the complete NPC spawn area broad and level. The smooth transition
+        // prevents a hard cliff where the protected spawn terrain meets the island.
+        float spawnDistance = distance(x, z, CENTER_X, CENTER_Z);
+        if (spawnDistance < SPAWN_PLATFORM_RADIUS + SPAWN_PLATFORM_TRANSITION) {
+            float transition = Math.clamp((spawnDistance - SPAWN_PLATFORM_RADIUS)
+                    / SPAWN_PLATFORM_TRANSITION, 0.0f, 1.0f);
+            float smooth = transition * transition * (3.0f - 2.0f * transition);
+            float spawnHeight = SEA_LEVEL + ISLAND_HEIGHT;
+            generatedHeight = spawnHeight + (generatedHeight - spawnHeight) * smooth;
+        }
+
+        return Math.round(generatedHeight);
     }
 
     /**
@@ -205,14 +228,17 @@ public final class IslandGenerator implements Generator {
      */
     private Lake chooseLake(Random random) {
         for (int attempt = 0; attempt < 100; attempt++) {
-            int x = random.nextInt(19) - 9;
-            int z = random.nextInt(19) - 9;
+            int x = random.nextInt(41) - 20;
+            int z = random.nextInt(41) - 20;
             float centerDistance = distance(x, z, CENTER_X, CENTER_Z);
-            if (centerDistance < 6.0f || centerDistance > 9.0f || isCoast(x, z)) continue;
+            float lakeEdge = LAKE_RADIUS + 0.75f + 1.0f;
+            if (!isIsland(x, z) || centerDistance < NPC_SAFE_RADIUS + lakeEdge
+                    || centerDistance > ISLAND_RADIUS - 2.0f
+                    || terrainHeight(x, z) <= SEA_LEVEL) continue;
             int surfaceY = Math.max(SEA_LEVEL + 1, terrainHeight(x, z) - 1);
             return new Lake(x, z, surfaceY);
         }
-        return new Lake(7, 0, Math.max(SEA_LEVEL + 1, terrainHeight(7, 0) - 1));
+        return null;
     }
 
     /**
@@ -222,11 +248,15 @@ public final class IslandGenerator implements Generator {
      */
     private LavaPool chooseLavaPool(Random random) {
         for (int attempt = 0; attempt < 100; attempt++) {
-            int x = random.nextInt(21) - 10;
-            int z = random.nextInt(21) - 10;
-            if (!isIsland(x, z) || isCoast(x, z)
-                    || distance(x, z, CENTER_X, CENTER_Z) < 5.0f
-                    || distance(x, z, lake.x, lake.z) < LAKE_RADIUS + LAVA_RADIUS + 3.0f) {
+            int x = random.nextInt(41) - 20;
+            int z = random.nextInt(41) - 20;
+            float centerDistance = distance(x, z, CENTER_X, CENTER_Z);
+            float lavaEdge = LAVA_RADIUS + 0.3f + 1.0f;
+            if (!isIsland(x, z) || centerDistance < NPC_SAFE_RADIUS + lavaEdge
+                    || centerDistance > ISLAND_RADIUS - 2.0f
+                    || terrainHeight(x, z) <= SEA_LEVEL
+                    || (lake != null
+                    && distance(x, z, lake.x, lake.z) < LAKE_RADIUS + LAVA_RADIUS + 3.0f)) {
                 continue;
             }
             return new LavaPool(x, z, terrainHeight(x, z));
@@ -245,7 +275,7 @@ public final class IslandGenerator implements Generator {
             int z = random.nextInt(27) - 13;
             if (!isIsland(x, z) || isCoast(x, z) || isInLake(x, z) || isInLavaPool(x, z)
                     || distance(x, z, CENTER_X, CENTER_Z) < 4.0f
-                    || distance(x, z, lake.x, lake.z) < LAKE_RADIUS + 2.0f
+                    || (lake != null && distance(x, z, lake.x, lake.z) < LAKE_RADIUS + 2.0f)
                     || nearTree(x, z)) continue;
             trees.add(new Tree(x, terrainHeight(x, z), z,
                     4 + random.nextInt(4), random.nextLong()));
@@ -272,7 +302,7 @@ public final class IslandGenerator implements Generator {
      * @return {@code true} if the position is inside the lake; otherwise {@code false}
      */
     private boolean isInLake(int x, int z) {
-        return distance(x, z, lake.x, lake.z)
+        return lake != null && distance(x, z, lake.x, lake.z)
                 <= LAKE_RADIUS + noise(x, z, 3) * 0.75f;
     }
 
