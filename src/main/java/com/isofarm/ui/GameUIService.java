@@ -864,7 +864,7 @@ public final class GameUIService implements Service<GameMaster> {
         player.getInventory().add(item, amount);
 
         log.info("Player bought {} x{} from shop", item.getName(), amount);
-        ToastFactory.success(Local.lang.f("toast.item_bought", amount,
-                item.getName(), totalPrice));
+//        ToastFactory.success(Local.lang.f("toast.item_bought", amount,
+//                item.getName(), totalPrice));
     }
 }

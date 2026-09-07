@@ -11,6 +11,7 @@ import java.util.List;
 /**
  * Encapsulates the state and operations required by toast factory within the game runtime.
  */
+@SuppressWarnings("all")
 @Utils
 public class ToastFactory implements Service<Toast> {
     private static final List<Toast> toasts = new ArrayList<>();

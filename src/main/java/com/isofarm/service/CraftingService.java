@@ -5,12 +5,13 @@ import com.isofarm.craft.Recipe;
 import com.isofarm.data.*;
 import com.isofarm.entity.Player;
 import com.isofarm.item.*;
-import com.isofarm.utils.Local;
 import com.isofarm.utils.ToastFactory;
 
 /**
  * Encapsulates the state and operations required by crafting service within the game runtime.
  */
+@SuppressWarnings("all")
+@Singleton
 public class CraftingService {
     public static final CraftingService cs = new CraftingService();
 
@@ -51,7 +52,7 @@ public class CraftingService {
         consume(inventory, recipe);
         give(recipe);
         SoundService.fx.playEntitySound(SoundGroup.ITEMS);
-        ToastFactory.success(Local.lang.f("toast.crafted", recipe.result().getDisplayName()));
+//        ToastFactory.success(Local.lang.f("toast.crafted", recipe.result().getDisplayName()));
         return true;
     }
 

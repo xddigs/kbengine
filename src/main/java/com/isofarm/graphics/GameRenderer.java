@@ -32,6 +32,7 @@ import static org.lwjgl.opengl.GL13.*;
 public class GameRenderer {
     private static final int MAX_TORCH_LIGHTS = 32;
     public static final GameRenderer gamr = new GameRenderer();
+    private final List<Vector3f> torchLights = new ArrayList<>();
     private final Matrix4f modelMatrix = new Matrix4f();
     private final Matrix4f viewProjMatrix = new Matrix4f();
     private final FrustumIntersection frustum = new FrustumIntersection();
@@ -40,7 +41,6 @@ public class GameRenderer {
     private float blurX;
     private float blurY;
     private float waterTime;
-    private final List<Vector3f> torchLights = new ArrayList<>();
 
     /**
      * Renders this object in the requested render pass.
