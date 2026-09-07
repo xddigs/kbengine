@@ -15,6 +15,7 @@ import java.util.Locale;
 /**
  * Enumerates voxel and model-backed interactive block data in one registry.
  */
+@SuppressWarnings("all")
 @DataClass
 public enum BlockData implements Blockable {
     AIR((byte) 0, (byte) 0, (byte) 0, false, false, 0, null, SoundGroup.SILENT, 0f, true, new Object[]{}, Tier.NONE),

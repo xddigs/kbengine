@@ -10,6 +10,8 @@ import java.util.List;
  * Defines Axis-Aligned Bounding Boxes (AABB) for slabs, staircases, and fence
  * combinations, alongside utilities for collision detection, height evaluation, and raycasting.
  */
+@SuppressWarnings("all")
+@DataClass
 public enum BlockShape {
     FULL_CUBE(new Box(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f)),
     HORIZONTAL_SLAB(new Box(0.0f, 0.0f, 0.0f, 1.0f, 0.5f, 1.0f)),

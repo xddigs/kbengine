@@ -21,6 +21,7 @@ import org.lwjgl.stb.STBTTBakedChar;
 /**
  * Encapsulates the state and operations required by book ui within the game runtime.
  */
+@SuppressWarnings("all")
 @Singleton
 @GodObject
 public class BookUI extends UIElement {

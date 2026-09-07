@@ -22,6 +22,7 @@ import java.util.List;
 /**
  * Represents the local player and orchestrates its focused components.
  */
+@SuppressWarnings("all")
 @Singleton
 public class Player extends Character {
     private static final float AUTO_JUMP_CLEARANCE = 1.05f;

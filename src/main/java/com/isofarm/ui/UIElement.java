@@ -15,7 +15,7 @@ import java.util.function.Consumer;
 /**
  * Encapsulates the state and operations required by uielement within the game runtime.
  */
-@SuppressWarnings("unused")
+@SuppressWarnings("all")
 @DataClass
 @GodObject
 public abstract class UIElement {

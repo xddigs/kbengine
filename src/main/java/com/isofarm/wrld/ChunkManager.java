@@ -17,6 +17,7 @@ import java.util.concurrent.Executors;
 /**
  * Encapsulates the state and operations required by chunk manager within the game runtime.
  */
+@SuppressWarnings("all")
 public class ChunkManager {
     private static final float SOIL_GRASS_TIME = 10.0f;
     private static final int MAX_MESH_UPLOADS_PER_FRAME = 2;

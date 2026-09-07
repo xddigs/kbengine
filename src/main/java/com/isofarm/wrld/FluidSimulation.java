@@ -19,6 +19,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * simulations. Concrete simulations provide their block type, update speed and
  * source-renewal policy.
  */
+
+@SuppressWarnings("all")
 public abstract class FluidSimulation {
     protected static final byte MAX_LEVEL = 8;
     protected static final byte MIN_LEVEL = 1;
