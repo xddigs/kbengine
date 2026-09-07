@@ -10,7 +10,7 @@ import com.isofarm.wrld.GameMaster;
  * Encapsulates the state and operations required by animal within the game runtime.
  */
 @DataClass
-@TODO
+@TODO(reason="Animals are not implemented yet")
 public class Animal extends Entity {
 
     /**

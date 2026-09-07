@@ -74,7 +74,7 @@ public class GameMaster {
      * @param progressCallback the {@link Consumer} supplied as {@code progressCallback}
      */
     public void loadResources(Consumer<Float> progressCallback) {
-        float totalSteps = 10.0f;
+        float totalSteps = 12.0f;
         int currentStep = 0;
 
         glEnable(GL_BLEND);
@@ -109,6 +109,9 @@ public class GameMaster {
         notifyProgress(progressCallback, ++currentStep / totalSteps);
 
         addEntity(Player.plyr);
+        notifyProgress(progressCallback, ++currentStep / totalSteps);
+
+        NPCService.npcs.init();
         notifyProgress(progressCallback, ++currentStep / totalSteps);
 
         Library.initItems(itemRegistry);
