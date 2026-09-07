@@ -132,8 +132,10 @@ public final class GameUIService implements Service<GameMaster> {
         hotbarUI.setInventory(player.getInventory());
         backpackUI.setInventory(player.getBackpack());
 
-        SpriteSheet bookSheet = ResourceManager.rem.getBookAnimationSheet();
-        float scale = 2.0f;
+        SpriteSheet bookSheet = BookUI.canBeAnimated()
+                ? ResourceManager.rem.getBookAnimationSheet()
+                : ResourceManager.rem.getBookUI();
+        float scale = 4.0f;
         float bookWidth = bookSheet.getFrameWidth() * scale;
         float bookHeight = bookSheet.getFrameHeight() * scale;
         float centerX = (windowWidth - bookWidth) * 0.5f;
@@ -339,7 +341,9 @@ public final class GameUIService implements Service<GameMaster> {
         uiManager.update(delta);
         if (BookService.bs.isOpen()) {
             BookUI.bui.update(BookService.bs.getOpenedBook(),
-                    ResourceManager.rem.getBookAnimationSheet());
+                    BookUI.canBeAnimated()
+                            ? ResourceManager.rem.getBookAnimationSheet()
+                            : ResourceManager.rem.getBookUI());
         }
 
         ToastFactory.update(delta);
@@ -375,8 +379,10 @@ public final class GameUIService implements Service<GameMaster> {
             return;
         }
         Frontend.begin(windowWidth, windowHeight);
+        SpriteSheet bookSheet = BookUI.canBeAnimated()
+                ? ResourceManager.rem.getBookAnimationSheet()
+                : ResourceManager.rem.getBookUI();
 
-        SpriteSheet bookSheet = ResourceManager.rem.getBookAnimationSheet();
         if (BookService.bs.isOpen()) {
             BookUI.bui.render(BookService.bs.getOpenedBook(),
                     gameMaster.getGenDelta(), bookSheet);

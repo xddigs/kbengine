@@ -187,7 +187,9 @@ public final class K {
         public static final String DEFAULT_SELECTOR_UI = "assets/ui/selector.png";
         public static final String SCROLL_BAR = "assets/ui/scroll_bar.png";
         public static final String SCROLL_KNOB = "assets/ui/scroll_knob.png";
-        public static final String BOOK_ANIMATION = "assets/ui/book.png";
+
+        public static final String ANIMATED_BOOK_UI = "assets/ui/animated_book.png";
+        public static final String BOOK_UI = "assets/ui/book.png";
         public static final String BOOK_SORT_NAME = "assets/ui/sort_name.png";
         public static final String BOOK_FAVORITE = "assets/ui/favorite.png";
         public static final String BOOK_SORT_TYPE = "assets/ui/sort_type.png";

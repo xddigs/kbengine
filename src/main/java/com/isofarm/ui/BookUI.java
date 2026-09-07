@@ -22,6 +22,8 @@ import org.lwjgl.stb.STBTTBakedChar;
  */
 @Singleton
 public class BookUI extends UIElement {
+    public static boolean canBeAnimated = false;
+    private static final float BOOK_SCALE = 8.0f;
     private static final float ANIMATION_DURATION = 0.35f;
     private static final float PAGE_FLIP_DURATION = 0.4f;
     private static final int TOTAL_ANIM_FRAMES = 16;
@@ -175,6 +177,15 @@ public class BookUI extends UIElement {
      * Activates this object and prepares any state it requires.
      */
     public void open() {
+        if (!canBeAnimated) {
+            animationProgress = 1.0f;
+            isClosing = false;
+            isOpening = false;
+            show();
+            updateButtonState();
+            return;
+        }
+
         isClosing = false;
         isOpening = true;
         show();
@@ -186,6 +197,15 @@ public class BookUI extends UIElement {
      */
     public void close() {
         if (isClosing) return;
+
+        if (!canBeAnimated) {
+            animationProgress = 0.0f;
+            isClosing = false;
+            isOpening = false;
+            updateButtonState();
+            hide();
+            return;
+        }
 
         isClosing = true;
         isOpening = false;
@@ -206,6 +226,14 @@ public class BookUI extends UIElement {
      */
     public boolean isAnimating() {
         return isOpening || isClosing;
+    }
+
+    /**
+     * Checks whether the animated book sprite and transitions are enabled.
+     * @return {@code true} when book animations are enabled
+     */
+    public static boolean canBeAnimated() {
+        return canBeAnimated;
     }
 
     /**
@@ -251,7 +279,7 @@ public class BookUI extends UIElement {
         float screenWidth = Frontend.getScreenWidth();
         float screenHeight = Frontend.getScreenHeight();
 
-        float scale = 2.0f;
+        float scale = BOOK_SCALE;
 
         float bookWidth = animSheet.getFrameWidth() * scale;
         float bookHeight = animSheet.getFrameHeight() * scale;
@@ -373,16 +401,18 @@ public class BookUI extends UIElement {
         float screenWidth = Frontend.getScreenWidth();
         float screenHeight = Frontend.getScreenHeight();
 
-        float scale = 2.0f;
+        float scale = BOOK_SCALE;
         float bookWidth = animSheet.getFrameWidth() * scale;
         float bookHeight = animSheet.getFrameHeight() * scale;
 
         float centerX = (screenWidth - bookWidth) * 0.5f;
         float centerY = (screenHeight - bookHeight) * 0.5f;
 
-        updateAnimation(delta);
-        float alpha = easeInOutCubic(animationProgress);
-        float y = lerp(screenHeight, centerY, alpha);
+        if (canBeAnimated) {
+            updateAnimation(delta);
+        }
+        float alpha = canBeAnimated ? easeInOutCubic(animationProgress) : 1.0f;
+        float y = canBeAnimated ? lerp(screenHeight, centerY, alpha) : centerY;
 
         setPosition(centerX, y);
         setSize(bookWidth, bookHeight);
@@ -390,30 +420,30 @@ public class BookUI extends UIElement {
         layoutButtons(bookWidth);
         updateButtonState();
 
-        Vector4f color = new Vector4f(0.8706f, 0.8196f, 0.6745f, 1.0f);
-        Frontend.drawRect(centerX, y + BASE_CONTENT_HEIGHT_OFFSET + BASE_CONTENT_HEIGHT_OFFSET/2f,
-                bookWidth, bookHeight + BASE_CONTENT_HEIGHT_OFFSET, color);
+        if (canBeAnimated) {
+            Vector4f color = new Vector4f(0.8706f, 0.8196f, 0.6745f, 1.0f);
+            Frontend.drawRect(centerX, y + BASE_CONTENT_HEIGHT_OFFSET + BASE_CONTENT_HEIGHT_OFFSET/2f,
+                    bookWidth, bookHeight + BASE_CONTENT_HEIGHT_OFFSET, color);
+        }
 
-        if (isFlippingPage) {
+        if (canBeAnimated && isFlippingPage) {
             pageFlipTimer += delta;
             float progress = Math.min(1.0f, pageFlipTimer / PAGE_FLIP_DURATION);
             float animFrameProgress = isFlippingNext ? progress : (1.0f - progress);
             int currentFrame = (int) (animFrameProgress * (TOTAL_ANIM_FRAMES - 1));
-            renderFlippingSpread(book, centerX, y, bookWidth, bookHeight, alpha, progress);
             Frontend.drawSprite(animSheet, currentFrame, centerX, y, bookWidth, bookHeight, new Vector4f(1.0f));
+            renderFlippingSpread(book, centerX, y, bookWidth, bookHeight, alpha, progress);
+            renderFlippingBookButtons(centerX, bookWidth, progress);
 
             if (progress >= 1.0f) {
                 isFlippingPage = false;
             }
 
         } else {
-            renderSpread(book, centerX, y, animSheet, scale, alpha);
             Frontend.drawSprite(animSheet, 0, centerX, y, bookWidth, bookHeight, new Vector4f(1.0f));
+            renderSpread(book, centerX, y, animSheet, scale, alpha);
+            renderBookButtons();
         }
-
-        // Buttons belong to the book, not to a particular page. Rendering them
-        // here keeps all four controls available when the recipe list is empty.
-        renderBookButtons();
     }
 
     private boolean isAnyButtonHovered() {
@@ -451,6 +481,47 @@ public class BookUI extends UIElement {
 
     private void renderBookButtons() {
         renderChildren();
+    }
+
+    /**
+     * Keeps the persistent book controls attached to the right-hand page while
+     * it folds. The same button instances are reused for every spread and book,
+     * so global controls such as close never depend on page content.
+     */
+    private void renderFlippingBookButtons(float bookX, float bookWidth,
+                                           float progress) {
+        float pageWidth = bookWidth / 2.0f;
+        float spineX = bookX + pageWidth;
+        float foldCurve = (float) Math.sin(progress * Math.PI) * PAGE_CONTENT_CURVE;
+
+        if (isFlippingNext) {
+            if (progress < 0.5f) {
+                float fold = easeInOutCubic(progress * 2.0f);
+                renderTransformedBookButtons(spineX, pageWidth,
+                        1.0f - fold, foldCurve);
+            } else {
+                // The new right page is already stationary while the new left
+                // page finishes unfolding.
+                renderBookButtons();
+            }
+            return;
+        }
+
+        if (progress < 0.5f) {
+            // The old right page remains stationary until the returning page
+            // crosses the spine.
+            renderBookButtons();
+        } else {
+            float unfold = easeInOutCubic((progress - 0.5f) * 2.0f);
+            renderTransformedBookButtons(spineX, pageWidth, unfold, foldCurve);
+        }
+    }
+
+    private void renderTransformedBookButtons(float spineX, float pageWidth,
+                                              float scaleX, float curve) {
+        Frontend.beginPageTransform(spineX, scaleX, pageWidth, curve);
+        renderBookButtons();
+        Frontend.endPageTransform();
     }
 
     /**
@@ -557,6 +628,11 @@ public class BookUI extends UIElement {
      * Updates text or selection state for next page.
      */
     public void nextPage() {
+        if (!canBeAnimated) {
+            isFlippingPage = false;
+            return;
+        }
+
         if (isFlippingPage) return;
 
         isFlippingPage = true;
@@ -568,6 +644,11 @@ public class BookUI extends UIElement {
      * Updates text or selection state for previous page.
      */
     public void previousPage() {
+        if (!canBeAnimated) {
+            isFlippingPage = false;
+            return;
+        }
+
         if (isFlippingPage) return;
 
         isFlippingPage = true;
