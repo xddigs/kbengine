@@ -13,6 +13,7 @@ import com.isofarm.item.*;
 import com.isofarm.service.SoundService;
 import com.isofarm.utils.K;
 import com.isofarm.utils.Settings;
+import com.isofarm.utils.ToastFactory;
 import com.isofarm.wrld.GameMaster;
 import org.joml.Vector4f;
 import org.slf4j.Logger;
@@ -45,11 +46,11 @@ public class InventoryUI extends UIElement {
 
     private final List<UIButton> buttons;
     private final UIScrollBar creativeScrollBar;
+    private final Player player = Player.plyr;
     private UIButton sortButton;
     private UIButton groupButton;
     private UIButton backpackButton;
     private UIButton inventoryModeButton;
-    private final Player player = Player.plyr;
     private Inventory inventory;
     private iBlock containerBlock;
     private Inventory externalInventory;
@@ -1218,13 +1219,13 @@ public class InventoryUI extends UIElement {
         int totalPrice = item.getValue() * amount;
         if (trader.getStock().getAmount(item) < amount
                 || player.purse() < totalPrice
-                || !canFitInPlayerInventories(item, amount)) {
+                || !canFit(item, amount)) {
             return;
         }
 
         if (!trader.sell(item, amount)) return;
         player.spend(totalPrice);
-        addToPlayerInventories(item, amount);
+        addTo(item, amount);
     }
 
     /** Sells a stack from a player's inventory to a trader. */
@@ -1237,7 +1238,7 @@ public class InventoryUI extends UIElement {
             return;
         }
 
-        int amountToSell = affordableAmount(trader, item, amount);
+        int amountToSell = canAfford(trader, item, amount);
         while (amountToSell > 0 && !canFit(trader.getStock(), item, amountToSell)) {
             amountToSell--;
         }
@@ -1248,7 +1249,7 @@ public class InventoryUI extends UIElement {
     }
 
     /** Returns the largest quantity the trader can pay for right now. */
-    private int affordableAmount(NPC trader, Item item, int requested) {
+    private int canAfford(NPC trader, Item item, int requested) {
         if (item.getValue() <= 0) return requested;
         return Math.min(requested, trader.purse() / item.getValue());
     }
@@ -1275,7 +1276,7 @@ public class InventoryUI extends UIElement {
     }
 
     /** Checks both player storage areas and includes the equipped backpack when present. */
-    private boolean canFitInPlayerInventories(Item item, int amount) {
+    private boolean canFit(Item item, int amount) {
         if (player == null) return false;
         int remaining = amount;
         Inventory playerInventory = player.getInventory();
@@ -1300,7 +1301,7 @@ public class InventoryUI extends UIElement {
     }
 
     /** Inserts an item into player storage after capacity has been checked. */
-    private void addToPlayerInventories(Item item, int amount) {
+    private void addTo(Item item, int amount) {
         if (player == null) return;
         int remaining = player.getInventory().add(item, amount);
         if (remaining > 0 && player.getInventory().hasBackpackEquipped()

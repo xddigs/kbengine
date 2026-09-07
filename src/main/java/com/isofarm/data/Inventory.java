@@ -13,6 +13,7 @@ import java.util.*;
  * Encapsulates the state and operations required by inventory within the game runtime.
  */
 @DataClass
+@GodObject
 public class Inventory {
     /** Supported global item ordering strategies. */
     public enum SortOrder {

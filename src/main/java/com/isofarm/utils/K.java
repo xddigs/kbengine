@@ -88,7 +88,7 @@ public final class K {
 
         public static final int ICON_TOOL_COLS = 5;
         public static final int ICON_TOOL_ROWS = 7;
-        public static final int ICON_USABLES_COLS = 6;
+        public static final int ICON_USABLES_COLS = 7;
         public static final int ICON_HEARTS_ROWS = 4;
 
         public static final int ICON_MATERIAL_COLS = 12;
