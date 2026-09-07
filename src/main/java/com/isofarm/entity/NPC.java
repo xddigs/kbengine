@@ -3,6 +3,7 @@ package com.isofarm.entity;
 import com.isofarm.data.*;
 import com.isofarm.graphics.gltf.GLTFLoader;
 import com.isofarm.graphics.gltf.GLTFModel;
+import com.isofarm.item.Block;
 import com.isofarm.item.Item;
 import com.isofarm.service.SoundService;
 import com.isofarm.service.TimeService;
@@ -56,6 +57,7 @@ public class NPC extends Character {
         setHitpoints(20);
         setMaxStamina(100);
         setStamina(100);
+        setReputation(Reputation.FRIENDLY);
         setGamemode(Gamemode.SURVIVAL);
         setSpeed(WALK_SPEED);
         chooseIdleDuration();
@@ -256,6 +258,16 @@ public class NPC extends Character {
         };
     }
 
+    /** Returns the disapproving voice for this NPC, with a concrete recording for every gender. */
+    private NPCVoice disapprovingVoice() {
+        return switch (gender) {
+            case FEMALE -> NPCVoice.DISAPPROVING_FEMALE;
+            case MALE -> NPCVoice.DISAPPROVING_MALE;
+            case NON_BINARY -> Math.random() < 0.5
+                    ? NPCVoice.DISAPPROVING_FEMALE : NPCVoice.DISAPPROVING_MALE;
+        };
+    }
+
     /** Returns the hurt voice for this NPC, with a concrete recording for every gender. */
     private NPCVoice hurtVoice() {
         return switch (gender) {
@@ -305,6 +317,11 @@ public class NPC extends Character {
         getPurse().add(amount);
     }
 
+    public void setUpStock() {
+        if (job != Job.TRADER) return;
+        add(new Block(BlockData.OAK_LOG), 64);
+    }
+
     /** Resets the trader's stock on the configured schedule. */
     public void updateShop(TimeService timeService) {
         if (job == Job.TRADER && timeService.getDay() % 10 == 0) {
@@ -319,24 +336,46 @@ public class NPC extends Character {
         log.info("Added x{} of {} to {}'s stock", amount, item.getName(), getOwner());
     }
 
-    /** Processes a player selling an item to this trader. */
+    /** Processes this trader selling an item to the player. */
     public void sell(Item item, int amount) {
-        if (item == null || amount <= 0) return;
+        if (item == null || amount <= 0
+                || getInventory().getAmount(item) < amount) return;
         getInventory().remove(item, amount);
-        earn(amount);
+        earn(item.getValue() * amount);
+
+        Player.plyr.add(item, amount);
+        Player.plyr.getPurse().remove(item.getValue() * amount);
+
+        if (item.getValue() < 50) {
+            SoundService.fx.playNPCVoice(disapprovingVoice());
+        } else {
+            SoundService.fx.playNPCVoice(normalVoice());
+        }
+
         log.info("Sold x{} of {} to player", amount, item.getName());
     }
 
-    /** Processes a player buying an item from this trader. */
+    /** Processes this trader buying from the player. */
     public void buy(Item item, int amount) {
         if (item == null || amount <= 0) return;
         int totalPrice = item.getValue() * amount;
-        if (!hasMoney() || purse() < totalPrice) {
+
+        if (purse() < totalPrice) {
             log.warn("Not enough money to buy x{} of {}", amount, item.getName());
             return;
         }
+
         getInventory().add(item, amount);
         getPurse().remove(totalPrice);
+
+        Player.plyr.remove(item, amount);
+        Player.plyr.earn(totalPrice);
+
+        if (item.getValue() > 100) {
+            SoundService.fx.playNPCVoice(disapprovingVoice());
+        } else {
+            SoundService.fx.playNPCVoice(normalVoice());
+        }
         log.info("Bought x{} of {} from player", amount, item.getName());
     }
 
@@ -374,6 +413,7 @@ public class NPC extends Character {
     /** Restores the trader's initial stock and currency state. */
     public void resetShop() {
         clear();
+        setUpStock();
         earn(K.World.STARTING_COINS);
     }
 

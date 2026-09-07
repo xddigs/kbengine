@@ -1,5 +1,6 @@
 package com.isofarm.data;
 
+import com.isofarm.entity.Character;
 import com.isofarm.item.*;
 import com.isofarm.entity.Player;
 import com.isofarm.service.BookService;
@@ -25,19 +26,28 @@ public class Inventory {
     private final List<InventorySlot> equippedExtraItems = new ArrayList<>();
     private final InventorySlot backpackSlot;
     private final InventorySlot bookSlot;
+    private final Character owner;
 
     /**
      * Creates a new {@code Inventory} instance.
      */
     public Inventory() {
-        this(false);
+        this(false, null);
+    }
+
+    /**
+     * Creates a new {@code Inventory} instance owned by a character.
+     */
+    public Inventory(Character owner) {
+        this(false, owner);
     }
 
     /**
      * Creates a new {@code Inventory} instance.
      * @param includeHotbar whether to allocate independent player hotbar slots
      */
-    public Inventory(boolean includeHotbar) {
+    public Inventory(boolean includeHotbar, Character owner) {
+        this.owner = owner;
         this.slots = new ArrayList<>();
         this.hasHotbar = includeHotbar;
         this.backpackSlot = new InventorySlot();
@@ -49,6 +59,14 @@ public class Inventory {
         for (int i = 0; i < capacity; i++) {
             this.slots.add(new InventorySlot());
         }
+    }
+
+    /**
+     * Retrieves {@code owner}
+     * @return {@link Character} value of owner
+     */
+    public Character getOwner() {
+        return owner;
     }
 
     /**

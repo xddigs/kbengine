@@ -7,6 +7,7 @@ import com.isofarm.graphics.ResourceManager;
 import com.isofarm.graphics.gltf.GLTFModel;
 import com.isofarm.item.Item;
 import com.isofarm.pathfinding.GridPos;
+import com.isofarm.service.SoundService;
 import com.isofarm.utils.DeathManager;
 import com.isofarm.utils.Settings;
 import com.isofarm.wrld.GameMaster;
@@ -470,6 +471,7 @@ public class Player extends Character {
      */
     public void earn(int amount) {
         gameplay.earn(amount);
+        SoundService.fx.playUseSound(SoundGroup.CASH);
     }
 
     /**

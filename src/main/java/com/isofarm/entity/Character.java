@@ -44,8 +44,8 @@ public abstract class Character extends Entity implements Levelable {
      */
     protected Character(String name, boolean includeHotbar) {
         super(name);
-        this.inventory = new Inventory(includeHotbar);
-        this.backpack = new Inventory();
+        this.inventory = new Inventory(includeHotbar, this);
+        this.backpack = new Inventory(this);
         this.purse = new Purse();
         this.reputation = Reputation.NEUTRAL;
 

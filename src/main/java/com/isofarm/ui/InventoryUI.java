@@ -1,6 +1,7 @@
 package com.isofarm.ui;
 
 import com.isofarm.data.*;
+import com.isofarm.entity.NPC;
 import com.isofarm.entity.Player;
 import com.isofarm.graphics.ResourceManager;
 import com.isofarm.graphics.SpriteSheet;
@@ -868,6 +869,16 @@ public class InventoryUI extends UIElement {
         InventorySlot source = sourceUI.getSlotType();
         if (source.isEmpty() || player == null) return;
 
+        NPC trader = getExternalTrader();
+        if (trader != null) {
+            if (ownsSlot(externalInventory, source)) {
+                buyFromTrader(trader, source.getItem(), source.getAmount());
+            } else if (isPlayerInventorySlot(source)) {
+                sellToTrader(trader, source.getItem(), source.getAmount(), source);
+            }
+            return;
+        }
+
         Inventory playerInventory = player.getInventory();
         Inventory backpackInventory = player.getBackpack();
         Inventory containerInventory = externalInventory;
@@ -1001,6 +1012,11 @@ public class InventoryUI extends UIElement {
      * @param slot the {@link InventorySlot} supplied as {@code slot}
      */
     private void leftClick(InventorySlot slot) {
+        NPC trader = getExternalTrader();
+        if (trader != null && ownsSlot(externalInventory, slot) && carriedItem != null) {
+            return;
+        }
+
         if (carriedItem == null) {
             pickEntireStack(slot);
             return;
@@ -1027,9 +1043,18 @@ public class InventoryUI extends UIElement {
             return;
         }
 
+        NPC trader = getExternalTrader();
+        if (trader != null) {
+            if (ownsSlot(externalInventory, slot)) {
+                buyFromTrader(trader, slot.getItem(), slot.getAmount());
+            } else if (isPlayerInventorySlot(slot)) {
+                sellToTrader(trader, slot.getItem(), slot.getAmount(), slot);
+            }
+            return;
+        }
+
         carriedItem = slot.getItem();
         carriedAmount = slot.getAmount();
-
         slot.clear();
     }
 
@@ -1084,6 +1109,11 @@ public class InventoryUI extends UIElement {
      * @param slot the {@link InventorySlot} supplied as {@code slot}
      */
     private void rightClick(InventorySlot slot) {
+        NPC trader = getExternalTrader();
+        if (trader != null && ownsSlot(externalInventory, slot) && carriedItem != null) {
+            return;
+        }
+
         if (carriedItem == null) {
             takeHalf(slot);
             return;
@@ -1111,6 +1141,16 @@ public class InventoryUI extends UIElement {
         }
 
         int splitAmount = (int) Math.ceil(slot.getAmount() / 2.0);
+
+        NPC trader = getExternalTrader();
+        if (trader != null) {
+            if (ownsSlot(externalInventory, slot)) {
+                buyFromTrader(trader, slot.getItem(), splitAmount);
+            } else if (isPlayerInventorySlot(slot)) {
+                sellToTrader(trader, slot.getItem(), splitAmount, slot);
+            }
+            return;
+        }
 
         carriedItem = slot.getItem();
         carriedAmount = splitAmount;
@@ -1152,6 +1192,112 @@ public class InventoryUI extends UIElement {
 
         if (carriedAmount <= 0) {
             clearCarriedItem();
+        }
+    }
+
+    /** Returns the trader whose stock is currently open, if any. */
+    private NPC getExternalTrader() {
+        if (externalInventory == null) return null;
+        if (externalInventory.getOwner() instanceof NPC npc
+                && npc.getJob() == Job.TRADER) {
+            return npc;
+        }
+        return null;
+    }
+
+    /** Returns whether a slot belongs to either of the player's visible inventories. */
+    private boolean isPlayerInventorySlot(InventorySlot slot) {
+        if (player == null || slot == null) return false;
+        return ownsSlot(player.getInventory(), slot) || ownsSlot(player.getBackpack(), slot);
+    }
+
+    /** Buys a complete or partial stack from a trader into the player's inventory. */
+    private void buyFromTrader(NPC trader, Item item, int amount) {
+        if (trader == null || player == null || item == null || amount <= 0) return;
+
+        int totalPrice = item.getValue() * amount;
+        if (trader.getStock().getAmount(item) < amount
+                || player.purse() < totalPrice
+                || !canFitInPlayerInventories(item, amount)) {
+            return;
+        }
+
+        trader.sell(item, amount);
+        player.spend(totalPrice);
+        addToPlayerInventories(item, amount);
+    }
+
+    /** Sells a stack from a player's inventory to a trader. */
+    private void sellToTrader(NPC trader, Item item, int amount, InventorySlot sourceSlot) {
+        if (trader == null || player == null || sourceSlot == null
+                || item == null || amount <= 0) return;
+
+        int totalPrice = item.getValue() * amount;
+        if (sourceSlot.isEmpty() || !isSameType(sourceSlot.getItem(), item)
+                || sourceSlot.getAmount() < amount
+                || trader.purse() < totalPrice
+                || !canFit(trader.getStock(), item, amount)) {
+            return;
+        }
+
+        trader.buy(item, amount);
+        sourceSlot.setAmount(sourceSlot.getAmount() - amount);
+        player.earn(totalPrice);
+    }
+
+    /** Checks whether an inventory can receive the requested amount without loss. */
+    private boolean canFit(Inventory target, Item item, int amount) {
+        if (target == null || item == null || amount <= 0) return false;
+
+        int remaining = amount;
+        int maxStack = target.getMaxStack(item);
+        for (InventorySlot slot : target.getSlots()) {
+            if (!slot.isEmpty() && isSameType(slot.getItem(), item)) {
+                remaining -= Math.max(0, maxStack - slot.getAmount());
+                if (remaining <= 0) return true;
+            }
+        }
+        for (InventorySlot slot : target.getSlots()) {
+            if (slot.isEmpty()) {
+                remaining -= maxStack;
+                if (remaining <= 0) return true;
+            }
+        }
+        return false;
+    }
+
+    /** Checks both player storage areas and includes the equipped backpack when present. */
+    private boolean canFitInPlayerInventories(Item item, int amount) {
+        if (player == null) return false;
+        int remaining = amount;
+        Inventory playerInventory = player.getInventory();
+        if (canFit(playerInventory, item, remaining)) return true;
+
+        remaining -= availableSpace(playerInventory, item);
+        Inventory backpack = player.getBackpack();
+        return backpack != null && playerInventory.hasBackpackEquipped()
+                && canFit(backpack, item, Math.max(1, remaining));
+    }
+
+    /** Returns the number of items that can be inserted into the inventory. */
+    private int availableSpace(Inventory target, Item item) {
+        if (target == null || item == null) return 0;
+        int maxStack = target.getMaxStack(item);
+        int space = 0;
+        for (InventorySlot slot : target.getSlots()) {
+            space += slot.isEmpty() ? maxStack
+                    : isSameType(slot.getItem(), item) ? Math.max(0, maxStack - slot.getAmount()) : 0;
+        }
+        return space;
+    }
+
+    /** Inserts an item into player storage after capacity has been checked. */
+    private void addToPlayerInventories(Item item, int amount) {
+        if (player == null) return;
+        int remaining = player.getInventory().add(item, amount);
+        if (remaining > 0 && player.getInventory().hasBackpackEquipped()
+                && player.getBackpack() != null) {
+            player.getBackpack().add(item, remaining);
         }
     }
 
