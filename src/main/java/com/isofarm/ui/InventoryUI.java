@@ -51,6 +51,7 @@ public class InventoryUI extends UIElement {
     private final Player player = Player.plyr;
     private Inventory inventory;
     private iBlock containerBlock;
+    private Inventory externalInventory;
     private SpriteSheet seedIcons;
     private SpriteSheet cropIcons;
     private SpriteSheet blockIcons;
@@ -414,7 +415,7 @@ public class InventoryUI extends UIElement {
             this.defaultX = (GameMaster.game.getWindowWidth() - getWidth()) / 2.0f;
             this.targetX = defaultX;
             this.defaultY = (GameMaster.game.getWindowHeight() - getHeight()) / 2.0f;
-            if (containerBlock != null) {
+            if (externalInventory != null) {
                 this.defaultY += (getContainerPanelHeight()
                         + Settings.getScaledSpacing() * 2.0f) / 2.0f;
             }
@@ -541,10 +542,9 @@ public class InventoryUI extends UIElement {
         }
     }
 
-    /** Synchronizes and exposes the slots belonging to the open chest. */
+    /** Synchronizes and exposes the slots belonging to the open external inventory. */
     private void syncContainerInventory() {
-        Inventory containerInventory = containerBlock == null
-                ? null : containerBlock.getInventory();
+        Inventory containerInventory = externalInventory;
         for (int i = 0; i < containerSlotUIs.length; i++) {
             InventorySlotUI slotUI = containerSlotUIs[i];
             if (slotUI == null) continue;
@@ -582,7 +582,7 @@ public class InventoryUI extends UIElement {
      */
     private void updateInventoryMode() {
         boolean creative = !(this instanceof BackpackInventoryUI)
-                && containerBlock == null
+                && externalInventory == null
                 && player != null && player.getGamemode().isGodmode();
         if (creative == isGodmode) return;
 
@@ -812,7 +812,7 @@ public class InventoryUI extends UIElement {
         InventorySlotUI[] backpackSlots = (backpackUI != null && backpackUI.isVisible()) ?
                 backpackUI.getSlotUIs() : new InventorySlotUI[0];
 
-        int containerSlotCount = containerBlock == null ? 0 : containerSlotUIs.length;
+        int containerSlotCount = externalInventory == null ? 0 : containerSlotUIs.length;
         InventorySlotUI[] allSlots = new InventorySlotUI[slotUIs.length
                 + containerSlotCount + hotbarSlots.length + backpackSlots.length];
         System.arraycopy(slotUIs, 0, allSlots, 0, slotUIs.length);
@@ -870,8 +870,7 @@ public class InventoryUI extends UIElement {
 
         Inventory playerInventory = player.getInventory();
         Inventory backpackInventory = player.getBackpack();
-        Inventory containerInventory = containerBlock == null
-                ? null : containerBlock.getInventory();
+        Inventory containerInventory = externalInventory;
         Inventory destination;
         List<SlotRange> destinationRanges = new ArrayList<>();
 
@@ -963,7 +962,7 @@ public class InventoryUI extends UIElement {
             InventorySlotUI[] backpackSlots = backpackUI.getSlotUIs();
             return index < backpackSlots.length ? backpackSlots[index] : null;
         }
-        if (containerBlock != null && owner == containerBlock.getInventory()) {
+        if (externalInventory != null && owner == externalInventory) {
             return index < containerSlotUIs.length ? containerSlotUIs[index] : null;
         }
         return null;
@@ -1193,7 +1192,7 @@ public class InventoryUI extends UIElement {
         renderQuickMoveAnimations();
         renderCarriedItem();
 
-        if (containerBlock == null && (!isGodmode || !isCreativeInventoryVisible)
+        if (externalInventory == null && (!isGodmode || !isCreativeInventoryVisible)
                 && inventory != null && inventory.getBackpackSlot() != null
                 && inventory.getBackpackSlot().getItem() != null) {
             backpackButton.show();
@@ -1226,9 +1225,9 @@ public class InventoryUI extends UIElement {
                 height, new Vector4f(1.0f, 1.0f, 1.0f, getWorldOpacity()));
     }
 
-    /** Draws the headerless chest panel above the player inventory. */
+    /** Draws the headerless external-storage panel above the player inventory. */
     private void renderContainerBackground() {
-        if (containerBlock == null) return;
+        if (externalInventory == null) return;
 
         float width = getAbsoluteWidth();
         float height = getContainerPanelHeight();
@@ -1392,20 +1391,38 @@ public class InventoryUI extends UIElement {
     public void openContainer(iBlock block) {
         if (block == null || GameMaster.game == null) return;
         this.containerBlock = block;
+        this.externalInventory = block.getInventory();
         this.inventory = player == null ? null : player.getInventory();
         GameMaster.game.setInventoryOpen(true);
         SoundService.fx.playUseSound(block.getType().getSoundGroup(), 0);
     }
 
     /**
-     * Restores the player's inventory after closing a block container.
+     * Opens a non-block inventory, such as the stock carried by a trader NPC,
+     * beside the player's inventory.
+     *
+     * @param externalInventory the inventory to expose in the storage panel
+     */
+    public void openExternalInventory(Inventory externalInventory) {
+        if (externalInventory == null || GameMaster.game == null) return;
+        this.containerBlock = null;
+        this.externalInventory = externalInventory;
+        this.inventory = player == null ? null : player.getInventory();
+        GameMaster.game.setInventoryOpen(true);
+    }
+
+    /**
+     * Restores the player-only view after closing a block or NPC inventory.
      */
     private void closeContainer() {
-        if (containerBlock == null) return;
-        containerBlock.setActivated(false);
-        SoundService.fx.playUseSound(containerBlock.getType()
-                .getSoundGroup(), 1);
+        if (externalInventory == null) return;
+        if (containerBlock != null) {
+            containerBlock.setActivated(false);
+            SoundService.fx.playUseSound(containerBlock.getType()
+                    .getSoundGroup(), 1);
+        }
         containerBlock = null;
+        externalInventory = null;
         syncContainerInventory();
     }
 

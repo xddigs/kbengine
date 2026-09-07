@@ -9,7 +9,6 @@ import java.util.Locale;
  * Enumerates the available {@link NPC} jobs, such as Farmer, Miner, etc.
  */
 @DataClass
-@Task(reason="Lacking translations")
 public enum Job {
     FARMER((byte) 0, "assets/models/npcs/farmer.gltf"),
     MINER((byte) 1, "assets/models/npcs/miner.gltf"),
@@ -18,7 +17,12 @@ public enum Job {
     private final byte id;
     private final String modelPath;
 
-    /** Creates a new {@code Job} instance. */
+    /**
+     * Creates a job registration.
+     *
+     * @param id the stable serialized identifier
+     * @param modelPath the classpath path of the NPC GLTF model
+     */
     Job(byte id, String modelPath) {
         this.id = id;
         this.modelPath = modelPath;

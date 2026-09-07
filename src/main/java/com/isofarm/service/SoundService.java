@@ -42,6 +42,7 @@ public class SoundService implements Service<SoundGroup> {
     private int backgroundSource;
     private int loopingSource;
     private int useSource;
+    private int genderSource;
 
     private String currentBackgroundSound;
     private SoundGroup currentBreakingSoundGroup;
@@ -66,6 +67,7 @@ public class SoundService implements Service<SoundGroup> {
             loadSoundArray(group.getBackgroundSounds());
             loadSoundArray(group.getLoopingSounds());
             loadSoundArray(group.getUseSounds());
+            loadSoundArray(group.getGenderSounds());
         }
     }
 
@@ -105,6 +107,7 @@ public class SoundService implements Service<SoundGroup> {
         backgroundSource = alGenSources();
         loopingSource = alGenSources();
         useSource = alGenSources();
+        genderSource = alGenSources();
 
         alSourcef(breakSource, AL_GAIN, 1.0f);
         alSourcef(breakingSource, AL_GAIN, 1.0f);
@@ -114,6 +117,7 @@ public class SoundService implements Service<SoundGroup> {
         alSourcef(backgroundSource, AL_GAIN, 1.0f);
         alSourcef(loopingSource, AL_GAIN, 1.0f);
         alSourcef(useSource, AL_GAIN, 1.0f);
+        alSourcef(genderSource, AL_GAIN, 1.0f);
     }
 
     /**
@@ -206,11 +210,23 @@ public class SoundService implements Service<SoundGroup> {
      * or its pitch.
      *
      * @param group the {@link SoundGroup} argument; the sound group
-     * @param soundIndex the {@code int} argument; the index of the sound within the group's use sounds
+     * @param soundIndex the {@code int} argument; the index within the group's use sounds
      */
     public void playUseSound(SoundGroup group, int soundIndex) {
         if (group == null) return;
         playSound(useSource, group.getUseSounds(), 1.0f, 1.0f, soundIndex);
+    }
+
+    /**
+     * Plays a gender specific sound without randomizing either the selected effect
+     * or its pitch.
+     *
+     * @param group the {@link SoundGroup} argument; the sound group
+     * @param soundIndex the {@code int} argument; the index within the group's gender sounds
+     */
+    public void playGenderSound(SoundGroup group, int soundIndex) {
+        if (group == null) return;
+        playSound(genderSource, group.getGenderSounds(), 1.0f, 1.0f, soundIndex);
     }
 
     /**
@@ -288,6 +304,11 @@ public class SoundService implements Service<SoundGroup> {
 
     /**
      * Plays a loaded sound buffer with the supplied source settings.
+     *
+     * @param source the OpenAL source that will play the effect
+     * @param soundPath the classpath path used to locate the loaded buffer
+     * @param pitch the exact playback pitch
+     * @param volume the playback gain
      */
     private void playSoundBuffer(int source, String soundPath, float pitch, float volume) {
         Integer bufferId = soundBuffers.get(soundPath);
@@ -369,6 +390,10 @@ public class SoundService implements Service<SoundGroup> {
         alDeleteSources(placeSource);
         alDeleteSources(entitySource);
         alDeleteSources(backgroundSource);
+        alDeleteSources(breakingSource);
+        alDeleteSources(loopingSource);
+        alDeleteSources(useSource);
+        alDeleteSources(genderSource);
         soundBuffers.values().forEach(AL10::alDeleteBuffers);
         alcMakeContextCurrent(MemoryUtil.NULL);
         alcDestroyContext(context);

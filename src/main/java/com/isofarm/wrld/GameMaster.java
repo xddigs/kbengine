@@ -113,6 +113,7 @@ public class GameMaster {
         notifyProgress(progressCallback, ++currentStep / totalSteps);
 
         NPCService.npcs.init();
+        AnimalService.anml.init();
         notifyProgress(progressCallback, ++currentStep / totalSteps);
 
         Library.initItems(itemRegistry);
@@ -155,6 +156,7 @@ public class GameMaster {
         GridPos spawn = world.getHighestY(0.5f, 0.5f);
         float spawnY = spawn.y() + 1.8f;
         Player.plyr.setPosition(0.5f, spawnY, 0.5f);
+        NPCService.npcs.spawn();
         camera.setPosition(0.5f, spawnY + 10.0f, 0.5f);
     }
 

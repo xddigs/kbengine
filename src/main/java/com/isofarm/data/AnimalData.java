@@ -2,6 +2,9 @@ package com.isofarm.data;
 
 import com.isofarm.item.Craftable;
 import com.isofarm.item.Material;
+import com.isofarm.utils.Local;
+
+import java.util.Locale;
 
 /**
  * Enumerates the supported animal data values.
@@ -29,6 +32,10 @@ public enum AnimalData {
      */
     public byte getId() {
         return id;
+    }
+
+    public String getDisplayName() {
+        return Local.lang.t("animal." + name().toLowerCase(Locale.ROOT));
     }
 
     /**

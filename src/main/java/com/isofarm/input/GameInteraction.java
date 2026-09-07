@@ -144,6 +144,11 @@ public class GameInteraction {
             }
         }
 
+        if (isRightPressed && canInteract && NPCService.npcs.interact(gameMaster)) {
+            if (!player.isAttacking()) player.interact();
+            isRightPressed = false;
+        }
+
         if (selectedItem instanceof Usable usable) {
             switch (usable) {
                 case Backpack backpack -> {
