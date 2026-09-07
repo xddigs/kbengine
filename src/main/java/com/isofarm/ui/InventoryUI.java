@@ -13,7 +13,6 @@ import com.isofarm.item.*;
 import com.isofarm.service.SoundService;
 import com.isofarm.utils.K;
 import com.isofarm.utils.Settings;
-import com.isofarm.utils.ToastFactory;
 import com.isofarm.wrld.GameMaster;
 import org.joml.Vector4f;
 import org.slf4j.Logger;
@@ -1218,7 +1217,7 @@ public class InventoryUI extends UIElement {
 
         int totalPrice = item.getValue() * amount;
         if (trader.getStock().getAmount(item) < amount
-                || player.purse() < totalPrice
+                || player.hasWallet().coins() < totalPrice
                 || !canFit(item, amount)) {
             return;
         }
@@ -1251,7 +1250,10 @@ public class InventoryUI extends UIElement {
     /** Returns the largest quantity the trader can pay for right now. */
     private int canAfford(NPC trader, Item item, int requested) {
         if (item.getValue() <= 0) return requested;
-        return Math.min(requested, trader.purse() / item.getValue());
+        if (trader.hasMoney()) {
+            return Math.min(requested, trader.hasWallet().coins() / item.getValue());
+        }
+        return 0;
     }
 
     /** Checks whether an inventory can receive the requested amount without loss. */

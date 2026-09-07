@@ -470,6 +470,7 @@ public class Player extends Character {
      * @param amount the {@code int} argument; currency amount
      */
     public void earn(int amount) {
+        if (hasWallet() == null) return;
         gameplay.earn(amount);
         SoundService.fx.playUseSound(SoundGroup.CASH);
     }
@@ -479,6 +480,7 @@ public class Player extends Character {
      * @param amount the {@code int} argument; currency amount
      */
     public void spend(int amount) {
+        if (hasWallet() == null) return;
         gameplay.spend(amount);
     }
 

@@ -38,6 +38,25 @@ public class CraftingBook extends Book implements Equippable,
         reload();
     }
 
+    /** {@inheritDoc} */
+    @Override
+    public boolean use(GameMaster gameMaster, boolean isCtrlHeld) {
+        Inventory inventory = Player.plyr.getInventory();
+        if (inventory == null) return false;
+        if (isCtrlHeld) {
+            if (!inventory.hasBookEquipped()) {
+                if (this.equip()) {
+                    GameUIService.ui.resetHotbarPosition();
+                }
+            } else {
+                this.unequip();
+            }
+        } else {
+            super.use(gameMaster, isCtrlHeld);
+        }
+        return true;
+    }
+
     /**
      * {@inheritDoc}
      * Reloads this object from its authoritative source.
@@ -176,29 +195,5 @@ public class CraftingBook extends Book implements Equippable,
      */
     private Comparator<Recipe> recipeComparator() {
         return Comparator.comparing(Recipe::result, Inventory.sorter(recipeOrder));
-    }
-
-    /**
-     * {@inheritDoc}
-     * Handles use and applies its effect to the current interaction state.
-     * @param gameMaster the {@link GameMaster} supplied as {@code gameMaster}
-     * @param isCtrlHeld the {@code boolean} supplied as {@code isCtrlHeld}
-     * @return {@code boolean}; the use result
-     */
-    @Override
-    public boolean use(GameMaster gameMaster, boolean isCtrlHeld) {
-        Inventory inventory = Player.plyr.getInventory();
-        if (inventory == null) return false;
-        if (isCtrlHeld) {
-            if (!inventory.hasBookEquipped()) {
-                inventory.equipBook(this);
-                GameUIService.ui.resetHotbarPosition();
-            } else {
-                inventory.unequipBook();
-            }
-        } else {
-            super.use(gameMaster, isCtrlHeld);
-        }
-        return true;
     }
 }

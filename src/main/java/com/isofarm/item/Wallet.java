@@ -69,7 +69,7 @@ public class Wallet extends Usable
      * Returns the {@code coins} value
      * @return {@link Integer} value of coins
      */
-    public Integer getCoins() {
+    public Integer coins() {
         return coins;
     }
 
@@ -91,5 +91,12 @@ public class Wallet extends Usable
     public Wallet spend(Integer coins) {
         this.coins -= coins;
         return this;
+    }
+
+    /**
+     * Empties the wallet
+     */
+    public void empty() {
+        this.coins = 0;
     }
 }

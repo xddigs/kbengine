@@ -1,15 +1,16 @@
 package com.isofarm.entity;
 
 import com.isofarm.data.*;
+import com.isofarm.item.Wallet;
 import com.isofarm.utils.ToastFactory;
 
 /**
  * Encapsulates the state and operations required by character within the game runtime.
  */
+@SuppressWarnings("all")
 @DataClass
 public abstract class Character extends Entity implements Levelable {
     private static final float FRAME_DURATION = 0.15f;
-    private final Purse purse;
     private Inventory inventory;
     private Inventory backpack;
     private Reputation reputation;
@@ -46,7 +47,6 @@ public abstract class Character extends Entity implements Levelable {
         super(name);
         this.inventory = new Inventory(includeHotbar, this);
         this.backpack = new Inventory(this);
-        this.purse = new Purse();
         this.reputation = Reputation.NEUTRAL;
 
         this.level = 1;
@@ -164,6 +164,51 @@ public abstract class Character extends Entity implements Levelable {
     }
 
     /**
+     * {@inheritDoc}
+     * Applies the supplied damage amount and triggers the associated health-state changes.
+     * @param amount the {@code float} supplied as {@code amount}
+     */
+    @Override
+    public void damage(float amount) {
+        damage(amount, Cause.ENTITY);
+    }
+
+    /**
+     * {@inheritDoc}
+     * Applies damage attributed to a specific cause.
+     * @param amount the {@code float} argument; the damage amount
+     * @param cause the {@link Cause} argument; the damage cause
+     */
+    @Override
+    public void damage(float amount, Cause cause) {
+        if (!isAlive() || amount <= 0) return;
+        if (gamemode.isGodmode() || gamemode.isNoClip()) return;
+        super.damage(amount, cause);
+    }
+
+    /**
+     * {@inheritDoc}
+     * Handles damage taken and updates the affected state.
+     * @param amount the {@code float} supplied as {@code amount}
+     */
+    @Override
+    protected void onDamageTaken(float amount) {
+    }
+
+    /**
+     * Checks whether the character has a wallet in their inventory.
+     * @return {@code true} if wallet; otherwise {@code false}
+     */
+    public Wallet hasWallet() {
+        for (InventorySlot slot : getInventory().getSlots()) {
+            if (slot.getItem() instanceof Wallet wallet) {
+                return wallet;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Returns the frame duration.
      * @return {@code float}; the frame duration
      */
@@ -210,37 +255,7 @@ public abstract class Character extends Entity implements Levelable {
         damage(amount, Cause.FALL);
     }
 
-    /**
-     * {@inheritDoc}
-     * Applies the supplied damage amount and triggers the associated health-state changes.
-     * @param amount the {@code float} supplied as {@code amount}
-     */
-    @Override
-    public void damage(float amount) {
-        damage(amount, Cause.ENTITY);
-    }
 
-    /**
-     * {@inheritDoc}
-     * Applies damage attributed to a specific cause.
-     * @param amount the {@code float} argument; the damage amount
-     * @param cause the {@link Cause} argument; the damage cause
-     */
-    @Override
-    public void damage(float amount, Cause cause) {
-        if (!isAlive() || amount <= 0) return;
-        if (gamemode.isGodmode() || gamemode.isNoClip()) return;
-        super.damage(amount, cause);
-    }
-
-    /**
-     * {@inheritDoc}
-     * Handles damage taken and updates the affected state.
-     * @param amount the {@code float} supplied as {@code amount}
-     */
-    @Override
-    protected void onDamageTaken(float amount) {
-    }
 
     /**
      * Restores the supplied amount of health without exceeding the configured limit.
@@ -315,22 +330,6 @@ public abstract class Character extends Entity implements Levelable {
      */
     public void setBackpack(Inventory backpack) {
         this.backpack = backpack;
-    }
-
-    /**
-     * Returns the purse.
-     * @return the {@link Purse} representing the purse
-     */
-    public Purse getPurse() {
-        return purse;
-    }
-
-    /**
-     * Returns the purse associated with this character.
-     * @return {@code int}; the purse result
-     */
-    public int purse() {
-        return purse.getBalance();
     }
 
     /**

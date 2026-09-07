@@ -26,9 +26,10 @@ public class Library implements Service<GameMaster> {
      */
     public static void initItems(ItemRegistry itemR) {
         registerDefault(itemR, Backpack::new);
-        registerDefault(itemR, () -> new Book(false));
         registerDefault(itemR, CraftingBook::new);
+        registerDefault(itemR, () -> new Book(false));
         registerDefault(itemR, () -> new Bucket(BlockData.AIR));
+        registerDefault(itemR, () -> new Wallet());
 
         MaterialID.forEach(material -> {
             if (material.equals(MaterialID.INGOT) || material.equals(MaterialID.RAW_ORE)) return;

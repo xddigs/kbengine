@@ -315,9 +315,9 @@ public class NPC extends Character {
         return getInventory();
     }
 
-    /** Adds currency to this NPC's purse. */
+    /** Adds currency to this NPC's wallet. */
     public void earn(int amount) {
-        getPurse().add(amount);
+        hasWallet().earn(amount);
     }
 
     /**
@@ -384,7 +384,7 @@ public class NPC extends Character {
         if (item == null || amount <= 0) return false;
         int totalPrice = item.getValue() * amount;
 
-        if (purse() < totalPrice) {
+        if (hasWallet().coins() < totalPrice) {
             log.warn("Not enough money to buy x{} of {}", amount, item.getName());
             return false;
         }
@@ -394,7 +394,7 @@ public class NPC extends Character {
             return false;
         }
         getInventory().add(item, amount);
-        getPurse().remove(totalPrice);
+        hasWallet().spend(totalPrice);
 
         if (item.getValue() > 100) {
             SoundService.fx.playNPCVoice(disapprovingVoice());
@@ -444,7 +444,7 @@ public class NPC extends Character {
 
     /** Returns whether this trader has coins available. */
     public boolean hasMoney() {
-        return purse() > 0;
+        return hasWallet().coins() > 0;
     }
 
     /** Returns the number of non-empty stock slots. */
@@ -470,7 +470,7 @@ public class NPC extends Character {
     /** Restores the trader's initial stock and currency state. */
     public void resetShop() {
         clear();
-        getPurse().empty();
+        hasWallet().empty();
         setUpStock();
         long stockValue = getInventory().getItems().entrySet().stream()
                 .mapToLong(entry -> (long) entry.getKey().getValue() * entry.getValue())

@@ -24,18 +24,19 @@ public class RecipeRegistry {
         registerMaterialRecipes();
 
         create().result(new iBlock(BlockData.CHEST), 1).with(new Block(BlockData.OAK_PLANK), 8).add();
-        create().result(new Material(Tier.NONE, MaterialID.STICK), 4).with(BlockData.fromIdTo(BlockData.OAK_PLANK.getId()), 1).add();
+        create().result(new Material(MaterialID.STICK), 4).with(BlockData.fromIdTo(BlockData.OAK_PLANK.getId()), 1).add();
 
-        create().result(new Material(Tier.NONE, MaterialID.CHARCOAL), 1)
+        create().result(new Material(MaterialID.CHARCOAL), 1)
                 .with(new Block(BlockData.OAK_LOG), 8)
                 .or(new Block(BlockData.SPRUCE_LOG), 8).add();
 
         create().result(new Block(BlockData.TORCH), 4)
-                .with(new Material(Tier.NONE, MaterialID.STICK), 1)
-                .with(new Material(Tier.NONE, MaterialID.CHARCOAL), 2).add();
+                .with(new Material(MaterialID.STICK), 1)
+                .with(new Material(MaterialID.CHARCOAL), 2).add();
 
         create().result(new Book(false), 1).with(MaterialID.LEATHER, 3).with(MaterialID.PAPER, 2).add();
         create().result(new Backpack(), 1).with(MaterialID.LEATHER, 3).add();
+        create().result(new Wallet(), 1).with(MaterialID.LEATHER, 2).add();
         create().result(new Bucket(), 1).with(new MiningComponent(Tier.STEEL, MaterialID.INGOT), 3).add();
         registerToolSet(BlockData.fromIdTo(BlockData.OAK_PLANK.getId()));
 
@@ -110,17 +111,17 @@ public class RecipeRegistry {
         for (Tier tier : metalTiers) {
             create().result(new MiningComponent(tier, MaterialID.INGOT), 1)
                     .with(new MiningComponent(tier, MaterialID.RAW_ORE), 1)
-                    .with(new Material(Tier.NONE, MaterialID.CHARCOAL), 2)
+                    .with(new Material(MaterialID.CHARCOAL), 2)
                     .add();
         }
 
         create().result(new Block(BlockData.STONE), 1)
                 .with(new Block(BlockData.COBBLESTONE), 1)
-                .with(new Material(Tier.NONE, MaterialID.CHARCOAL), 1).add();
+                .with(new Material(MaterialID.CHARCOAL), 1).add();
 
         create().result(new Block(BlockData.GLASS), 4)
                 .with(new Block(BlockData.SAND), 1)
-                .with(new Material(Tier.NONE, MaterialID.CHARCOAL), 1).add();
+                .with(new Material(MaterialID.CHARCOAL), 1).add();
     }
 
     /**

@@ -11,7 +11,8 @@ public class StartingKit extends Kit {
      */
     public StartingKit() {
         setItems(new Item[]{
-                new CraftingBook()
+                new CraftingBook(),
+                new Wallet()
         });
     }
 }
