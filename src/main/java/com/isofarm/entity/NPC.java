@@ -18,6 +18,8 @@ public class NPC extends Character {
     private static final float MIN_IDLE_TIME = 2.0f;
     private static final float IDLE_TIME_VARIATION = 4.0f;
     private static final float WANDER_RADIUS = 5.0f;
+    private static final float KNOCKBACK_DURATION = 0.30f;
+    private static final float KNOCKBACK_DAMPING = 12.0f;
     private final CharacterAnimator animator = new CharacterAnimator(this);
     private final NPCGender gender;
     private final Job job;
@@ -26,6 +28,7 @@ public class NPC extends Character {
     private final Vector3f destination = new Vector3f();
     private float idleTimer;
     private boolean isWalking;
+    private float knockbackTimer;
 
     private Character lastInteractor = null;
     private float interactionTimer = 0.0f;
@@ -85,7 +88,12 @@ public class NPC extends Character {
     /** {@inheritDoc} */
     @Override
     public void damage(float amount, Entity attacker) {
+        float previousHitpoints = getHitpoints();
         super.damage(amount, attacker);
+        if (getHitpoints() < previousHitpoints) {
+            knockbackTimer = KNOCKBACK_DURATION;
+            grunt();
+        }
         if (attacker instanceof Character character) {
             interactWith(character);
         }
@@ -110,6 +118,16 @@ public class NPC extends Character {
             if (interactionTimer <= 0.0f) {
                 lastInteractor = null;
             }
+        }
+
+        if (knockbackTimer > 0.0f) {
+            knockbackTimer = Math.max(0.0f, knockbackTimer - delta);
+            collide(GameMaster.game.getWorld(),
+                    new Vector3f(velocity.x, 0.0f, velocity.z), delta);
+            float damping = (float) Math.exp(-KNOCKBACK_DAMPING * delta);
+            velocity.x *= damping;
+            velocity.z *= damping;
+            return;
         }
 
         if (isWalking) {
@@ -199,14 +217,34 @@ public class NPC extends Character {
 
     /** Plays this character's normal gender-specific voice response. */
     public void speak() {
-        SoundService.fx.playGenderSound(SoundGroup.NPC, gender.getSoundIndex(false, false));
+        SoundService.fx.playNPCVoice(normalVoice());
     }
 
-    /** Plays this character's male gender-specific voice response. */
-    public void grunt(NPCGender gender) {
+    /** Plays this character's gender-specific hurt response. */
+    public void grunt() {
         SoundService fx = SoundService.fx;
-        if (gender.equals(NPCGender.MALE)) fx.playEntitySound(SoundGroup.ENTITY);
-        fx.playGenderSound(SoundGroup.NPC, gender.getSoundIndex(false, true));
+        fx.playHitSound();
+        fx.playNPCVoice(hurtVoice());
+    }
+
+    /** Returns the normal voice for this NPC, with non-binary voices alternating. */
+    private NPCVoice normalVoice() {
+        return switch (gender) {
+            case FEMALE -> NPCVoice.HMM_FEMALE;
+            case MALE -> NPCVoice.HMM_MALE;
+            case NON_BINARY -> Math.random() < 0.5
+                    ? NPCVoice.HMM_FEMALE : NPCVoice.HMM_MALE;
+        };
+    }
+
+    /** Returns the hurt voice for this NPC, with a concrete recording for every gender. */
+    private NPCVoice hurtVoice() {
+        return switch (gender) {
+            case FEMALE -> NPCVoice.HURT_FEMALE;
+            case MALE -> NPCVoice.HURT_MALE;
+            case NON_BINARY -> Math.random() < 0.5
+                    ? NPCVoice.HURT_FEMALE : NPCVoice.HURT_MALE;
+        };
     }
 
     /**
