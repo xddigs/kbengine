@@ -271,6 +271,14 @@ public abstract class Character extends Entity implements Levelable {
     }
 
     /**
+     * Returns the last character that interacted with this character
+     * @return the {@link Character} representing the last character that interacted with this character
+     */
+    protected Character hasBeenInteractedWith() {
+        return this;
+    }
+
+    /**
      * Updates the current state.
      */
     public void update() {

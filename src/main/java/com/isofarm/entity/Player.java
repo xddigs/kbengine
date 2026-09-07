@@ -1,9 +1,10 @@
 package com.isofarm.entity;
 
 import com.isofarm.data.*;
-import com.isofarm.entity.plyr.PlayerAnimator;
 import com.isofarm.entity.plyr.PlayerGameplay;
 import com.isofarm.entity.plyr.PlayerManager;
+import com.isofarm.graphics.ResourceManager;
+import com.isofarm.graphics.gltf.GLTFModel;
 import com.isofarm.item.Item;
 import com.isofarm.pathfinding.GridPos;
 import com.isofarm.utils.DeathManager;
@@ -30,7 +31,8 @@ public class Player extends Character {
         plyr.initialize();
     }
 
-    private final PlayerAnimator animator;
+    private final GLTFModel playerModel;
+    private final CharacterAnimator animator;
     private final PlayerGameplay gameplay;
     private final PlayerManager manager;
 
@@ -39,9 +41,10 @@ public class Player extends Character {
      */
     private Player() {
         super(null, true);
-        gameplay = new PlayerGameplay();
-        manager = new PlayerManager();
-        animator = new PlayerAnimator();
+        this.playerModel = ResourceManager.rem.getPlayerModel();
+        this.gameplay = new PlayerGameplay();
+        this.manager = new PlayerManager();
+        this.animator = new CharacterAnimator(this);
     }
 
     /**
@@ -50,7 +53,7 @@ public class Player extends Character {
     private void initialize() {
         gameplay.initialize();
         manager.initialize();
-        animator.initialize();
+        animator.initialize(playerModel);
     }
 
     /**
@@ -60,18 +63,18 @@ public class Player extends Character {
     @Override
     public void update(BlockPos blockPos, float delta) {
         if (!gameplay.updateLifeCycle(delta)) {
-            animator.update(delta);
+            animator.update(playerModel, delta);
             return;
         }
-        // Keep the player state fixed while interacting with inventory slots.
-        // In particular, do not advance falling/void or ocean-drowning damage.
+
         if (GameMaster.game != null && GameMaster.game.isInventoryOpen()) {
-            animator.update(delta);
+            animator.update(playerModel, delta);
             return;
         }
+
         if (gameplay.checkOceanDrowning()) return;
         manager.update(delta);
-        animator.update(delta);
+        animator.update(playerModel, delta);
         gameplay.update(delta);
     }
 
@@ -81,7 +84,7 @@ public class Player extends Character {
      */
     @Override
     public void render(GameMaster game, RenderPass pass) {
-        animator.render(game, pass);
+        animator.render(game, playerModel, pass);
     }
 
     /**

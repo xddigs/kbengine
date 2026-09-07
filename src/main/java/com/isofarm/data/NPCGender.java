@@ -30,8 +30,8 @@ public enum NPCGender {
     public int getSoundIndex(boolean disapproving, boolean hurt) {
         int voiceOffset = switch (this) {
             case FEMALE -> 0;
-            case MALE -> 2;
-            case NON_BINARY -> Math.random() < 0.5 ? 0 : 2;
+            case MALE -> 3;
+            case NON_BINARY -> Math.random() < 0.5 ? 0 : 3;
         };
 
         voiceOffset += disapproving ? 1 : 0;

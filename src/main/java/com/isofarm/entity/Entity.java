@@ -15,6 +15,8 @@ import org.joml.Vector3f;
 /**
  * Encapsulates the state and operations required by entity within the game runtime.
  */
+
+@SuppressWarnings("all")
 @DataClass
 public abstract class Entity {
     private static final float LAVA_DAMAGE_INTERVAL = 1.0f;
@@ -86,6 +88,36 @@ public abstract class Entity {
         hitpoints = Math.max(0.0f, hitpoints - amount);
         if (hitpoints < previousHitpoints) onDamageTaken(amount);
         if (hitpoints == 0.0f) onDeath(cause == null ? Cause.NULL : cause);
+    }
+
+    /**
+     * Applies damage to the entity opposite to the {@code attacker}
+     * @param amount amount of damage
+     * @param attacker {@link Entity} supplied as {@code attacker}
+     */
+    public void damage(float amount, Entity attacker) {
+        damage(amount, Cause.ENTITY);
+        if (attacker != null) {
+            float knockbackStrength = 16.0f;
+            float upwardForce = 2.0f;
+            applyKnockback(attacker.getPosition(), knockbackStrength, upwardForce);
+        }
+    }
+
+    /** Calculates the force pushed from the attack, upwards */
+    public void applyKnockback(Vector3f sourcePosition, float strength, float upwardForce) {
+        Vector3f knockbackDir = new Vector3f(this.position).sub(sourcePosition);
+        knockbackDir.y = 0.0f;
+
+        if (knockbackDir.lengthSquared() < 0.0001f) {
+            knockbackDir.set(0, 0, 1);
+        } else {
+            knockbackDir.normalize();
+        }
+
+        this.velocity.x += knockbackDir.x * strength;
+        this.velocity.y += upwardForce;
+        this.velocity.z += knockbackDir.z * strength;
     }
 
     /**

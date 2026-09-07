@@ -182,7 +182,6 @@ public final class GLTFLoader {
                 data = ByteBuffer.allocateDirect(decoded.length).order(ByteOrder.LITTLE_ENDIAN);
                 data.put(decoded);
                 data.flip();
-
             } else {
                 throw new IllegalArgumentException("External GLTF buffers are not supported yet: " + uri);
             }

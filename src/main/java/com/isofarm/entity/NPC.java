@@ -3,53 +3,36 @@ package com.isofarm.entity;
 import com.isofarm.data.*;
 import com.isofarm.graphics.gltf.GLTFLoader;
 import com.isofarm.graphics.gltf.GLTFModel;
-import com.isofarm.graphics.gltf.GLTFNode;
-import com.isofarm.graphics.*;
 import com.isofarm.service.SoundService;
-import com.isofarm.service.TimeService;
 import com.isofarm.utils.Naming;
-import com.isofarm.utils.Settings;
 import com.isofarm.wrld.GameMaster;
-import org.joml.Matrix4f;
-import org.joml.Quaternionf;
 import org.joml.Vector3f;
-
-import static org.lwjgl.opengl.GL11.*;
 
 /**
  * Represents an NPC, with their own state and behavior, in contrast to {@link Player},
  * who starts with their own {@link Singleton} instance. Inherits from {@link Character}.
  */
-@SuppressWarnings("all")
 @DataClass
 public class NPC extends Character {
-    private static final float MOVE_THRESHOLD = 0.03f;
     private static final float WALK_SPEED = 1.25f;
     private static final float MIN_IDLE_TIME = 2.0f;
     private static final float IDLE_TIME_VARIATION = 4.0f;
     private static final float WANDER_RADIUS = 5.0f;
-    private final Matrix4f modelMatrix = new Matrix4f();
+    private final CharacterAnimator animator = new CharacterAnimator(this);
     private final NPCGender gender;
     private final Job job;
     private final GLTFModel npcModel;
     private final Vector3f home = new Vector3f();
     private final Vector3f destination = new Vector3f();
-    private GLTFNode head;
-    private GLTFNode body;
-    private GLTFNode rightArm;
-    private GLTFNode leftArm;
-    private GLTFNode rightLeg;
-    private GLTFNode leftLeg;
-    private Quaternionf baseHeadRotation;
-    private float yaw;
-    private float walkTime;
-    private float idleTime;
     private float idleTimer;
-    private boolean walking;
+    private boolean isWalking;
+
+    private Character lastInteractor = null;
+    private float interactionTimer = 0.0f;
+    private static final float INTERACTION_DURATION = 4.0f;
 
     /**
      * Creates an NPC and loads the model registered by its job.
-     *
      * @param gender the voice and localized gender of the character
      * @param job the job that supplies its model and interaction type
      */
@@ -58,6 +41,7 @@ public class NPC extends Character {
         this.gender = gender;
         this.job = job;
         this.npcModel = GLTFLoader.load(job.getModelPath());
+        animator.initialize(npcModel);
         setDimensions(0.6f, 1.8f, 0.6f);
         setMaxHitpoints(20);
         setHitpoints(20);
@@ -65,13 +49,11 @@ public class NPC extends Character {
         setStamina(100);
         setGamemode(Gamemode.SURVIVAL);
         setSpeed(WALK_SPEED);
-        bindNodes();
         chooseIdleDuration();
     }
 
     /**
      * Creates a farmer NPC with the supplied gender.
-     *
      * @param gender the voice and localized gender of the character
      */
     public NPC(NPCGender gender) {
@@ -90,87 +72,32 @@ public class NPC extends Character {
     public void update(BlockPos blockPos, float delta) {
         if (!isAlive() || delta <= 0.0f) return;
         updateBehavior(delta);
-        animate(delta);
+        animator.update(npcModel, delta);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public void render(GameMaster gameMaster, RenderPass pass) {
         if (!isAlive() || npcModel == null) return;
-        Shader shader = pass == RenderPass.SHADOW
-                ? ResourceManager.rem.getShadowMapShader()
-                : ResourceManager.rem.getDefaultShader();
-        if (shader == null) return;
-
-        float scale = Settings.getScaledEntity();
-        float bob = walking ? (float) Math.abs(Math.sin(walkTime * 2.0f)) * 0.025f : 0.0f;
-        modelMatrix.identity().translate(position.x, position.y + bob, position.z)
-                .rotateY(yaw).scale(scale);
-        shader.bind();
-        if (pass == RenderPass.SHADOW) {
-            shader.setUniform("uLightSpaceMatrix", ShadowSystem.sys.getLightSpaceMatrix());
-            shader.setUniform("uAlphaTest", true);
-            glCullFace(GL_FRONT);
-            npcModel.render(shader, modelMatrix);
-            glCullFace(GL_BACK);
-        } else {
-            CameraView camera = gameMaster.getActiveCamera();
-            CelestialLighting light = gameMaster.getCelestialLighting();
-            shader.setUniform("uProjection", camera.getProjectionMatrix());
-            shader.setUniform("uView", camera.getViewMatrix());
-            shader.setUniform("uLightIntensity", light.getIntensity());
-            shader.setUniform("uLightDirection", light.getDirection());
-            shader.setUniform("uAmbientIntensity", light.getAmbientIntensity());
-            shader.setUniform("uSkyColor", TimeService.getSkyColor());
-            shader.setUniform("uBaseColor", new Vector3f(1.0f));
-            shader.setUniform("uIsSprite", false);
-            shader.setUniform("uUseTexture", true);
-            shader.setUniform("uParticleAlpha", 1.0f);
-            shader.setUniform("uIsMaskPass", false);
-            shader.setUniform("uEnableShadows", Settings.doEnableShadows());
-            shader.setUniform("uLightSpaceMatrix", ShadowSystem.sys.getLightSpaceMatrix());
-            shader.setUniform("uIsSubmergedEntity", pass == RenderPass.SUBMERGED);
-            npcModel.render(shader, modelMatrix);
-        }
-        shader.unbind();
+        animator.render(gameMaster, npcModel, pass);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
-    public void damage(float amount) {
-        super.damage(amount);
-        grunt(gender);
+    public void damage(float amount, Entity attacker) {
+        super.damage(amount, attacker);
+        if (attacker instanceof Character character) {
+            interactWith(character);
+        }
     }
 
-    /**
-     * Binds the NPC's model nodes to their respective names
-     */
-    private void bindNodes() {
-        head = npcModel.findNode("Head");
-        body = npcModel.findNode("Body");
-        rightArm = npcModel.findNode("Right Arm");
-        leftArm = npcModel.findNode("Left Arm");
-        rightLeg = npcModel.findNode("Right Leg");
-        leftLeg = npcModel.findNode("Left Leg");
-        hideNode("sword");
-        hideNode("pickaxe");
-        hideNode("axe");
-        hideNode("hoe");
-        hideNode("shovel");
-        if (head != null) baseHeadRotation = new Quaternionf(head.getRotation());
-    }
-
-    /**
-     * Hides the node with the supplied name.
-     * @param name the name of the node to hide
-     */
-    private void hideNode(String name) {
-        GLTFNode node = npcModel.findNode(name);
-        if (node != null) node.setVisible(false);
+    /** {@inheritDoc} */
+    @Override
+    public Character hasBeenInteractedWith() {
+        if (interactionTimer > 0.0f) {
+            return lastInteractor;
+        }
+        return null;
     }
 
     /**
@@ -178,17 +105,23 @@ public class NPC extends Character {
      * @param delta the {@code float} argument; frame time in seconds
      */
     private void updateBehavior(float delta) {
-        if (walking) {
+        if (interactionTimer > 0.0f) {
+            interactionTimer -= delta;
+            if (interactionTimer <= 0.0f) {
+                lastInteractor = null;
+            }
+        }
+
+        if (isWalking) {
             Vector3f offset = new Vector3f(destination).sub(position);
             offset.y = 0.0f;
             if (offset.lengthSquared() < 0.16f) {
-                walking = false;
+                isWalking = false;
                 setVelocity(0.0f, getVelocity().y, 0.0f);
                 chooseIdleDuration();
             } else {
                 offset.normalize(WALK_SPEED);
                 setVelocity(offset.x, getVelocity().y, offset.z);
-                yaw = (float) Math.atan2(offset.x, offset.z) + (float) Math.PI;
             }
         } else {
             idleTimer -= delta;
@@ -204,7 +137,7 @@ public class NPC extends Character {
         float radius = (float) Math.sqrt(Math.random()) * WANDER_RADIUS;
         destination.set(home).add((float) Math.sin(angle) * radius, 0.0f,
                 (float) Math.cos(angle) * radius);
-        walking = true;
+        isWalking = true;
     }
 
     /**
@@ -212,38 +145,6 @@ public class NPC extends Character {
      */
     private void chooseIdleDuration() {
         idleTimer = MIN_IDLE_TIME + (float) Math.random() * IDLE_TIME_VARIATION;
-    }
-
-    /**
-     * Animates the NPC's model based on its current velocity.
-     * @param delta the {@code float} argument; frame time in seconds
-     */
-    private void animate(float delta) {
-        boolean moving = walking && (Math.abs(velocity.x) > MOVE_THRESHOLD
-                || Math.abs(velocity.z) > MOVE_THRESHOLD);
-        float weight = moving ? 1.0f : 0.0f;
-        if (moving) walkTime += delta * 8.0f;
-        else idleTime += delta * 2.0f;
-        float swing = (float) Math.sin(walkTime) * 0.55f * weight;
-        float breath = (float) Math.sin(idleTime) * 0.035f * (1.0f - weight);
-        rotate(body, new Quaternionf().rotateX(breath));
-        rotate(rightArm, new Quaternionf().rotateX(swing + breath));
-        rotate(leftArm, new Quaternionf().rotateX(-swing + breath));
-        rotate(rightLeg, new Quaternionf().rotateX(-swing));
-        rotate(leftLeg, new Quaternionf().rotateX(swing));
-        if (head != null && baseHeadRotation != null) {
-            rotate(head, new Quaternionf(baseHeadRotation).rotateZ(breath * 0.35f));
-        }
-        npcModel.updateTransforms();
-    }
-
-    /**
-     * Translates the supplied node by the supplied offset.
-     * @param node the {@link GLTFNode} to translate
-     * @param rotation the {@link Quaternionf} to rotate the node by
-     */
-    private static void rotate(GLTFNode node, Quaternionf rotation) {
-        if (node != null) node.setRotation(rotation);
     }
 
     /**
@@ -331,5 +232,14 @@ public class NPC extends Character {
      */
     public GLTFModel getNpcModel() {
         return npcModel;
+    }
+
+    /**
+     * Interacts with the NPC.
+     * @param interactor the {@link Character} interacting with this NPC
+     */
+    public void interactWith(Character interactor) {
+        this.lastInteractor = interactor;
+        this.interactionTimer = INTERACTION_DURATION;
     }
 }

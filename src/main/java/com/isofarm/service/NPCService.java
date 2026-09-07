@@ -62,6 +62,7 @@ public class NPCService implements Service<NPC> {
     public boolean interact(GameMaster gameMaster) {
         NPC closest = getClosest();
         if (closest == null) return false;
+        closest.interactWith(Player.plyr);
         closest.speak();
         if (closest.getJob() == Job.TRADER && GameUIService.ui != null) {
             GameUIService.ui.getInventoryUI().openExternalInventory(closest.getInventory());
@@ -78,7 +79,8 @@ public class NPCService implements Service<NPC> {
     public boolean attack(GameMaster gameMaster) {
         NPC closest = getClosest();
         if (closest == null) return false;
-        closest.damage(Player.plyr.getAttack());
+        closest.damage(Player.plyr.getAttack(), Player.plyr);
+        closest.grunt(closest.getGender());
         return true;
     }
 
