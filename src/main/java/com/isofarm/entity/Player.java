@@ -21,6 +21,7 @@ import java.util.List;
 
 /**
  * Represents the local player and orchestrates its focused components.
+ * Inherits from {@link Character}.
  */
 @SuppressWarnings("all")
 @Singleton
