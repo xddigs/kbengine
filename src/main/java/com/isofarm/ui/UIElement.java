@@ -16,8 +16,8 @@ import java.util.function.Consumer;
  * Encapsulates the state and operations required by uielement within the game runtime.
  */
 @SuppressWarnings("unused")
-@GodObject
 @DataClass
+@GodObject
 public abstract class UIElement {
     private final List<UIElement> children = new ArrayList<>();
     private final Vector4f tint = new Vector4f(1.0f, 1.0f, 1.0f, 1.0f);

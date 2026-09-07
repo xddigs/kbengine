@@ -1,6 +1,7 @@
 package com.isofarm.ui;
 
 import com.isofarm.data.BookLine;
+import com.isofarm.data.GodObject;
 import com.isofarm.data.Singleton;
 import com.isofarm.graphics.ResourceManager;
 import com.isofarm.graphics.SpriteSheet;
@@ -21,6 +22,7 @@ import org.lwjgl.stb.STBTTBakedChar;
  * Encapsulates the state and operations required by book ui within the game runtime.
  */
 @Singleton
+@GodObject
 public class BookUI extends UIElement {
     private static final float BOOK_SCALE = 8.0f;
     private static final float ANIMATION_DURATION = 0.35f;
