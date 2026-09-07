@@ -1,7 +1,7 @@
 package com.isofarm.service;
 
 import com.isofarm.data.Singleton;
-import com.isofarm.data.TODO;
+import com.isofarm.data.Task;
 import com.isofarm.entity.NPC;
 import com.isofarm.wrld.GameMaster;
 
@@ -12,7 +12,7 @@ import java.util.List;
  * Represents the methods, data, behavior of the {@link NPC}'s.
  */
 @Singleton
-@TODO(reason="Pending map of NPCModels")
+@Task(reason="Pending map of NPCModels")
 public class NPCService implements Service<NPC> {
     public static final NPCService npcs = new NPCService();
     private final List<NPC> npcsList = new LinkedList<>();

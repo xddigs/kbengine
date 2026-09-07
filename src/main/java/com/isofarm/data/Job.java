@@ -9,7 +9,7 @@ import java.util.Locale;
  * Enumerates the available {@link NPC} jobs, such as Farmer, Miner, etc.
  */
 @DataClass
-@TODO(reason="Lacking translations")
+@Task(reason="Lacking translations")
 public enum Job {
     FARMER((byte) 0, "assets/models/npcs/farmer.gltf"),
     MINER((byte) 1, "assets/models/npcs/miner.gltf"),

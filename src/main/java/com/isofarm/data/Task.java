@@ -1,5 +1,5 @@
 package com.isofarm.data;
 
-public @interface TODO {
+public @interface Task {
     String reason();
 }

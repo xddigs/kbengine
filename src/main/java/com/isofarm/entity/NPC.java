@@ -10,7 +10,7 @@ import com.isofarm.wrld.GameMaster;
  * who starts with their own {@link Singleton} instance. Inherits from {@link Character}.
  */
 @DataClass
-@TODO(reason="Each NPC should load their own model")
+@Task(reason="Each NPC should load their own model")
 public class NPC extends Character {
     private static final String name = Naming.nm.fullName();
     private final Job job;

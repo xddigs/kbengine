@@ -7,7 +7,7 @@ import com.isofarm.item.Material;
  * Enumerates the supported animal data values.
  */
 @DataClass
-@TODO(reason="Models, lack there of, are not complete")
+@Task(reason="Models, lack there of, are not complete")
 public enum AnimalData {
     COW((byte) 0, "assets/models/animals/cow.gltf", new Material[]{new Material(Tier.NONE, MaterialID.LEATHER)}),
     CHICKEN((byte) 1, "assets/models/animals/chicken.gltf", new Material[]{});
