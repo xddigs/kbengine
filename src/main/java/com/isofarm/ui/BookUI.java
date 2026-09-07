@@ -179,15 +179,6 @@ public class BookUI extends UIElement {
      * Activates this object and prepares any state it requires.
      */
     public void open() {
-        if (!Settings.doBookAnimation()) {
-            animationProgress = 1.0f;
-            isClosing = false;
-            isOpening = false;
-            show();
-            updateButtonState();
-            return;
-        }
-
         isClosing = false;
         isOpening = true;
         show();
@@ -199,15 +190,6 @@ public class BookUI extends UIElement {
      */
     public void close() {
         if (isClosing) return;
-
-        if (!Settings.doBookAnimation()) {
-            animationProgress = 0.0f;
-            isClosing = false;
-            isOpening = false;
-            updateButtonState();
-            hide();
-            return;
-        }
 
         isClosing = true;
         isOpening = false;
@@ -411,8 +393,8 @@ public class BookUI extends UIElement {
         float centerY = (screenHeight - bookHeight) * 0.5f;
 
         updateAnimation(delta);
-        float alpha = Settings.doBookAnimation() ? easeInOutCubic(animationProgress) : 1.0f;
-        float y = Settings.doBookAnimation() ? lerp(screenHeight, centerY, alpha) : centerY;
+        float alpha = easeInOutCubic(animationProgress);
+        float y = lerp(screenHeight, centerY, alpha);
 
         setPosition(centerX, y);
         setSize(bookWidth, bookHeight);
