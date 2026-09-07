@@ -144,11 +144,14 @@ public class GameInteraction {
             }
         }
 
-        if (isRightPressed && canInteract && NPCService.npcs.interact(gameMaster)) {
+        BlockPos hoveredCell = HoveredCell.get(gameMaster, isShiftHeld);
+        BlockPos raycastCell = hoveredCell;
+
+        if (isRightPressed && canInteract && NPCService.npcs.interact(gameMaster, raycastCell)) {
             if (!player.isAttacking()) player.interact();
             isRightPressed = false;
-        } else if (isLeftPressed && NPCService.npcs.attack(gameMaster)) {
-            if (player.isAttacking()) return null;
+        } else if (isLeftPressed && canInteract && NPCService.npcs.attack(gameMaster, raycastCell)) {
+            return null;
         }
 
         if (selectedItem instanceof Usable usable) {
@@ -182,7 +185,6 @@ public class GameInteraction {
             }
         }
 
-        BlockPos hoveredCell = HoveredCell.get(gameMaster, isShiftHeld);
         if (isShiftHeld && hoveredCell != null) {
             byte blockType = GameMaster.game.getWorld().getBlockTypeAt(hoveredCell);
             if (blockType == BlockData.OAK_LOG.getId()) {
@@ -211,7 +213,8 @@ public class GameInteraction {
         breakTimeout = Math.max(breakTimeout, 0.0f);
 
         if (isLeftHeld && canInteract) {
-            if (breakTimeout <= 0.0f) {
+            if (breakTimeout <= 0.0f
+                    && NPCService.npcs.getClosestBeforeBlock(gameMaster, raycastCell) == null) {
                 breaking(gameMaster, hoveredCell);
             }
         } else {
