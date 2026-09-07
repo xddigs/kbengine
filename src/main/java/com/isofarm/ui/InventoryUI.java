@@ -19,6 +19,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
+import static org.joml.Math.lerp;
+
 /**
  * Encapsulates the state and operations required by inventory ui within the game runtime.
  */
@@ -28,13 +30,17 @@ public class InventoryUI extends UIElement {
     private static final int BACKPACK_COLUMNS = 4;
     private static final int BACKPACK_ROWS = 4;
     private static final int GUI_SLICE_SIZE = 3;
+    private static final float QUICK_MOVE_ANIMATION_DURATION_SECONDS = 0.12f;
+    private static final float ANIMATION_COMPLETE = 1.0f;
 
     private static final Logger log = LoggerFactory.getLogger(InventoryUI.class);
 
     private final InventorySlotUI[] slotUIs;
+    private final InventorySlotUI[] containerSlotUIs;
     private final InventorySlot[] creativeSlotData;
     private final Set<InventorySlot> creativeSlots;
     private final List<Item> creativeItems;
+    private final List<QuickMoveAnimation> quickMoveAnimations;
 
     private final List<UIButton> buttons;
     private final UIScrollBar creativeScrollBar;
@@ -84,9 +90,11 @@ public class InventoryUI extends UIElement {
 
         int totalVisualSlots = K.UI.INVENTORY_SLOTS;
         this.slotUIs = new InventorySlotUI[totalVisualSlots];
+        this.containerSlotUIs = new InventorySlotUI[totalVisualSlots];
         this.creativeSlotData = new InventorySlot[totalVisualSlots];
         this.creativeSlots = Collections.newSetFromMap(new IdentityHashMap<>());
         this.creativeItems = new ArrayList<>();
+        this.quickMoveAnimations = new ArrayList<>();
         this.buttons = new ArrayList<>();
         this.creativeScrollBar = createCreativeScrollBar();
         setFocusable(true);
@@ -241,6 +249,31 @@ public class InventoryUI extends UIElement {
             slotUIs[i] = slotUI;
             addChild(slotUI);
         }
+        createContainerSlots();
+    }
+
+    /** Creates the chest slots in a separate panel above the player inventory. */
+    private void createContainerSlots() {
+        float panelOffset = getContainerPanelHeight()
+                + Settings.getScaledSpacing() * 2.0f;
+        for (int i = 0; i < containerSlotUIs.length; i++) {
+            int column = i % K.UI.INVENTORY_COLUMNS;
+            int row = i / K.UI.INVENTORY_COLUMNS;
+            float x = Settings.getScaledPadding()
+                    + column * (Settings.getScaledSlot() + Settings.getScaledSpacing());
+            float y = -panelOffset + Settings.getScaledPadding()
+                    + row * (Settings.getScaledSlot() + Settings.getScaledSpacing());
+            InventorySlotUI slotUI = new InventorySlotUI(x, y,
+                    Settings.getScaledSlot(), Settings.getScaledSlot(), SlotType.INVENTORY);
+            slotUI.hide();
+            containerSlotUIs[i] = slotUI;
+            addChild(slotUI);
+        }
+    }
+
+    /** Returns the height of the headerless chest panel. */
+    private float getContainerPanelHeight() {
+        return getInventoryHeight() - Settings.getScaledHeader();
     }
 
     /**
@@ -352,6 +385,7 @@ public class InventoryUI extends UIElement {
     public void update(float delta) {
         super.update(delta);
         updatePosition(delta);
+        updateQuickMoveAnimations(delta);
 
         if (player == null) return;
         boolean wasOpen = isVisible();
@@ -380,6 +414,10 @@ public class InventoryUI extends UIElement {
             this.defaultX = (GameMaster.game.getWindowWidth() - getWidth()) / 2.0f;
             this.targetX = defaultX;
             this.defaultY = (GameMaster.game.getWindowHeight() - getHeight()) / 2.0f;
+            if (containerBlock != null) {
+                this.defaultY += (getContainerPanelHeight()
+                        + Settings.getScaledSpacing() * 2.0f) / 2.0f;
+            }
             this.targetY = defaultY;
             setPosition(defaultX, GameMaster.game.getWindowHeight());
         }
@@ -474,6 +512,8 @@ public class InventoryUI extends UIElement {
             updateItemSprite(slotUI);
         }
 
+        syncContainerInventory();
+
         if (backpackUI != null && backpackUI.getSlotUIs() != null) {
             Inventory backpackInv = player.getBackpack();
             for (int i = 0; i < backpackUI.getSlotUIs().length; i++) {
@@ -498,6 +538,26 @@ public class InventoryUI extends UIElement {
 
             backpackButton.setSpriteSheet(inventoryIcons);
             backpackButton.setSpriteColumn(2);
+        }
+    }
+
+    /** Synchronizes and exposes the slots belonging to the open chest. */
+    private void syncContainerInventory() {
+        Inventory containerInventory = containerBlock == null
+                ? null : containerBlock.getInventory();
+        for (int i = 0; i < containerSlotUIs.length; i++) {
+            InventorySlotUI slotUI = containerSlotUIs[i];
+            if (slotUI == null) continue;
+
+            if (containerInventory != null && i < containerInventory.getSlots().size()) {
+                slotUI.setSlot(containerInventory.getSlot(i));
+                updateItemSprite(slotUI);
+                slotUI.show();
+            } else {
+                slotUI.setSlot(null);
+                updateItemSprite(slotUI);
+                slotUI.hide();
+            }
         }
     }
 
@@ -718,6 +778,12 @@ public class InventoryUI extends UIElement {
             }
         }
 
+        for (InventorySlotUI slotUI : containerSlotUIs) {
+            if (slotUI != null && slotUI.isVisible()) {
+                slotUI.setHovered(slotUI.contains(mouseX, mouseY));
+            }
+        }
+
         if (backpackUI != null && backpackUI.isVisible()) {
             for (InventorySlotUI slotUI : backpackUI.getSlotUIs()) {
                 if (slotUI != null) {
@@ -746,11 +812,19 @@ public class InventoryUI extends UIElement {
         InventorySlotUI[] backpackSlots = (backpackUI != null && backpackUI.isVisible()) ?
                 backpackUI.getSlotUIs() : new InventorySlotUI[0];
 
-        InventorySlotUI[] allSlots = new InventorySlotUI[slotUIs.length + hotbarSlots.length + backpackSlots.length];
+        int containerSlotCount = containerBlock == null ? 0 : containerSlotUIs.length;
+        InventorySlotUI[] allSlots = new InventorySlotUI[slotUIs.length
+                + containerSlotCount + hotbarSlots.length + backpackSlots.length];
         System.arraycopy(slotUIs, 0, allSlots, 0, slotUIs.length);
-        System.arraycopy(hotbarSlots, 0, allSlots, slotUIs.length, hotbarSlots.length);
+        if (containerSlotCount > 0) {
+            System.arraycopy(containerSlotUIs, 0, allSlots,
+                    slotUIs.length, containerSlotCount);
+        }
+        int hotbarOffset = slotUIs.length + containerSlotCount;
+        System.arraycopy(hotbarSlots, 0, allSlots, hotbarOffset, hotbarSlots.length);
         if (backpackSlots.length > 0) {
-            System.arraycopy(backpackSlots, 0, allSlots, slotUIs.length + hotbarSlots.length, backpackSlots.length);
+            System.arraycopy(backpackSlots, 0, allSlots,
+                    hotbarOffset + hotbarSlots.length, backpackSlots.length);
         }
 
         for (InventorySlotUI slotUI : allSlots) {
@@ -764,7 +838,12 @@ public class InventoryUI extends UIElement {
                     takeCreativeItem(slot);
                     break;
                 }
-                leftClick(slot);
+                if (Controls.isDown(ControlAction.MODIFIER)
+                        && carriedItem == null) {
+                    quickMove(slotUI);
+                } else {
+                    leftClick(slot);
+                }
                 break;
             }
 
@@ -777,6 +856,135 @@ public class InventoryUI extends UIElement {
                 break;
             }
         }
+    }
+
+    /**
+     * Moves a complete stack directly between the storage areas currently
+     * exposed by the inventory screen.
+     *
+     * @param sourceUI slot selected with control-left-click
+     */
+    private void quickMove(InventorySlotUI sourceUI) {
+        InventorySlot source = sourceUI.getSlotType();
+        if (source.isEmpty() || player == null) return;
+
+        Inventory playerInventory = player.getInventory();
+        Inventory backpackInventory = player.getBackpack();
+        Inventory containerInventory = containerBlock == null
+                ? null : containerBlock.getInventory();
+        Inventory destination;
+        List<SlotRange> destinationRanges = new ArrayList<>();
+
+        if (ownsSlot(containerInventory, source)
+                || ownsSlot(backpackInventory, source)) {
+            destination = playerInventory;
+            destinationRanges.add(new SlotRange(0, playerInventory.getHotbarStart()));
+            destinationRanges.add(new SlotRange(
+                    playerInventory.getHotbarStart(), playerInventory.getSlots().size()));
+        } else {
+            int playerSlot = playerInventory.getSlots().indexOf(source);
+            if (playerSlot < 0) return;
+
+            if (containerInventory != null) {
+                destination = containerInventory;
+                destinationRanges.add(new SlotRange(0, destination.getSlots().size()));
+            } else if (playerSlot >= playerInventory.getHotbarStart()) {
+                destination = playerInventory;
+                destinationRanges.add(new SlotRange(0, playerInventory.getHotbarStart()));
+            } else if (backpackUI != null && backpackUI.isVisible()) {
+                destination = backpackInventory;
+                destinationRanges.add(new SlotRange(0, destination.getSlots().size()));
+            } else {
+                destination = playerInventory;
+                destinationRanges.add(new SlotRange(
+                        playerInventory.getHotbarStart(), playerInventory.getSlots().size()));
+            }
+        }
+
+        Item item = source.getItem();
+        int originalAmount = source.getAmount();
+        InventorySlot animationTarget = findAvailableSlot(
+                destination, item, destinationRanges);
+        if (animationTarget == null) return;
+
+        int remaining = originalAmount;
+        for (SlotRange range : destinationRanges) {
+            if (remaining <= 0) break;
+            remaining = destination.addToRange(
+                    item, remaining, range.startInclusive(), range.endExclusive());
+        }
+        if (remaining == originalAmount) return;
+
+        source.setAmount(remaining);
+        InventorySlotUI destinationUI = findSlotUI(destination, animationTarget);
+        if (destinationUI != null) {
+            quickMoveAnimations.add(new QuickMoveAnimation(
+                    item, originalAmount - remaining,
+                    centerX(sourceUI), centerY(sourceUI),
+                    centerX(destinationUI), centerY(destinationUI)));
+        }
+    }
+
+    /** Finds the first stack or empty slot that can receive an item. */
+    private InventorySlot findAvailableSlot(Inventory destination, Item item,
+                                             List<SlotRange> ranges) {
+        int maxStack = destination.getMaxStack(item);
+        for (SlotRange range : ranges) {
+            for (int index = range.startInclusive(); index < range.endExclusive(); index++) {
+                InventorySlot slot = destination.getSlot(index);
+                if (!slot.isEmpty() && isSameType(slot.getItem(), item)
+                        && slot.getAmount() < maxStack) {
+                    return slot;
+                }
+            }
+            for (int index = range.startInclusive(); index < range.endExclusive(); index++) {
+                InventorySlot slot = destination.getSlot(index);
+                if (slot.isEmpty()) return slot;
+            }
+        }
+        return null;
+    }
+
+    /** Resolves a data slot back to the UI element that displays it. */
+    private InventorySlotUI findSlotUI(Inventory owner, InventorySlot slot) {
+        int index = owner.getSlots().indexOf(slot);
+        if (index < 0) return null;
+
+        Inventory playerInventory = player.getInventory();
+        if (owner == playerInventory) {
+            if (index < playerInventory.getHotbarStart()) {
+                return index < slotUIs.length ? slotUIs[index] : null;
+            }
+            int hotbarIndex = index - playerInventory.getHotbarStart();
+            InventorySlotUI[] hotbarSlots = hotbarUI.getSlotUIs();
+            return hotbarIndex < hotbarSlots.length ? hotbarSlots[hotbarIndex] : null;
+        }
+        if (owner == player.getBackpack()) {
+            InventorySlotUI[] backpackSlots = backpackUI.getSlotUIs();
+            return index < backpackSlots.length ? backpackSlots[index] : null;
+        }
+        if (containerBlock != null && owner == containerBlock.getInventory()) {
+            return index < containerSlotUIs.length ? containerSlotUIs[index] : null;
+        }
+        return null;
+    }
+
+    /** Advances every quick-move icon towards its destination. */
+    private void updateQuickMoveAnimations(float delta) {
+        quickMoveAnimations.removeIf(animation -> animation.update(delta));
+    }
+
+    private static float centerX(InventorySlotUI slot) {
+        return slot.getAbsoluteX() + slot.getAbsoluteWidth() / 2.0f;
+    }
+
+    private static float centerY(InventorySlotUI slot) {
+        return slot.getAbsoluteY() + slot.getAbsoluteHeight() / 2.0f;
+    }
+
+    /** Returns whether an inventory owns the supplied slot instance. */
+    private boolean ownsSlot(Inventory owner, InventorySlot slot) {
+        return owner != null && owner.getSlots().contains(slot);
     }
 
     /**
@@ -979,11 +1187,13 @@ public class InventoryUI extends UIElement {
      */
     @Override
     public void render() {
+        renderContainerBackground();
         renderBackground();
         renderChildren();
+        renderQuickMoveAnimations();
         renderCarriedItem();
 
-        if ((!isGodmode || !isCreativeInventoryVisible)
+        if (containerBlock == null && (!isGodmode || !isCreativeInventoryVisible)
                 && inventory != null && inventory.getBackpackSlot() != null
                 && inventory.getBackpackSlot().getItem() != null) {
             backpackButton.show();
@@ -1005,6 +1215,25 @@ public class InventoryUI extends UIElement {
             y += headerHeight;
             height -= headerHeight;
         }
+        int textureWidth = Math.max(GUI_SLICE_SIZE * 2,
+                Math.round(width / Settings.getScale()));
+        int textureHeight = Math.max(GUI_SLICE_SIZE * 2,
+                Math.round(height / Settings.getScale()));
+        Texture background = Frontend.createNineSliceTexture(
+                ResourceManager.rem.getBackgroundUI(), textureWidth,
+                textureHeight, GUI_SLICE_SIZE);
+        Frontend.drawTexture(background, getAbsoluteX(), y, width,
+                height, new Vector4f(1.0f, 1.0f, 1.0f, getWorldOpacity()));
+    }
+
+    /** Draws the headerless chest panel above the player inventory. */
+    private void renderContainerBackground() {
+        if (containerBlock == null) return;
+
+        float width = getAbsoluteWidth();
+        float height = getContainerPanelHeight();
+        float spacing = Settings.getScaledSpacing() * 2.0f;
+        float y = getAbsoluteY() - height - spacing;
         int textureWidth = Math.max(GUI_SLICE_SIZE * 2,
                 Math.round(width / Settings.getScale()));
         int textureHeight = Math.max(GUI_SLICE_SIZE * 2,
@@ -1042,6 +1271,71 @@ public class InventoryUI extends UIElement {
 
             Frontend.drawString(amount, x + iconSize - 10, y + iconSize - 10,
                     Frontend.getNormalFont(), K.UI.UI_TEXT_COLOR);
+        }
+    }
+
+    /** Renders the transient icons created by control-left-click transfers. */
+    private void renderQuickMoveAnimations() {
+        float iconSize = Settings.getScaledIcon();
+        for (QuickMoveAnimation animation : quickMoveAnimations) {
+            SpriteSheet sheet = ResourceManager.getItemSpriteSheet(animation.item);
+            if (sheet == null) continue;
+
+            float x = animation.currentX - iconSize / 2.0f;
+            float y = animation.currentY - iconSize / 2.0f;
+            Frontend.drawSprite(sheet, ResourceManager.getItemFrame(animation.item),
+                    x, y, iconSize, iconSize, K.UI.UI_ITEM_TINT);
+        }
+    }
+
+    /** Exclusive slot range used by quick-move destination selection. */
+    private record SlotRange(int startInclusive, int endExclusive) {}
+
+    /** Screen-space interpolation state for one completed quick move. */
+    private static final class QuickMoveAnimation {
+        private final Item item;
+        private final int amount;
+        private final float startX;
+        private final float startY;
+        private final float targetX;
+        private final float targetY;
+        private float currentX;
+        private float currentY;
+        private float elapsed;
+
+        /**
+         * Creates a new quick move animation.
+         * @param item the {@link Item} argument; the item to be moved
+         * @param amount the {@code int} argument; the amount of the item to be moved
+         * @param startX the {@code float} argument; the starting X position
+         * @param startY the {@code float} argument; the starting Y position
+         * @param targetX the {@code float} argument; the target X position
+         * @param targetY the {@code float} argument; the target Y position
+         */
+        private QuickMoveAnimation(Item item, int amount, float startX, float startY,
+                                   float targetX, float targetY) {
+            this.item = item;
+            this.amount = amount;
+            this.startX = startX;
+            this.startY = startY;
+            this.targetX = targetX;
+            this.targetY = targetY;
+            this.currentX = startX;
+            this.currentY = startY;
+        }
+
+        /**
+         * Advances the interpolation.
+         * @return whether the animation reached its destination
+         */
+        private boolean update(float delta) {
+            elapsed += Math.max(delta, 0.0f);
+            float progress = Math.min(
+                    elapsed / QUICK_MOVE_ANIMATION_DURATION_SECONDS,
+                    ANIMATION_COMPLETE);
+            currentX = lerp(startX, targetX, progress);
+            currentY = lerp(startY, targetY, progress);
+            return progress >= ANIMATION_COMPLETE;
         }
     }
 
@@ -1098,7 +1392,7 @@ public class InventoryUI extends UIElement {
     public void openContainer(iBlock block) {
         if (block == null || GameMaster.game == null) return;
         this.containerBlock = block;
-        this.inventory = block.getInventory();
+        this.inventory = player == null ? null : player.getInventory();
         GameMaster.game.setInventoryOpen(true);
         SoundService.fx.playUseSound(block.getType().getSoundGroup(), 0);
     }
@@ -1112,7 +1406,7 @@ public class InventoryUI extends UIElement {
         SoundService.fx.playUseSound(containerBlock.getType()
                 .getSoundGroup(), 1);
         containerBlock = null;
-        inventory = player == null ? null : player.getInventory();
+        syncContainerInventory();
     }
 
     /**

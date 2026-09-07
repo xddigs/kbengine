@@ -197,6 +197,32 @@ public class Inventory {
     }
 
     /**
+     * Adds an item only within the supplied slot range, filling compatible
+     * stacks before the first empty slot.
+     *
+     * @param item the item to add
+     * @param amount the amount to add
+     * @param startInclusive first destination slot
+     * @param endExclusive slot after the final destination
+     * @return amount that did not fit
+     */
+    public int addToRange(Item item, int amount, int startInclusive, int endExclusive) {
+        if (item == null || amount <= 0) return amount;
+
+        int start = Math.max(0, startInclusive);
+        int end = Math.min(slots.size(), endExclusive);
+        if (start >= end) return amount;
+
+        int remaining = addToExistingStacks(item, amount, start, end);
+        remaining = addToEmptySlots(item, remaining, start, end);
+        if (remaining < amount && Player.plyr != null
+                && Player.plyr.getInventory() == this) {
+            BookService.bs.reloadOpenCraftingBook();
+        }
+        return remaining;
+    }
+
+    /**
      * Adds the to existing stacks.
      * @param item the {@link Item} supplied as {@code item}
      * @param amount the {@code int} supplied as {@code amount}
@@ -300,7 +326,8 @@ public class Inventory {
         group();
         List<Stack> stacks = new ArrayList<>();
         int firstMutableSlot = getFirstMutableSlotIndex();
-        for (int i = firstMutableSlot; i < slots.size(); i++) {
+        int mutableSlotLimit = getMutableSlotLimit();
+        for (int i = firstMutableSlot; i < mutableSlotLimit; i++) {
             InventorySlot slot = slots.get(i);
             if (!slot.isEmpty()) {
                 stacks.add(new Stack(slot.getItem(), slot.getAmount()));
@@ -316,7 +343,7 @@ public class Inventory {
         for (Stack stack : stacks) {
             int remaining = stack.amount();
 
-            while (remaining > 0 && index < slots.size()) {
+            while (remaining > 0 && index < mutableSlotLimit) {
                 int amount = Math.min(remaining, getMaxStack(stack.item()));
 
                 InventorySlot slot = slots.get(index++);
@@ -386,7 +413,8 @@ public class Inventory {
      */
     public void group() {
         int firstMutableSlot = getFirstMutableSlotIndex();
-        for (int i = firstMutableSlot; i < slots.size(); i++) {
+        int mutableSlotLimit = getMutableSlotLimit();
+        for (int i = firstMutableSlot; i < mutableSlotLimit; i++) {
             InventorySlot currentSlot = slots.get(i);
 
             if (currentSlot.isEmpty()) {
@@ -395,7 +423,7 @@ public class Inventory {
 
             Item currentItem = currentSlot.getItem();
 
-            for (int j = i + 1; j < slots.size(); j++) {
+            for (int j = i + 1; j < mutableSlotLimit; j++) {
                 InventorySlot targetSlot = slots.get(j);
 
                 if (targetSlot.isEmpty()) {
@@ -686,7 +714,15 @@ public class Inventory {
      * @return the first mutable slot index
      */
     private int getFirstMutableSlotIndex() {
-        return hasHotbar ? getHotbarStart() : 0;
+        return 0;
+    }
+
+    /**
+     * Returns the exclusive upper bound for inventory-wide actions.
+     * @return the first hotbar slot for players, otherwise the inventory size
+     */
+    private int getMutableSlotLimit() {
+        return hasHotbar ? getHotbarStart() : slots.size();
     }
 
     /**

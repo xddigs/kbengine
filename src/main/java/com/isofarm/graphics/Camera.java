@@ -342,7 +342,9 @@ public class Camera implements CameraView {
                     || (shapeHit != null && shapeHit.distance() <= cellExit));
 
             if (hasBlock && hitsShape && (!data.isFluid() || isBucket)) {
-                boolean isTransparentObject = data == BlockData.OAK_LEAVES;
+                boolean isTransparentObject = data.isTransparent()
+                        || data == BlockData.OAK_LEAVES
+                        || data == BlockData.SPRUCE_LEAVES;
 
                 if (!isSmartFilter || !isTransparentObject) {
                     float blockCenterX = x + 0.5f;
