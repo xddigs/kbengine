@@ -1,6 +1,7 @@
 package com.isofarm.graphics;
 
 import com.isofarm.data.BlockShape;
+import com.isofarm.graphics.gltf.GLTFModel;
 import com.isofarm.utils.K;
 import org.lwjgl.system.MemoryUtil;
 import org.slf4j.Logger;

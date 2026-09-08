@@ -700,7 +700,7 @@ public class GameInteraction {
         ParticleEngine.peng.spawnBlock(cell, blockData);
 
         if (wasBrokenIn != null) {
-            itemToDrop = new Block(BlockData.fromIdTo(wasBrokenIn.getId()).getType(), cell);
+            itemToDrop = BlockData.fromIdTo(wasBrokenIn.getId());
         } else if (removedBlock.getType().hasDrops()) {
             Object dropObj = removedBlock.getType().getRandomDrop();
             if (dropObj instanceof MaterialID mid) {
