@@ -24,10 +24,7 @@ public class Inventory {
 
     private final List<InventorySlot> slots;
     private final boolean hasHotbar;
-    private final List<InventorySlot> equippedExtraItems = new ArrayList<>();
     private final InventorySlot backpackSlot;
-    private final InventorySlot bookSlot;
-    private final InventorySlot walletSlot;
     private final Character owner;
 
     /**
@@ -53,8 +50,6 @@ public class Inventory {
         this.slots = new ArrayList<>();
         this.hasHotbar = includeHotbar;
         this.backpackSlot = new InventorySlot();
-        this.bookSlot = new InventorySlot();
-        this.walletSlot = new InventorySlot();
 
         int capacity = includeHotbar
                 ? K.UI.PLAYER_INVENTORY_SLOTS
@@ -89,32 +84,11 @@ public class Inventory {
     }
 
     /**
-     * Returns the equipped extra items.
-     * @return the {@link List} representing the equipped extra items
-     */
-    public List<InventorySlot> getEquippedExtraItems() {
-        return equippedExtraItems;
-    }
-
-    /**
      * Returns the backpack slot.
      * @return the {@link InventorySlot} representing the backpack slot
      */
     public InventorySlot getBackpackSlot() {
         return backpackSlot;
-    }
-
-    /**
-     * Returns the book slot.
-     * @return the {@link InventorySlot} representing the book slot
-     */
-    public InventorySlot getBookSlot() {
-        return bookSlot;
-    }
-
-    /** Returns the wallet equipment slot. */
-    public InventorySlot getWalletSlot() {
-        return walletSlot;
     }
 
     /**
@@ -126,37 +100,11 @@ public class Inventory {
     }
 
     /**
-     * Checks whether the book equipped condition is met.
-     * @return {@code true} if book equipped; otherwise {@code false}
-     */
-    public boolean hasBookEquipped() {
-        return !bookSlot.isEmpty() && bookSlot.getItem() instanceof CraftingBook;
-    }
-
-    /** Returns whether a wallet is equipped in the extra-item bar. */
-    public boolean hasWalletEquipped() {
-        return !walletSlot.isEmpty() && walletSlot.getItem() instanceof Wallet;
-    }
-
-    /**
      * Returns the backpack.
      * @return the {@link Backpack} representing the backpack
      */
     public Backpack getBackpack() {
         return backpackSlot.getItem() instanceof Backpack backpack ? backpack : null;
-    }
-
-    /**
-     * Returns the book.
-     * @return the {@link CraftingBook} representing the book
-     */
-    public CraftingBook getBook() {
-        return bookSlot.getItem() instanceof CraftingBook book ? book : null;
-    }
-
-    /** Returns the equipped wallet, or {@code null} when it is not equipped. */
-    public Wallet getWallet() {
-        return walletSlot.getItem() instanceof Wallet wallet ? wallet : null;
     }
 
     /**
@@ -167,34 +115,6 @@ public class Inventory {
         if (backpack == null || hasBackpackEquipped()) return;
         remove(backpack, 1);
         backpackSlot.setItem(backpack);
-        if (!equippedExtraItems.contains(backpackSlot)) {
-            equippedExtraItems.add(backpackSlot);
-        }
-        SoundService.fx.playUseSound(SoundGroup.ITEMS);
-    }
-
-    /**
-     * Applies equip book and updates the affected character or item state.
-     * @param book the {@link Book} supplied as {@code book}
-     */
-    public void equipBook(Book book) {
-        if (book == null || hasBookEquipped()) return;
-        remove(book, 1);
-        bookSlot.setItem(book);
-        if (!equippedExtraItems.contains(bookSlot)) {
-            equippedExtraItems.add(bookSlot);
-        }
-        SoundService.fx.playUseSound(SoundGroup.ITEMS);
-    }
-
-    /** Equips a wallet in the extra-item bar. */
-    public void equipWallet(Wallet wallet) {
-        if (wallet == null || hasWalletEquipped()) return;
-        remove(wallet, 1);
-        walletSlot.setItem(wallet);
-        if (!equippedExtraItems.contains(walletSlot)) {
-            equippedExtraItems.add(walletSlot);
-        }
         SoundService.fx.playUseSound(SoundGroup.ITEMS);
     }
 
@@ -204,30 +124,8 @@ public class Inventory {
     public void unequipBackpack() {
         if (!hasBackpackEquipped()) return;
         Item backpack = backpackSlot.getItem();
-        equippedExtraItems.remove(backpackSlot);
-        add(backpack, 1);
+        if (add(backpack, 1) > 0) return;
         backpackSlot.clear();
-        SoundService.fx.playUseSound(SoundGroup.ITEMS);
-    }
-
-    /**
-     * Applies unequip book and updates the affected character or item state.
-     */
-    public void unequipBook() {
-        Item book = bookSlot.getItem();
-        equippedExtraItems.remove(bookSlot);
-        add(book, 1);
-        bookSlot.clear();
-        SoundService.fx.playUseSound(SoundGroup.ITEMS);
-    }
-
-    /** Unequips the wallet and returns it to the normal inventory. */
-    public void unequipWallet() {
-        if (!hasWalletEquipped()) return;
-        Item wallet = walletSlot.getItem();
-        if (add(wallet, 1) > 0) return;
-        equippedExtraItems.remove(walletSlot);
-        walletSlot.clear();
         SoundService.fx.playUseSound(SoundGroup.ITEMS);
     }
 

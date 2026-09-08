@@ -12,7 +12,7 @@ import com.isofarm.utils.Local;
  */
 @DataClass
 public abstract class Tool implements Craftable,
-        Enchantable, Equippable {
+        Enchantable {
     private final byte id;
     private final String name;
     private final int value;
@@ -79,24 +79,6 @@ public abstract class Tool implements Craftable,
     /** {@inheritDoc} */
     @Override
     public boolean enchanting(Enchantment enchantment) {
-        return false;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public boolean equip() {
-        return false;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public boolean unequip() {
-        return false;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public boolean isEquipped() {
         return false;
     }
 

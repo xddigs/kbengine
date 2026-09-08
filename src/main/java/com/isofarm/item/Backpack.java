@@ -17,7 +17,7 @@ public class Backpack extends Usable implements Equippable,
      * Creates a new {@code Backpack} instance.
      */
     public Backpack() {
-        super(Usables.BACKPACK, Local.lang.t("item.usable.backpack"));
+        super(Usables.BACKPACK);
     }
 
     /** {@inheritDoc} */
@@ -49,8 +49,11 @@ public class Backpack extends Usable implements Equippable,
     public boolean unequip() {
         if (Player.plyr.getInventory().hasBackpackEquipped()) {
             Player.plyr.getInventory().unequipBackpack();
-            GameUIService.ui.resetHotbarPosition();
-            return true;
+            boolean unequipped = !Player.plyr.getInventory().hasBackpackEquipped();
+            if (unequipped && GameUIService.ui != null) {
+                GameUIService.ui.resetHotbarPosition();
+            }
+            return unequipped;
         }
         return false;
     }

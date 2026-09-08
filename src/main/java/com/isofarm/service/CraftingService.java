@@ -52,7 +52,7 @@ public class CraftingService {
         consume(inventory, recipe);
         give(recipe);
         SoundService.fx.playEntitySound(SoundGroup.ITEMS);
-//        ToastFactory.success(Local.lang.f("toast.crafted", recipe.result().getDisplayName()));
+//      @dead-code ToastFactory.success(Local.lang.f("toast.crafted", recipe.result().getDisplayName()));
         return true;
     }
 

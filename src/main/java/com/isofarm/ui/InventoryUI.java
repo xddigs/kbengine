@@ -1114,6 +1114,15 @@ public class InventoryUI extends UIElement {
             return;
         }
 
+        if (carriedItem == null && player != null
+                && ownsSlot(player.getBackpack(), slot)
+                && (slot.getItem() instanceof CraftingBook
+                || slot.getItem() instanceof Wallet)) {
+            ((Usable) slot.getItem()).use(GameMaster.game,
+                    Controls.isDown(ControlAction.MODIFIER));
+            return;
+        }
+
         if (carriedItem == null) {
             takeHalf(slot);
             return;

@@ -3,11 +3,9 @@ package com.isofarm.item;
 import com.isofarm.craft.Recipe;
 import com.isofarm.craft.RecipeRegistry;
 import com.isofarm.data.Inventory;
-import com.isofarm.entity.Player;
 import com.isofarm.input.ControlAction;
 import com.isofarm.input.Controls;
 import com.isofarm.service.CraftingService;
-import com.isofarm.ui.GameUIService;
 import com.isofarm.wrld.GameMaster;
 
 import java.util.Comparator;
@@ -17,8 +15,7 @@ import java.util.stream.Collectors;
 /**
  * Encapsulates the state and operations required by crafting book within the game runtime.
  */
-public class CraftingBook extends Book implements Equippable,
-        Undroppable {
+public class CraftingBook extends Book implements Undroppable {
     private static final int LINES_PER_PAGE = 16;
     private Inventory.SortOrder recipeOrder = Inventory.SortOrder.CREATIVE;
     private boolean areOnlyCraftableRecipes;
@@ -38,23 +35,10 @@ public class CraftingBook extends Book implements Equippable,
         reload();
     }
 
-    /** {@inheritDoc} */
+    /** Opens the book only while this instance is stored in the equipped backpack. */
     @Override
     public boolean use(GameMaster gameMaster, boolean isCtrlHeld) {
-        Inventory inventory = Player.plyr.getInventory();
-        if (inventory == null) return false;
-        if (isCtrlHeld) {
-            if (!inventory.hasBookEquipped()) {
-                if (this.equip()) {
-                    GameUIService.ui.resetHotbarPosition();
-                }
-            } else {
-                this.unequip();
-            }
-        } else {
-            super.use(gameMaster, isCtrlHeld);
-        }
-        return true;
+        return super.use(gameMaster, isCtrlHeld);
     }
 
     /**
@@ -110,32 +94,6 @@ public class CraftingBook extends Book implements Equippable,
         }
     }
 
-    /** {@inheritDoc} */
-    @Override
-    public boolean equip() {
-        if (!Player.plyr.getInventory().hasBookEquipped()) {
-            Player.plyr.getInventory().equipBook(this);
-            return true;
-        }
-        return false;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public boolean unequip() {
-        if (Player.plyr.getInventory().hasBookEquipped()) {
-            Player.plyr.getInventory().unequipBook();
-            return true;
-        }
-        return false;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public boolean isEquipped() {
-        return Player.plyr.getInventory().hasBookEquipped();
-    }
-
     /**
      * Sorts recipes alphabetically by their localized result name.
      */
@@ -182,11 +140,6 @@ public class CraftingBook extends Book implements Equippable,
     public void toggleFavoriteRecipes() {
         areOnlyFavoriteRecipes = !areOnlyFavoriteRecipes;
         reload();
-    }
-
-    /** Returns whether the favorite-only filter is enabled. */
-    public boolean isShowingOnlyFavoriteRecipes() {
-        return areOnlyFavoriteRecipes;
     }
 
     /**

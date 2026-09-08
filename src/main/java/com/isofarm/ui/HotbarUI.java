@@ -11,15 +11,11 @@ import com.isofarm.input.ControlAction;
 import com.isofarm.input.Controls;
 import com.isofarm.input.Mouse;
 import com.isofarm.item.Backpack;
-import com.isofarm.item.Book;
 import com.isofarm.item.Item;
-import com.isofarm.item.Wallet;
 import com.isofarm.utils.K;
 import com.isofarm.utils.Settings;
 import com.isofarm.wrld.GameMaster;
 import org.joml.Vector4f;
-
-import java.util.List;
 
 /**
  * Encapsulates the state and operations required by hotbar ui within the game runtime.
@@ -29,8 +25,6 @@ public class HotbarUI extends UIElement {
     private final Player player = Player.plyr;
     private Inventory inventory;
     private InventorySlotUI backpackSlotUI;
-    private InventorySlotUI bookSlotUI;
-    private InventorySlotUI walletSlotUI;
     private Item lastSelectedItem;
 
     private SpriteSheet seedIcons;
@@ -137,16 +131,6 @@ public class HotbarUI extends UIElement {
             width += slot;
         }
 
-        if (inventory != null && inventory.hasBookEquipped()) {
-            width += spacing * 2.0f;
-            width += slot;
-        }
-
-        if (inventory != null && inventory.hasWalletEquipped()) {
-            width += spacing * 2.0f;
-            width += slot;
-        }
-
         return width;
     }
 
@@ -166,12 +150,6 @@ public class HotbarUI extends UIElement {
     public int getMaxSelectableSlots() {
         int max = K.UI.INVENTORY_COLUMNS;
         if (inventory != null && inventory.hasBackpackEquipped()) {
-            max++;
-        }
-        if (inventory != null && inventory.hasBookEquipped()) {
-            max++;
-        }
-        if (inventory != null && inventory.hasWalletEquipped()) {
             max++;
         }
         return max;
@@ -220,14 +198,8 @@ public class HotbarUI extends UIElement {
         if (inventory == null || item == null) {
             return -1;
         }
-        List<InventorySlot> extras = inventory.getEquippedExtraItems();
-        for (int i = 0; i < extras.size(); i++) {
-            if (extras.get(i).getItem() != null && extras.get(i).getItem().equals(item)) {
-                return K.UI.INVENTORY_COLUMNS + i;
-            }
-        }
-
-        return -1;
+        return inventory.getBackpackSlot().getItem() == item
+                ? K.UI.INVENTORY_COLUMNS : -1;
     }
 
     /**
@@ -240,24 +212,8 @@ public class HotbarUI extends UIElement {
             return null;
         }
 
-        int extraIndex = index - K.UI.INVENTORY_COLUMNS;
-        List<InventorySlot> extras = inventory.getEquippedExtraItems();
-        if (extraIndex < 0 || extraIndex >= extras.size()) {
-            return null;
-        }
-
-        Item item = extras.get(extraIndex).getItem();
-        if (item instanceof Backpack) {
-            return backpackSlotUI;
-        }
-
-        if (item instanceof Book) {
-            return bookSlotUI;
-        }
-        if (item instanceof Wallet) {
-            return walletSlotUI;
-        }
-        return null;
+        return index == K.UI.INVENTORY_COLUMNS
+                && inventory.hasBackpackEquipped() ? backpackSlotUI : null;
     }
 
     /**
@@ -287,21 +243,6 @@ public class HotbarUI extends UIElement {
 
         backpackSlotUI.hide();
         addChild(backpackSlotUI);
-
-        float bookX = backpackX + Settings.getScaledSlot() + Settings.getScaledSpacing();
-
-        bookSlotUI = new InventorySlotUI(bookX, Settings.getScaledPadding(),
-                Settings.getScaledSlot(), Settings.getScaledSlot(),
-                SlotType.HOTBAR);
-
-        bookSlotUI.hide();
-        addChild(bookSlotUI);
-
-        float walletX = bookX + Settings.getScaledSlot() + Settings.getScaledSpacing();
-        walletSlotUI = new InventorySlotUI(walletX, Settings.getScaledPadding(),
-                Settings.getScaledSlot(), Settings.getScaledSlot(), SlotType.HOTBAR);
-        walletSlotUI.hide();
-        addChild(walletSlotUI);
     }
 
     /**
@@ -351,32 +292,15 @@ public class HotbarUI extends UIElement {
      */
     private void syncExtraSlots() {
         backpackSlotUI.hide();
-        bookSlotUI.hide();
-        walletSlotUI.hide();
 
         if (inventory == null) {
             return;
         }
 
-        List<InventorySlot> extras = inventory.getEquippedExtraItems();
-        for (InventorySlot extra : extras) {
-            Item item = extra.getItem();
-
-            if (item instanceof Backpack) {
-                backpackSlotUI.setSlot(inventory.getBackpackSlot());
-                updateItemSprite(backpackSlotUI);
-                backpackSlotUI.show();
-
-            } else if (item instanceof Book) {
-                bookSlotUI.setSlot(inventory.getBookSlot());
-                updateItemSprite(bookSlotUI);
-                bookSlotUI.show();
-
-            } else if (item instanceof Wallet) {
-                walletSlotUI.setSlot(inventory.getWalletSlot());
-                updateItemSprite(walletSlotUI);
-                walletSlotUI.show();
-            }
+        if (inventory.hasBackpackEquipped()) {
+            backpackSlotUI.setSlot(inventory.getBackpackSlot());
+            updateItemSprite(backpackSlotUI);
+            backpackSlotUI.show();
         }
 
         int maxSlots = getMaxSelectableSlots();
@@ -424,11 +348,6 @@ public class HotbarUI extends UIElement {
         backpackSlotUI.setSelected(false);
         backpackSlotUI.setHovered(isSlotHovered(backpackSlotUI));
 
-        bookSlotUI.setSelected(false);
-        bookSlotUI.setHovered(isSlotHovered(bookSlotUI));
-        walletSlotUI.setSelected(false);
-        walletSlotUI.setHovered(isSlotHovered(walletSlotUI));
-
         if (player == null || inventory == null) {
             return;
         }
@@ -439,24 +358,9 @@ public class HotbarUI extends UIElement {
             return;
         }
 
-        int extraIndex = selectedSlot - K.UI.INVENTORY_COLUMNS;
-
-        if (extraIndex < 0) {
-            return;
-        }
-
-        List<InventorySlot> extras = inventory.getEquippedExtraItems();
-        if (extraIndex >= extras.size()) {
-            return;
-        }
-
-        Item item = extras.get(extraIndex).getItem();
-        if (item instanceof Backpack) {
+        if (selectedSlot == K.UI.INVENTORY_COLUMNS
+                && inventory.hasBackpackEquipped()) {
             backpackSlotUI.setSelected(true);
-        } else if (item instanceof Book) {
-            bookSlotUI.setSelected(true);
-        } else if (item instanceof Wallet) {
-            walletSlotUI.setSelected(true);
         }
     }
 
@@ -475,28 +379,6 @@ public class HotbarUI extends UIElement {
                 }
                 if (backpackSlotUI.getItem() instanceof Backpack backpack) {
                     backpack.use(GameMaster.game, isCtrlHeld);
-                }
-                return;
-            }
-
-            if (bookSlotUI.isVisible() && isSlotHovered(bookSlotUI)) {
-                int index = getExtraSlotIndex(bookSlotUI.getItem());
-                if (index >= 0) {
-                    selectSlot(index);
-                }
-                if (bookSlotUI.getItem() instanceof Book book) {
-                    book.use(GameMaster.game, isCtrlHeld);
-                }
-                return;
-            }
-
-            if (walletSlotUI.isVisible() && isSlotHovered(walletSlotUI)) {
-                int index = getExtraSlotIndex(walletSlotUI.getItem());
-                if (index >= 0) {
-                    selectSlot(index);
-                }
-                if (walletSlotUI.getItem() instanceof Wallet wallet) {
-                    wallet.use(GameMaster.game, isCtrlHeld);
                 }
                 return;
             }
@@ -538,25 +420,9 @@ public class HotbarUI extends UIElement {
             return null;
         }
 
-        int extraIndex = selectedSlot - K.UI.INVENTORY_COLUMNS;
-        if (extraIndex >= 0) {
-            List<InventorySlot> extras = inventory.getEquippedExtraItems();
-            if (extraIndex >= extras.size()) {
-                return null;
-            }
-
-            Item item = extras.get(extraIndex).getItem();
-            if (item instanceof Backpack) {
-                return inventory.getBackpackSlot();
-            }
-
-            if (item instanceof Book) {
-                return inventory.getBookSlot();
-            }
-            if (item instanceof Wallet) {
-                return inventory.getWalletSlot();
-            }
-            return null;
+        if (selectedSlot == K.UI.INVENTORY_COLUMNS) {
+            return inventory.hasBackpackEquipped()
+                    ? inventory.getBackpackSlot() : null;
         }
 
         int hotbarStart = inventory.getHotbarStart();

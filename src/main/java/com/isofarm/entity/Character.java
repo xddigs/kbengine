@@ -1,6 +1,7 @@
 package com.isofarm.entity;
 
 import com.isofarm.data.*;
+import com.isofarm.item.Item;
 import com.isofarm.item.Wallet;
 import com.isofarm.utils.ToastFactory;
 
@@ -195,28 +196,36 @@ public abstract class Character extends Entity implements Levelable {
     protected void onDamageTaken(float amount) {
     }
 
-    /**
-     * Returns the wallet carried by the character, including the equipped slot.
-     * @return {@code true} if wallet; otherwise {@code false}
-     */
+    /** Returns the wallet stored in this character's equipped backpack. */
     public Wallet hasWallet() {
-        Wallet equipped = getInventory().getWallet();
-        if (equipped != null) {
-            return equipped;
+        return getFromBackpack(Wallet.class);
+    }
+
+    /**
+     * Returns the first item of the requested type stored in the equipped backpack.
+     * Items in the normal inventory or in an unequipped backpack are deliberately ignored.
+     */
+    public <T extends Item> T getFromBackpack(Class<T> type) {
+        if (type == null || getInventory() == null
+                || !getInventory().hasBackpackEquipped() || getBackpack() == null) {
+            return null;
         }
-        for (InventorySlot slot : getInventory().getSlots()) {
-            if (slot.getItem() instanceof Wallet wallet) {
-                return wallet;
-            }
-        }
-        if (getBackpack() != null) {
-            for (InventorySlot slot : getBackpack().getSlots()) {
-                if (slot.getItem() instanceof Wallet wallet) {
-                    return wallet;
-                }
+        for (InventorySlot slot : getBackpack().getSlots()) {
+            if (type.isInstance(slot.getItem())) {
+                return type.cast(slot.getItem());
             }
         }
         return null;
+    }
+
+    /** Returns whether this exact item instance is stored in the equipped backpack. */
+    public boolean isInBackpack(Item item) {
+        if (item == null || getInventory() == null
+                || !getInventory().hasBackpackEquipped() || getBackpack() == null) {
+            return false;
+        }
+        return getBackpack().getSlots().stream()
+                .anyMatch(slot -> slot.getItem() == item);
     }
 
     /**

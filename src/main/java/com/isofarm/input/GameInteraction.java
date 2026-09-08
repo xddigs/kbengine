@@ -110,18 +110,20 @@ public class GameInteraction {
             GameMaster.game.toggleInventory();
         }
 
-        if (inventory.hasBookEquipped() && Controls.isPressed(ControlAction.TOGGLE_BOOK)
-                && !GameMaster.game.isChatOpen()) {
-            CraftingBook book = inventory.getBook();
-            if (book != null) {
-                if (!BookService.bs.isOpen()) {
-                    BookService.bs.open(book);
-                } else {
-                    BookService.bs.close();
-                }
+        CraftingBook backpackBook = player.getFromBackpack(CraftingBook.class);
+        if (BookService.bs.getOpenedBook() instanceof CraftingBook openedBook
+                && openedBook != backpackBook) {
+            BookService.bs.close();
+        }
+        if (Controls.isPressed(ControlAction.TOGGLE_BOOK)
+                && !GameMaster.game.isChatOpen() && backpackBook != null) {
+            if (!BookService.bs.isOpen()) {
+                BookService.bs.open(backpackBook);
+            } else {
+                BookService.bs.close();
             }
         } else if (Controls.isPressed(ControlAction.TOGGLE_INVENTORY) && BookService.bs.isOpen() &&
-                !inventory.hasBookEquipped()) {
+                backpackBook == null) {
             BookService.bs.close();
         }
 
@@ -721,7 +723,7 @@ public class GameInteraction {
      */
     private BlockData wasBrokenInSurvival(BlockData blockData) {
         return switch (blockData) {
-            case GRASS -> BlockData.DIRT;
+            case GRASS, TILLED_DIRT -> BlockData.DIRT;
             case STONE -> BlockData.COBBLESTONE;
             default -> blockData;
         };
