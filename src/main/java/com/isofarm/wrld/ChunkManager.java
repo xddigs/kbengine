@@ -29,6 +29,7 @@ public class ChunkManager {
     private final ConcurrentLinkedQueue<MeshBuildResult> completedMeshes = new ConcurrentLinkedQueue<>();
     private final Set<Long> buildingChunks = ConcurrentHashMap.newKeySet();
     private final Set<Long> dirtyChunks = new HashSet<>();
+    private final Map<Long, Long> meshVersions = new ConcurrentHashMap<>();
 
     private int lastPlayerChunkX = Integer.MAX_VALUE;
     private int lastPlayerChunkZ = Integer.MAX_VALUE;
@@ -109,6 +110,8 @@ public class ChunkManager {
                 long key = world.get2DKey(chunk.getChunkX(), chunk.getChunkZ());
                 world.getChunks().remove(key);
                 buildingChunks.remove(key);
+                meshVersions.remove(key);
+                dirtyChunks.remove(key);
                 cleanupSoilTimersForChunk(chunk);
                 return true;
             }
@@ -160,10 +163,12 @@ public class ChunkManager {
             return;
         }
 
+        long version = meshVersions.getOrDefault(key, 0L);
+        dirtyChunks.remove(key);
         meshExecutor.submit(() -> {
             try {
                 ChunkMeshBuilder.ChunkMeshData data = ChunkMeshBuilder.buildMesh(world, chunk);
-                completedMeshes.add(new MeshBuildResult(chunk, data));
+                completedMeshes.add(new MeshBuildResult(chunk, data, version));
             } finally {
                 buildingChunks.remove(key);
             }
@@ -183,6 +188,11 @@ public class ChunkManager {
             long key = world.get2DKey(chunk.getChunkX(), chunk.getChunkZ());
 
             if (!world.getChunks().containsKey(key)) {
+                continue;
+            }
+
+            if (result.version() != meshVersions.getOrDefault(key, 0L)) {
+                if (dirtyChunks.contains(key)) queueMeshBuild(chunk);
                 continue;
             }
 
@@ -206,7 +216,6 @@ public class ChunkManager {
     public void rebuildChunkMeshAt(int worldX, int worldZ) {
         int chunkX = Math.floorDiv(worldX, Chunk.SIZE_X);
         int chunkZ = Math.floorDiv(worldZ, Chunk.SIZE_Z);
-        dirtyChunks.add(world.get2DKey(chunkX, chunkZ));
 
         updateGrassColumn(worldX, worldZ);
         rebuildSingleChunk(chunkX, chunkZ);
@@ -226,8 +235,11 @@ public class ChunkManager {
      * @param cz the {@code int} supplied as {@code cz}
      */
     private void rebuildSingleChunk(int cx, int cz) {
-        Chunk chunk = world.getChunks().get(world.get2DKey(cx, cz));
+        long key = world.get2DKey(cx, cz);
+        Chunk chunk = world.getChunks().get(key);
         if (chunk != null) {
+            meshVersions.merge(key, 1L, Long::sum);
+            dirtyChunks.add(key);
             queueMeshBuild(chunk);
         }
     }
@@ -406,6 +418,8 @@ public class ChunkManager {
         soilTimers.clear();
         completedMeshes.clear();
         buildingChunks.clear();
+        meshVersions.clear();
+        dirtyChunks.clear();
         chunkMeshes.values().forEach(ChunkMeshBuilder.ChunkRenderMesh::dispose);
         chunkMeshes.clear();
     }
@@ -439,5 +453,5 @@ public class ChunkManager {
     /**
      * Immutable value object containing mesh build result.
      */
-    private record MeshBuildResult(Chunk chunk, ChunkMeshBuilder.ChunkMeshData data) {}
+    private record MeshBuildResult(Chunk chunk, ChunkMeshBuilder.ChunkMeshData data, long version) {}
 }
