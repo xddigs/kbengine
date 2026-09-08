@@ -195,11 +195,7 @@ public class InventoryUI extends UIElement {
         sortButton.setOnClick(this::sortInventory);
         groupButton.setOnClick(this::groupInventory);
         backpackButton.setOnClick(() -> {
-            if (isBackpackOpen && !isBackpackClosing) {
-                closeBackpack();
-            } else if (!isBackpackOpen) {
-                openBackpack(GameUIService.ui.getBackpackInventoryUI());
-            }
+            if (GameMaster.game != null) GameMaster.game.setBackpackOpen(true);
         });
 
         sortButton.setTooltipText("inventory.sort");
@@ -330,19 +326,21 @@ public class InventoryUI extends UIElement {
             }
         }
 
-        if (backpackUI != null && backpackUI.isVisible()) {
-            float bpX = getX() + (getWidth() - backpackUI.getWidth()) / 2.0f;
+        if (backpackUI != null && backpackUI.isAttachedToInventory()) {
+            float bpX = getX() - backpackUI.getWidth()
+                    - Settings.getScaledSpacing() * 2.0f;
+            float bpY = getY() + (getHeight() - backpackUI.getHeight()) / 2.0f;
             if (Math.abs(backpackTargetY - backpackCurrentY) > 0.1f) {
                 backpackCurrentY += (backpackTargetY - backpackCurrentY) * Math.min(1.0f, delta * 15.0f);
             } else {
                 backpackCurrentY = backpackTargetY;
                 if (isBackpackClosing) {
-                    backpackUI.hide();
+                    backpackUI.hideAttached();
                     isBackpackOpen = false;
                     isBackpackClosing = false;
                 }
             }
-            backpackUI.setPosition(bpX, backpackCurrentY);
+            backpackUI.setPosition(bpX, bpY);
         }
     }
 
@@ -391,7 +389,8 @@ public class InventoryUI extends UIElement {
 
         if (player == null) return;
         boolean wasOpen = isVisible();
-        boolean isOpen = GameMaster.game != null && GameMaster.game.isInventoryOpen();
+        boolean isOpen = GameMaster.game != null && (this instanceof BackpackInventoryUI
+                ? GameMaster.game.isBackpackOpen() : GameMaster.game.isInventoryOpen());
 
         if (isOpen && !wasOpen) {
             show();
@@ -413,7 +412,11 @@ public class InventoryUI extends UIElement {
         closeBackpack();
 
         if (GameMaster.game != null) {
-            this.defaultX = (GameMaster.game.getWindowWidth() - getWidth()) / 2.0f;
+            float spacing = Settings.getScaledSpacing() * 2.0f;
+            float attachedBackpackWidth = backpackUI != null && backpackUI.isAttachedToInventory()
+                    ? backpackUI.getWidth() + spacing : 0.0f;
+            this.defaultX = (GameMaster.game.getWindowWidth()
+                    - getWidth() - attachedBackpackWidth) / 2.0f + attachedBackpackWidth;
             this.targetX = defaultX;
             this.defaultY = (GameMaster.game.getWindowHeight() - getHeight()) / 2.0f;
             if (externalInventory != null) {
@@ -434,7 +437,7 @@ public class InventoryUI extends UIElement {
      */
     private void onClose() {
         if (backpackUI != null) {
-            backpackUI.hide();
+            backpackUI.hideAttached();
             isBackpackOpen = false;
             isBackpackClosing = false;
         }
@@ -653,7 +656,7 @@ public class InventoryUI extends UIElement {
      */
     private void hideBackpackForCreativeInventory() {
         if (backpackUI == null) return;
-        backpackUI.hide();
+        backpackUI.hideAttached();
         isBackpackOpen = false;
         isBackpackClosing = false;
         targetY = defaultY;
@@ -742,7 +745,7 @@ public class InventoryUI extends UIElement {
      * Updates the item sprite.
      * @param slotUI the {@link InventorySlotUI} supplied as {@code slotUI}
      */
-    private void updateItemSprite(InventorySlotUI slotUI) {
+    protected void updateItemSprite(InventorySlotUI slotUI) {
         Item item = slotUI.getItem();
 
         if (item == null) {
@@ -769,7 +772,7 @@ public class InventoryUI extends UIElement {
     /**
      * Updates the slots.
      */
-    private void updateSlots() {
+    protected void updateSlots() {
         float mouseX = Mouse.getX();
         float mouseY = Mouse.getY();
 
@@ -807,7 +810,8 @@ public class InventoryUI extends UIElement {
      */
     public void slotInteract() {
         if (hotbarUI == null) return;
-        if (!GameMaster.game.isInventoryOpen()) return;
+        if (!GameMaster.game.isInventoryOpen()
+                && !(this instanceof BackpackInventoryUI && GameMaster.game.isBackpackOpen())) return;
 
         InventorySlotUI[] hotbarSlots = hotbarUI.getSlotUIs();
         InventorySlotUI[] backpackSlots = (backpackUI != null && backpackUI.isVisible()) ?
@@ -872,7 +876,7 @@ public class InventoryUI extends UIElement {
         NPC trader = getExternalTrader();
         if (trader != null) {
             if (ownsSlot(externalInventory, source)) {
-                buyFromTrader(trader, source.getItem(), source.getAmount());
+                buyFromTrader(trader, source.getItem(), source.getAmount(), source);
             } else if (isPlayerInventorySlot(source)) {
                 sellToTrader(trader, source.getItem(), source.getAmount(), source);
             }
@@ -895,7 +899,10 @@ public class InventoryUI extends UIElement {
             int playerSlot = playerInventory.getSlots().indexOf(source);
             if (playerSlot < 0) return;
 
-            if (containerInventory != null) {
+            if (isStandaloneBackpackOpen()) {
+                destination = backpackInventory;
+                destinationRanges.add(new SlotRange(0, destination.getSlots().size()));
+            } else if (containerInventory != null) {
                 destination = containerInventory;
                 destinationRanges.add(new SlotRange(0, destination.getSlots().size()));
             } else if (playerSlot >= playerInventory.getHotbarStart()) {
@@ -1046,7 +1053,7 @@ public class InventoryUI extends UIElement {
         NPC trader = getExternalTrader();
         if (trader != null) {
             if (ownsSlot(externalInventory, slot)) {
-                buyFromTrader(trader, slot.getItem(), slot.getAmount());
+                buyFromTrader(trader, slot.getItem(), slot.getAmount(), slot);
             } else if (isPlayerInventorySlot(slot)) {
                 sellToTrader(trader, slot.getItem(), slot.getAmount(), slot);
             }
@@ -1154,7 +1161,7 @@ public class InventoryUI extends UIElement {
         NPC trader = getExternalTrader();
         if (trader != null) {
             if (ownsSlot(externalInventory, slot)) {
-                buyFromTrader(trader, slot.getItem(), splitAmount);
+                buyFromTrader(trader, slot.getItem(), splitAmount, slot);
             } else if (isPlayerInventorySlot(slot)) {
                 sellToTrader(trader, slot.getItem(), splitAmount, slot);
             }
@@ -1214,6 +1221,12 @@ public class InventoryUI extends UIElement {
         return null;
     }
 
+    /** Returns whether this UI is the standalone backpack panel. */
+    private boolean isStandaloneBackpackOpen() {
+        return this instanceof BackpackInventoryUI && GameMaster.game != null
+                && GameMaster.game.isBackpackOpen();
+    }
+
     /** Returns whether a slot belongs to either of the player's visible inventories. */
     private boolean isPlayerInventorySlot(InventorySlot slot) {
         if (player == null || slot == null) return false;
@@ -1221,7 +1234,7 @@ public class InventoryUI extends UIElement {
     }
 
     /** Buys a complete or partial stack from a trader into the player's inventory. */
-    private void buyFromTrader(NPC trader, Item item, int amount) {
+    private void buyFromTrader(NPC trader, Item item, int amount, InventorySlot sourceSlot) {
         if (trader == null || player == null || item == null || amount <= 0) return;
 
         int totalPrice = item.getValue() * amount;
@@ -1231,9 +1244,21 @@ public class InventoryUI extends UIElement {
             return;
         }
 
+        Inventory destination = canFit(player.getInventory(), item, amount)
+                ? player.getInventory() : player.getBackpack();
+        InventorySlot targetSlot = findAvailableSlot(destination, item,
+                List.of(new SlotRange(0, destination.getSlots().size())));
+        InventorySlotUI sourceUI = sourceSlot == null ? null
+                : findSlotUI(trader.getStock(), sourceSlot);
         if (!trader.sell(item, amount)) return;
         player.spend(totalPrice);
         addTo(item, amount);
+        InventorySlotUI targetUI = targetSlot == null ? null
+                : findSlotUI(destination, targetSlot);
+        if (sourceUI != null && targetUI != null) {
+            quickMoveAnimations.add(new QuickMoveAnimation(item, amount,
+                    centerX(sourceUI), centerY(sourceUI), centerX(targetUI), centerY(targetUI)));
+        }
     }
 
     /** Sells a stack from a player's inventory to a trader. */
@@ -1246,6 +1271,12 @@ public class InventoryUI extends UIElement {
             return;
         }
 
+        InventorySlot targetSlot = findAvailableSlot(trader.getStock(), item,
+                List.of(new SlotRange(0, trader.getStock().getSlots().size())));
+        Inventory sourceInventory = ownsSlot(player.getBackpack(), sourceSlot)
+                ? player.getBackpack() : player.getInventory();
+        InventorySlotUI sourceUI = findSlotUI(sourceInventory, sourceSlot);
+
         int amountToSell = canAfford(trader, item, amount);
         while (amountToSell > 0 && !canFit(trader.getStock(), item, amountToSell)) {
             amountToSell--;
@@ -1254,6 +1285,12 @@ public class InventoryUI extends UIElement {
 
         sourceSlot.setAmount(sourceSlot.getAmount() - amountToSell);
         player.earn(item.getValue() * amountToSell);
+        InventorySlotUI targetUI = targetSlot == null ? null
+                : findSlotUI(trader.getStock(), targetSlot);
+        if (sourceUI != null && targetUI != null) {
+            quickMoveAnimations.add(new QuickMoveAnimation(item, amountToSell,
+                    centerX(sourceUI), centerY(sourceUI), centerX(targetUI), centerY(targetUI)));
+        }
     }
 
     /** Returns the largest quantity the trader can pay for right now. */
@@ -1440,7 +1477,7 @@ public class InventoryUI extends UIElement {
     }
 
     /** Renders the transient icons created by control-left-click transfers. */
-    private void renderQuickMoveAnimations() {
+    protected void renderQuickMoveAnimations() {
         float iconSize = Settings.getScaledIcon();
         for (QuickMoveAnimation animation : quickMoveAnimations) {
             SpriteSheet sheet = ResourceManager.getItemSpriteSheet(animation.item);
@@ -1574,6 +1611,12 @@ public class InventoryUI extends UIElement {
         this.containerBlock = null;
         this.externalInventory = externalInventory;
         this.inventory = player == null ? null : player.getInventory();
+        if (getExternalTrader() != null && this.inventory != null
+                && this.inventory.hasBackpackEquipped() && backpackUI != null) {
+            float x = getX() - backpackUI.getWidth() - Settings.getScaledSpacing() * 2.0f;
+            float y = getY() + (getHeight() - backpackUI.getHeight()) / 2.0f;
+            backpackUI.showAttached(x, y);
+        }
         GameMaster.game.setInventoryOpen(true);
     }
 
@@ -1589,6 +1632,7 @@ public class InventoryUI extends UIElement {
         }
         containerBlock = null;
         externalInventory = null;
+        if (backpackUI != null) backpackUI.hideAttached();
         syncContainerInventory();
     }
 

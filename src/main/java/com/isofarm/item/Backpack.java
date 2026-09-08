@@ -23,11 +23,9 @@ public class Backpack extends Usable implements Equippable,
     /** {@inheritDoc} */
     @Override
     public boolean use(GameMaster gameMaster,  boolean isCtrlHeld) {
-        this.equip();
-        if (!gameMaster.isChatOpen()) {
-            gameMaster.toggleInventory();
-        }
-        return false;
+        if (gameMaster == null || gameMaster.isChatOpen() || !isEquipped()) return false;
+        gameMaster.setBackpackOpen(!gameMaster.isBackpackOpen());
+        return true;
     }
 
     /** {@inheritDoc} */

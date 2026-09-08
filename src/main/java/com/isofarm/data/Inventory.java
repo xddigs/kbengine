@@ -112,10 +112,15 @@ public class Inventory {
      * @param backpack the {@link Backpack} supplied as {@code backpack}
      */
     public void equipBackpack(Backpack backpack) {
+        equipBackpack(backpack, true);
+    }
+
+    /** Equips a backpack, optionally playing the player-facing equip sound. */
+    public void equipBackpack(Backpack backpack, boolean playSound) {
         if (backpack == null || hasBackpackEquipped()) return;
         remove(backpack, 1);
         backpackSlot.setItem(backpack);
-        SoundService.fx.playUseSound(SoundGroup.ITEMS);
+        if (playSound) SoundService.fx.playUseSound(SoundGroup.ITEMS);
     }
 
     /**

@@ -144,6 +144,8 @@ public final class GameUIService implements Service<GameMaster> {
         BookUI.init(centerX, centerY, bookWidth, bookHeight);
 
         inventoryUI.setHotbarUI(hotbarUI);
+        backpackUI.setHotbarUI(hotbarUI);
+        inventoryUI.setBackpackUI(backpackUI);
         inventoryUI.setIcons(seedIcons, cropIcons, blockIcons,
                 toolIcons, materialIcons, inventoryIcons);
 
@@ -345,7 +347,7 @@ public final class GameUIService implements Service<GameMaster> {
 
         ToastFactory.update(delta);
 
-        if (!gameMaster.isInventoryOpen()) {
+        if (!gameMaster.isInventoryOpen() && !gameMaster.isBackpackOpen()) {
             float scroll = Mouse.getScrollY();
 
             if (scroll != 0) {
@@ -398,7 +400,8 @@ public final class GameUIService implements Service<GameMaster> {
 
         renderChatHistory();
 
-        if (!gameMaster.isInventoryOpen() && !BookUI.bui.isOpen()) {
+        if (!gameMaster.isInventoryOpen() && !gameMaster.isBackpackOpen()
+                && !BookUI.bui.isOpen()) {
             Frontend.drawCursor(gameMaster);
         }
 

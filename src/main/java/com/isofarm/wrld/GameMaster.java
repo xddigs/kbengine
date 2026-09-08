@@ -60,6 +60,7 @@ public class GameMaster {
 
     private boolean isChatOpen = false;
     private boolean isInventoryOpen = false;
+    private boolean isBackpackOpen = false;
     private boolean isHUDShown = true;
 
     private float genDelta;
@@ -324,6 +325,18 @@ public class GameMaster {
      */
     public void setInventoryOpen(boolean isInventoryOpen) {
         this.isInventoryOpen = isInventoryOpen;
+        if (isInventoryOpen) isBackpackOpen = false;
+    }
+
+    /** Returns whether the standalone backpack panel is open. */
+    public boolean isBackpackOpen() {
+        return isBackpackOpen;
+    }
+
+    /** Opens or closes the standalone backpack panel. */
+    public void setBackpackOpen(boolean isBackpackOpen) {
+        this.isBackpackOpen = isBackpackOpen;
+        if (isBackpackOpen) isInventoryOpen = false;
     }
 
     /**

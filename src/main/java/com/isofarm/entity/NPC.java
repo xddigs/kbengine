@@ -67,7 +67,7 @@ public class NPC extends Character {
         setSpeed(WALK_SPEED);
         chooseIdleDuration();
         if (job == Job.TRADER) {
-            getInventory().equipBackpack(new Backpack());
+            getInventory().equipBackpack(new Backpack(), false);
             getBackpack().add(new Wallet(), 1);
             resetShop();
         }

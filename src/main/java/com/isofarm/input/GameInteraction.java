@@ -68,7 +68,8 @@ public class GameInteraction {
         boolean isCtrlHeld = Controls.isDown(ControlAction.MODIFIER);
 
         boolean isShiftHeld = Controls.isDown(ControlAction.SMART_SHIFT);
-        isSmartShift = isShiftHeld && !GameMaster.game.isInventoryOpen();
+        isSmartShift = isShiftHeld && !GameMaster.game.isInventoryOpen()
+                && !GameMaster.game.isBackpackOpen();
 
         boolean isLeftHeld = Controls.isDown(ControlAction.PRIMARY_ACTION);
         boolean isLeftPressed = Controls.isPressed(ControlAction.PRIMARY_ACTION);
@@ -76,6 +77,7 @@ public class GameInteraction {
         boolean canInteract = player != null
                 && !player.getGamemode().isNoClip()
                 && !GameMaster.game.isInventoryOpen()
+                && !GameMaster.game.isBackpackOpen()
                 && !GameMaster.game.isChatOpen();
 
         if (Controls.isPressed(ControlAction.OPEN_CHAT)) {
@@ -107,7 +109,11 @@ public class GameInteraction {
 
         if (Controls.isPressed(ControlAction.TOGGLE_INVENTORY) && !GameMaster.game.isChatOpen() &&
                 !BookService.bs.isOpen()) {
-            GameMaster.game.toggleInventory();
+            if (GameMaster.game.isBackpackOpen()) {
+                GameMaster.game.setBackpackOpen(false);
+            } else {
+                GameMaster.game.toggleInventory();
+            }
         }
 
         CraftingBook backpackBook = player.getFromBackpack(CraftingBook.class);
@@ -159,9 +165,11 @@ public class GameInteraction {
         if (selectedItem instanceof Usable usable) {
             switch (usable) {
                 case Backpack backpack -> {
-                    if (isRightPressed && !GameMaster.game.isInventoryOpen()) {
+                    if (isRightPressed && !GameMaster.game.isInventoryOpen()
+                            && !GameMaster.game.isBackpackOpen()) {
                         if (isCtrlHeld) {
-                            backpack.unequip();
+                            if (backpack.isEquipped()) backpack.unequip();
+                            else backpack.equip();
                         } else {
                             backpack.use(gameMaster, isCtrlHeld);
                         }

@@ -161,8 +161,17 @@ public final class PlayerGameplay {
     }
 
     private void setUpInventory() {
-        if (player.getGamemode() == Gamemode.SURVIVAL)
-            for (Item item : new StartingKit().getItems()) add(item);
+        if (player.getGamemode() != Gamemode.SURVIVAL) return;
+
+        Backpack starterBackpack = null;
+        for (Item item : new StartingKit().getItems()) {
+            add(item);
+            if (item instanceof Backpack backpack) starterBackpack = backpack;
+        }
+        if (starterBackpack == null) return;
+
+        player.getBackpack().add(new CraftingBook(), 1);
+        player.getBackpack().add(new Wallet(), 1);
     }
 
     private void checkDurability() {
