@@ -360,7 +360,7 @@ public class NPC extends Character {
     public void add(Item item, int amount) {
         if (item == null || amount <= 0) return;
         getInventory().add(item, amount);
-        log.info("Added x{} of {} to {}'s stock", amount, item.getName(), getOwner());
+        log.trace("Added x{} of {} to {}'s stock", amount, item.getName(), getOwner());
     }
 
     /** Processes this trader selling an item to the player. */

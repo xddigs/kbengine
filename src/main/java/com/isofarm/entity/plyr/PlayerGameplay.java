@@ -210,12 +210,12 @@ public final class PlayerGameplay {
      * @param item the {@link Item} supplied as {@code item}
      * @param amount the {@code int} argument; quantity
      */
-    public void add(Item item, int amount) { player.getInventory().add(item, amount); log.info("Added x{} of {} to inventory", amount, item.getName()); }
+    public void add(Item item, int amount) { player.getInventory().add(item, amount); log.trace("Added x{} of {} to inventory", amount, item.getName()); }
     /**
      * Adds the supplied element to the corresponding collection or processing queue.
      * @param item the {@link Item} supplied as {@code item}
      */
-    public void add(Item item) { add(item, 1); log.info("Added x1 of {} to inventory", item.getName()); }
+    public void add(Item item) { add(item, 1); log.trace("Added x1 of {} to inventory", item.getName()); }
     /**
      * Adds to backpack to the corresponding collection or processing queue.
      * @param item the {@link Item} supplied as {@code item}
@@ -226,7 +226,7 @@ public final class PlayerGameplay {
      * Adds to backpack to the corresponding collection or processing queue.
      * @param item the {@link Item} supplied as {@code item}
      */
-    public void addToBackpack(Item item) { addToBackpack(item, 1); log.info("Added x1 of {} to backpack", item.getName()); }
+    public void addToBackpack(Item item) { addToBackpack(item, 1); log.trace("Added x1 of {} to backpack", item.getName()); }
     /**
      * Removes from backpack and updates any dependent state.
      * @param item the {@link Item} supplied as {@code item}

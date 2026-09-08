@@ -30,7 +30,6 @@ public final class CharacterAnimator {
     private static final float DEATH_FALL_DURATION = 0.75f;
     private static final float DEATH_FADE_DURATION = 0.75f;
     private final Character character;
-    private final EquipmentController equipmentController = new EquipmentController();
     private final Matrix4f modelMatrix = new Matrix4f();
     private GLTFNode head, torso, backpack, rightArm, leftArm, rightLeg, leftLeg;
     private Quaternionf baseHeadRotation;
@@ -59,7 +58,10 @@ public final class CharacterAnimator {
         leftArm = node(model, "Left Arm");
         rightLeg = node(model, "Right Leg");
         leftLeg = node(model, "Left Leg");
-        equipmentController.init(model);
+
+        if (character instanceof Player) {
+            EquipmentController.eq.init(model);
+        }
 
         if (head != null) {
             headPosition = copy(head);
@@ -149,7 +151,11 @@ public final class CharacterAnimator {
         rotate(rightArm, new Quaternionf().rotateX(swing + breath - armBend + attackX).rotateY(attackY).rotateZ(sway + attackZ));
         rotate(rightLeg, new Quaternionf().rotateX(-swing)); rotate(leftLeg, new Quaternionf().rotateX(swing));
         updateHead(delta);
-        if (model != null) model.updateTransforms();
+
+        if (model != null) {
+            model.updateTransforms();
+        }
+
         updateEquipment();
     }
 
@@ -187,9 +193,7 @@ public final class CharacterAnimator {
                 .rotateZ((float) Math.toRadians(32.0f) * loosen));
         rotate(leftLeg, new Quaternionf().rotateX((float) Math.toRadians(18.0f) * loosen));
         rotate(rightLeg, new Quaternionf().rotateX((float) Math.toRadians(-12.0f) * loosen));
-
         if (model != null) model.updateTransforms();
-        equipmentController.equip();
     }
 
     private static void translate(GLTFNode node, Vector3f base, float x, float y, float z) {
@@ -293,10 +297,8 @@ public final class CharacterAnimator {
      * Updates equipment based on held tool/weapon
      */
     private void updateEquipment() {
-        if (character instanceof Player) {
-            equipmentController.equip();
-            return;
-        }
+        if (!(character instanceof Player)) return;
+        EquipmentController.eq.equip();
     }
 
     /**
