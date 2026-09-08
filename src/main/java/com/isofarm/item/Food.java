@@ -3,6 +3,7 @@ package com.isofarm.item;
 import com.isofarm.data.Consumable;
 import com.isofarm.data.DataClass;
 import com.isofarm.data.FoodData;
+import com.isofarm.entity.Player;
 
 /**
  * Represents a food item, which can be consumed.
@@ -28,7 +29,13 @@ public record Food(FoodData type) implements Craftable,
      */
     @Override
     public boolean consume() {
-        return true;
+        if (Player.plyr.getHunger() < 100) {
+            Player.plyr.setHunger(Player.plyr.getHunger() + type.getFoodValue());
+            Player.plyr.remove(this, 1);
+            Player.plyr.restoreHunger(type.getFoodValue());
+            return true;
+        }
+        return false;
     }
 
     /**
