@@ -31,8 +31,8 @@ public class ResourceManager {
     private static final SpriteSheet materialIcons = new SpriteSheet(K.Paths.MATERIAL_ICONS, K.UI.ICON_MATERIAL_COLS, K.UI.ICON_MATERIAL_ROWS);
     private static final SpriteSheet usablesIcons = new SpriteSheet(K.Paths.USABLES_ICONS, K.UI.ICON_USABLES_COLS, 1);
     private static final SpriteSheet inventoryIcons = new SpriteSheet(K.Paths.INVENTORY_ICONS, K.UI.ICON_INV_COLS, 1);
-    private static final SpriteSheet bookUI = new SpriteSheet(K.Paths.BOOK_UI, 1, 1);
     private static final SpriteSheet bookAnimationSheet = new SpriteSheet(K.Paths.ANIMATED_BOOK_UI, 16, 1);
+    private static final SpriteSheet bookUI = new SpriteSheet(K.Paths.BOOK_UI, 1, 1);
     private static final SpriteSheet bookSortNameIcon = new SpriteSheet(K.Paths.BOOK_SORT_NAME, 1, 1);
     private static final SpriteSheet bookFavoriteIcon = new SpriteSheet(K.Paths.BOOK_FAVORITE, 1, 1);
     private static final SpriteSheet bookSortTypeIcon = new SpriteSheet(K.Paths.BOOK_SORT_TYPE, 1, 1);

@@ -8,14 +8,16 @@ import java.util.Locale;
  * Enumerates the supported tool type values.
  */
 public enum ToolType implements Item {
-    SWORD((byte) 0, 7, new BlockData[]{BlockData.OAK_LEAVES, BlockData.TALL_GRASS, BlockData.ROSE, BlockData.ROSEBUSH, BlockData.LILY, BlockData.GHOSTFLOWER, BlockData.RED_MUSHROOM, BlockData.BRIGHT_FLOWER, BlockData.BLUE_FLOWER, BlockData.ROSES, BlockData.TULIP, BlockData.OAK_BONSAI, BlockData.SPRUCE_LEAVES, BlockData.SPRUCE_BONSAI}, 10, 1.5f),
-    PICKAXE((byte) 1, 6, new BlockData[]{BlockData.STONE, BlockData.STONE_SLAB, BlockData.STONE_VERTICAL_SLAB, BlockData.STONE_STAIRCASE, BlockData.COBBLESTONE, BlockData.GLASS, BlockData.COPPER_ORE, BlockData.IRON_ORE, BlockData.STEEL_ORE, BlockData.GOLD_ORE, BlockData.PLATINUM_ORE, BlockData.DIAMOND_ORE, BlockData.FOSSIL, BlockData.OBSIDIAN}, 7, 2.5f),
-    AXE((byte) 2, 8, new BlockData[]{BlockData.OAK_LOG, BlockData.OAK_PLANK, BlockData.OAK_PLANK_SLAB, BlockData.OAK_PLANK_VERTICAL_SLAB, BlockData.OAK_PLANK_STAIRCASE, BlockData.OAK_PLANK_FENCE, BlockData.OAK_LEAVES, BlockData.SPRUCE_LOG, BlockData.SPRUCE_PLANK, BlockData.SPRUCE_PLANK_SLAB, BlockData.SPRUCE_PLANK_VERTICAL_SLAB, BlockData.SPRUCE_PLANK_STAIRCASE, BlockData.SPRUCE_PLANK_FENCE, BlockData.SPRUCE_LEAVES}, 10, 2.5f),
-    HOE((byte) 3, 5, new BlockData[]{BlockData.GRASS, BlockData.DIRT, BlockData.TILLED_DIRT, BlockData.OAK_LEAVES}, 8, 1.75f),
-    SHOVEL((byte) 4, 4, new BlockData[]{BlockData.GRASS, BlockData.DIRT, BlockData.TILLED_DIRT, BlockData.SNOW, BlockData.SAND, BlockData.GRAVEL}, 5, 3.0f);
+    SWORD((byte) 0, 7.0f, new BlockData[]{BlockData.OAK_LEAVES, BlockData.TALL_GRASS, BlockData.ROSE, BlockData.ROSEBUSH, BlockData.LILY, BlockData.GHOSTFLOWER, BlockData.RED_MUSHROOM, BlockData.BRIGHT_FLOWER, BlockData.BLUE_FLOWER, BlockData.ROSES, BlockData.TULIP, BlockData.OAK_BONSAI, BlockData.SPRUCE_LEAVES, BlockData.SPRUCE_BONSAI}, 10, 1.5f),
+    PICKAXE((byte) 1, 6.0f, new BlockData[]{BlockData.STONE, BlockData.STONE_SLAB, BlockData.STONE_VERTICAL_SLAB, BlockData.STONE_STAIRCASE, BlockData.COBBLESTONE, BlockData.GLASS, BlockData.COPPER_ORE, BlockData.IRON_ORE, BlockData.STEEL_ORE, BlockData.GOLD_ORE, BlockData.PLATINUM_ORE, BlockData.DIAMOND_ORE, BlockData.FOSSIL, BlockData.OBSIDIAN}, 7, 2.5f),
+    AXE((byte) 2, 8.5f, new BlockData[]{BlockData.OAK_LOG, BlockData.OAK_PLANK, BlockData.OAK_PLANK_SLAB, BlockData.OAK_PLANK_VERTICAL_SLAB, BlockData.OAK_PLANK_STAIRCASE, BlockData.OAK_PLANK_FENCE, BlockData.OAK_LEAVES, BlockData.SPRUCE_LOG, BlockData.SPRUCE_PLANK, BlockData.SPRUCE_PLANK_SLAB, BlockData.SPRUCE_PLANK_VERTICAL_SLAB, BlockData.SPRUCE_PLANK_STAIRCASE, BlockData.SPRUCE_PLANK_FENCE, BlockData.SPRUCE_LEAVES}, 10, 2.5f),
+    HOE((byte) 3, 5.0f, new BlockData[]{BlockData.GRASS, BlockData.DIRT, BlockData.TILLED_DIRT, BlockData.OAK_LEAVES}, 8, 1.75f),
+    SHOVEL((byte) 4, 4.0f, new BlockData[]{BlockData.GRASS, BlockData.DIRT, BlockData.TILLED_DIRT, BlockData.SNOW, BlockData.SAND, BlockData.GRAVEL}, 5, 3.0f),
+    SHIELD((byte) 5, 0.0f, 15.0f, BlockData.all(), 250, 0.0f);
 
     private final byte id;
     private final float baseDamage;
+    private final float baseDefense;
     private final BlockData[] usableOn;
     private final int baseDurability;
     private final float destroySpeed;
@@ -32,6 +34,26 @@ public enum ToolType implements Item {
              int baseDurability, float destroySpeed) {
         this.id = id;
         this.baseDamage = baseDamage;
+        this.usableOn = usableOn;
+        this.baseDurability = baseDurability;
+        this.destroySpeed = destroySpeed;
+        this.baseDefense = 0.0f;
+    }
+
+    /**
+     * Creates a new {@code ToolType} instance. A defense type.
+     * @param id the {@code byte} supplied as {@code id}
+     * @param baseDamage the {@code float} supplied as {@code baseDamage}
+     * @param baseDefense the {@code float} supplied as {@code baseDefense}
+     * @param usableOn an array of {@link BlockData} values supplied as {@code usableOn}
+     * @param baseDurability the {@code int} supplied as {@code baseDurability}
+     * @param destroySpeed multiplier applied while breaking compatible blocks
+     */
+    ToolType(byte id, float baseDamage, float baseDefense, BlockData[] usableOn,
+             int baseDurability, float destroySpeed) {
+        this.id = id;
+        this.baseDamage = baseDamage;
+        this.baseDefense = baseDefense;
         this.usableOn = usableOn;
         this.baseDurability = baseDurability;
         this.destroySpeed = destroySpeed;
@@ -93,6 +115,14 @@ public enum ToolType implements Item {
      */
     public float getBaseDamage() {
         return baseDamage;
+    }
+
+    /**
+     * Returns the {@code baseDefense} value
+     * @return {@link float} value of baseDefense
+     */
+    public float getBaseDefense() {
+        return baseDefense;
     }
 
     /**
