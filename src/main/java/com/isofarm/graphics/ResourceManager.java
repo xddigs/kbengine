@@ -26,6 +26,8 @@ public class ResourceManager {
     private static final SpriteSheet cropIcons = new SpriteSheet(K.Paths.CROP_ICONS, K.UI.ICON_SEED_CROPS_COLS, 1);
     private static final SpriteSheet foodIcons = new SpriteSheet(K.Paths.FOOD_ICONS, K.UI.ICON_FOOD_COLS, 1);
     private static final SpriteSheet toolIcons = new SpriteSheet(K.Paths.TOOL_ICONS, K.UI.ICON_TOOL_COLS, K.UI.ICON_TOOL_ROWS);
+    private static final SpriteSheet shieldBack = new SpriteSheet(
+            K.Paths.SHIELD_BACK, 1, K.UI.ICON_TOOL_ROWS);
     private static final SpriteSheet blockIcons = new SpriteSheet(K.Paths.BLOCK_ICONS, K.UI.ICON_BLOCK_COLS, K.UI.ICON_BLOCK_ROWS);
     private static final SpriteSheet torchIcons = new SpriteSheet(K.Paths.TORCH_ICONS, K.UI.TORCH_COLS, 1);
     private static final SpriteSheet materialIcons = new SpriteSheet(K.Paths.MATERIAL_ICONS, K.UI.ICON_MATERIAL_COLS, K.UI.ICON_MATERIAL_ROWS);
@@ -261,6 +263,7 @@ public class ResourceManager {
         seedIcons.dispose();
         foodIcons.dispose();
         toolIcons.dispose();
+        shieldBack.dispose();
         blockIcons.dispose();
         torchIcons.dispose();
         materialIcons.dispose();
@@ -526,6 +529,11 @@ public class ResourceManager {
      */
     public SpriteSheet getTorchIcons() {
         return torchIcons;
+    }
+
+    /** Returns the texture used by the inner face of equipped shields. */
+    public SpriteSheet getShieldBack() {
+        return shieldBack;
     }
 
     /**

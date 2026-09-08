@@ -172,6 +172,7 @@ public final class K {
         public static final String CROP_ICONS = "assets/sprites/crops.png";
         public static final String FOOD_ICONS = "assets/sprites/food.png";
         public static final String TOOL_ICONS = "assets/sprites/tools.png";
+        public static final String SHIELD_BACK = "assets/sprites/shield_back.png";
         public static final String BLOCK_ICONS = "assets/sprites/blocks.png";
         public static final String TORCH_ICONS = "assets/sprites/torch.png";
         public static final String MATERIAL_ICONS = "assets/sprites/materials.png";

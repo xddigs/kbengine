@@ -32,15 +32,16 @@ public class EquipmentController {
     private static final float ITEM_Z = -0.15f;
 
     private static final float SHIELD_SCALE = 0.52f;
-    private static final float SHIELD_X = 0.0f;
+    private static final float SHIELD_X = -0.08f;
     private static final float SHIELD_Y = -0.29f;
-    private static final float SHIELD_Z = -0.11f;
+    private static final float SHIELD_Z = 0.0f;
+    private static final float SHIELD_ARM_ROTATION = (float) Math.toRadians(-90.0f);
     private static final float SHIELD_RAISE_ANGLE = (float) Math.toRadians(70.0f);
 
     private GLTFNode currentActiveNode = null;
     private GLTFNode shieldNode = null;
     private DynamicEquipmentMesh equipmentMesh;
-    private DynamicEquipmentMesh shieldMesh;
+    private DynamicShieldMesh shieldMesh;
 
     /** Returns the singleton instance of {@code EquipmentController}. */
     private EquipmentController() {}
@@ -97,11 +98,12 @@ public class EquipmentController {
         if (leftArm == null) throw new NullPointerException("Left arm node not found");
 
         int shieldMeshIndex = playerModel.getMeshes().size();
-        shieldMesh = new DynamicEquipmentMesh();
+        shieldMesh = new DynamicShieldMesh(ResourceManager.rem.getShieldBack());
         playerModel.addMesh(shieldMesh);
         shieldNode = new GLTFNode("equipped_shield_root", shieldMeshIndex,
                 new Vector3f(SHIELD_X, SHIELD_Y, SHIELD_Z),
-                new Quaternionf(), new Vector3f(SHIELD_SCALE));
+                new Quaternionf().rotateY(SHIELD_ARM_ROTATION),
+                new Vector3f(SHIELD_SCALE));
         shieldNode.setVisible(false);
         leftArm.addChild(shieldNode);
     }
@@ -174,7 +176,7 @@ public class EquipmentController {
         int frame = Math.clamp(ResourceManager.getItemFrame(shield),
                 0, sheet.getTotalFrames() - 1);
         Vector4f uvBounds = sheet.getUVBounds(frame);
-        shieldMesh.update(sheet, frame, uvBounds);
+        shieldMesh.update(sheet, frame, uvBounds, shield.getRow());
         shieldNode.setTextureOverride(sheet.getTextureId(), uvBounds);
         shieldNode.setVisible(true);
     }
@@ -184,7 +186,9 @@ public class EquipmentController {
         if (shieldNode == null) return;
         float clamped = Math.clamp(weight, 0.0f, 1.0f);
         shieldNode.setTranslation(new Vector3f(SHIELD_X, SHIELD_Y, SHIELD_Z));
-        shieldNode.setRotation(new Quaternionf().rotateX(-SHIELD_RAISE_ANGLE * clamped));
+        shieldNode.setRotation(new Quaternionf()
+                .rotateY(SHIELD_ARM_ROTATION)
+                .rotateX(-SHIELD_RAISE_ANGLE * clamped));
         shieldNode.setScale(new Vector3f(SHIELD_SCALE));
     }
 
@@ -331,6 +335,71 @@ public class EquipmentController {
         @Override
         public void dispose() {
             mesh.dispose();
+        }
+    }
+
+    /** Draws the tier-specific outer face and a separate textured inner face. */
+    private static final class DynamicShieldMesh extends GLTFModel.GLTFMesh {
+        private static final float BACK_FACE_OFFSET = 0.0005f;
+        private final SpriteSheet backSheet;
+        private final Mesh backMesh;
+        private Mesh mesh = Mesh.createCenteredQuad();
+        private int textureId = -1;
+        private int frame = -1;
+        private int backFrame;
+
+        private DynamicShieldMesh(SpriteSheet backSheet) {
+            super(0, 0, 0, 0, 0);
+            this.backSheet = backSheet;
+            this.backMesh = createShieldBackMesh();
+        }
+
+        private void update(SpriteSheet sheet, int selectedFrame, Vector4f uvBounds,
+                            int selectedBackFrame) {
+            backFrame = Math.clamp(selectedBackFrame, 0, backSheet.getTotalFrames() - 1);
+            if (textureId == sheet.getTextureId() && frame == selectedFrame) return;
+            Mesh replacement = createItemMesh(sheet, uvBounds);
+            mesh.dispose();
+            mesh = replacement;
+            textureId = sheet.getTextureId();
+            frame = selectedFrame;
+        }
+
+        @Override
+        public void render(Shader shader, int renderTextureId, Vector4f uvBounds) {
+            renderMesh(shader, mesh, renderTextureId, uvBounds);
+            renderMesh(shader, backMesh, backSheet.getTextureId(),
+                    backSheet.getUVBounds(backFrame));
+        }
+
+        private static void renderMesh(Shader shader, Mesh mesh, int textureId,
+                                       Vector4f uvBounds) {
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, textureId);
+            shader.setUniform("uTexture", 0);
+            shader.setUniform("uUseTexture", true);
+            shader.setUniform("uUVBounds", uvBounds);
+            mesh.render();
+        }
+
+        @Override
+        public void dispose() {
+            mesh.dispose();
+            backMesh.dispose();
+        }
+
+        private static Mesh createShieldBackMesh() {
+            float depth = THICKNESS_LAYERS * LAYER_DEPTH * 0.5f + BACK_FACE_OFFSET;
+            MeshBuilder builder = new MeshBuilder(1);
+            builder.face(new float[]{
+                            -0.5f, -0.5f, depth,
+                            0.5f, -0.5f, depth,
+                            0.5f, 0.5f, depth,
+                            -0.5f, 0.5f, depth},
+                    0.0f, 0.0f, 1.0f,
+                    new float[]{0.0f, 1.0f, 1.0f, 1.0f,
+                            1.0f, 0.0f, 0.0f, 0.0f});
+            return builder.build();
         }
     }
 
