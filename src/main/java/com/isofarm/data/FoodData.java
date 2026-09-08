@@ -12,7 +12,7 @@ import java.util.function.Consumer;
 public enum FoodData {
     BREAD((byte) 0, (byte) 0, (byte) 0, 4.0f, 25),
     CARROT_CAKE((byte) 1, (byte) 1, (byte) 0, 6.0f, 25),
-    FRIES((byte) 2, (byte) 0, (byte) 2, 5.0f, 25),
+    FRIES((byte) 2, (byte) 2, (byte) 0, 5.0f, 25),
     POTATO_CAKE((byte) 3, (byte) 3, (byte) 0, 6.0f, 25);
 
     private final byte id;

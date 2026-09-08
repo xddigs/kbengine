@@ -28,6 +28,11 @@ import static org.joml.Math.lerp;
 @SuppressWarnings("all")
 @GodObject
 public class InventoryUI extends UIElement {
+    private enum CreativeTab {
+        ALL,
+        FOOD
+    }
+
     private static final int BACKPACK_COLUMNS = 4;
     private static final int BACKPACK_ROWS = 4;
     private static final int GUI_SLICE_SIZE = 3;
@@ -50,6 +55,7 @@ public class InventoryUI extends UIElement {
     private UIButton groupButton;
     private UIButton backpackButton;
     private UIButton inventoryModeButton;
+    private UIButton foodTabButton;
     private Inventory inventory;
     private iBlock containerBlock;
     private Inventory externalInventory;
@@ -65,6 +71,7 @@ public class InventoryUI extends UIElement {
     private int carriedAmount;
     private boolean isGodmode;
     private boolean isCreativeInventoryVisible;
+    private CreativeTab creativeTab = CreativeTab.ALL;
 
     private float defaultX;
     private float targetX;
@@ -211,6 +218,7 @@ public class InventoryUI extends UIElement {
         addChild(groupButton);
         addChild(backpackButton);
         createInventoryModeButton();
+        createFoodTabButton();
 
     }
 
@@ -230,6 +238,40 @@ public class InventoryUI extends UIElement {
         inventoryModeButton.hide();
         buttons.add(inventoryModeButton);
         addChild(inventoryModeButton);
+    }
+
+    /** Creates the food-category tab used by the creative catalog. */
+    private void createFoodTabButton() {
+        float size = Settings.getScaledSlot();
+        float spacing = Settings.getScaledSpacing();
+        foodTabButton = new UIButton(-size - spacing,
+                Settings.getScaledHeader(), size, size)
+                .setOnClick(this::toggleFoodTab);
+        Food bread = new Food(FoodData.BREAD);
+        foodTabButton.setSpriteSheet(ResourceManager.getItemSpriteSheet(bread));
+        foodTabButton.setSpriteColumn(ResourceManager.getItemFrame(bread));
+        foodTabButton.setTooltipText("inventory.food");
+        foodTabButton.setZIndex(1);
+        foodTabButton.hide();
+        buttons.add(foodTabButton);
+        addChild(foodTabButton);
+    }
+
+    /** Alternates the creative catalog between every item and edible items. */
+    private void toggleFoodTab() {
+        if (!isGodmode || !isCreativeInventoryVisible) return;
+        creativeTab = creativeTab == CreativeTab.FOOD
+                ? CreativeTab.ALL : CreativeTab.FOOD;
+        buildCreativeCatalog();
+        syncCreativeInventory();
+        updateFoodTabAppearance();
+    }
+
+    private void updateFoodTabAppearance() {
+        boolean selected = creativeTab == CreativeTab.FOOD;
+        foodTabButton.setNormalColor(selected ? 0.55f : 1.0f,
+                selected ? 0.55f : 1.0f,
+                selected ? 0.55f : 1.0f, 1.0f);
     }
 
     /**
@@ -625,6 +667,7 @@ public class InventoryUI extends UIElement {
     private void updateInventoryViewControls() {
         if (!isGodmode) {
             inventoryModeButton.hide();
+            foodTabButton.hide();
             creativeScrollBar.hide();
             sortButton.show();
             groupButton.show();
@@ -641,11 +684,14 @@ public class InventoryUI extends UIElement {
                 ResourceManager.getItemFrame(destination));
 
         if (isCreativeInventoryVisible) {
+            foodTabButton.show();
+            updateFoodTabAppearance();
             sortButton.hide();
             groupButton.hide();
             backpackButton.hide();
             creativeScrollBar.show();
         } else {
+            foodTabButton.hide();
             creativeScrollBar.hide();
             sortButton.show();
             groupButton.show();
@@ -674,15 +720,19 @@ public class InventoryUI extends UIElement {
 
         for (String id : GameMaster.game.getItemRegistry().getIds()) {
             Item item = GameMaster.game.getItemRegistry().create(id);
-            if (isSupportedCreativeItem(item)) creativeItems.add(item);
+            if (isSupportedCreativeItem(item) && isInSelectedCreativeTab(item)) {
+                creativeItems.add(item);
+            }
         }
 
-        creativeItems.removeIf(MiningComponent.class::isInstance);
-        Tier.forEach(tier -> {
-            if (tier.isInvalidTier()) return;
-            creativeItems.add(new MiningComponent(tier, MaterialID.RAW_ORE));
-            creativeItems.add(new MiningComponent(tier, MaterialID.INGOT));
-        });
+        if (creativeTab == CreativeTab.ALL) {
+            creativeItems.removeIf(MiningComponent.class::isInstance);
+            Tier.forEach(tier -> {
+                if (tier.isInvalidTier()) return;
+                creativeItems.add(new MiningComponent(tier, MaterialID.RAW_ORE));
+                creativeItems.add(new MiningComponent(tier, MaterialID.INGOT));
+            });
+        }
 
         creativeItems.sort(Inventory.sorter());
         int totalRows = Math.ceilDiv(creativeItems.size(), K.UI.INVENTORY_COLUMNS);
@@ -702,7 +752,9 @@ public class InventoryUI extends UIElement {
                 || item instanceof Tool
                 || item instanceof Usable
                 || item instanceof Material
-                || item instanceof iBlock;
+                || item instanceof iBlock
+                || item instanceof Food
+                || item instanceof Produce;
         if (!supportedCategory || ResourceManager.getItemSpriteSheet(item) == null
                 || ResourceManager.getItemFrame(item) < 0) {
             return false;
@@ -711,6 +763,12 @@ public class InventoryUI extends UIElement {
         return displayName != null && !displayName.isBlank()
                 && !displayName.equals("block." + item.getName())
                 && !displayName.startsWith("item.");
+    }
+
+    private boolean isInSelectedCreativeTab(Item item) {
+        if (creativeTab == CreativeTab.ALL) return true;
+        return item instanceof Food
+                || item instanceof Produce produce && produce.getFoodValue() > 0.0f;
     }
 
     /**

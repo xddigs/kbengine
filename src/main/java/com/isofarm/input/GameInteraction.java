@@ -73,7 +73,6 @@ public class GameInteraction {
         boolean isLeftHeld = Controls.isDown(ControlAction.PRIMARY_ACTION);
         boolean isLeftPressed = Controls.isPressed(ControlAction.PRIMARY_ACTION);
         boolean isRightPressed = Controls.isPressed(ControlAction.SECONDARY_ACTION);
-        boolean isRightHeld = Controls.isDown(ControlAction.SECONDARY_ACTION);
         boolean canInteract = player != null
                 && !player.getGamemode().isNoClip()
                 && !GameMaster.game.isInventoryOpen()
@@ -203,8 +202,9 @@ public class GameInteraction {
         }
 
         if (selectedItem instanceof Consumable consumable) {
-            if (isRightHeld && !GameMaster.game.isInventoryOpen()) {
-                consumable.consume();
+            if (isRightPressed && canInteract && consumable.consume()) {
+                if (!player.isAttacking()) player.interact();
+                isRightPressed = false;
             }
         }
 

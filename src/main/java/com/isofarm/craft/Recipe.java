@@ -1,6 +1,7 @@
 package com.isofarm.craft;
 
 import com.isofarm.data.MaterialID;
+import com.isofarm.data.Produce;
 import com.isofarm.item.*;
 
 import java.util.List;
@@ -127,6 +128,9 @@ public final class Recipe {
             case MiningComponent mc1 when b instanceof MiningComponent mc2 -> mc1.getTier() == mc2.getTier()
                     && mc1.getId() == mc2.getId();
             case Block blk1 when b instanceof Block blk2 -> blk1.getType() == blk2.getType();
+            case Food food1 -> b instanceof Food food2 && food1.type() == food2.type();
+            case Produce produce1 -> b instanceof Produce produce2
+                    && produce1.getType() == produce2.getType();
             case Material mat1 when b instanceof Material mat2 -> mat1.getId() == mat2.getId();
             default -> a.getId() == b.getId();
         };

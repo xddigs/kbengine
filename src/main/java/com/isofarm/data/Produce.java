@@ -68,12 +68,14 @@ public class Produce implements Craftable, Consumable {
         return value;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
-    public boolean consume() {
-        return !type.equals(CropType.WHEAT);
+    public float getFoodValue() {
+        return switch (type) {
+            case CARROT, BEETROOT -> 2.0f;
+            case POTATO, SUGAR_CANE_CROP -> 1.0f;
+            case WHEAT -> 0.0f;
+        };
     }
 
     /**

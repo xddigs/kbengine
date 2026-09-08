@@ -362,7 +362,9 @@ public class Inventory {
             case Tool ignored -> 2;
             case Usable ignored -> 3;
             case Material ignored -> 4;
-            case null, default -> 5;
+            case Food ignored -> 5;
+            case Produce ignored -> 5;
+            case null, default -> 6;
         };
     }
 

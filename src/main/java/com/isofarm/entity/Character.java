@@ -141,7 +141,6 @@ public abstract class Character extends Entity implements Levelable {
             int levelUpScaling = (int) (level * 0.8f);
             scale(levelUpScaling);
             maxHitpoints += 1;
-            maxHunger += 1;
             experienceForNextLevel = calcNextLevel();
         }
     }
@@ -409,7 +408,7 @@ public abstract class Character extends Entity implements Levelable {
      * @return {@code float}; the max hunger
      */
     public float getMaxHunger() {
-        return maxHunger * level;
+        return maxHunger;
     }
 
     /**
