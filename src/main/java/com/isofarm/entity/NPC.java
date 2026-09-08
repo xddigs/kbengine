@@ -26,12 +26,16 @@ import java.util.concurrent.ThreadLocalRandom;
 @DataClass
 public class NPC extends Character {
     private static final Logger log = LoggerFactory.getLogger(NPC.class);
-    private static final float WALK_SPEED = 1.25f;
+    private static final float WALK_SPEED = 1.5f;
     private static final float MIN_IDLE_TIME = 2.0f;
     private static final float IDLE_TIME_VARIATION = 4.0f;
     private static final float WANDER_RADIUS = 5.0f;
     private static final float KNOCKBACK_DAMPING = 12.0f;
     private static final float DEFAULT_KNOCKBACK_TIMER = 0.25f;
+    private static final float HEIGHT = 1.0f;
+    private static final float WIDTH = 0.25f;
+    private static final int MAX_HITPOINTS = 20;
+    private static final int MAX_HUNGER = 20;
     private final CharacterAnimator animator = new CharacterAnimator(this);
     private final NPCGender gender;
     private final Job job;
@@ -57,15 +61,16 @@ public class NPC extends Character {
         this.job = job;
         this.npcModel = GLTFLoader.load(job.getModelPath());
         animator.initialize(npcModel);
-        setDimensions(0.6f, 1.8f, 0.6f);
-        setMaxHitpoints(20);
-        setHitpoints(20);
-        setMaxHunger(100);
-        setHunger(100);
+        setDimensions(WIDTH, HEIGHT, WIDTH);
+        setMaxHitpoints(MAX_HITPOINTS);
+        setHitpoints(MAX_HITPOINTS);
+        setMaxHunger(MAX_HUNGER);
+        setHunger(MAX_HUNGER);
         setReputation(Reputation.FRIENDLY);
         setGamemode(Gamemode.SURVIVAL);
         setSpeed(WALK_SPEED);
         chooseIdleDuration();
+
         if (job == Job.TRADER) {
             getInventory().equipBackpack(new Backpack(), false);
             getBackpack().add(new Wallet(), 1);
@@ -78,7 +83,7 @@ public class NPC extends Character {
      * @param gender the voice and localized gender of the character
      */
     public NPC(NPCGender gender) {
-        this(gender, Job.FARMER);
+        this(gender, Job.TRADER);
     }
 
     /** Creates a female farmer NPC. */

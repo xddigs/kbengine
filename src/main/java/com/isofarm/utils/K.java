@@ -178,7 +178,7 @@ public final class K {
         public static final String USABLES_ICONS = "assets/sprites/usables.png";
         public static final String INVENTORY_ICONS = "assets/sprites/inventory.png";
 
-        public static final String PLAYER_MODEL = "assets/models/player/steve.gltf";
+        public static final String PLAYER_MODEL = "assets/models/player/player.gltf";
 
         public static final String DESTROY_STAGES = "assets/textures/blocks/destroy.png";
         public static final String HEARTS_SPRITESHEET = "assets/ui/hearts.png";

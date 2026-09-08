@@ -24,6 +24,7 @@ import static org.lwjgl.opengl.GL13.*;
  */
 public final class CharacterAnimator {
     private static final float ZERO = 0.0f, MOVE_THRESHOLD = 0.05f;
+    private static final float ANIMATION_SCALE = 0.5f;
     private static final float ROTATION_SPEED = 720.0f, FULL_DEGREES = 360.0f, HALF_DEGREES = 180.0f;
     private static final float MAX_HEAD_YAW = (float) Math.toRadians(65), MAX_HEAD_PITCH = (float) Math.toRadians(35);
     private static final float HEAD_SPEED = 12.0f;
@@ -54,10 +55,10 @@ public final class CharacterAnimator {
         head = node(model, "Head");
         torso = node(model, "Body");
         backpack = node(model, "Backpack");
-        rightArm = node(model, "Right Arm");
-        leftArm = node(model, "Left Arm");
-        rightLeg = node(model, "Right Leg");
-        leftLeg = node(model, "Left Leg");
+        rightArm = node(model, "RightArm");
+        leftArm = node(model, "LeftArm");
+        rightLeg = node(model, "RightLeg");
+        leftLeg = node(model, "LeftLeg");
 
         if (character instanceof Player) {
             EquipmentController.eq.init(model);
@@ -127,8 +128,10 @@ public final class CharacterAnimator {
         float swing = (float) Math.sin(walkTime) * lerp(.45f, .25f, sneakWeight) * walkWeight;
         float breath = (float) Math.sin(idleTime) * .05f * idleWeight * (1 - sneakWeight * .5f);
         float sway = (float) Math.cos(idleTime * .5f) * .02f * idleWeight;
-        float offset = .08f * sneakWeight, lean = (float) Math.toRadians(20) * sneakWeight;
-        float armBend = (float) Math.toRadians(15) * sneakWeight;
+        float offset = .05f * ANIMATION_SCALE * sneakWeight;
+        float lean = (float) Math.toRadians(8) * sneakWeight;
+        float armBend = (float) Math.toRadians(6) * sneakWeight;
+        float legOffset = .10f * ANIMATION_SCALE * sneakWeight;
         float attackX = 0, attackY = 0, attackZ = 0;
 
         if (attacking) {
@@ -140,11 +143,13 @@ public final class CharacterAnimator {
             if (attackTime >= Math.PI) { attacking = false; attackTime = 0; }
         }
 
-        translate(head, headPosition, 0, -offset, 0); translate(torso, torsoPosition, 0, -offset, 0);
-        translate(backpack, backpackPosition, 0, offset, 0); translate(rightArm, rightArmPosition, 0, -offset, 0);
+        translate(head, headPosition, 0, -offset, 0);
+        translate(torso, torsoPosition, 0, -offset, 0);
+        translate(backpack, backpackPosition, 0, offset, 0);
+        translate(rightArm, rightArmPosition, 0, -offset, 0);
         translate(leftArm, leftArmPosition, 0, -offset, 0);
-        translate(rightLeg, rightLegPosition, 0, 0, .18f * sneakWeight);
-        translate(leftLeg, leftLegPosition, 0, 0, .18f * sneakWeight);
+        translate(rightLeg, rightLegPosition, 0, 0, legOffset);
+        translate(leftLeg, leftLegPosition, 0, 0, legOffset);
         rotate(torso, new Quaternionf().rotateX(-lean + breath));
         rotate(backpack, new Quaternionf().rotateX(-lean + breath));
         rotate(leftArm, new Quaternionf().rotateX(-swing + breath - armBend).rotateZ(-sway));
@@ -173,11 +178,11 @@ public final class CharacterAnimator {
         attackTime = 0.0f;
 
         float loosen = deathWeight;
-        translate(head, headPosition, 0.0f, -0.08f * loosen, 0.0f);
-        translate(torso, torsoPosition, 0.0f, -0.04f * loosen, 0.0f);
-        translate(backpack, backpackPosition, 0.0f, 0.04f * loosen, 0.0f);
-        translate(rightArm, rightArmPosition, 0.0f, -0.05f * loosen, 0.0f);
-        translate(leftArm, leftArmPosition, 0.0f, -0.05f * loosen, 0.0f);
+        translate(head, headPosition, 0.0f, -0.08f * ANIMATION_SCALE * loosen, 0.0f);
+        translate(torso, torsoPosition, 0.0f, -0.04f * ANIMATION_SCALE * loosen, 0.0f);
+        translate(backpack, backpackPosition, 0.0f, 0.04f * ANIMATION_SCALE * loosen, 0.0f);
+        translate(rightArm, rightArmPosition, 0.0f, -0.05f * ANIMATION_SCALE * loosen, 0.0f);
+        translate(leftArm, leftArmPosition, 0.0f, -0.05f * ANIMATION_SCALE * loosen, 0.0f);
         translate(rightLeg, rightLegPosition, 0.0f, 0.0f, 0.0f);
         translate(leftLeg, leftLegPosition, 0.0f, 0.0f, 0.0f);
 
@@ -196,16 +201,37 @@ public final class CharacterAnimator {
         if (model != null) model.updateTransforms();
     }
 
+    /**
+     * Translates a node by the specified amount
+     * @param node the {@link GLTFNode} argument; the node to translate
+     * @param base the {@link Vector3f} argument; the base position to translate from
+     * @param x the {@code float} argument; the amount to translate in the x-axis
+     * @param y the {@code float} argument; the amount to translate in the y-axis
+     * @param z the {@code float} argument; the amount to translate in the z-axis
+     */
     private static void translate(GLTFNode node, Vector3f base, float x, float y, float z) {
         if (node != null && base != null) node.setTranslation(new Vector3f(base).add(x, y, z));
     }
+
+    /**
+     * Rotates a node by the specified amount
+     * @param node the {@link GLTFNode} argument; the node to rotate
+     * @param rotation the {@link Quaternionf} argument; the rotation to apply
+     */
     private static void rotate(GLTFNode node, Quaternionf rotation) { if (node != null) node.setRotation(rotation); }
 
+    /**
+     * Returns the direction the player is facing.
+     * @param velocity the {@link Vector3f} argument; the player's velocity
+     */
     private void updateFacing(Vector3f velocity) {
         float raw = (float) Math.toDegrees(Math.atan2(velocity.x, velocity.z));
         setTargetYaw(raw + 180.0f);
     }
 
+    /**
+     * Returns the direction the player is facing.
+     */
     private void updateFacingCursor() {
         float worldYaw = getCursorWorldYaw();
         if (!Float.isNaN(worldYaw)) {
@@ -213,14 +239,30 @@ public final class CharacterAnimator {
         }
     }
 
+    /**
+     * Sets the target yaw angle.
+     * @param yaw the {@code float} argument; the yaw angle to set as the target
+     */
     private void setTargetYaw(float yaw) {
         targetYaw = yaw % FULL_DEGREES;
         if (targetYaw < 0) targetYaw += FULL_DEGREES;
         int sector = (int) Math.round(targetYaw / 45) % 8;
-        direction = switch (sector) { case 1 -> Direction.NE; case 2 -> Direction.E; case 3 -> Direction.SE;
-            case 4 -> Direction.S; case 5 -> Direction.SW; case 6 -> Direction.W; case 7 -> Direction.NW; default -> Direction.N; };
+        direction = switch (sector) {
+            case 1 -> Direction.NE;
+            case 2 -> Direction.E;
+            case 3 -> Direction.SE;
+            case 4 -> Direction.S;
+            case 5 -> Direction.SW;
+            case 6 -> Direction.W;
+            case 7 -> Direction.NW;
+            default -> Direction.N;
+        };
     }
 
+    /**
+     * Updates the model's rotation based on the target yaw angle.
+     * @param delta the {@code float} argument; the frame time in seconds
+     */
     private void updateRotation(float delta) {
         float difference = targetYaw - modelYaw;
         while (difference > HALF_DEGREES) difference -= FULL_DEGREES;
@@ -230,6 +272,10 @@ public final class CharacterAnimator {
         modelYaw %= FULL_DEGREES; if (modelYaw < 0) modelYaw += FULL_DEGREES;
     }
 
+    /**
+     * Updates the head's rotation based on the target yaw angle.
+     * @param delta the {@code float} argument; the frame time in seconds
+     */
     private void updateHead(float delta) {
         if (head == null || baseHeadRotation == null) return;
         if (!(character instanceof Player)) {
@@ -265,6 +311,10 @@ public final class CharacterAnimator {
         }
     }
 
+    /**
+     * Returns the direction the player is facing.
+     * @return {@link Float} the direction the player is facing
+     */
     private float getCursorWorldYaw() {
         GameMaster game = GameMaster.game;
         if (game == null) return Float.NaN;
@@ -310,8 +360,9 @@ public final class CharacterAnimator {
         if (model == null) return;
         float scale = Settings.getScaledEntity();
         float deathRoll = (float) Math.toRadians(82.0f) * deathWeight;
-        float deathDrop = 0.35f * deathWeight;
-        float bob = (float) Math.sin(idleTime) * .025f * idleWeight;
+        float deathDrop = 0.35f * ANIMATION_SCALE * deathWeight;
+        float bob = (float) Math.sin(idleTime) * .025f
+                * ANIMATION_SCALE * idleWeight;
         if (pass == RenderPass.SHADOW) {
             Shader shader = ResourceManager.rem.getShadowMapShader();
             if (shader == null) return;

@@ -24,10 +24,10 @@ public class EquipmentController {
     private static final int THICKNESS_LAYERS = 24;
     private static final float LAYER_DEPTH = 0.0025f;
 
-    private static final float ITEM_SCALE = 0.65f;
-    private static final float ITEM_X = 0.10f;
-    private static final float ITEM_Y = -0.55f;
-    private static final float ITEM_Z = -0.25f;
+    private static final float ITEM_SCALE = 0.35f;
+    private static final float ITEM_X = 0.20f;
+    private static final float ITEM_Y = 0.25f;
+    private static final float ITEM_Z = -0.15f;
 
     private GLTFNode currentActiveNode = null;
     private DynamicEquipmentMesh equipmentMesh;

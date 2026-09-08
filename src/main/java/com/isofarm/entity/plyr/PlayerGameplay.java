@@ -29,8 +29,8 @@ import java.util.List;
  */
 public final class PlayerGameplay {
     private static final Logger log = LoggerFactory.getLogger(PlayerGameplay.class);
-    private static final float WIDTH = 0.5f, HEIGHT = 2.0f, SPAWN_X = 0.5f, SPAWN_Z = 0.5f;
-    private static final float SPEED = 6.0f, RESPAWN_DELAY = 5.0f;
+    private static final float WIDTH = 0.25f, HEIGHT = 1.0f, SPAWN_X = 0.25f, SPAWN_Z = 0.5f;
+    private static final float SPEED = 6.0f, RESPAWN_DELAY = 3.0f;
     private static final float HUNGER_SECONDS_PER_POINT = 180.0f;
     private static final float HUNGER_LEVEL_SCALING = 0.05f;
     private static final int MAX_HITPOINTS = 20, MAX_HUNGER = 20;
