@@ -13,7 +13,6 @@ import com.isofarm.entity.WorldItem;
 import com.isofarm.item.*;
 import com.isofarm.pathfinding.GridPos;
 import com.isofarm.service.SoundService;
-import com.isofarm.service.TimeService;
 import com.isofarm.utils.Local;
 import com.isofarm.utils.Settings;
 import com.isofarm.utils.ToastFactory;
@@ -32,6 +31,8 @@ public final class PlayerGameplay {
     private static final Logger log = LoggerFactory.getLogger(PlayerGameplay.class);
     private static final float WIDTH = 0.5f, HEIGHT = 2.0f, SPAWN_X = 0.5f, SPAWN_Z = 0.5f;
     private static final float SPEED = 6.0f, RESPAWN_DELAY = 5.0f;
+    private static final float HUNGER_SECONDS_PER_POINT = 180.0f;
+    private static final float HUNGER_LEVEL_SCALING = 0.05f;
     private static final int MAX_HITPOINTS = 20, MAX_HUNGER = 20;
     private Player player;
     private int damageSequence;
@@ -91,8 +92,10 @@ public final class PlayerGameplay {
     private void updateHunger(float delta) {
         if (!player.isInSurvival()) return;
         Difficulty difficulty = GameMaster.game.getDifficulty();
-        float hungerDiff = difficulty.getMultiplier();
-        player.hungry((player.getLevel() * delta * hungerDiff) / 60.0f);
+        float levelMultiplier = 1.0f
+                + Math.max(0, player.getLevel() - 1) * HUNGER_LEVEL_SCALING;
+        player.hungry(delta * difficulty.getMultiplier() * levelMultiplier
+                / HUNGER_SECONDS_PER_POINT);
 
         if (difficulty == Difficulty.NIGHTMARE && player.getHunger() <= 0.0f) {
             player.kill(Cause.STARVATION);

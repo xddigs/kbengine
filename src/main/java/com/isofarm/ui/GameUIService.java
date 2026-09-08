@@ -506,7 +506,7 @@ public final class GameUIService implements Service<GameMaster> {
      */
     public void renderHunger(SpriteSheet hungerSheet, float startX, float startY) {
         if (hungerSheet == null) return;
-        int currentHunger = (int) player.getHunger();
+        int currentHunger = (int) Math.ceil(player.getHunger());
         int maxHunger = (int) player.getMaxHunger();
 
         int totalHungerPoints = (maxHunger + 1) / 2;
