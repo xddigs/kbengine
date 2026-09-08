@@ -69,6 +69,7 @@ public class GameInteraction {
 
         boolean isLeftHeld = Controls.isDown(ControlAction.PRIMARY_ACTION);
         boolean isLeftPressed = Controls.isPressed(ControlAction.PRIMARY_ACTION);
+        boolean isRightHeld = Controls.isDown(ControlAction.SECONDARY_ACTION);
         boolean isRightPressed = Controls.isPressed(ControlAction.SECONDARY_ACTION);
         boolean canInteract = player != null
                 && !player.getGamemode().isNoClip()
@@ -101,6 +102,17 @@ public class GameInteraction {
         if (Controls.isPressed(ControlAction.DROP_ITEM) && canInteract) {
             boolean dropAll = Controls.isDown(ControlAction.MODIFIER);
             dropItem(selectedItem, dropAll);
+        }
+
+        if (Controls.isPressed(ControlAction.TOGGLE_SHIELD) && canInteract) {
+            player.toggleShield(selectedItem);
+        }
+
+        boolean isUsingShield = canInteract && isRightHeld
+                && player.getEquippedShield() != null;
+        player.setShieldRaised(isUsingShield);
+        if (isUsingShield) {
+            isRightPressed = false;
         }
 
         if (Controls.isPressed(ControlAction.TOGGLE_INVENTORY) && !GameMaster.game.isChatOpen() &&
@@ -326,8 +338,6 @@ public class GameInteraction {
             velocity.y += verticalStrength;
 
             worldItem.setVelocity(velocity);
-            worldItem.setWorld(GameMaster.game.getWorld());
-
             player.remove(item, amount);
             GameMaster.game.addEntity(worldItem);
             SoundService.fx.playEntitySound(SoundGroup.ITEMS);

@@ -14,6 +14,7 @@
     "toggle_hud": "GLFW_KEY_F1",
     "toggle_debug": "GLFW_KEY_F3",
     "drop_item": "GLFW_KEY_Q",
+    "toggle_shield": "GLFW_KEY_F",
     "modifier": ["GLFW_KEY_LEFT_CONTROL", "GLFW_KEY_RIGHT_CONTROL"],
     "smart_shift": "GLFW_KEY_LEFT_SHIFT",
     "toggle_inventory": "GLFW_KEY_E",

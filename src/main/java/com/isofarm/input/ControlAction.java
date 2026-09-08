@@ -23,6 +23,7 @@ public enum ControlAction {
     TOGGLE_HUD("toggle_hud"),
     TOGGLE_DEBUG("toggle_debug"),
     DROP_ITEM("drop_item"),
+    TOGGLE_SHIELD("toggle_shield"),
     MODIFIER("modifier"),
     SMART_SHIFT("smart_shift"),
     TOGGLE_INVENTORY("toggle_inventory"),
