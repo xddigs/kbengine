@@ -12,8 +12,7 @@ public final class K {
     /**
      * Creates a new {@code K} instance.
      */
-    private K() {
-    }
+    private K() {}
 
     /**
      * Encapsulates the state and operations required by camera within the game runtime.
@@ -81,6 +80,7 @@ public final class K {
 
         public static final int ICON_SEED_SEEDS_COLS = 4;
         public static final int ICON_SEED_CROPS_COLS = 5;
+        public static final int ICON_FOOD_COLS = 3;
 
         public static final int ICON_BLOCK_COLS = 10;
         public static final int ICON_BLOCK_ROWS = 7;
@@ -170,6 +170,7 @@ public final class K {
 
         public static final String SEED_ICONS = "assets/sprites/seeds.png";
         public static final String CROP_ICONS = "assets/sprites/crops.png";
+        public static final String FOOD_ICONS = "assets/sprites/food.png";
         public static final String TOOL_ICONS = "assets/sprites/tools.png";
         public static final String BLOCK_ICONS = "assets/sprites/blocks.png";
         public static final String TORCH_ICONS = "assets/sprites/torch.png";

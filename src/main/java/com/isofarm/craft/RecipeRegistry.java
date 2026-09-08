@@ -19,6 +19,7 @@ public class RecipeRegistry {
      */
     public List<Recipe> init() {
         recipes.clear();
+        registerFoodRecipes();
         registerBlocksRecipes();
         registerSmeltingRecipes();
         registerMaterialRecipes();
@@ -96,6 +97,22 @@ public class RecipeRegistry {
         if (mat instanceof MiningComponent mc) return mc.getTier();
         if (mat instanceof Block block && block.getType() == BlockData.STONE) return Tier.STONE;
         return Tier.WOODEN;
+    }
+
+    private void registerFoodRecipes() {
+        create().result(new Food(FoodData.BREAD), 1)
+                .with(new Produce(CropType.WHEAT), 3).add();
+
+        create().result(new Food(FoodData.CARROT_CAKE), 1)
+                .with(new Produce(CropType.CARROT), 4)
+                .with(new Material(MaterialID.SUGAR), 2).add();
+
+        create().result(new Food(FoodData.FRIES), 1)
+                .with(new Produce(CropType.POTATO), 4).add();
+
+        create().result(new Food(FoodData.POTATO_CAKE), 1)
+                .with(new Produce(CropType.POTATO), 4)
+                .with(new Material(MaterialID.SUGAR), 2).add();
     }
 
     /**

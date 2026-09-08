@@ -1,5 +1,6 @@
 package com.isofarm.data;
 
+import com.isofarm.item.Craftable;
 import com.isofarm.item.Item;
 
 import java.util.Objects;
@@ -8,7 +9,7 @@ import java.util.Objects;
  * Encapsulates the state and operations required by produce within the game runtime.
  */
 @DataClass
-public class Produce implements Item {
+public class Produce implements Craftable, Consumable {
     private final byte id;
     private final String name;
     private final String displayName;
@@ -65,6 +66,14 @@ public class Produce implements Item {
     @Override
     public int getValue() {
         return value;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean consume() {
+        return !type.equals(CropType.WHEAT);
     }
 
     /**

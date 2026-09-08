@@ -50,6 +50,10 @@ public class Library implements Service<GameMaster> {
             registerDefault(itemR, () -> new Hoe(tier));
             registerDefault(itemR, () -> new Shovel(tier));
         });
+        
+        FoodData.forEach(foodData -> {
+            registerDefault(itemR, () -> new Food(foodData));
+        });
 
         for (CropType type : CropType.values()) {
             registerDefault(itemR, () -> new Produce(type));
