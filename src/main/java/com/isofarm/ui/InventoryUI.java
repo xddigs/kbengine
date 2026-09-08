@@ -1237,6 +1237,7 @@ public class InventoryUI extends UIElement {
     /** Buys a complete or partial stack from a trader into the player's inventory. */
     private void buyFromTrader(NPC trader, Item item, int amount, InventorySlot sourceSlot) {
         if (trader == null || player == null || item == null || amount <= 0) return;
+        if (trader.hasWallet() == null || player.hasWallet() == null) return;
 
         int totalPrice = item.getValue() * amount;
         if (trader.getStock().getAmount(item) < amount
@@ -1266,11 +1267,9 @@ public class InventoryUI extends UIElement {
     private void sellToTrader(NPC trader, Item item, int amount, InventorySlot sourceSlot) {
         if (trader == null || player == null || sourceSlot == null
                 || item == null || amount <= 0) return;
-
+        if (trader.hasWallet() == null || player.hasWallet() == null) return;
         if (sourceSlot.isEmpty() || !isSameType(sourceSlot.getItem(), item)
-                || sourceSlot.getAmount() < amount) {
-            return;
-        }
+                || sourceSlot.getAmount() < amount) return;
 
         InventorySlot targetSlot = findAvailableSlot(trader.getStock(), item,
                 List.of(new SlotRange(0, trader.getStock().getSlots().size())));
