@@ -28,9 +28,21 @@ import static org.joml.Math.lerp;
 @SuppressWarnings("all")
 @GodObject
 public class InventoryUI extends UIElement {
-    private enum CreativeTab {
-        ALL,
-        FOOD
+    private enum CreativeFilter {
+        ALL(null),
+        FOOD("inventory.filter.food"),
+        BLOCKS("inventory.filter.blocks"),
+        TOOLS("inventory.filter.tools"),
+        MATERIALS("inventory.filter.materials"),
+        PRODUCE("inventory.filter.produce"),
+        SEEDS("inventory.filter.seeds"),
+        USABLES("inventory.filter.usables");
+
+        private final String translationKey;
+
+        CreativeFilter(String translationKey) {
+            this.translationKey = translationKey;
+        }
     }
 
     private static final int BACKPACK_COLUMNS = 4;
@@ -55,7 +67,8 @@ public class InventoryUI extends UIElement {
     private UIButton groupButton;
     private UIButton backpackButton;
     private UIButton inventoryModeButton;
-    private UIButton foodTabButton;
+    private final Map<CreativeFilter, UIButton> creativeFilterButtons =
+            new EnumMap<>(CreativeFilter.class);
     private Inventory inventory;
     private iBlock containerBlock;
     private Inventory externalInventory;
@@ -71,7 +84,7 @@ public class InventoryUI extends UIElement {
     private int carriedAmount;
     private boolean isGodmode;
     private boolean isCreativeInventoryVisible;
-    private CreativeTab creativeTab = CreativeTab.ALL;
+    private CreativeFilter creativeFilter = CreativeFilter.ALL;
 
     private float defaultX;
     private float targetX;
@@ -218,7 +231,7 @@ public class InventoryUI extends UIElement {
         addChild(groupButton);
         addChild(backpackButton);
         createInventoryModeButton();
-        createFoodTabButton();
+        createCreativeFilterButtons();
 
     }
 
@@ -240,38 +253,67 @@ public class InventoryUI extends UIElement {
         addChild(inventoryModeButton);
     }
 
-    /** Creates the food-category tab used by the creative catalog. */
-    private void createFoodTabButton() {
+    /** Creates the category filters distributed across the creative header. */
+    private void createCreativeFilterButtons() {
         float size = Settings.getScaledSlot();
         float spacing = Settings.getScaledSpacing();
-        foodTabButton = new UIButton(-size - spacing,
-                Settings.getScaledHeader(), size, size)
-                .setOnClick(this::toggleFoodTab);
-        Food bread = new Food(FoodData.BREAD);
-        foodTabButton.setSpriteSheet(ResourceManager.getItemSpriteSheet(bread));
-        foodTabButton.setSpriteColumn(ResourceManager.getItemFrame(bread));
-        foodTabButton.setTooltipText("inventory.food");
-        foodTabButton.setZIndex(1);
-        foodTabButton.hide();
-        buttons.add(foodTabButton);
-        addChild(foodTabButton);
+        float startX = Settings.getScaledPadding();
+        float y = Settings.getScaledPadding() - spacing;
+        int index = 0;
+
+        for (CreativeFilter filter : CreativeFilter.values()) {
+            if (filter == CreativeFilter.ALL) continue;
+            Item icon = getCreativeFilterIcon(filter);
+            UIButton button = new UIButton(startX + index * (size + spacing),
+                    y, size, size)
+                    .setOnClick(() -> toggleCreativeFilter(filter));
+            button.setSpriteSheet(ResourceManager.getItemSpriteSheet(icon));
+            button.setSpriteColumn(ResourceManager.getItemFrame(icon));
+            button.setTooltipText(filter.translationKey);
+            button.setZIndex(1);
+            button.hide();
+            creativeFilterButtons.put(filter, button);
+            buttons.add(button);
+            addChild(button);
+            index++;
+        }
     }
 
-    /** Alternates the creative catalog between every item and edible items. */
-    private void toggleFoodTab() {
+    /** Selects one creative filter, or clears it when pressed a second time. */
+    private void toggleCreativeFilter(CreativeFilter filter) {
         if (!isGodmode || !isCreativeInventoryVisible) return;
-        creativeTab = creativeTab == CreativeTab.FOOD
-                ? CreativeTab.ALL : CreativeTab.FOOD;
+        creativeFilter = creativeFilter == filter ? CreativeFilter.ALL : filter;
         buildCreativeCatalog();
         syncCreativeInventory();
-        updateFoodTabAppearance();
+        updateCreativeFilterAppearance();
     }
 
-    private void updateFoodTabAppearance() {
-        boolean selected = creativeTab == CreativeTab.FOOD;
-        foodTabButton.setNormalColor(selected ? 0.55f : 1.0f,
-                selected ? 0.55f : 1.0f,
-                selected ? 0.55f : 1.0f, 1.0f);
+    private Item getCreativeFilterIcon(CreativeFilter filter) {
+        return switch (filter) {
+            case FOOD -> new Food(FoodData.BREAD);
+            case BLOCKS -> new Block(BlockData.GRASS);
+            case TOOLS -> new Pickaxe(Tier.WOODEN);
+            case MATERIALS -> new Material(MaterialID.STICK);
+            case PRODUCE -> new Produce(CropType.CARROT);
+            case SEEDS -> new Seed(CropType.WHEAT);
+            case USABLES -> new Backpack();
+            case ALL -> throw new IllegalArgumentException("ALL has no filter button");
+        };
+    }
+
+    private void setCreativeFiltersVisible(boolean visible) {
+        creativeFilterButtons.values().forEach(button -> {
+            if (visible) button.show();
+            else button.hide();
+        });
+    }
+
+    private void updateCreativeFilterAppearance() {
+        creativeFilterButtons.forEach((filter, button) -> {
+            boolean selected = creativeFilter == filter;
+            float color = selected ? 0.55f : 1.0f;
+            button.setNormalColor(color, color, color, 1.0f);
+        });
     }
 
     /**
@@ -667,7 +709,7 @@ public class InventoryUI extends UIElement {
     private void updateInventoryViewControls() {
         if (!isGodmode) {
             inventoryModeButton.hide();
-            foodTabButton.hide();
+            setCreativeFiltersVisible(false);
             creativeScrollBar.hide();
             sortButton.show();
             groupButton.show();
@@ -684,14 +726,14 @@ public class InventoryUI extends UIElement {
                 ResourceManager.getItemFrame(destination));
 
         if (isCreativeInventoryVisible) {
-            foodTabButton.show();
-            updateFoodTabAppearance();
+            setCreativeFiltersVisible(true);
+            updateCreativeFilterAppearance();
             sortButton.hide();
             groupButton.hide();
             backpackButton.hide();
             creativeScrollBar.show();
         } else {
-            foodTabButton.hide();
+            setCreativeFiltersVisible(false);
             creativeScrollBar.hide();
             sortButton.show();
             groupButton.show();
@@ -720,12 +762,13 @@ public class InventoryUI extends UIElement {
 
         for (String id : GameMaster.game.getItemRegistry().getIds()) {
             Item item = GameMaster.game.getItemRegistry().create(id);
-            if (isSupportedCreativeItem(item) && isInSelectedCreativeTab(item)) {
+            if (isSupportedCreativeItem(item) && isInSelectedCreativeFilter(item)) {
                 creativeItems.add(item);
             }
         }
 
-        if (creativeTab == CreativeTab.ALL) {
+        if (creativeFilter == CreativeFilter.ALL
+                || creativeFilter == CreativeFilter.MATERIALS) {
             creativeItems.removeIf(MiningComponent.class::isInstance);
             Tier.forEach(tier -> {
                 if (tier.isInvalidTier()) return;
@@ -742,7 +785,7 @@ public class InventoryUI extends UIElement {
     }
 
     /**
-     * Checks whether an item belongs to one of the five creative categories and
+     * Checks whether an item belongs to a supported creative category and
      * has a drawable, translated inventory representation.
      * @param item the item to validate
      * @return {@code true} when the item may be shown in the creative catalog
@@ -754,7 +797,8 @@ public class InventoryUI extends UIElement {
                 || item instanceof Material
                 || item instanceof iBlock
                 || item instanceof Food
-                || item instanceof Produce;
+                || item instanceof Produce
+                || item instanceof Seed;
         if (!supportedCategory || ResourceManager.getItemSpriteSheet(item) == null
                 || ResourceManager.getItemFrame(item) < 0) {
             return false;
@@ -765,10 +809,17 @@ public class InventoryUI extends UIElement {
                 && !displayName.startsWith("item.");
     }
 
-    private boolean isInSelectedCreativeTab(Item item) {
-        if (creativeTab == CreativeTab.ALL) return true;
-        return item instanceof Food
-                || item instanceof Produce produce && produce.getFoodValue() > 0.0f;
+    private boolean isInSelectedCreativeFilter(Item item) {
+        return switch (creativeFilter) {
+            case ALL -> true;
+            case FOOD -> item instanceof Food;
+            case BLOCKS -> item instanceof Block || item instanceof iBlock;
+            case TOOLS -> item instanceof Tool;
+            case MATERIALS -> item instanceof Material;
+            case PRODUCE -> item instanceof Produce;
+            case SEEDS -> item instanceof Seed;
+            case USABLES -> item instanceof Usable;
+        };
     }
 
     /**
