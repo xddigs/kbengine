@@ -32,6 +32,10 @@ public final class IslandGenerator implements Generator {
     private static final float SPAWN_PLATFORM_RADIUS = 6.0f;
     /** Width of the smooth terrain transition outside the spawn platform. */
     private static final float SPAWN_PLATFORM_TRANSITION = 6.0f;
+    private static final int PLANT_ATTEMPTS_PER_CHUNK = 24;
+    private static final int TALL_GRASS_CLUSTER_ATTEMPTS = 24;
+    private static final int TALL_GRASS_CLUSTER_SIZE = 8;
+    private static final BlockData[] DECORATIVE_PLANTS = createDecorativePlants();
 
     private final World world;
     private final FluidSimulation waterSimulation;
@@ -88,6 +92,9 @@ public final class IslandGenerator implements Generator {
         registerWaterSources(chunk, chunkX, chunkZ);
         registerLavaSources(chunkX, chunkZ);
         generateTreesInChunk(chunkX, chunkZ);
+        long plantSeed = seed ^ ((long) chunkX * 341873128712L)
+                ^ ((long) chunkZ * 132897987541L) ^ 0x5DEECE66DL;
+        generatePlants(chunk, new Random(plantSeed));
     }
 
     /**
@@ -438,6 +445,70 @@ public final class IslandGenerator implements Generator {
                 }
             }
         }
+    }
+
+    /**
+     * Generates decorative plants on exposed grass or dirt in one chunk.
+     */
+    private void generatePlants(Chunk chunk, Random random) {
+        if (DECORATIVE_PLANTS.length == 0) return;
+        for (int attempt = 0; attempt < PLANT_ATTEMPTS_PER_CHUNK; attempt++) {
+            int x = random.nextInt(Chunk.SIZE_X);
+            int z = random.nextInt(Chunk.SIZE_Z);
+            int surfaceY = findPlantableSurface(chunk, x, z);
+            if (surfaceY < 0) continue;
+
+            BlockData plant = DECORATIVE_PLANTS[random.nextInt(DECORATIVE_PLANTS.length)];
+            chunk.setBlock(x, surfaceY + 1, z, plant.getId());
+            if (plant == BlockData.TALL_GRASS) {
+                generateTallGrassCluster(chunk, x, surfaceY, z, random);
+            }
+        }
+    }
+
+    /**
+     * Expands tall grass around its initial plant while staying inside the
+     * chunk currently being generated.
+     */
+    private void generateTallGrassCluster(Chunk chunk, int centerX, int centerY,
+                                          int centerZ, Random random) {
+        int placed = 1;
+        for (int attempt = 0; attempt < TALL_GRASS_CLUSTER_ATTEMPTS
+                && placed < TALL_GRASS_CLUSTER_SIZE; attempt++) {
+            int x = centerX + random.nextInt(5) - 2;
+            int z = centerZ + random.nextInt(5) - 2;
+            if (x < 0 || x >= Chunk.SIZE_X || z < 0 || z >= Chunk.SIZE_Z) continue;
+
+            int surfaceY = findPlantableSurface(chunk, x, z);
+            if (surfaceY < 0 || Math.abs(surfaceY - centerY) > 2) continue;
+            chunk.setBlock(x, surfaceY + 1, z, BlockData.TALL_GRASS.getId());
+            placed++;
+        }
+    }
+
+    /** Returns the highest exposed grass or dirt block in a chunk column. */
+    private int findPlantableSurface(Chunk chunk, int x, int z) {
+        for (int y = Chunk.SIZE_Y - 2; y >= 0; y--) {
+            byte block = chunk.getBlock(x, y, z);
+            if (block == BlockData.AIR.getId()) continue;
+            if ((block == BlockData.GRASS.getId() || block == BlockData.DIRT.getId())
+                    && chunk.getBlock(x, y + 1, z) == BlockData.AIR.getId()) {
+                return y;
+            }
+            return -1;
+        }
+        return -1;
+    }
+
+    /** Excludes bonsais, which are crafted/placeable blocks rather than wild plants. */
+    private static BlockData[] createDecorativePlants() {
+        List<BlockData> plants = new ArrayList<>();
+        for (BlockData plant : BlockData.allPlants()) {
+            if (plant != BlockData.OAK_BONSAI && plant != BlockData.SPRUCE_BONSAI) {
+                plants.add(plant);
+            }
+        }
+        return plants.toArray(new BlockData[0]);
     }
 
     /**

@@ -14,7 +14,6 @@ import java.util.Random;
  * Generates a configurable island, including terrain, lakes, mountains and
  * vegetation. Worlds created with the same seed and settings are deterministic.
  */
-@SuppressWarnings("all")
 public class WorldGenerator implements Generator {
     public static final int TREE_COUNT = 6;
     public static final int LAKE_COUNT = 2;
@@ -352,7 +351,7 @@ public class WorldGenerator implements Generator {
             BlockData[] plants = BlockData.allPlants();
             BlockData plant = plants[random.nextInt(plants.length)];
             if (plant != BlockData.OAK_BONSAI && plant != BlockData.SPRUCE_BONSAI
-                    && World.wrld.getBlockTypeAt(x, y, z) == BlockData.GRASS.getId()
+                    && isPlantableSurface(x, y, z)
                     && World.wrld.getBlockTypeAt(x, y + 1, z) == BlockData.AIR.getId()) {
                 World.wrld.setBlockTypeAt(x, y + 1, z, plant.getId());
                 if (plant == BlockData.TALL_GRASS) generateCluster(x, y, z, plant, random);
@@ -388,12 +387,18 @@ public class WorldGenerator implements Generator {
             if (lakeAt(x, z) == null && !isLakeShore(x, z) && !nearLavaPuddle(x, z)
                     && !nearTree(x, z)
                     && Math.abs(y - surfaceY) <= 2
-                    && World.wrld.getBlockTypeAt(x, y, z) == BlockData.GRASS.getId()
+                    && isPlantableSurface(x, y, z)
                     && World.wrld.getBlockTypeAt(x, y + 1, z) == BlockData.AIR.getId()) {
                 World.wrld.setBlockTypeAt(x, y + 1, z, plant.getId());
                 placed++;
             }
         }
+    }
+
+    /** Returns whether the block can support a naturally generated plant. */
+    private boolean isPlantableSurface(int x, int y, int z) {
+        byte block = World.wrld.getBlockTypeAt(x, y, z);
+        return block == BlockData.GRASS.getId() || block == BlockData.DIRT.getId();
     }
 
     /**
