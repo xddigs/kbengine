@@ -30,7 +30,6 @@ public final class CharacterAnimator {
     private static final float DEATH_FALL_DURATION = 0.75f;
     private static final float DEATH_FADE_DURATION = 0.75f;
     private final Character character;
-    /** Equipment state is per model; sharing it makes NPC nodes mirror the player weapon. */
     private final EquipmentController equipmentController = new EquipmentController();
     private final Matrix4f modelMatrix = new Matrix4f();
     private GLTFNode head, torso, backpack, rightArm, leftArm, rightLeg, leftLeg;
@@ -190,7 +189,7 @@ public final class CharacterAnimator {
         rotate(rightLeg, new Quaternionf().rotateX((float) Math.toRadians(-12.0f) * loosen));
 
         if (model != null) model.updateTransforms();
-        equipmentController.equip(null, null);
+        equipmentController.equip();
     }
 
     private static void translate(GLTFNode node, Vector3f base, float x, float y, float z) {
@@ -294,24 +293,10 @@ public final class CharacterAnimator {
      * Updates equipment based on held tool/weapon
      */
     private void updateEquipment() {
-        if (!(character instanceof Player)) {
-            equipmentController.equip(null, null);
+        if (character instanceof Player) {
+            equipmentController.equip();
             return;
         }
-        Item item = Settings.selectedItem;
-        if (!(item instanceof Tool tool)) {
-            equipmentController.equip(null, null);
-            return;
-        }
-        String type = switch (item) {
-            case Sword ignored -> "sword";
-            case Pickaxe ignored -> "pickaxe";
-            case Axe ignored -> "axe";
-            case Hoe ignored -> "hoe";
-            case Shovel ignored -> "shovel";
-            default -> null;
-        };
-        equipmentController.equip(tool.getTier().getName(), type);
     }
 
     /**
