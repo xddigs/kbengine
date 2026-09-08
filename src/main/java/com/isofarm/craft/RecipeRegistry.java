@@ -93,7 +93,9 @@ public class RecipeRegistry {
      * @return the {@link Tier} representing the tier from material
      */
     private Tier getTierFromMaterial(Craftable mat) {
-        return (mat instanceof MiningComponent mc) ? mc.getTier() : Tier.WOODEN;
+        if (mat instanceof MiningComponent mc) return mc.getTier();
+        if (mat instanceof Block block && block.getType() == BlockData.STONE) return Tier.STONE;
+        return Tier.WOODEN;
     }
 
     /**
