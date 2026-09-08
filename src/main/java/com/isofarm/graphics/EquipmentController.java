@@ -2,6 +2,7 @@ package com.isofarm.graphics;
 
 import com.isofarm.graphics.gltf.GLTFModel;
 import com.isofarm.graphics.gltf.GLTFNode;
+import com.isofarm.item.Equippable;
 import com.isofarm.item.Item;
 import com.isofarm.item.Tool;
 import com.isofarm.utils.Settings;
@@ -87,9 +88,14 @@ public class EquipmentController {
             currentActiveNode.setVisible(false);
             return;
         }
+
         SpriteSheet sheet = ResourceManager.getItemSpriteSheet(item);
         if (sheet == null) {
             currentActiveNode.setVisible(false);
+            return;
+        }
+
+        if (item instanceof Equippable e && e.isEquipped()) {
             return;
         }
 

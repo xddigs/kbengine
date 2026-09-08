@@ -39,6 +39,7 @@ public class RecipeRegistry {
         create().result(new Wallet(), 1).with(MaterialID.LEATHER, 2).add();
         create().result(new Bucket(), 1).with(new MiningComponent(Tier.STEEL, MaterialID.INGOT), 3).add();
         registerToolSet(BlockData.fromIdTo(BlockData.OAK_PLANK.getId()));
+        registerToolSet(BlockData.fromIdTo(BlockData.STONE.getId()));
 
         /* Required tier, Crafted Tier */
         Map<Tier, Tier> metalProgression = Map.of(
