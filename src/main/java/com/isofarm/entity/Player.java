@@ -6,6 +6,7 @@ import com.isofarm.entity.plyr.PlayerManager;
 import com.isofarm.graphics.ResourceManager;
 import com.isofarm.graphics.gltf.GLTFModel;
 import com.isofarm.item.Item;
+import com.isofarm.item.Shield;
 import com.isofarm.pathfinding.GridPos;
 import com.isofarm.service.SoundService;
 import com.isofarm.utils.DeathManager;
@@ -99,6 +100,33 @@ public class Player extends Character {
         if (GameMaster.game != null && GameMaster.game.getCamera() != null) {
             GameMaster.game.getCamera().applyDamageTilt(amount);
         }
+    }
+
+    /** Applies shield defense before entity-originated damage and knockback. */
+    @Override
+    public void damage(float amount, Entity attacker) {
+        float remaining = gameplay.absorbWithShield(amount);
+        if (remaining > 0.0f) super.damage(remaining, attacker);
+    }
+
+    /** Toggles the dedicated left-hand shield equipment slot. */
+    public boolean toggleShield(Item selectedItem) {
+        return gameplay.toggleShield(selectedItem);
+    }
+
+    /** Sets whether the equipped shield is being actively used. */
+    public void setShieldRaised(boolean raised) {
+        gameplay.setShieldRaised(raised);
+    }
+
+    /** Returns whether the shield is currently raised. */
+    public boolean isShieldRaised() {
+        return gameplay.isShieldRaised();
+    }
+
+    /** Returns the shield mounted on the left arm, if present. */
+    public Shield getEquippedShield() {
+        return getInventory().getShield();
     }
 
     /**

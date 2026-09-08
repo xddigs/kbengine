@@ -37,6 +37,7 @@ public final class PlayerGameplay {
     private Player player;
     private int damageSequence;
     private float respawnTimer = -1.0f;
+    private boolean shieldRaised;
 
     /**
      * Creates the shared player's gameplay component.
@@ -165,6 +166,7 @@ public final class PlayerGameplay {
         player.setMaxHitpoints(MAX_HITPOINTS); player.setHitpoints(MAX_HITPOINTS);
         player.setMaxHunger(MAX_HUNGER); player.setHunger(MAX_HUNGER);
         player.setExperience(0); player.setLevel(1); resetAttributes();
+        shieldRaised = false;
         respawnTimer = -1.0f;
         GameMaster.game.toggleHUD();
     }
@@ -204,6 +206,55 @@ public final class PlayerGameplay {
                 }
             }
         }
+
+        Shield shield = player.getInventory().getShield();
+        if (shield != null && shield.getDurability() <= 0) {
+            shieldRaised = false;
+            player.getInventory().breakShield();
+            SoundService.fx.playBreakSound(SoundGroup.ITEMS);
+        }
+    }
+
+    /** Equips the selected shield, or unequips the current one. */
+    public boolean toggleShield(Item selectedItem) {
+        Shield equipped = player.getInventory().getShield();
+        if (equipped != null) {
+            shieldRaised = false;
+            return equipped.unequip();
+        }
+
+        Shield shield = selectedItem instanceof Shield selectedShield
+                ? selectedShield
+                : player.getInventory().getItemOfType(Shield.class).orElse(null);
+        return shield != null && shield.equip();
+    }
+
+    /** Sets whether the equipped shield is actively being held up. */
+    public void setShieldRaised(boolean raised) {
+        Shield shield = player.getInventory().getShield();
+        shieldRaised = raised && shield != null && shield.canBeUsed();
+    }
+
+    /** Returns whether the player is currently blocking with a usable shield. */
+    public boolean isShieldRaised() {
+        return shieldRaised;
+    }
+
+    /** Absorbs an entity hit using the shield's defense and durability. */
+    public float absorbWithShield(float amount) {
+        Shield shield = player.getInventory().getShield();
+        if (!shieldRaised || shield == null || !shield.canBeUsed() || amount <= 0.0f) {
+            return amount;
+        }
+
+        float remaining = Math.max(0.0f, amount - shield.getDefense());
+        shield.use();
+        if (!shield.canBeUsed()) {
+            shieldRaised = false;
+            player.getInventory().breakShield();
+            SoundService.fx.playBreakSound(SoundGroup.ITEMS);
+        }
+        return remaining;
     }
 
     /**

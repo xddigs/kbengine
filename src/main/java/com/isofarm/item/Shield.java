@@ -3,6 +3,7 @@ package com.isofarm.item;
 import com.isofarm.data.Enchantment;
 import com.isofarm.data.Tier;
 import com.isofarm.data.ToolType;
+import com.isofarm.entity.Player;
 
 /**
  * Encapsulates the state and operations required by Shield within the game runtime.
@@ -28,19 +29,24 @@ public class Shield extends Tool implements Equippable {
     /** {@inheritDoc} */
     @Override
     public boolean equip() {
-        return false;
+        return Player.plyr.getInventory().equipShield(this);
     }
 
     /** {@inheritDoc} */
     @Override
     public boolean unequip() {
-        return false;
+        return isEquipped() && Player.plyr.getInventory().unequipShield();
     }
 
     /** {@inheritDoc} */
     @Override
     public boolean isEquipped() {
-        return false;
+        return Player.plyr.getInventory().getShield() == this;
+    }
+
+    /** Returns how many incoming damage points this shield can absorb per hit. */
+    public float getDefense() {
+        return getType().getBaseDefense();
     }
 
     /**
