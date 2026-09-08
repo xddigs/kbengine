@@ -202,7 +202,9 @@ public class GameInteraction {
         }
 
         if (selectedItem instanceof Consumable consumable) {
-            consumable.consume();
+            if (isRightPressed && !GameMaster.game.isInventoryOpen()) {
+                consumable.consume();
+            }
         }
 
         if (isShiftHeld && hoveredCell != null) {
