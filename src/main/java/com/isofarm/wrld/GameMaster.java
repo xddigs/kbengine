@@ -5,19 +5,21 @@ import com.isofarm.craft.RecipeRegistry;
 import com.isofarm.data.*;
 import com.isofarm.entity.*;
 import com.isofarm.graphics.*;
+import com.isofarm.input.*;
+import com.isofarm.item.Item;
 import com.isofarm.item.iBlock;
+import com.isofarm.pathfinding.GridPos;
+import com.isofarm.service.*;
 import com.isofarm.ui.Frontend;
 import com.isofarm.ui.GameUIService;
 import com.isofarm.ui.UIManager;
-import com.isofarm.input.*;
-import com.isofarm.item.Item;
-import com.isofarm.pathfinding.GridPos;
-import com.isofarm.service.*;
-import com.isofarm.utils.*;
+import com.isofarm.utils.HoveredCell;
+import com.isofarm.utils.K;
+import com.isofarm.utils.Settings;
+import com.isofarm.utils.ToastFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -43,7 +45,7 @@ public class GameMaster {
     private final CommandService commandService = new CommandService(commandRegistry);
     private final ItemRegistry itemRegistry = new ItemRegistry();
     private final RainEngine rainEngine = new RainEngine();
-    private final List<Entity> entities = new LinkedList<>();
+    private List<Entity> entities = new LinkedList<>();
     private List<Recipe> recipes;
     private ShadowMap shadowMap;
     private ChunkManager chunkManager;
@@ -441,7 +443,9 @@ public class GameMaster {
      */
     public void removeEntity(Entity entity) {
         if (entity == null) return;
-        entities.remove(entity);
+        List<Entity> copy = List.copyOf(entities);
+        copy.remove(entity);
+        entities = copy;
     }
 
     /**
