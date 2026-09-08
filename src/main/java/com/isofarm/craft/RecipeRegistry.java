@@ -24,7 +24,7 @@ public class RecipeRegistry {
         registerMaterialRecipes();
 
         create().result(new iBlock(BlockData.CHEST), 1).with(new Block(BlockData.OAK_PLANK), 8).add();
-        create().result(new Material(MaterialID.STICK), 4).with(BlockData.fromIdTo(BlockData.OAK_PLANK.getId()), 1).add();
+        create().result(new Material(MaterialID.STICK), 4).with(BlockData.fromIdTo(BlockData.OAK_PLANK.getId()), 2).add();
 
         create().result(new Material(MaterialID.CHARCOAL), 1)
                 .with(new Block(BlockData.OAK_LOG), 8)
@@ -40,8 +40,10 @@ public class RecipeRegistry {
         create().result(new Bucket(), 1).with(new MiningComponent(Tier.STEEL, MaterialID.INGOT), 3).add();
         registerToolSet(BlockData.fromIdTo(BlockData.OAK_PLANK.getId()));
 
+        /* Required tier, Crafted Tier */
         Map<Tier, Tier> metalProgression = Map.of(
-                Tier.COPPER, Tier.COPPER,
+                Tier.STONE, Tier.WOODEN,
+                Tier.COPPER, Tier.STONE,
                 Tier.IRON, Tier.COPPER,
                 Tier.STEEL, Tier.IRON,
                 Tier.GOLDEN, Tier.STEEL,
@@ -49,6 +51,7 @@ public class RecipeRegistry {
                 Tier.DIAMOND, Tier.PLATINUM);
 
         metalProgression.forEach((toolTier, requiredStationTier) -> {
+            if (toolTier.isInvalidTier() || toolTier.equals(Tier.STONE)) return;
             Craftable mainMaterial = new MiningComponent(toolTier, MaterialID.INGOT);
             registerToolSet(mainMaterial);
         });
@@ -63,7 +66,7 @@ public class RecipeRegistry {
     private void registerToolSet(Craftable primaryMat) {
         registerTool(primaryMat, 2, 1, Sword::new);
         registerTool(primaryMat, 3, 2, Pickaxe::new);
-        registerTool(primaryMat, 3, 3, Axe::new);
+        registerTool(primaryMat, 4, 2, Axe::new);
         registerTool(primaryMat, 2, 2, Hoe::new);
         registerTool(primaryMat, 1, 2, Shovel::new);
     }

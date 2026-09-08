@@ -109,6 +109,7 @@ public class BackpackInventoryUI extends InventoryUI {
         syncInventory();
         updateSlots();
         slotInteract();
+        updateQuickMoveAnimations(delta);
         getChildren().forEach(child -> child.update(delta));
     }
 
@@ -172,5 +173,6 @@ public class BackpackInventoryUI extends InventoryUI {
         renderBackground();
         renderChildren();
         renderQuickMoveAnimations();
+        renderCarriedItem();
     }
 }

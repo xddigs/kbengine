@@ -37,7 +37,7 @@ public class Library implements Service<GameMaster> {
         });
 
         Tier.forEach(tier -> {
-            if (tier.isInvalidTier()) return;
+            if (tier.isInvalidTier() || tier.equals(Tier.STONE)) return;
             registerDefault(itemR, () -> new MiningComponent(tier, MaterialID.RAW_ORE));
             registerDefault(itemR, () -> new MiningComponent(tier, MaterialID.INGOT));
         });

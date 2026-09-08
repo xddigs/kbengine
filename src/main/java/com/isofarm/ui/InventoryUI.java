@@ -548,6 +548,7 @@ public class InventoryUI extends UIElement {
 
     /** Synchronizes and exposes the slots belonging to the open external inventory. */
     private void syncContainerInventory() {
+        positionContainerSlots();
         Inventory containerInventory = externalInventory;
         for (int i = 0; i < containerSlotUIs.length; i++) {
             InventorySlotUI slotUI = containerSlotUIs[i];
@@ -987,7 +988,7 @@ public class InventoryUI extends UIElement {
     }
 
     /** Advances every quick-move icon towards its destination. */
-    private void updateQuickMoveAnimations(float delta) {
+    protected void updateQuickMoveAnimations(float delta) {
         quickMoveAnimations.removeIf(animation -> animation.update(delta));
     }
 
@@ -1428,6 +1429,32 @@ public class InventoryUI extends UIElement {
                 height, new Vector4f(1.0f, 1.0f, 1.0f, getWorldOpacity()));
     }
 
+    /** Positions external slots independently when the open inventory belongs to a trader. */
+    private void positionContainerSlots() {
+        if (externalInventory == null) return;
+        float panelX = getContainerPanelX() - getAbsoluteX();
+        float panelOffset = getContainerPanelHeight()
+                + Settings.getScaledSpacing() * 2.0f;
+        for (int i = 0; i < containerSlotUIs.length; i++) {
+            InventorySlotUI slotUI = containerSlotUIs[i];
+            if (slotUI == null) continue;
+            int column = i % K.UI.INVENTORY_COLUMNS;
+            int row = i / K.UI.INVENTORY_COLUMNS;
+            slotUI.setPosition(panelX + Settings.getScaledPadding()
+                            + column * (Settings.getScaledSlot() + Settings.getScaledSpacing()),
+                    -panelOffset + Settings.getScaledPadding()
+                            + row * (Settings.getScaledSlot() + Settings.getScaledSpacing()));
+        }
+    }
+
+    /** Returns the external panel's screen-space X independently of the player inventory. */
+    private float getContainerPanelX() {
+        if (getExternalTrader() != null && GameMaster.game != null) {
+            return (GameMaster.game.getWindowWidth() - getWidth()) / 2.0f;
+        }
+        return getAbsoluteX();
+    }
+
     /** Draws the headerless external-storage panel above the player inventory. */
     private void renderContainerBackground() {
         if (externalInventory == null) return;
@@ -1443,14 +1470,14 @@ public class InventoryUI extends UIElement {
         Texture background = Frontend.createNineSliceTexture(
                 ResourceManager.rem.getBackgroundUI(), textureWidth,
                 textureHeight, GUI_SLICE_SIZE);
-        Frontend.drawTexture(background, getAbsoluteX(), y, width,
+        Frontend.drawTexture(background, getContainerPanelX(), y, width,
                 height, new Vector4f(1.0f, 1.0f, 1.0f, getWorldOpacity()));
     }
 
     /**
      * Renders the carried item.
      */
-    private void renderCarriedItem() {
+    protected void renderCarriedItem() {
         if (carriedItem == null || carriedAmount <= 0) {
             return;
         }

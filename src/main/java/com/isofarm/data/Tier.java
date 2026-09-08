@@ -10,12 +10,13 @@ public enum Tier {
     NONE((byte) -1, 0),
     LEATHER((byte) 0, 1),
     WOODEN((byte) 0, 64),
-    COPPER((byte) 1, 128),
-    IRON((byte) 2, 160),
-    STEEL((byte) 3, 192),
-    GOLDEN((byte) 4, 64),
-    PLATINUM((byte) 5, 512),
-    DIAMOND((byte) 6, 1024);
+    STONE((byte) 1, 128),
+    COPPER((byte) 2, 156),
+    IRON((byte) 3, 198),
+    STEEL((byte) 4, 230),
+    GOLDEN((byte) 5, 64),
+    PLATINUM((byte) 6, 512),
+    DIAMOND((byte) 7, 1024);
 
     private final byte id;
     private final int durability;
