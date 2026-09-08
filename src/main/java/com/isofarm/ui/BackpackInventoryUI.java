@@ -3,6 +3,8 @@ package com.isofarm.ui;
 import com.isofarm.data.Inventory;
 import com.isofarm.data.SlotType;
 import com.isofarm.entity.Player;
+import com.isofarm.item.CraftingBook;
+import com.isofarm.item.Wallet;
 import com.isofarm.utils.Settings;
 
 /**
@@ -11,7 +13,7 @@ import com.isofarm.utils.Settings;
 public class BackpackInventoryUI extends InventoryUI {
     private static final int BACKPACK_SLOTS = 16;
     private final InventorySlotUI[] backpackSlots = new InventorySlotUI[BACKPACK_SLOTS];
-    private Inventory backpack;
+    private final Inventory backpack;
 
     /**
      * Creates a new {@code BackpackInventoryUI} instance.
@@ -30,6 +32,16 @@ public class BackpackInventoryUI extends InventoryUI {
         setHeight(getBackpackHeight());
         setLayer(50);
         createBackpackSlots();
+
+        setUp();
+    }
+
+    /**
+     * Fills the slots with the basic backpack items.
+     */
+    private void setUp() {
+        Player.plyr.addToBackpack(new CraftingBook());
+        Player.plyr.addToBackpack(new Wallet());
     }
 
     /**
