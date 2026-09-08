@@ -14,6 +14,7 @@ public enum SoundGroup {
     ENTITY(new String[]{}, new String[]{"fx/entity/fall.ogg"}, new String[]{}, new String[]{}, new String[]{"fx/entity/hurt.ogg", "fx/entity/hit.ogg"}, new String[]{}, new String[]{}, new String[]{}, new String[]{}),
     RAIN(new String[]{}, new String[]{}, new String[]{}, new String[]{}, new String[]{}, new String[]{"fx/ambient/rain.ogg"}, new String[]{}, new String[]{}, new String[]{}),
     NATURE(new String[]{}, new String[]{}, new String[]{}, new String[]{}, new String[]{}, new String[]{"fx/ambient/nature.ogg"}, new String[]{}, new String[]{}, new String[]{}),
+    FOOD(new String[]{}, new String[]{}, new String[]{}, new String[]{}, new String[]{}, new String[]{}, new String[]{}, new String[]{"fx/entity/eat_01.ogg", "fx/entity/eat_02.ogg"}, new String[]{}),
     CHEST(new String[]{}, new String[]{"fx/blocks/wood.ogg"}, new String[]{"fx/blocks/wood_tumbling.ogg"}, new String[]{"fx/blocks/wood.ogg"}, new String[]{}, new String[]{}, new String[]{}, new String[]{"fx/blocks/chest_open.ogg", "fx/blocks/chest_close.ogg"}, new String[]{}),
     DOOR(new String[]{"fx/blocks/wood.ogg"}, new String[]{"fx/blocks/wood.ogg"}, new String[]{"fx/blocks/wood_tumbling.ogg"}, new String[]{"fx/blocks/wood.ogg"}, new String[]{}, new String[]{}, new String[]{}, new String[]{"fx/blocks/chest_open.ogg", "fx/blocks/chest_close.ogg"}, new String[]{}),
     CASH(new String[]{}, new String[]{}, new String[]{}, new String[]{}, new String[]{}, new String[]{}, new String[]{}, new String[]{"fx/ui/cash.ogg"}, new String[]{}),

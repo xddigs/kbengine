@@ -3,7 +3,9 @@ package com.isofarm.item;
 import com.isofarm.data.Consumable;
 import com.isofarm.data.DataClass;
 import com.isofarm.data.FoodData;
+import com.isofarm.data.SoundGroup;
 import com.isofarm.entity.Player;
+import com.isofarm.service.SoundService;
 
 /**
  * Represents a food item, which can be consumed.
@@ -33,6 +35,7 @@ public record Food(FoodData type) implements Craftable,
             Player.plyr.setHunger(Player.plyr.getHunger() + type.getFoodValue());
             Player.plyr.remove(this, 1);
             Player.plyr.restoreHunger(type.getFoodValue());
+            SoundService.fx.playUseSound(SoundGroup.FOOD);
             return true;
         }
         return false;
