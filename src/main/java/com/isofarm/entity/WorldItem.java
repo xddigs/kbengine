@@ -9,16 +9,12 @@ import com.isofarm.item.Item;
 import com.isofarm.wrld.GameMaster;
 import com.isofarm.wrld.World;
 import org.joml.Vector3f;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Encapsulates the state and operations required by world item within the game runtime.
  */
-@SuppressWarnings("unused")
 @DataClass
 public class WorldItem extends Entity {
-    private static final Logger log = LoggerFactory.getLogger(WorldItem.class);
     private static final float GRAVITY = -20.0f;
     private static final float GROUND_OFFSET = 0.02f;
     private static final float ITEM_HEIGHT = 0.45f;
@@ -32,7 +28,6 @@ public class WorldItem extends Entity {
     private static final float GROUND_BOB_HEIGHT = 0.08f;
     private final Item item;
     private int amount;
-    private World world;
     private float rotation;
     private float bobTime;
     private float pickupTimer;
@@ -68,7 +63,7 @@ public class WorldItem extends Entity {
      */
     @Override
     public void update(BlockPos blockPos, float delta) {
-        if (world == null || delta <= 0.0f) {
+        if (delta <= 0.0f) {
             return;
         }
         if (pickupTimer > 0.0f) {
@@ -113,7 +108,7 @@ public class WorldItem extends Entity {
         int currentZ = (int) Math.floor(position.z);
         int startY = (int) Math.floor(position.y);
         for (int y = startY; y >= 0; y--) {
-            float surfaceY = world.getBlockSurfaceY(
+            float surfaceY = World.wrld.getBlockSurfaceY(
                     currentX, y, currentZ, position.x, position.z);
             if (surfaceY != Float.NEGATIVE_INFINITY)
                 return surfaceY + GROUND_OFFSET + ITEM_HEIGHT * 0.5f;
@@ -167,22 +162,6 @@ public class WorldItem extends Entity {
      */
     public void addVelocity(float x, float y, float z) {
         this.velocity.add(x, y, z);
-    }
-
-    /**
-     * Returns the world.
-     * @return the {@link World} representing the world
-     */
-    public World getWorld() {
-        return world;
-    }
-
-    /**
-     * Sets the world.
-     * @param world the {@link World} supplied as {@code world}
-     */
-    public void setWorld(World world) {
-        this.world = world;
     }
 
     /**
