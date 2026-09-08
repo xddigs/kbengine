@@ -83,6 +83,7 @@ public class RecipeRegistry {
         registerTool(primaryMat, 4, 2, Axe::new);
         registerTool(primaryMat, 2, 2, Hoe::new);
         registerTool(primaryMat, 1, 2, Shovel::new);
+        registerTool(primaryMat, 6, 1, Shield::new);
     }
 
     /**

@@ -55,6 +55,7 @@ public class InventoryUI extends UIElement {
 
     private final InventorySlotUI[] slotUIs;
     private final InventorySlotUI[] containerSlotUIs;
+    private InventorySlotUI shieldSlotUI;
     private final InventorySlot[] creativeSlotData;
     private final Set<InventorySlot> creativeSlots;
     private final List<Item> creativeItems;
@@ -331,6 +332,11 @@ public class InventoryUI extends UIElement {
             slotUIs[i] = slotUI;
             addChild(slotUI);
         }
+        float shieldX = -Settings.getScaledSlot() - Settings.getScaledSpacing();
+        float shieldY = Settings.getScaledPadding() + Settings.getScaledHeader();
+        shieldSlotUI = new InventorySlotUI(shieldX, shieldY,
+                Settings.getScaledSlot(), Settings.getScaledSlot(), SlotType.SHIELD);
+        addChild(shieldSlotUI);
         createContainerSlots();
     }
 
@@ -584,8 +590,15 @@ public class InventoryUI extends UIElement {
 
         updateInventoryMode();
         if (isGodmode && isCreativeInventoryVisible) {
+            if (shieldSlotUI != null) shieldSlotUI.hide();
             syncCreativeInventory();
             return;
+        }
+
+        if (shieldSlotUI != null) {
+            shieldSlotUI.setSlot(inventory.getShieldSlot());
+            updateItemSprite(shieldSlotUI);
+            shieldSlotUI.show();
         }
 
         for (int i = 0; i < slotUIs.length; i++) {
@@ -892,6 +905,10 @@ public class InventoryUI extends UIElement {
             }
         }
 
+        if (shieldSlotUI != null && shieldSlotUI.isVisible()) {
+            shieldSlotUI.setHovered(shieldSlotUI.contains(mouseX, mouseY));
+        }
+
         for (InventorySlotUI slotUI : containerSlotUIs) {
             if (slotUI != null && slotUI.isVisible()) {
                 slotUI.setHovered(slotUI.contains(mouseX, mouseY));
@@ -928,8 +945,10 @@ public class InventoryUI extends UIElement {
                 backpackUI.getSlotUIs() : new InventorySlotUI[0];
 
         int containerSlotCount = externalInventory == null ? 0 : containerSlotUIs.length;
+        int shieldSlotCount = shieldSlotUI != null && shieldSlotUI.isVisible() ? 1 : 0;
         InventorySlotUI[] allSlots = new InventorySlotUI[slotUIs.length
-                + containerSlotCount + hotbarSlots.length + backpackSlots.length];
+                + containerSlotCount + hotbarSlots.length + backpackSlots.length
+                + shieldSlotCount];
         System.arraycopy(slotUIs, 0, allSlots, 0, slotUIs.length);
         if (containerSlotCount > 0) {
             System.arraycopy(containerSlotUIs, 0, allSlots,
@@ -940,6 +959,9 @@ public class InventoryUI extends UIElement {
         if (backpackSlots.length > 0) {
             System.arraycopy(backpackSlots, 0, allSlots,
                     hotbarOffset + hotbarSlots.length, backpackSlots.length);
+        }
+        if (shieldSlotCount > 0) {
+            allSlots[allSlots.length - 1] = shieldSlotUI;
         }
 
         for (InventorySlotUI slotUI : allSlots) {
@@ -1134,6 +1156,11 @@ public class InventoryUI extends UIElement {
             return;
         }
 
+        if (isShieldSlot(slot)) {
+            handleShieldSlotClick(slot);
+            return;
+        }
+
         if (carriedItem == null) {
             pickEntireStack(slot);
             return;
@@ -1231,6 +1258,11 @@ public class InventoryUI extends UIElement {
             return;
         }
 
+        if (isShieldSlot(slot)) {
+            handleShieldSlotClick(slot);
+            return;
+        }
+
         if (carriedItem == null && player != null
                 && ownsSlot(player.getBackpack(), slot)
                 && (slot.getItem() instanceof CraftingBook
@@ -1255,6 +1287,23 @@ public class InventoryUI extends UIElement {
         }
 
         addOneToSlot(slot);
+    }
+
+    /** Moves exactly one shield into or out of the dedicated equipment slot. */
+    private void handleShieldSlotClick(InventorySlot slot) {
+        if (carriedItem == null) {
+            pickEntireStack(slot);
+            return;
+        }
+        if (!(carriedItem instanceof Shield) || !slot.isEmpty()) return;
+        slot.setItem(carriedItem);
+        slot.setAmount(1);
+        carriedAmount--;
+        if (carriedAmount <= 0) clearCarriedItem();
+    }
+
+    private boolean isShieldSlot(InventorySlot slot) {
+        return inventory != null && slot == inventory.getShieldSlot();
     }
 
     /**

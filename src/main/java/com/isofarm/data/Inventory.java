@@ -25,6 +25,7 @@ public class Inventory {
     private final List<InventorySlot> slots;
     private final boolean hasHotbar;
     private final InventorySlot backpackSlot;
+    private final InventorySlot shieldSlot;
     private final Character owner;
 
     /**
@@ -50,6 +51,7 @@ public class Inventory {
         this.slots = new ArrayList<>();
         this.hasHotbar = includeHotbar;
         this.backpackSlot = new InventorySlot();
+        this.shieldSlot = new InventorySlot();
 
         int capacity = includeHotbar
                 ? K.UI.PLAYER_INVENTORY_SLOTS
@@ -105,6 +107,45 @@ public class Inventory {
      */
     public Backpack getBackpack() {
         return backpackSlot.getItem() instanceof Backpack backpack ? backpack : null;
+    }
+
+    /** Returns the dedicated left-hand shield slot. */
+    public InventorySlot getShieldSlot() {
+        return shieldSlot;
+    }
+
+    /** Returns the currently equipped shield, if any. */
+    public Shield getShield() {
+        return shieldSlot.getItem() instanceof Shield shield ? shield : null;
+    }
+
+    /** Equips the exact shield instance from this inventory. */
+    public boolean equipShield(Shield shield) {
+        if (shield == null || getShield() != null) return false;
+
+        InventorySlot source = slots.stream()
+                .filter(slot -> slot.getItem() == shield && slot.getAmount() > 0)
+                .findFirst().orElse(null);
+        if (source == null) return false;
+
+        source.clear();
+        shieldSlot.setItem(shield);
+        SoundService.fx.playUseSound(SoundGroup.ITEMS);
+        return true;
+    }
+
+    /** Returns the equipped shield to normal storage when space is available. */
+    public boolean unequipShield() {
+        Shield shield = getShield();
+        if (shield == null || add(shield, 1) > 0) return false;
+        shieldSlot.clear();
+        SoundService.fx.playUseSound(SoundGroup.ITEMS);
+        return true;
+    }
+
+    /** Removes a broken shield directly from its equipment slot. */
+    public void breakShield() {
+        shieldSlot.clear();
     }
 
     /**
@@ -495,6 +536,7 @@ public class Inventory {
         for (InventorySlot slot : slots) {
             slot.clear();
         }
+        shieldSlot.clear();
     }
 
     /**
