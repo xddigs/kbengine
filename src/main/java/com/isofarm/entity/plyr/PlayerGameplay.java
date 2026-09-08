@@ -92,8 +92,7 @@ public final class PlayerGameplay {
         if (!player.isInSurvival()) return;
         Difficulty difficulty = GameMaster.game.getDifficulty();
         float hungerDiff = difficulty.getMultiplier();
-        player.hungry((player.getLevel() * delta * hungerDiff) /
-                TimeService.ts.getTimeScale());
+        player.hungry((player.getLevel() * delta * hungerDiff) / 60.0f);
 
         if (difficulty == Difficulty.NIGHTMARE && player.getHunger() <= 0.0f) {
             player.kill(Cause.STARVATION);

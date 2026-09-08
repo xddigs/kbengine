@@ -161,7 +161,7 @@ public final class GameUIService implements Service<GameMaster> {
         chatField.setCompletionProvider(new CommandCompletionProvider(gameMaster.getCommandRegistry()));
         uiManager.getRoot().addChild(chatField);
 
-        final float lineheight = 32.0f;
+        final float lineheight = PLAYER_ICONS_OFFSET;
         float y = startingY;
 
         y += lineheight * 6.0f;
