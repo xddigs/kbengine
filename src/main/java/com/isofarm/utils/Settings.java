@@ -32,6 +32,11 @@ public class Settings {
      */
     private Settings() {}
 
+    /** Returns the item currently selected in the hotbar. */
+    public static Item getSelectedItem() {
+        return selectedItem;
+    }
+
     /**
      * Returns the shadow map size.
      * @return {@code float}; the shadow map size
