@@ -60,8 +60,8 @@ public class NPC extends Character {
         setDimensions(0.6f, 1.8f, 0.6f);
         setMaxHitpoints(20);
         setHitpoints(20);
-        setMaxStamina(100);
-        setStamina(100);
+        setMaxHunger(100);
+        setHunger(100);
         setReputation(Reputation.FRIENDLY);
         setGamemode(Gamemode.SURVIVAL);
         setSpeed(WALK_SPEED);

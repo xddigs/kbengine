@@ -21,7 +21,8 @@ public class DeathManager {
             Cause.BURN.getId(), "death.reason.burned",
             Cause.DROWN.getId(), "death.reason.drown",
             Cause.FALL.getId(), "death.reason.high_fall",
-            Cause.VOID.getId(), "death.reason.void");
+            Cause.VOID.getId(), "death.reason.void",
+            Cause.STARVATION.getId(), "death.reason.starvation");
     private Cause lastCauseOfDeath = Cause.NULL;
 
     /**

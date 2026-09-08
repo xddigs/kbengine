@@ -38,7 +38,7 @@ public class ResourceManager {
     private static final SpriteSheet bookHomeCraftings = new SpriteSheet(K.Paths.BOOK_LOCAL_CRAFTINGS, 2, 1);
     private static final SpriteSheet bookCloseIcon = new SpriteSheet(K.Paths.BOOK_CLOSE, 1, 1);
     private static final SpriteSheet heartsSpriteSheet = new SpriteSheet(K.Paths.HEARTS_SPRITESHEET, 1, K.UI.ICON_HEARTS_ROWS);
-    private static final SpriteSheet hungerSpriteSheet = new SpriteSheet(K.Paths.HEARTS_SPRITESHEET, 1, K.UI.ICON_HEARTS_ROWS);
+    private static final SpriteSheet hungerSpriteSheet = new SpriteSheet(K.Paths.HUNGER_SPRITESHEET, 1, K.UI.ICON_HEARTS_ROWS);
     private static final SpriteSheet destroyTexture = new SpriteSheet(K.Paths.DESTROY_STAGES, K.UI.DESTROY_FRAMES, 1);
 
     private static final SpriteSheet wheat = new SpriteSheet(K.Paths.WHEAT_TEXTURE, K.Render.CROP_TOTAL_FRAMES, 1);

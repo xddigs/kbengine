@@ -11,7 +11,8 @@ public enum Cause {
     BURN((byte) 3),
     DROWN((byte) 4),
     FALL((byte) 5),
-    VOID((byte) 6);
+    VOID((byte) 6),
+    STARVATION((byte) 7);
 
     private final byte id;
 

@@ -3,7 +3,9 @@ package com.isofarm.entity;
 import com.isofarm.data.*;
 import com.isofarm.item.Item;
 import com.isofarm.item.Wallet;
+import com.isofarm.utils.Local;
 import com.isofarm.utils.ToastFactory;
+import com.isofarm.wrld.GameMaster;
 
 /**
  * Encapsulates the state and operations required by character within the game runtime.
@@ -19,8 +21,8 @@ public abstract class Character extends Entity implements Levelable {
     private int level;
     private int experience;
     private int experienceForNextLevel;
-    private float stamina;
-    private float maxStamina;
+    private float hunger;
+    private float maxHunger;
     private int strength;
     private int intelligence;
     private int dexterity;
@@ -139,7 +141,7 @@ public abstract class Character extends Entity implements Levelable {
             int levelUpScaling = (int) (level * 0.8f);
             scale(levelUpScaling);
             maxHitpoints += 1;
-            maxStamina += 1;
+            maxHunger += 1;
             experienceForNextLevel = calcNextLevel();
         }
     }
@@ -161,7 +163,7 @@ public abstract class Character extends Entity implements Levelable {
     @Override
     public void levelUp() {
         level++;
-        ToastFactory.success("Level up! You're now level " + level);
+        ToastFactory.success(Local.lang.f("toast.level_up", level));
     }
 
     /**
@@ -287,22 +289,22 @@ public abstract class Character extends Entity implements Levelable {
     }
 
     /**
-     * Applies restore stamina and updates the affected character or item state.
+     * Restores hunger without exceeding its configured maximum.
      * @param amount the {@code float} supplied as {@code amount}
      */
-    public void restoreStamina(float amount) {
+    public void restoreHunger(float amount) {
         if (amount <= 0) return;
-        this.stamina = Math.min(getMaxStamina(), this.stamina + amount);
+        this.hunger = Math.min(getMaxHunger(), this.hunger + amount);
     }
 
     /**
-     * Applies consume stamina and updates the affected character or item state.
+     * Consumes hunger without dropping below zero.
      * @param amount the {@code float} supplied as {@code amount}
      */
-    public void consumeStamina(float amount) {
+    public void hungry(float amount) {
         if (amount <= 0) return;
         if (gamemode.isGodmode() || gamemode.isNoClip()) return;
-        this.stamina = Math.max(0.0f, this.stamina - amount);
+        this.hunger = Math.max(0.0f, this.hunger - amount);
     }
 
     /**
@@ -387,35 +389,35 @@ public abstract class Character extends Entity implements Levelable {
     }
 
     /**
-     * Returns the stamina.
-     * @return {@code float}; the stamina
+     * Returns the hunger.
+     * @return {@code float}; the hunger
      */
-    public float getStamina() {
-        return stamina;
+    public float getHunger() {
+        return hunger;
     }
 
     /**
-     * Sets the stamina.
-     * @param stamina the {@code float} supplied as {@code stamina}
+     * Sets the hunger.
+     * @param hunger the {@code float} supplied as {@code hunger}
      */
-    public void setStamina(float stamina) {
-        this.stamina = stamina;
+    public void setHunger(float hunger) {
+        this.hunger = hunger;
     }
 
     /**
-     * Returns the max stamina.
-     * @return {@code float}; the max stamina
+     * Returns the max hunger.
+     * @return {@code float}; the max hunger
      */
-    public float getMaxStamina() {
-        return maxStamina * level;
+    public float getMaxHunger() {
+        return maxHunger * level;
     }
 
     /**
-     * Sets the max stamina.
-     * @param maxStamina the {@code float} supplied as {@code maxStamina}
+     * Sets the max hunger.
+     * @param maxHunger the {@code float} supplied as {@code maxHunger}
      */
-    public void setMaxStamina(float maxStamina) {
-        this.maxStamina = maxStamina;
+    public void setMaxHunger(float maxHunger) {
+        this.maxHunger = maxHunger;
     }
 
     /**
@@ -560,6 +562,22 @@ public abstract class Character extends Entity implements Levelable {
      */
     public void setGamemode(Gamemode gamemode) {
         this.gamemode = gamemode;
+    }
+
+    /**
+     * Returns whether the character is in godmode
+     * @return {@code boolean}; whether the character is in godmode
+     */
+    public boolean isInGodMode() {
+        return gamemode.isGodmode();
+    }
+
+    /**
+     * Returns whether the character is alive and in survival mode.
+     * @return {@code true} if alive and in survival mode; otherwise {@code false}
+     */
+    public boolean isInSurvival() {
+        return gamemode.isSurvival();
     }
 
     /**

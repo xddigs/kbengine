@@ -45,6 +45,8 @@ public final class GameUIService implements Service<GameMaster> {
     private static final float DEATH_OVERLAY_MAX_ALPHA = 0.50f;
     private static final float DEATH_FADE_DURATION = 2.0f;
     private static final float DEATH_BLUR_RADIUS = 5.0f;
+    private static final float PLAYER_ICONS_OFFSET = 24.0f;
+
     private final GameMaster gameMaster;
     private final UIManager uiManager;
     private final InventoryUI inventoryUI;
@@ -389,10 +391,15 @@ public final class GameUIService implements Service<GameMaster> {
 
         if (isHUDShown) {
             uiManager.render();
-            float startX = startingX;
-            float startY = startingY;
-            renderHearts(ResourceManager.rem.getHeartsSpriteSheet(),
-                    startX, startY);
+            if (Player.plyr.isInSurvival()) {
+                float startX = startingX;
+                float startY = startingY;
+                renderHearts(ResourceManager.rem.getHeartsSpriteSheet(),
+                        startX, startY);
+
+                renderHunger(ResourceManager.rem.getHungerSpriteSheet(),
+                        startX, startY + PLAYER_ICONS_OFFSET);
+            }
             renderHotbarLabel();
             renderToasts();
         } else {
@@ -454,8 +461,7 @@ public final class GameUIService implements Service<GameMaster> {
     }
 
     /**
-     * Renders the hearts.
-     *
+     * Renders the hearts, follows the {@link Player}'s lives.
      * @param heartsSheet the {@link SpriteSheet} supplied as {@code heartsSheet}
      * @param startX      the {@code float} supplied as {@code startX}
      * @param startY      the {@code float} supplied as {@code startY}
@@ -469,8 +475,8 @@ public final class GameUIService implements Service<GameMaster> {
         int totalHearts = (maxHp + 1) / 2;
         int heartsPerRow = 10;
 
-        float heartSize = Settings.getScaledIcon() / 2f;
-        float spacing = Settings.getScaledSpacing() - 5.0f;
+        float heartSize = Settings.getScaledIcon();
+        float spacing = Settings.getScaledSpacing() - PLAYER_ICONS_OFFSET;
         float rowSpacing = spacing;
 
         heartsSheet.bind();
@@ -486,15 +492,51 @@ public final class GameUIService implements Service<GameMaster> {
 
             Frontend.drawSprite(heartsSheet, frame, posX, posY, heartSize, heartSize, color);
             if (flashTimer > 0.0f) {
-                int overlayFrame = 3;
-                Frontend.drawSprite(heartsSheet, overlayFrame, posX, posY, heartSize, heartSize, color);
+                Frontend.drawSpriteOutline(heartsSheet, 0, posX, posY, heartSize,
+                        heartSize, 1.0f, color);
+            }
+        }
+    }
+
+    /**
+     * Renders the hunger sprites, follows the {@link Player}'s hunger level
+     * @param hungerSheet the {@link SpriteSheet} supplied as {@code hungerSheet}
+     * @param startX the {@code float} supplied as {@code startX}
+     * @param startY the {@code float} supplied as {@code startY}
+     */
+    public void renderHunger(SpriteSheet hungerSheet, float startX, float startY) {
+        if (hungerSheet == null) return;
+        int currentHunger = (int) player.getHunger();
+        int maxHunger = (int) player.getMaxHunger();
+
+        int totalHungerPoints = (maxHunger + 1) / 2;
+        int hungerPerRow = 10;
+
+        float hungerSize = Settings.getScaledIcon();
+        float spacing = Settings.getScaledSpacing() - PLAYER_ICONS_OFFSET;
+        float rowSpacing = spacing;
+
+        hungerSheet.bind();
+        for (int i = 0; i < totalHungerPoints; i++) {
+            int col = i % hungerPerRow;
+            int row = i / hungerPerRow;
+
+            float posX = startX + col * (hungerSize + spacing);
+            float posY = startY - row * (hungerSize + rowSpacing);
+            int hungerHp = Math.min(2, Math.max(0, currentHunger - (i * 2)));
+            int frame = (hungerHp == 2) ? 0 : (hungerHp == 1 ? 1 : 2);
+            Vector4f color = new Vector4f(1.0f);
+
+            Frontend.drawSprite(hungerSheet, frame, posX, posY, hungerSize, hungerSize, color);
+            if (flashTimer > 0.0f) {
+                Frontend.drawSpriteOutline(hungerSheet, 0, posX, posY, hungerSize,
+                        hungerSize, 1.0f, color);
             }
         }
     }
 
     /**
      * Returns the uimanager.
-     *
      * @return the {@link UIManager} representing the uimanager
      */
     public UIManager getUIManager() {

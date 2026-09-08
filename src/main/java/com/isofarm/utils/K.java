@@ -89,7 +89,7 @@ public final class K {
         public static final int ICON_TOOL_COLS = 5;
         public static final int ICON_TOOL_ROWS = 8;
         public static final int ICON_USABLES_COLS = 7;
-        public static final int ICON_HEARTS_ROWS = 4;
+        public static final int ICON_HEARTS_ROWS = 3;
 
         public static final int ICON_MATERIAL_COLS = 12;
         public static final int ICON_MATERIAL_ROWS = 2;
@@ -181,6 +181,7 @@ public final class K {
 
         public static final String DESTROY_STAGES = "assets/textures/blocks/destroy.png";
         public static final String HEARTS_SPRITESHEET = "assets/ui/hearts.png";
+        public static final String HUNGER_SPRITESHEET = "assets/ui/hunger.png";
 
         public static final String CURSOR_POINTER = "assets/ui/pointer.png";
         public static final String DEFAULT_BACKGROUND_UI = "assets/ui/slot.png";

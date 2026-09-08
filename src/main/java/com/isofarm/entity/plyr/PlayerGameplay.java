@@ -2,6 +2,7 @@ package com.isofarm.entity.plyr;
 
 import com.isofarm.data.Gamemode;
 import com.isofarm.data.Cause;
+import com.isofarm.data.Difficulty;
 import com.isofarm.data.InventorySlot;
 import com.isofarm.data.Reputation;
 import com.isofarm.data.Seed;
@@ -30,7 +31,7 @@ public final class PlayerGameplay {
     private static final Logger log = LoggerFactory.getLogger(PlayerGameplay.class);
     private static final float WIDTH = 0.5f, HEIGHT = 2.0f, SPAWN_X = 0.5f, SPAWN_Z = 0.5f;
     private static final float SPEED = 6.0f, RESPAWN_DELAY = 5.0f;
-    private static final int MAX_HITPOINTS = 20, MAX_STAMINA = 100;
+    private static final int MAX_HITPOINTS = 20, MAX_HUNGER = 20;
     private Player player;
     private int damageSequence;
     private float respawnTimer = -1.0f;
@@ -51,7 +52,7 @@ public final class PlayerGameplay {
         player.setVelocity(new Vector3f());
         player.setDimensions(new Vector3f(WIDTH, HEIGHT, WIDTH));
         player.setMaxHitpoints(MAX_HITPOINTS); player.setHitpoints(MAX_HITPOINTS);
-        player.setMaxStamina(MAX_STAMINA); player.setStamina(MAX_STAMINA);
+        player.setMaxHunger(MAX_HUNGER); player.setHunger(MAX_HUNGER);
         player.setSpeed(SPEED); player.setReputation(Reputation.NEUTRAL);
         player.setGamemode(Gamemode.SURVIVAL);
         setUpInventory();
@@ -82,7 +83,18 @@ public final class PlayerGameplay {
     public void update(float delta) {
         player.setAnimTimer(player.getAnimTimer() + delta);
         player.heal(((0.5f + player.getLevel()) * delta) / getDifficultyRegen());
+        updateHunger(delta);
         checkDurability();
+    }
+
+    private void updateHunger(float delta) {
+        if (!player.isInSurvival()) return;
+
+        Difficulty difficulty = GameMaster.game.getDifficulty();
+        player.hungry(player.getLevel() * delta * difficulty.getMultiplier());
+        if (difficulty == Difficulty.NIGHTMARE && player.getHunger() <= 0.0f) {
+            player.kill(Cause.STARVATION);
+        }
     }
 
     /** Kills the survival player as soon as their body enters generated ocean. */
@@ -146,7 +158,7 @@ public final class PlayerGameplay {
         player.setSpeed(SPEED); player.setReputation(Reputation.NEUTRAL); player.setGamemode(Gamemode.SURVIVAL);
         player.setIsOffGroundTimer(0.0f); player.setWasOnGround(false);
         player.setMaxHitpoints(MAX_HITPOINTS); player.setHitpoints(MAX_HITPOINTS);
-        player.setMaxStamina(MAX_STAMINA); player.setStamina(MAX_STAMINA);
+        player.setMaxHunger(MAX_HUNGER); player.setHunger(MAX_HUNGER);
         player.setExperience(0); player.setLevel(1); resetAttributes();
         respawnTimer = -1.0f;
         GameMaster.game.toggleHUD();
