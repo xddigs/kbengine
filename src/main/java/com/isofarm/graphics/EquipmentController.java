@@ -2,8 +2,10 @@ package com.isofarm.graphics;
 
 import com.isofarm.graphics.gltf.GLTFModel;
 import com.isofarm.graphics.gltf.GLTFNode;
+import com.isofarm.entity.Player;
 import com.isofarm.item.Equippable;
 import com.isofarm.item.Item;
+import com.isofarm.item.Shield;
 import com.isofarm.item.Tool;
 import com.isofarm.utils.Settings;
 import org.joml.Quaternionf;
@@ -29,8 +31,16 @@ public class EquipmentController {
     private static final float ITEM_Y = 0.25f;
     private static final float ITEM_Z = -0.15f;
 
+    private static final float SHIELD_SCALE = 0.52f;
+    private static final float SHIELD_X = 0.0f;
+    private static final float SHIELD_Y = -0.29f;
+    private static final float SHIELD_Z = -0.11f;
+    private static final float SHIELD_RAISE_ANGLE = (float) Math.toRadians(70.0f);
+
     private GLTFNode currentActiveNode = null;
+    private GLTFNode shieldNode = null;
     private DynamicEquipmentMesh equipmentMesh;
+    private DynamicEquipmentMesh shieldMesh;
 
     /** Returns the singleton instance of {@code EquipmentController}. */
     private EquipmentController() {}
@@ -75,6 +85,25 @@ public class EquipmentController {
 
         currentActiveNode.setVisible(false);
         arm.addChild(currentActiveNode);
+
+        GLTFNode leftArm = playerModel.findNode("LeftArm");
+        if (leftArm == null) {
+            leftArm = playerModel.getNodes().stream()
+                    .filter(n -> n.getName() != null && n.getName().toLowerCase().contains("left")
+                            && n.getName().toLowerCase().contains("arm"))
+                    .findFirst()
+                    .orElse(null);
+        }
+        if (leftArm == null) throw new NullPointerException("Left arm node not found");
+
+        int shieldMeshIndex = playerModel.getMeshes().size();
+        shieldMesh = new DynamicEquipmentMesh();
+        playerModel.addMesh(shieldMesh);
+        shieldNode = new GLTFNode("equipped_shield_root", shieldMeshIndex,
+                new Vector3f(SHIELD_X, SHIELD_Y, SHIELD_Z),
+                new Quaternionf(), new Vector3f(SHIELD_SCALE));
+        shieldNode.setVisible(false);
+        leftArm.addChild(shieldNode);
     }
 
     /**
@@ -82,6 +111,7 @@ public class EquipmentController {
      */
     public void equip() {
         if (currentActiveNode == null) return;
+        equipShield();
 
         Item item = Settings.getSelectedItem();
         if (item == null) {
@@ -96,6 +126,7 @@ public class EquipmentController {
         }
 
         if (item instanceof Equippable e && e.isEquipped()) {
+            currentActiveNode.setVisible(false);
             return;
         }
 
@@ -123,6 +154,38 @@ public class EquipmentController {
         }
 
         currentActiveNode.setVisible(true);
+    }
+
+    /** Updates the shield texture while keeping it attached over the left forearm. */
+    private void equipShield() {
+        if (shieldNode == null || shieldMesh == null) return;
+        Shield shield = Player.plyr.getEquippedShield();
+        if (shield == null) {
+            shieldNode.setVisible(false);
+            return;
+        }
+
+        SpriteSheet sheet = ResourceManager.getItemSpriteSheet(shield);
+        if (sheet == null) {
+            shieldNode.setVisible(false);
+            return;
+        }
+
+        int frame = Math.clamp(ResourceManager.getItemFrame(shield),
+                0, sheet.getTotalFrames() - 1);
+        Vector4f uvBounds = sheet.getUVBounds(frame);
+        shieldMesh.update(sheet, frame, uvBounds);
+        shieldNode.setTextureOverride(sheet.getTextureId(), uvBounds);
+        shieldNode.setVisible(true);
+    }
+
+    /** Counter-rotates the forearm-mounted shield so its face stays toward incoming attacks. */
+    public void setShieldRaise(float weight) {
+        if (shieldNode == null) return;
+        float clamped = Math.clamp(weight, 0.0f, 1.0f);
+        shieldNode.setTranslation(new Vector3f(SHIELD_X, SHIELD_Y, SHIELD_Z));
+        shieldNode.setRotation(new Quaternionf().rotateX(-SHIELD_RAISE_ANGLE * clamped));
+        shieldNode.setScale(new Vector3f(SHIELD_SCALE));
     }
 
     /**

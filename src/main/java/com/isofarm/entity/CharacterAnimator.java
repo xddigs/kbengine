@@ -37,6 +37,7 @@ public final class CharacterAnimator {
     private Vector3f headPosition, torsoPosition, backpackPosition, rightArmPosition, leftArmPosition, rightLegPosition, leftLegPosition;
     private Direction direction = Direction.S;
     private float modelYaw, targetYaw, idleTime, idleWeight, sneakWeight, walkTime, walkWeight, attackTime;
+    private float shieldWeight;
     private float deathTime, deathWeight, deathAlpha = 1.0f;
     private boolean attacking;
 
@@ -112,6 +113,8 @@ public final class CharacterAnimator {
         boolean sneaking = false;
         if (character instanceof Player p) {
             sneaking = p.getCurrentState() instanceof SneakingState;
+            shieldWeight = lerp(shieldWeight, p.isShieldRaised() ? 1.0f : ZERO,
+                    Math.clamp(delta * 30.0f, ZERO, 1.0f));
         }
 
         sneakWeight = lerp(sneakWeight, sneaking ? 1 : ZERO, Math.clamp(delta * 75, ZERO, 1));
@@ -152,16 +155,20 @@ public final class CharacterAnimator {
         translate(leftLeg, leftLegPosition, 0, 0, legOffset);
         rotate(torso, new Quaternionf().rotateX(-lean + breath));
         rotate(backpack, new Quaternionf().rotateX(-lean + breath));
-        rotate(leftArm, new Quaternionf().rotateX(-swing + breath - armBend).rotateZ(-sway));
+        rotate(leftArm, new Quaternionf()
+                .rotateX(-swing + breath - armBend
+                        + (float) Math.toRadians(70.0f) * shieldWeight)
+                .rotateY((float) Math.toRadians(-12.0f) * shieldWeight)
+                .rotateZ(-sway + (float) Math.toRadians(8.0f) * shieldWeight));
         rotate(rightArm, new Quaternionf().rotateX(swing + breath - armBend + attackX).rotateY(attackY).rotateZ(sway + attackZ));
         rotate(rightLeg, new Quaternionf().rotateX(-swing)); rotate(leftLeg, new Quaternionf().rotateX(swing));
         updateHead(delta);
 
+        updateEquipment();
+
         if (model != null) {
             model.updateTransforms();
         }
-
-        updateEquipment();
     }
 
     /**
@@ -176,6 +183,8 @@ public final class CharacterAnimator {
         deathAlpha = 1.0f - fadeProgress;
         attacking = false;
         attackTime = 0.0f;
+        shieldWeight = 0.0f;
+        EquipmentController.eq.setShieldRaise(0.0f);
 
         float loosen = deathWeight;
         translate(head, headPosition, 0.0f, -0.08f * ANIMATION_SCALE * loosen, 0.0f);
@@ -349,6 +358,7 @@ public final class CharacterAnimator {
     private void updateEquipment() {
         if (!(character instanceof Player)) return;
         EquipmentController.eq.equip();
+        EquipmentController.eq.setShieldRaise(shieldWeight);
     }
 
     /**
