@@ -64,7 +64,6 @@ public class GameInteraction {
      */
     public BlockPos update(GameMaster gameMaster, Item selectedItem) {
         Player player = Player.plyr;
-        Inventory inventory = player.getInventory();
         boolean isCtrlHeld = Controls.isDown(ControlAction.MODIFIER);
 
         boolean isShiftHeld = Controls.isDown(ControlAction.SMART_SHIFT);
@@ -200,6 +199,10 @@ public class GameInteraction {
                 default -> throw new IllegalStateException(
                         "Unexpected value: " + usable);
             }
+        }
+
+        if (selectedItem instanceof Consumable consumable) {
+            consumable.consume();
         }
 
         if (isShiftHeld && hoveredCell != null) {
