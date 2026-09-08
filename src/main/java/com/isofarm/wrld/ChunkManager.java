@@ -10,9 +10,12 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Encapsulates the state and operations required by chunk manager within the game runtime.
@@ -26,10 +29,11 @@ public class ChunkManager {
     private final Map<Chunk, ChunkMeshBuilder.ChunkRenderMesh> chunkMeshes;
     private final Map<SoilPosition, Float> soilTimers;
     private final ExecutorService meshExecutor;
-    private final ConcurrentLinkedQueue<MeshBuildResult> completedMeshes = new ConcurrentLinkedQueue<>();
+    private final ConcurrentLinkedDeque<MeshBuildResult> completedMeshes = new ConcurrentLinkedDeque<>();
     private final Set<Long> buildingChunks = ConcurrentHashMap.newKeySet();
     private final Set<Long> dirtyChunks = new HashSet<>();
     private final Map<Long, Long> meshVersions = new ConcurrentHashMap<>();
+    private final AtomicLong meshBuildSequence = new AtomicLong();
 
     private int lastPlayerChunkX = Integer.MAX_VALUE;
     private int lastPlayerChunkZ = Integer.MAX_VALUE;
@@ -45,7 +49,8 @@ public class ChunkManager {
         this.chunkMeshes = new HashMap<>();
         this.soilTimers = new HashMap<>();
         int threads = Math.max(1, Runtime.getRuntime().availableProcessors() - 2);
-        this.meshExecutor = Executors.newFixedThreadPool(threads);
+        this.meshExecutor = new ThreadPoolExecutor(threads, threads,
+                0L, TimeUnit.MILLISECONDS, new PriorityBlockingQueue<>());
     }
 
     /**
@@ -153,6 +158,11 @@ public class ChunkManager {
      * @param chunk the {@link Chunk} supplied as {@code chunk}
      */
     private void queueMeshBuild(Chunk chunk) {
+        queueMeshBuild(chunk, false);
+    }
+
+    /** Queues player-visible rebuilds ahead of background chunk generation. */
+    private void queueMeshBuild(Chunk chunk, boolean prioritized) {
         long key = world.get2DKey(chunk.getChunkX(), chunk.getChunkZ());
 
         if (meshExecutor.isShutdown()) {
@@ -165,14 +175,8 @@ public class ChunkManager {
 
         long version = meshVersions.getOrDefault(key, 0L);
         dirtyChunks.remove(key);
-        meshExecutor.submit(() -> {
-            try {
-                ChunkMeshBuilder.ChunkMeshData data = ChunkMeshBuilder.buildMesh(world, chunk);
-                completedMeshes.add(new MeshBuildResult(chunk, data, version));
-            } finally {
-                buildingChunks.remove(key);
-            }
-        });
+        meshExecutor.execute(new MeshBuildTask(chunk, key, version, prioritized,
+                meshBuildSequence.getAndIncrement()));
     }
 
     /**
@@ -182,7 +186,7 @@ public class ChunkManager {
         MeshBuildResult result;
         int processed = 0;
         while (processed < MAX_MESH_UPLOADS_PER_FRAME
-                && (result = completedMeshes.poll()) != null) {
+                && (result = completedMeshes.pollFirst()) != null) {
             processed++;
             Chunk chunk = result.chunk();
             long key = world.get2DKey(chunk.getChunkX(), chunk.getChunkZ());
@@ -192,7 +196,7 @@ public class ChunkManager {
             }
 
             if (result.version() != meshVersions.getOrDefault(key, 0L)) {
-                if (dirtyChunks.contains(key)) queueMeshBuild(chunk);
+                if (dirtyChunks.contains(key)) queueMeshBuild(chunk, true);
                 continue;
             }
 
@@ -240,7 +244,7 @@ public class ChunkManager {
         if (chunk != null) {
             meshVersions.merge(key, 1L, Long::sum);
             dirtyChunks.add(key);
-            queueMeshBuild(chunk);
+            queueMeshBuild(chunk, true);
         }
     }
 
@@ -453,5 +457,44 @@ public class ChunkManager {
     /**
      * Immutable value object containing mesh build result.
      */
-    private record MeshBuildResult(Chunk chunk, ChunkMeshBuilder.ChunkMeshData data, long version) {}
+    private record MeshBuildResult(Chunk chunk, ChunkMeshBuilder.ChunkMeshData data,
+                                   long version) {}
+
+    /** Prioritized CPU-side mesh build. GPU upload remains on the render thread. */
+    private final class MeshBuildTask implements Runnable, Comparable<MeshBuildTask> {
+        private final Chunk chunk;
+        private final long key;
+        private final long version;
+        private final boolean prioritized;
+        private final long sequence;
+
+        private MeshBuildTask(Chunk chunk, long key, long version,
+                              boolean prioritized, long sequence) {
+            this.chunk = chunk;
+            this.key = key;
+            this.version = version;
+            this.prioritized = prioritized;
+            this.sequence = sequence;
+        }
+
+        @Override
+        public void run() {
+            ChunkMeshBuilder.ChunkMeshData data;
+            try {
+                data = ChunkMeshBuilder.buildMesh(world, chunk);
+            } finally {
+                buildingChunks.remove(key);
+            }
+
+            MeshBuildResult result = new MeshBuildResult(chunk, data, version);
+            if (prioritized) completedMeshes.addFirst(result);
+            else completedMeshes.addLast(result);
+        }
+
+        @Override
+        public int compareTo(MeshBuildTask other) {
+            int priority = Boolean.compare(other.prioritized, prioritized);
+            return priority != 0 ? priority : Long.compare(sequence, other.sequence);
+        }
+    }
 }

@@ -35,7 +35,6 @@ import static org.joml.Math.lerp;
 public class GameInteraction {
     public static final GameInteraction gami = new GameInteraction();
     private static final float PICKUP_DISTANCE = 1.5f;
-    private static final float TIMEOUT = 0.4f;
     private static final float TIMER_MAX = 5.0f;
 
     private static final Logger log = LoggerFactory.getLogger(GameInteraction.class);
@@ -45,9 +44,7 @@ public class GameInteraction {
     private int breakingZ = Integer.MIN_VALUE;
 
     private float breakProgress = 0.0f;
-    private float breakTimeout = TIMEOUT;
     private float dropTimer = TIMER_MAX;
-    private long lastBreakTime = 0L;
 
     private boolean isSmartShift = false;
     
@@ -232,12 +229,8 @@ public class GameInteraction {
             return null;
         }
 
-        breakTimeout -= GameMaster.game.getGenDelta();
-        breakTimeout = Math.max(breakTimeout, 0.0f);
-
         if (isLeftHeld && canInteract) {
-            if (breakTimeout <= 0.0f
-                    && NPCService.npcs.getClosestBeforeBlock(gameMaster, raycastCell) == null) {
+            if (NPCService.npcs.getClosestBeforeBlock(gameMaster, raycastCell) == null) {
                 breaking(gameMaster, hoveredCell);
             }
         } else {
@@ -509,11 +502,9 @@ public class GameInteraction {
             breakingY = y;
             breakingZ = z;
             breakProgress = 0.0f;
-            lastBreakTime = System.nanoTime();
         }
 
-        Gamemode gamemode = Player.plyr.getGamemode();
-        if (gamemode.isGodmode()) {
+        if (Player.plyr.isInGodMode()) {
             breakBlock(gameMaster, cell, blockData, blockId, selectedItem);
             resetBreaking();
             return;
@@ -527,10 +518,7 @@ public class GameInteraction {
         }
 
         SoundService.fx.playBreakingSound(blockData.getSoundGroup());
-        long now = System.nanoTime();
-        float deltaTime = (now - lastBreakTime) / 1_000_000_000.0f;
-        lastBreakTime = now;
-        breakProgress += deltaTime / destroyTime;
+        breakProgress += GameMaster.game.getGenDelta() / destroyTime;
 
         if (breakProgress >= 1.0f) {
             breakBlock(gameMaster, cell, blockData, blockId, selectedItem);
@@ -541,7 +529,8 @@ public class GameInteraction {
     /**
      * Advances or completes the destruction of an interactive block.
      */
-    private void breakInteractiveBlock(GameMaster gameMaster, World world, iBlock block) {
+    private void breakInteractiveBlock(GameMaster gameMaster,
+                                       World world, iBlock block) {
         int x = block.getX();
         int y = block.getY();
         int z = block.getZ();
@@ -551,7 +540,6 @@ public class GameInteraction {
             breakingY = y;
             breakingZ = z;
             breakProgress = 0.0f;
-            lastBreakTime = System.nanoTime();
         }
 
         if (Player.plyr.getGamemode().isGodmode()) {
@@ -560,10 +548,8 @@ public class GameInteraction {
             return;
         }
 
-        long now = System.nanoTime();
-        float deltaTime = (now - lastBreakTime) / 1_000_000_000.0f;
-        lastBreakTime = now;
-        breakProgress += deltaTime / block.getType().getDestroyTime();
+        breakProgress += GameMaster.game.getGenDelta()
+                / block.getType().getDestroyTime();
 
         if (breakProgress >= 1.0f) {
             destroyInteractiveBlock(gameMaster, world, block);
@@ -727,7 +713,6 @@ public class GameInteraction {
 
         GameUIService.ui.logAction(cell);
         log.trace("Block removed: {} at {},{},{}", blockData.getName().toUpperCase(), cell.x(), cell.y(), cell.z());
-        this.breakTimeout = TIMEOUT;
     }
 
     /**
@@ -753,7 +738,6 @@ public class GameInteraction {
         breakingY = Integer.MIN_VALUE;
         breakingZ = Integer.MIN_VALUE;
         breakProgress = 0.0f;
-        lastBreakTime = 0L;
     }
 
     /**
