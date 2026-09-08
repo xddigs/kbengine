@@ -95,18 +95,19 @@ public class EquipmentController {
             layer.setTextureOverride(textureId, uvBounds);
         }
 
-        float offset = -0.20f;
+        float offset = 0.05f;
         currentActiveNode.setTranslation(new Vector3f(ITEM_X, ITEM_Y, ITEM_Z));
         if (item instanceof Tool) {
-            currentActiveNode.setTranslation(new Vector3f(ITEM_X, ITEM_Y + offset, ITEM_Z));
+            currentActiveNode.setTranslation(new Vector3f(ITEM_X, ITEM_Y + offset, ITEM_Z - offset));
             currentActiveNode.setRotation(new Quaternionf()
                     .rotateX((float) Math.toRadians(30.0f))
-                    .rotateZ((float) Math.toRadians(30.0f)));
+                    .rotateY((float) Math.toRadians(90.0f)));
+            currentActiveNode.setScale(new Vector3f(ITEM_SCALE + 0.2f));
         } else {
             currentActiveNode.setRotation(new Quaternionf().rotateX((float) Math.toRadians(90.0f)));
+            currentActiveNode.setScale(new Vector3f(ITEM_SCALE));
         }
 
-        currentActiveNode.setScale(new Vector3f(ITEM_SCALE));
         currentActiveNode.setVisible(true);
     }
 

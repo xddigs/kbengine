@@ -691,7 +691,7 @@ public class GameInteraction {
             }
         }
 
-        BlockData wasBrokenIn = wasBrokenInSurvival(blockData);
+        Craftable wasBrokenIn = wasBrokenInSurvival(blockData);
         world.setBlockTypeAt(cell, BlockData.AIR.getId());
         world.setFluidLevelAt(cell.x(), cell.y(), cell.z(), (byte) 0);
         breakAbove(cell.x(), cell.y(), cell.z());
@@ -700,7 +700,7 @@ public class GameInteraction {
         ParticleEngine.peng.spawnBlock(cell, blockData);
 
         if (wasBrokenIn != null) {
-            itemToDrop = new Block(wasBrokenIn, cell);
+            itemToDrop = new Block(BlockData.fromIdTo(wasBrokenIn.getId()).getType(), cell);
         } else if (removedBlock.getType().hasDrops()) {
             Object dropObj = removedBlock.getType().getRandomDrop();
             if (dropObj instanceof MaterialID mid) {
@@ -729,11 +729,12 @@ public class GameInteraction {
      * @param blockData the {@link BlockData} supplied as {@code blockData}
      * @return {@code true} if the block was broken; otherwise {@code false}
      */
-    private BlockData wasBrokenInSurvival(BlockData blockData) {
+    private Craftable wasBrokenInSurvival(BlockData blockData) {
         return switch (blockData) {
-            case GRASS, TILLED_DIRT -> BlockData.DIRT;
-            case STONE -> BlockData.COBBLESTONE;
-            default -> blockData;
+            case GRASS, TILLED_DIRT -> BlockData.fromIdTo(BlockData.DIRT.getId());
+            case STONE -> BlockData.fromIdTo(BlockData.COBBLESTONE.getId());
+            case OAK_LEAVES, SPRUCE_LEAVES -> MaterialID.STICK;
+            default -> BlockData.fromIdTo(blockData.getId());
         };
     }
 
