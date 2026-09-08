@@ -164,7 +164,7 @@ public final class GameUIService implements Service<GameMaster> {
         final float lineheight = 32.0f;
         float y = startingY;
 
-        y += lineheight * 2.0f;
+        y += lineheight * 6.0f;
         this.time = new UILabel(startingX, y, 100f, 25f, null);
         this.time.show();
         uiManager.getRoot().addChild(time);
@@ -398,7 +398,7 @@ public final class GameUIService implements Service<GameMaster> {
                         startX, startY);
 
                 renderHunger(ResourceManager.rem.getHungerSpriteSheet(),
-                        startX, startY + PLAYER_ICONS_OFFSET);
+                        startX, startY + PLAYER_ICONS_OFFSET * 2.0f);
             }
             renderHotbarLabel();
             renderToasts();

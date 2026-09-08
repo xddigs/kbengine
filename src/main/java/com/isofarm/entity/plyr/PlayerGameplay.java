@@ -13,6 +13,7 @@ import com.isofarm.entity.WorldItem;
 import com.isofarm.item.*;
 import com.isofarm.pathfinding.GridPos;
 import com.isofarm.service.SoundService;
+import com.isofarm.service.TimeService;
 import com.isofarm.utils.Local;
 import com.isofarm.utils.Settings;
 import com.isofarm.utils.ToastFactory;
@@ -89,9 +90,11 @@ public final class PlayerGameplay {
 
     private void updateHunger(float delta) {
         if (!player.isInSurvival()) return;
-
         Difficulty difficulty = GameMaster.game.getDifficulty();
-        player.hungry(player.getLevel() * delta * difficulty.getMultiplier());
+        float hungerDiff = difficulty.getMultiplier();
+        player.hungry((player.getLevel() * delta * hungerDiff) /
+                TimeService.ts.getTimeScale());
+
         if (difficulty == Difficulty.NIGHTMARE && player.getHunger() <= 0.0f) {
             player.kill(Cause.STARVATION);
         }
