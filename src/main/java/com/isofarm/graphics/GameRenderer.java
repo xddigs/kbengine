@@ -435,7 +435,7 @@ public class GameRenderer {
         defaultShader.unbind();
         sceneFbo.unbind((int) windowWidth, (int) windowHeight);
 
-        if (gameMaster.isInventoryOpen() || BookService.bs.isOpen()) {
+        if (gameMaster.isInventoryOpen() || gameMaster.isBackpackOpen() || BookService.bs.isOpen()) {
             glDisable(GL_DEPTH_TEST);
             Shader blurShader = ResourceManager.rem.getBlurShader();
             Vector2f resolution = new Vector2f(windowWidth, windowHeight);
