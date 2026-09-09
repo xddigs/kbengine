@@ -79,8 +79,11 @@ float applyViewFog(vec3 worldPosition) {
     float frontDepth = dot(offset, toCamera);
     float sideDistance = abs(dot(offset, vec2(-toCamera.y, toCamera.x)));
     float corridorWidth = max(1.5, uViewRadius * 0.32);
+
     if (frontDepth > 0.20 && sideDistance < corridorWidth
-            && worldPosition.y > uViewFloorY + 0.08) discard;
+        && worldPosition.y > uViewFloorY + 0.08) {
+        return 0.15;
+    }
 
     return 1.0 - smoothstep(max(0.0, uViewRadius - 2.0),
                             uViewRadius, distanceFromPlayer);

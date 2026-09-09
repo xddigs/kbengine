@@ -1,6 +1,7 @@
 package com.isofarm.item;
 
 import com.isofarm.data.BlockPos;
+import com.isofarm.data.DataClass;
 import com.isofarm.data.Inventory;
 import com.isofarm.data.BlockData;
 import com.isofarm.graphics.ResourceManager;
@@ -16,10 +17,11 @@ import org.joml.Vector3f;
 /**
  * A craftable block with a model and interactive state.
  */
+@DataClass
 public class iBlock implements Craftable {
-    private static final float ANIMATION_DURATION = 0.16f;
+    private static final float ANIMATION_DURATION = 0.10f;
     private static final float CHEST_OPEN_ANGLE = (float) Math.toRadians(35.0);
-    private static final float DOOR_OPEN_ANGLE = (float) Math.toRadians(90.0);
+    private static final float DOOR_OPEN_ANGLE = (float) Math.toRadians(-90.0);
     private static final float QUARTER_TURN = (float) (Math.PI * 0.5);
     private static final float DOOR_MIN_Z = 0.0625f;
     private static final float DOOR_DEPTH = 0.0625f;
@@ -378,12 +380,19 @@ public class iBlock implements Craftable {
 
     private float getDoorHingeX() {
         int quarter = Math.floorMod(Math.round(orientation / QUARTER_TURN), 4);
-        return x + ((quarter == 1 || quarter == 2) ? 1.0f : 0.0f);
+        return switch (quarter) {
+            case 2 -> x + 1.0f;
+            case 3 -> x + DOOR_MIN_Z + DOOR_DEPTH;
+            default -> x;
+        };
     }
 
     private float getDoorHingeZ() {
         int quarter = Math.floorMod(Math.round(orientation / QUARTER_TURN), 4);
-        return z + ((quarter == 2 || quarter == 3) ? 1.0f : 0.0f);
+        return switch (quarter) {
+            case 1, 2 -> z + 1.0f;
+            default -> z;
+        };
     }
 
     private void applyAnimation() {

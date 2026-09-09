@@ -22,8 +22,8 @@ public class Settings {
     private static boolean doKeepInventory = true;
     private static boolean doEnableMotions = false;
     private static float maxInteractionDistance = 6.0f;
-    private static int interiorDetectionRadius = 12;
-    private static float undergroundViewRadius = 8.0f;
+    private static int interiorDetectionRadius = 6;
+    private static float undergroundViewRadius = 6.0f;
     private static float undergroundCutHeight = 2.25f;
     private static boolean doEnableMusic = true;
     private static boolean doEnableDebugInfo = true;

@@ -197,8 +197,6 @@ public class GameRenderer {
         }
 
         if (player != null) {
-            // The cutaway belongs to the world. The avatar must remain whole
-            // while crossing the exterior/interior/underground boundary.
             defaultShader.setUniform("uIgnoreViewFog", true);
             player.render(gameMaster, RenderPass.NORMAL);
             defaultShader.bind();

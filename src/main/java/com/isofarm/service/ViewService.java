@@ -14,7 +14,7 @@ import org.joml.Vector4f;
  * Classifies the space occupied by the player and exposes the clipping volume
  * used by the isometric fog-of-war shaders.
  */
-public final class ViewService {
+public final class ViewService implements Service<View> {
     private static final int MIN_ROOM_HEIGHT = 2;
     private static final int MAX_ROOM_HEIGHT = 8;
     private static final float MIN_WALL_COVERAGE = 0.90f;

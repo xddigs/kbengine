@@ -8,6 +8,7 @@ import com.isofarm.item.Bucket;
 import com.isofarm.utils.K;
 import com.isofarm.utils.Settings;
 import com.isofarm.wrld.World;
+import com.isofarm.wrld.GameMaster;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
@@ -328,8 +329,15 @@ public class Camera implements CameraView {
         World.DoorHit doorHit = world.raycastDoor(origin, direction);
 
         do {
+            // Interaction must use the same visibility volume as rendering. In
+            // underground/interior view the ray may pass through cells that
+            // are outside the player's visible space; those cells must not be
+            // considered interaction targets.
+            boolean isVisible = GameMaster.game.getViewService().isVisible(
+                    new Vector3f(x + 0.5f, y + 0.5f, z + 0.5f));
+
             var interactiveBlock = world.getInteractiveBlockAt(x, y, z);
-            if (interactiveBlock != null
+            if (isVisible && interactiveBlock != null
                     && !interactiveBlock.getType().isDoor()) {
                 float distToPlayer = playerPos.distance(x + 0.5f, y + 0.5f, z + 0.5f);
                 if (distToPlayer > Settings.getMaxInteractionDistance()) return null;
@@ -351,7 +359,7 @@ public class Camera implements CameraView {
             boolean hitsShape = data != null && (blockShape.isFullCube()
                     || (shapeHit != null && shapeHit.distance() <= cellExit));
 
-            if (hasBlock && hitsShape && (!data.isFluid() || isBucket)) {
+            if (isVisible && hasBlock && hitsShape && (!data.isFluid() || isBucket)) {
                 boolean isTransparentObject = data.isTransparent()
                         || data == BlockData.OAK_LEAVES
                         || data == BlockData.SPRUCE_LEAVES;

@@ -236,7 +236,7 @@ public class GameInteraction {
             return null;
         }
 
-        if (!isWithinRange(hoveredCell)) {
+        if (!isVisibleToPlayer(hoveredCell) || !isWithinRange(hoveredCell)) {
             resetBreaking();
             return null;
         }
@@ -428,6 +428,16 @@ public class GameInteraction {
     }
 
     /**
+     * Keeps all block interactions inside the same visibility volume used by
+     * the renderer and camera raycast.
+     */
+    private boolean isVisibleToPlayer(BlockPos cell) {
+        if (cell == null) return false;
+        return GameMaster.game.getViewService().isVisible(
+                new Vector3f(cell.x() + 0.5f, cell.y() + 0.5f, cell.z() + 0.5f));
+    }
+
+    /**
      * Returns the distance to block.
      * @param cell the {@link BlockPos} supplied as {@code cell}
      * @return {@code float}; the distance to block
@@ -514,13 +524,8 @@ public class GameInteraction {
             breakProgress = 0.0f;
         }
 
-        if (Player.plyr.isInGodMode()) {
-            breakBlock(gameMaster, cell, blockData, blockId, selectedItem);
-            resetBreaking();
-            return;
-        }
-
-        float destroyTime = blockData.getDestroyTime(selectedItem);
+        float destroyTime = Player.plyr.isInGodMode() ? 0.2f :
+                blockData.getDestroyTime();
 
         if (destroyTime <= 0.0f) {
             resetBreaking();
