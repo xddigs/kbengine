@@ -1,11 +1,6 @@
 package com.isofarm.graphics;
 
-import com.isofarm.data.BlockData;
-import com.isofarm.data.BlockPos;
-import com.isofarm.data.BlockShape;
-import com.isofarm.data.Crop;
-import com.isofarm.data.RenderPass;
-import com.isofarm.data.View;
+import com.isofarm.data.*;
 import com.isofarm.entity.Player;
 import com.isofarm.input.GameInteraction;
 import com.isofarm.item.Block;
@@ -34,6 +29,8 @@ import static org.lwjgl.opengl.GL13.*;
  * Encapsulates the state and operations required by game renderer within the game runtime.
  * It is the main output for the graphics of the game
  */
+@Singleton
+@GodObject
 public class GameRenderer {
     private static final int MAX_TORCH_LIGHTS = 32;
     public static final GameRenderer gamr = new GameRenderer();
