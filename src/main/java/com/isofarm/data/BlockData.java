@@ -515,6 +515,10 @@ public enum BlockData implements Blockable {
         return this.equals(OAK_LOG) || this.equals(SPRUCE_LOG);
     }
 
+    public boolean isPlanks() {
+        return this.equals(OAK_PLANK) || this.equals(SPRUCE_PLANK);
+    }
+
     /**
      * Checks whether the tillable condition is met.
      * @return {@code true} if tillable; otherwise {@code false}

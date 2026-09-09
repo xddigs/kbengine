@@ -53,6 +53,7 @@ public class RecipeRegistry {
 
         registerToolSet(BlockData.fromIdTo(BlockData.OAK_PLANK.getId()));
         registerToolSet(BlockData.fromIdTo(BlockData.STONE.getId()));
+        registerShieldSet();
 
         /* Required tier, Crafted Tier */
         Map<Tier, Tier> metalProgression = Map.of(
@@ -83,7 +84,29 @@ public class RecipeRegistry {
         registerTool(primaryMat, 4, 2, Axe::new);
         registerTool(primaryMat, 2, 2, Hoe::new);
         registerTool(primaryMat, 1, 2, Shovel::new);
-        registerTool(primaryMat, 6, 1, Shield::new);
+    }
+
+    /** Adds shield set to the corresponding collection or processing queue. */
+    private void registerShieldSet() {
+        registerShields(Tier.WOODEN, null);
+        Tier.forEach(tier -> {
+            if (tier.isInvalidTier()) return;
+            registerShields(tier, new MiningComponent(tier, MaterialID.INGOT));
+        });
+    }
+
+    /**
+     * Adds shields to the corresponding collection or processing queue.
+     * @param tier the {@link Tier} supplied as {@code tier}
+     * @param primaryMat the {@link Craftable} supplied as {@code primaryMat}
+     */
+    private void registerShields(Tier tier, Craftable primaryMat) {
+        for (BlockData block : BlockData.all()) {
+            if (!block.isPlanks()) continue;
+            RecipeBuilder recipe = create().result(new Shield(tier), 1);
+            if (primaryMat != null) recipe.with(primaryMat, 1);
+            recipe.with(new Block(block), 6).add();
+        }
     }
 
     /**

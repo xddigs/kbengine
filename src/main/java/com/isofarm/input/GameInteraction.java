@@ -130,7 +130,8 @@ public class GameInteraction {
                 && openedBook != backpackBook) {
             BookService.bs.close();
         }
-        if (Controls.isPressed(ControlAction.TOGGLE_BOOK)
+
+        if (Controls.isPressed(ControlAction.TOGGLE_BOOK) && !GameMaster.game.isInventoryOpen()
                 && !GameMaster.game.isChatOpen() && backpackBook != null) {
             if (!BookService.bs.isOpen()) {
                 BookService.bs.open(backpackBook);

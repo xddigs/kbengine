@@ -159,10 +159,12 @@ public class CraftingService {
             Craftable craftable = option.craftable();
             if (craftable instanceof MaterialID materialID && item instanceof Material material
                     && material.getId() == materialID.getId()) return true;
-            if (craftable instanceof MiningComponent miningComponent
-                    && item instanceof MiningComponent itemMiningComponent
-                    && miningComponent.getTier() == itemMiningComponent.getTier()
-                    && miningComponent.getId() == itemMiningComponent.getId()) return true;
+            if (craftable instanceof MiningComponent miningComponent) {
+                if (item instanceof MiningComponent itemMiningComponent
+                        && miningComponent.getTier() == itemMiningComponent.getTier()
+                        && miningComponent.getId() == itemMiningComponent.getId()) return true;
+                continue;
+            }
             if (craftable instanceof Item craftableItem && isSameType(craftableItem, item)) return true;
         }
         return false;
