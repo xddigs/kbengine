@@ -17,14 +17,18 @@ import org.joml.Vector3f;
 /**
  * A craftable block with a model and interactive state.
  */
+@SuppressWarnings("all")
 @DataClass
 public class iBlock implements Craftable {
     private static final float ANIMATION_DURATION = 0.10f;
     private static final float CHEST_OPEN_ANGLE = (float) Math.toRadians(35.0);
     private static final float DOOR_OPEN_ANGLE = (float) Math.toRadians(-90.0);
-    private static final float QUARTER_TURN = (float) (Math.PI * 0.5);
     private static final float DOOR_MIN_Z = 0.0625f;
     private static final float DOOR_DEPTH = 0.0625f;
+    // The door asset is authored around its hinge/origin, rather than from a
+    // cell corner. These are its local panel bounds after node transforms.
+    private static final float DOOR_MODEL_MIN_X = -0.5f;
+    private static final float DOOR_MODEL_MIN_Z = -0.4375f;
 
     private final BlockData type;
     private final GLTFModel blockModel;
@@ -273,8 +277,9 @@ public class iBlock implements Craftable {
         }
 
         return destination.identity()
-                .translate(getDoorHingeX(), y, getDoorHingeZ())
-                .rotateY(orientation + DOOR_OPEN_ANGLE * animationProgress);
+                .translate(x, y, z)
+                .rotateY(orientation)
+                .rotateY(DOOR_OPEN_ANGLE * animationProgress);
     }
 
     /**
@@ -285,26 +290,27 @@ public class iBlock implements Craftable {
      */
     public Matrix4f getSelectionTransform(Matrix4f destination) {
         return getModelTransform(destination)
-                .translate(0.0f, 0.0f, DOOR_MIN_Z)
+                .translate(DOOR_MODEL_MIN_X, 0.0f, DOOR_MODEL_MIN_Z)
                 .scale(1.0f, 2.0f, DOOR_DEPTH);
     }
 
     /**
      * Tests an entity AABB against the animated, oriented door panel.
+     * @return {@code true} if the entity intersects the door panel; otherwise {@code false}
      */
     public boolean intersects(float minX, float minY, float minZ,
                               float maxX, float maxY, float maxZ) {
-        if (!type.isDoor()
-                || maxY <= y || minY >= y + 2.0f) return false;
+        if (!type.isDoor() || maxY <= y || minY >= y + 2.0f) return false;
 
         float angle = orientation + DOOR_OPEN_ANGLE * animationProgress;
         float cosine = (float) Math.cos(angle);
         float sine = (float) Math.sin(angle);
-        float hingeX = getDoorHingeX();
-        float hingeZ = getDoorHingeZ();
 
-        float localCenterX = 0.5f;
-        float localCenterZ = DOOR_MIN_Z + DOOR_DEPTH * 0.5f;
+        float hingeX = x;
+        float hingeZ = z;
+
+        float localCenterX = DOOR_MODEL_MIN_X + 0.5f;
+        float localCenterZ = DOOR_MODEL_MIN_Z + DOOR_DEPTH * 0.5f;
         float centerX = hingeX + cosine * localCenterX + sine * localCenterZ;
         float centerZ = hingeZ - sine * localCenterX + cosine * localCenterZ;
 
@@ -338,13 +344,15 @@ public class iBlock implements Craftable {
     public float rayIntersection(Vector3f origin, Vector3f direction) {
         if (!type.isDoor()) return Float.POSITIVE_INFINITY;
 
-        Matrix4f inverse = getModelTransform(new Matrix4f()).invert();
+        // Keep mouse targeting in the same volume as the rendered selection
+        // outline, regardless of the model's local pivot.
+        Matrix4f inverse = getSelectionTransform(new Matrix4f()).invert();
         Vector3f localOrigin = inverse.transformPosition(new Vector3f(origin));
         Vector3f localDirection = inverse.transformDirection(new Vector3f(direction));
         float[] origins = {localOrigin.x, localOrigin.y, localOrigin.z};
         float[] directions = {localDirection.x, localDirection.y, localDirection.z};
-        float[] minimums = {0.0f, 0.0f, DOOR_MIN_Z};
-        float[] maximums = {1.0f, 2.0f, DOOR_MIN_Z + DOOR_DEPTH};
+        float[] minimums = {0.0f, 0.0f, 0.0f};
+        float[] maximums = {1.0f, 1.0f, 1.0f};
         float near = 0.0f;
         float far = Float.POSITIVE_INFINITY;
 
@@ -376,23 +384,6 @@ public class iBlock implements Craftable {
      */
     public boolean isSolid() {
         return !type.isDoor() || !isActivated;
-    }
-
-    private float getDoorHingeX() {
-        int quarter = Math.floorMod(Math.round(orientation / QUARTER_TURN), 4);
-        return switch (quarter) {
-            case 2 -> x + 1.0f;
-            case 3 -> x + DOOR_MIN_Z + DOOR_DEPTH;
-            default -> x;
-        };
-    }
-
-    private float getDoorHingeZ() {
-        int quarter = Math.floorMod(Math.round(orientation / QUARTER_TURN), 4);
-        return switch (quarter) {
-            case 1, 2 -> z + 1.0f;
-            default -> z;
-        };
     }
 
     private void applyAnimation() {

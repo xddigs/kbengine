@@ -11,6 +11,7 @@ import com.isofarm.wrld.World;
 import com.isofarm.wrld.GameMaster;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 import static org.joml.Math.lerp;
 
@@ -258,12 +259,20 @@ public class Camera implements CameraView {
     public Ray getMouseRay(float mouseX, float mouseY, float screenWidth, float screenHeight) {
         float ndcX = (2.0f * mouseX / screenWidth) - 1.0f;
         float ndcY = 1.0f - (2.0f * mouseY / screenHeight);
+        int[] viewport = new int[] { 0, 0, (int)screenWidth, (int)screenHeight };
+        Vector3f nearPoint = new Vector3f();
+        Matrix4f viewMatrix = getViewMatrix();
+        Matrix4f invCombined = new Matrix4f();
+        projectionMatrix.mul(viewMatrix, invCombined).invert();
 
-        Matrix4f invVP = new Matrix4f();
-        projectionMatrix.mul(getViewMatrix(), invVP).invert();
+        Vector4f nearVec = new Vector4f(ndcX, ndcY, -1.0f, 1.0f).mul(invCombined);
+        if (nearVec.w != 0.0f) {
+            nearVec.x /= nearVec.w;
+            nearVec.y /= nearVec.w;
+            nearVec.z /= nearVec.w;
+        }
 
-        Vector3f rayOrigin = new Vector3f();
-        invVP.transformProject(ndcX, ndcY, -1.0f, rayOrigin);
+        Vector3f rayOrigin = new Vector3f(nearVec.x, nearVec.y, nearVec.z);
         return new Ray(rayOrigin, getForwardVector());
     }
 
