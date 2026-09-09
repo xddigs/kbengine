@@ -338,10 +338,6 @@ public class Camera implements CameraView {
         World.DoorHit doorHit = world.raycastDoor(origin, direction);
 
         do {
-            // Interaction must use the same visibility volume as rendering. In
-            // underground/interior view the ray may pass through cells that
-            // are outside the player's visible space; those cells must not be
-            // considered interaction targets.
             boolean isVisible = GameMaster.game.getViewService().isVisible(
                     new Vector3f(x + 0.5f, y + 0.5f, z + 0.5f));
 
