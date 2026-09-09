@@ -144,6 +144,8 @@ public final class K {
         public static final String GRASS_FRAG_SHADER = "shaders/grass.frag";
         public static final String DESTROY_VERT_SHADER = "shaders/destroy.vert";
         public static final String DESTROY_FRAG_SHADER = "shaders/destroy.frag";
+        public static final String OUTLINE_VERT_SHADER = "shaders/outline.vert";
+        public static final String OUTLINE_FRAG_SHADER = "shaders/outline.frag";
 
         public static final String MOTION_BLUR_VERT_SHADER = "shaders/motion_blur.vert";
         public static final String MOTION_BLUR_FRAG_SHADER = "shaders/motion_blur.frag";

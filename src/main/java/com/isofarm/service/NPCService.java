@@ -117,6 +117,30 @@ public class NPCService implements Service<NPC> {
     }
 
     /**
+     * Returns the living NPC nearest to the player, independently of the cursor.
+     * @return the nearest living NPC, or {@code null} when none is registered
+     */
+    public NPC getNearestToPlayer() {
+        if (Player.plyr == null) return null;
+        NPC nearest = null;
+        float nearestDistanceSquared = Float.POSITIVE_INFINITY;
+        for (NPC npc : npcsList) {
+            if (!npc.isAlive()) continue;
+            float distanceSquared = Player.plyr.getPosition().distanceSquared(npc.getPosition());
+            if (distanceSquared < nearestDistanceSquared) {
+                nearest = npc;
+                nearestDistanceSquared = distanceSquared;
+            }
+        }
+        return nearest;
+    }
+
+    /** Returns whether an NPC is still managed and can remain focus-locked. */
+    public boolean contains(NPC npc) {
+        return npc != null && npcsList.contains(npc);
+    }
+
+    /**
      * Returns the closest NPC hit by the cursor, provided it is closer than the
      * block currently hit by that same cursor ray.
      */

@@ -8,6 +8,7 @@ import com.isofarm.input.ControlAction;
 import com.isofarm.input.Controls;
 import com.isofarm.pathfinding.GridPos;
 import com.isofarm.service.BookService;
+import com.isofarm.service.NPCService;
 import com.isofarm.wrld.GameMaster;
 import com.isofarm.wrld.World;
 import org.joml.Vector3f;
@@ -52,10 +53,21 @@ public final class PlayerManager {
      * @param delta the {@code float} argument; frame time in seconds
      */
     public void update(float delta) {
+        updateFocus();
         currentState.input(GameMaster.game);
         currentState.update(delta);
         currentEyeHeight = lerp(currentEyeHeight, targetEyeHeight,
                 Math.clamp(delta * EYE_LERP_SPEED, ZERO, 1.0f));
+    }
+
+    /** Selects or releases the nearest NPC on the configured focus-button edge. */
+    private void updateFocus() {
+        GameMaster game = GameMaster.game;
+        if (game == null || game.isInventoryOpen() || game.isBackpackOpen()
+                || game.isChatOpen() || BookService.bs.isOpen()) return;
+        if (Controls.isPressed(ControlAction.THIRD_ACTION)) {
+            Player.plyr.focus(NPCService.npcs.getNearestToPlayer());
+        }
     }
 
     /**

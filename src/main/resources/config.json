@@ -33,7 +33,6 @@
     "secondary_action": "GLFW_MOUSE_BUTTON_RIGHT",
     "third_action": "GLFW_MOUSE_BUTTON_MIDDLE",
     "pathfind": "GLFW_MOUSE_BUTTON_RIGHT",
-    "zoom": "GLFW_MOUSE_BUTTON_MIDDLE",
     "ui_select": "GLFW_MOUSE_BUTTON_LEFT",
     "ui_context": "GLFW_MOUSE_BUTTON_RIGHT"
   },

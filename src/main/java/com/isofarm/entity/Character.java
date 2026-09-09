@@ -194,8 +194,22 @@ public abstract class Character extends Entity implements Levelable {
      * @param amount the {@code float} supplied as {@code amount}
      */
     @Override
-    protected void onDamageTaken(float amount) {
+    protected void onDamageTaken(float amount) {}
+
+    /**
+     * {@inheritDoc}
+     * Returns the max hitpoints.
+     * @return {@code float}; the max hitpoints
+     */
+    @Override
+    public float getMaxHitpoints() {
+        return maxHitpoints * level;
     }
+
+    /**
+     * Sets the {@link Character} towards a specific {@link Entity}'s direction
+     */
+    public void focus(Entity entity) {}
 
     /** Returns the wallet stored in this character's equipped backpack. */
     public Wallet hasWallet() {
@@ -367,16 +381,6 @@ public abstract class Character extends Entity implements Levelable {
      */
     public void setHitpoints(float hitpoints) {
         this.hitpoints = hitpoints;
-    }
-
-    /**
-     * {@inheritDoc}
-     * Returns the max hitpoints.
-     * @return {@code float}; the max hitpoints
-     */
-    @Override
-    public float getMaxHitpoints() {
-        return maxHitpoints * level;
     }
 
     /**

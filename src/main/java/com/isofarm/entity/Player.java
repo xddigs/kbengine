@@ -9,6 +9,7 @@ import com.isofarm.item.Item;
 import com.isofarm.item.Shield;
 import com.isofarm.pathfinding.GridPos;
 import com.isofarm.service.SoundService;
+import com.isofarm.service.NPCService;
 import com.isofarm.utils.DeathManager;
 import com.isofarm.utils.Settings;
 import com.isofarm.wrld.GameMaster;
@@ -37,6 +38,7 @@ public class Player extends Character {
     private final CharacterAnimator animator;
     private final PlayerGameplay gameplay;
     private final PlayerManager manager;
+    private NPC focusTarget;
 
     /**
      * Creates and initializes a player.
@@ -66,18 +68,18 @@ public class Player extends Character {
     public void update(BlockPos blockPos, float delta) {
         super.update(blockPos, delta);
         if (!gameplay.updateLifeCycle(delta)) {
-            animator.update(playerModel, delta);
+            animator.update(playerModel, delta, isFocusing());
             return;
         }
 
         if (GameMaster.game != null && GameMaster.game.isInventoryOpen()) {
-            animator.update(playerModel, delta);
+            animator.update(playerModel, delta, isFocusing());
             return;
         }
 
         if (gameplay.checkOceanDrowning()) return;
         manager.update(delta);
-        animator.update(playerModel, delta);
+        animator.update(playerModel, delta, isFocusing());
         gameplay.update(delta);
     }
 
@@ -88,6 +90,31 @@ public class Player extends Character {
     @Override
     public void render(GameMaster game, RenderPass pass) {
         animator.render(game, playerModel, pass);
+    }
+
+    @Override
+    public void focus(Entity entity) {
+        NPC npc = entity instanceof NPC candidate && candidate.isAlive() ? candidate : null;
+        focusTarget = npc == focusTarget ? null : npc;
+    }
+
+    /** Returns the currently locked NPC, clearing stale targets automatically. */
+    public NPC getFocusTarget() {
+        if (focusTarget != null
+                && (!focusTarget.isAlive() || !NPCService.npcs.contains(focusTarget))) {
+            focusTarget = null;
+        }
+        return focusTarget;
+    }
+
+    /** Returns whether the player currently has a valid target lock. */
+    public boolean isFocusing() {
+        return getFocusTarget() != null;
+    }
+
+    /** Returns whether the supplied NPC is the player's current focus target. */
+    public boolean isFocusedOn(NPC npc) {
+        return npc != null && getFocusTarget() == npc;
     }
 
     /**
@@ -109,30 +136,8 @@ public class Player extends Character {
         if (remaining > 0.0f) super.damage(remaining, attacker);
     }
 
-    /** Toggles the dedicated left-hand shield equipment slot. */
-    public boolean toggleShield(Item selectedItem) {
-        return gameplay.toggleShield(selectedItem);
-    }
-
-    /** Sets whether the equipped shield is being actively used. */
-    public void setShieldRaised(boolean raised) {
-        gameplay.setShieldRaised(raised);
-    }
-
-    /** Returns whether the shield is currently raised. */
-    public boolean isShieldRaised() {
-        return gameplay.isShieldRaised();
-    }
-
-    /** Returns the shield mounted on the left arm, if present. */
-    public Shield getEquippedShield() {
-        return getInventory().getShield();
-    }
-
     /**
      * Records the cause attached to the lethal damage event.
-     */
-    /**
      * Handles death and updates the affected state.
      * {@inheritDoc}
      */
@@ -148,6 +153,35 @@ public class Player extends Character {
     @Override
     protected void dropLoot() {
         gameplay.dropLoot();
+    }
+
+    /**
+     * Updates movement for adjust velocity according to the current physics and input state.
+     * {@inheritDoc}
+     */
+    @Override
+    protected void adjustVelocity(float delta) {
+        manager.adjustVelocity(delta);
+    }
+
+    /** Toggles the dedicated left-hand shield equipment slot. */
+    public boolean toggleShield(Item selectedItem) {
+        return gameplay.toggleShield(selectedItem);
+    }
+
+    /** Sets whether the equipped shield is being actively used. */
+    public void setShieldRaised(boolean isRaised) {
+        gameplay.setShieldRaised(isRaised);
+    }
+
+    /** Returns whether the shield is currently raised. */
+    public boolean isShieldRaised() {
+        return gameplay.isShieldRaised();
+    }
+
+    /** Returns the shield mounted on the left arm, if present. */
+    public Shield getEquippedShield() {
+        return getInventory().getShield();
     }
 
     /**
@@ -348,15 +382,6 @@ public class Player extends Character {
      */
     public boolean hasGroundBelow(float x, float z) {
         return manager.hasGroundBelow(x, z);
-    }
-
-    /**
-     * Updates movement for adjust velocity according to the current physics and input state.
-     * {@inheritDoc}
-     */
-    @Override
-    protected void adjustVelocity(float delta) {
-        manager.adjustVelocity(delta);
     }
 
     /**

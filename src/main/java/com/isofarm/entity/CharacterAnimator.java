@@ -15,6 +15,7 @@ import com.isofarm.wrld.GameMaster;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 import static org.joml.Math.lerp;
 import static org.lwjgl.opengl.GL13.*;
@@ -30,6 +31,8 @@ public final class CharacterAnimator {
     private static final float HEAD_SPEED = 12.0f;
     private static final float DEATH_FALL_DURATION = 0.75f;
     private static final float DEATH_FADE_DURATION = 0.75f;
+    private static final float FOCUS_OUTLINE_WIDTH = 0.015f;
+    private static final Vector4f FOCUS_OUTLINE_COLOR = new Vector4f(1.0f);
     private final Character character;
     private final Matrix4f modelMatrix = new Matrix4f();
     private GLTFNode head, torso, backpack, rightArm, leftArm, rightLeg, leftLeg;
@@ -82,11 +85,16 @@ public final class CharacterAnimator {
     private GLTFNode node(GLTFModel model, String name) { return model.findNode(name); }
     private static Vector3f copy(GLTFNode node) { return node == null ? null : new Vector3f(node.getTranslation()); }
 
+    /** Returns the character's current direction. */
+    public void update(GLTFModel model, float delta) {
+        update(model, delta, false);
+    }
+
     /**
      * Updates this object for the current simulation step.
      * @param delta the {@code float} argument; frame time in seconds
      */
-    public void update(GLTFModel model, float delta) {
+    public void update(GLTFModel model, float delta, boolean isFocusing) {
         if (!character.isAlive()) {
             updateDeath(model, delta);
             return;
@@ -98,7 +106,11 @@ public final class CharacterAnimator {
         Vector3f velocity = character.getVelocity();
         boolean moving = Math.abs(velocity.x) > MOVE_THRESHOLD || Math.abs(velocity.z) > MOVE_THRESHOLD;
 
-        if (moving) {
+        NPC focusTarget = isFocusing && character instanceof Player player
+                ? player.getFocusTarget() : null;
+        if (focusTarget != null) {
+            lookAt(focusTarget.getPosition());
+        } else if (moving) {
             updateFacing(velocity);
         } else if (character instanceof Player) {
             updateFacingCursor();
@@ -162,7 +174,7 @@ public final class CharacterAnimator {
                 .rotateZ(-sway + (float) Math.toRadians(8.0f) * shieldWeight));
         rotate(rightArm, new Quaternionf().rotateX(swing + breath - armBend + attackX).rotateY(attackY).rotateZ(sway + attackZ));
         rotate(rightLeg, new Quaternionf().rotateX(-swing)); rotate(leftLeg, new Quaternionf().rotateX(swing));
-        updateHead(delta);
+        updateHead(delta, focusTarget != null);
 
         updateEquipment();
 
@@ -285,11 +297,19 @@ public final class CharacterAnimator {
      * Updates the head's rotation based on the target yaw angle.
      * @param delta the {@code float} argument; the frame time in seconds
      */
-    private void updateHead(float delta) {
+    private void updateHead(float delta, boolean isFocusing) {
         if (head == null || baseHeadRotation == null) return;
         if (!(character instanceof Player)) {
             Quaternionf current = new Quaternionf(head.getRotation());
             current.slerp(baseHeadRotation, Math.clamp(1 - (float) Math.exp(-HEAD_SPEED * delta), 0, 1));
+            head.setRotation(current);
+            return;
+        }
+
+        if (isFocusing) {
+            Quaternionf current = new Quaternionf(head.getRotation());
+            current.slerp(baseHeadRotation,
+                    Math.clamp(1 - (float) Math.exp(-HEAD_SPEED * delta), 0, 1));
             head.setRotation(current);
             return;
         }
@@ -414,6 +434,12 @@ public final class CharacterAnimator {
         shader.setUniform("uIsSubmergedEntity", pass == RenderPass.SUBMERGED);
         modelMatrix.identity().translate(character.getPosition().x, character.getPosition().y + bob - deathDrop,
                 character.getPosition().z).rotateY((float) Math.toRadians(modelYaw)).rotateZ(deathRoll).scale(scale);
+        if (pass == RenderPass.NORMAL && character instanceof NPC npc
+                && Player.plyr.isFocusedOn(npc)) {
+            shader.unbind();
+            renderFocusOutline(camera, model);
+            shader.bind();
+        }
         shader.setUniform("uModel", modelMatrix);
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
@@ -434,6 +460,32 @@ public final class CharacterAnimator {
         glDepthMask(true);
         glBindTexture(GL_TEXTURE_2D, 0);
         glDisable(GL_BLEND);
+        shader.unbind();
+    }
+
+    /**
+     * Draws only the back faces of a slightly expanded model. The regular model
+     * then covers the interior, leaving a clean external silhouette.
+     */
+    private void renderFocusOutline(CameraView camera, GLTFModel model) {
+        Shader shader = ResourceManager.rem.getOutlineShader();
+        if (shader == null) return;
+        shader.bind();
+        shader.setUniform("uProjection", camera.getProjectionMatrix());
+        shader.setUniform("uView", camera.getViewMatrix());
+        shader.setUniform("uOutlineWidth", FOCUS_OUTLINE_WIDTH);
+        shader.setUniform("uOutlineColor", FOCUS_OUTLINE_COLOR);
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LESS);
+        glDepthMask(false);
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_FRONT);
+        glDisable(GL_BLEND);
+        model.render(shader, modelMatrix);
+        glCullFace(GL_BACK);
+        glDepthMask(true);
+        glDepthFunc(GL_LESS);
+        glBindTexture(GL_TEXTURE_2D, 0);
         shader.unbind();
     }
 
