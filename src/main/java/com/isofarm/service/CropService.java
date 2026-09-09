@@ -179,7 +179,7 @@ public class CropService implements Service<Crop> {
         World.wrld.removeCrop(crop);
         log.info("Successfully harvested {}" +
                 " giving {} items.", crop.getCropType().getName(), yield);
-//      @dead-code ToastFactory.success(Local.lang.f("toast.harvest", yield, crop.getCropType().getDisplayName()));
+        ToastFactory.success(Local.lang.f("toast.harvest", yield, crop.getCropType().getDisplayName()));
         return yield;
     }
 

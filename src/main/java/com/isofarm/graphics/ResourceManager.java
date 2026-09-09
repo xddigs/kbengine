@@ -71,7 +71,6 @@ public class ResourceManager {
     private static final Mesh spriteMesh = Mesh.createCrop();
     private static final Mesh flowerMesh = Mesh.createCrossMesh();
     private static final Mesh playerMesh = Mesh.quadVertical();
-    private static final Mesh blockFragmentMesh = Mesh.createCube();
     private static final Texture backgroundUI = new Texture(K.Paths.DEFAULT_BACKGROUND_UI);
     private static final Texture selectorUI = new Texture(K.Paths.DEFAULT_SELECTOR_UI);
     private static final Texture scrollBar = new Texture(K.Paths.SCROLL_BAR);
@@ -245,7 +244,6 @@ public class ResourceManager {
         spriteMesh.dispose();
         screenQuadMesh.dispose();
         playerMesh.dispose();
-        blockFragmentMesh.dispose();
 
         backgroundUI.dispose();
         selectorUI.dispose();
@@ -385,9 +383,6 @@ public class ResourceManager {
     public Mesh getFlowerMesh() {
         return flowerMesh;
     }
-
-    /** Returns the unit cube used by the voxel breaking effect. */
-    public Mesh getBlockFragmentMesh() { return blockFragmentMesh; }
 
     /**
      * Returns the selection mesh.

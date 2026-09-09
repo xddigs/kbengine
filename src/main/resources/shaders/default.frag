@@ -143,8 +143,6 @@ float torchShadowDepth(int index, vec3 lightToFragment) {
 }
 
 void main() {
-    // Sample just inside the face. This removes only faces owned by the block
-    // being broken, never the neighbouring block sharing that face plane.
     vec3 blockSample = vFragPos - normalize(vNormal) * 0.001;
     if (uVoxelBreakActive
             && all(greaterThanEqual(blockSample, uVoxelBreakPosition))

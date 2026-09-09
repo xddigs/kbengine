@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.Arrays;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.*;
@@ -296,5 +297,52 @@ public class Mesh {
         int[] indices = new int[36];
         for (int i = 0; i < 6; i++) { int v = i * 4; int idx = i * 6; indices[idx] = v; indices[idx + 1] = v + 1; indices[idx + 2] = v + 3; indices[idx + 3] = v + 3; indices[idx + 4] = v + 1; indices[idx + 5] = v + 2; }
         return new Mesh(positions, normals, textCoords, indices);
+    }
+
+    /** Creates the visible shell of a partially removed voxel block. */
+    public static Mesh createBreakingVoxelMesh(int subdivisions, int removed) {
+        int maxFaces = subdivisions * subdivisions * subdivisions * 6;
+        float[] positions = new float[maxFaces * 12];
+        float[] normals = new float[maxFaces * 12];
+        float[] uv = new float[maxFaces * 8];
+        int[] indices = new int[maxFaces * 6];
+        int pos = 0, normal = 0, tex = 0, index = 0, vertex = 0;
+        float size = 1.0f / subdivisions;
+
+        for (int x = 0; x < subdivisions; x++) for (int y = 0; y < subdivisions; y++)
+            for (int z = 0; z < subdivisions; z++) {
+                if (isRemovedVoxel(x, y, z, removed)) continue;
+                float x0 = x * size, x1 = x0 + size;
+                float y0 = y * size, y1 = y0 + size;
+                float z0 = z * size, z1 = z0 + size;
+                if (isRemovedVoxel(x, y + 1, z, removed)) { int[] next = addVoxelFace(positions, normals, uv, indices, pos, normal, tex, index, vertex, x0,y1,z0, x0,y1,z1, x1,y1,z1, x1,y1,z0, 0,1,0); pos=next[0]; normal=next[1]; tex=next[2]; index=next[3]; vertex=next[4]; }
+                if (isRemovedVoxel(x, y - 1, z, removed)) { int[] next = addVoxelFace(positions, normals, uv, indices, pos, normal, tex, index, vertex, x0,y0,z1, x0,y0,z0, x1,y0,z0, x1,y0,z1, 0,-1,0); pos=next[0]; normal=next[1]; tex=next[2]; index=next[3]; vertex=next[4]; }
+                if (isRemovedVoxel(x, y, z + 1, removed)) { int[] next = addVoxelFace(positions, normals, uv, indices, pos, normal, tex, index, vertex, x0,y0,z1, x0,y1,z1, x1,y1,z1, x1,y0,z1, 0,0,1); pos=next[0]; normal=next[1]; tex=next[2]; index=next[3]; vertex=next[4]; }
+                if (isRemovedVoxel(x, y, z - 1, removed)) { int[] next = addVoxelFace(positions, normals, uv, indices, pos, normal, tex, index, vertex, x1,y0,z0, x1,y1,z0, x0,y1,z0, x0,y0,z0, 0,0,-1); pos=next[0]; normal=next[1]; tex=next[2]; index=next[3]; vertex=next[4]; }
+                if (isRemovedVoxel(x + 1, y, z, removed)) { int[] next = addVoxelFace(positions, normals, uv, indices, pos, normal, tex, index, vertex, x1,y0,z1, x1,y0,z0, x1,y1,z0, x1,y1,z1, 1,0,0); pos=next[0]; normal=next[1]; tex=next[2]; index=next[3]; vertex=next[4]; }
+                if (isRemovedVoxel(x - 1, y, z, removed)) { int[] next = addVoxelFace(positions, normals, uv, indices, pos, normal, tex, index, vertex, x0,y0,z0, x0,y0,z1, x0,y1,z1, x0,y1,z0, -1,0,0); pos=next[0]; normal=next[1]; tex=next[2]; index=next[3]; vertex=next[4]; }
+            }
+        return new Mesh(Arrays.copyOf(positions, pos), Arrays.copyOf(normals, normal),
+                Arrays.copyOf(uv, tex), Arrays.copyOf(indices, index));
+    }
+
+    private static boolean isRemovedVoxel(int x, int y, int z, int removed) {
+        if (x < 0 || y < 0 || z < 0 || x >= 4 || y >= 4 || z >= 4) return true;
+        return (((x * 17 + y * 31 + z * 47) ^ (x * y * 13 + z * 7)) & 63) < removed;
+    }
+
+    private static int[] addVoxelFace(float[] positions, float[] normals, float[] uv, int[] indices,
+                                      int pos, int normal, int tex, int index, int vertex,
+                                      float x1, float y1, float z1, float x2, float y2, float z2,
+                                      float x3, float y3, float z3, float x4, float y4, float z4,
+                                      float nx, float ny, float nz) {
+        float[] face = {x1,y1,z1, x2,y2,z2, x3,y3,z3, x4,y4,z4};
+        System.arraycopy(face, 0, positions, pos, 12);
+        for (int i = 0; i < 4; i++) { normals[normal++] = nx; normals[normal++] = ny; normals[normal++] = nz; }
+        float[] coords = {0,0, 0,1, 1,1, 1,0};
+        System.arraycopy(coords, 0, uv, tex, 8);
+        indices[index++] = vertex; indices[index++] = vertex + 1; indices[index++] = vertex + 3;
+        indices[index++] = vertex + 3; indices[index++] = vertex + 1; indices[index++] = vertex + 2;
+        return new int[]{pos + 12, normal, tex + 8, index, vertex + 4};
     }
 }

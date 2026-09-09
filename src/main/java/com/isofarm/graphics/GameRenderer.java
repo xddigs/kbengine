@@ -45,6 +45,8 @@ public class GameRenderer {
     private float blurX;
     private float blurY;
     private float waterTime;
+    private Mesh voxelBreakMesh;
+    private int voxelBreakMeshKey = Integer.MIN_VALUE;
     private static final float VIEW_FOG_TRANSITION_DURATION = 0.15f;
     private ViewFogState displayedViewFog;
     private ViewFogState previousViewFog;
@@ -673,21 +675,15 @@ public class GameRenderer {
                 * BREAK_VOXELS_PER_AXIS * BREAK_VOXELS_PER_AXIS * BREAK_VOXELS_PER_AXIS / stages;
         shader.setUniform("uUVBounds", new Vector4f(region.uvMin().x, region.uvMin().y,
                 region.uvMax().x, region.uvMax().y));
-        Mesh fragment = ResourceManager.rem.getBlockFragmentMesh();
-        for (BlockShape.Box box : state.shape().getBoxes()) {
-            float sx = (box.maxX() - box.minX()) / BREAK_VOXELS_PER_AXIS;
-            float sy = (box.maxY() - box.minY()) / BREAK_VOXELS_PER_AXIS;
-            float sz = (box.maxZ() - box.minZ()) / BREAK_VOXELS_PER_AXIS;
-            for (int x = 0; x < BREAK_VOXELS_PER_AXIS; x++) for (int y = 0; y < BREAK_VOXELS_PER_AXIS; y++) for (int z = 0; z < BREAK_VOXELS_PER_AXIS; z++) {
-                int order = ((x * 17 + y * 31 + z * 47) ^ (x * y * 13 + z * 7)) & 63;
-                if (order < removed) continue;
-                modelMatrix.identity().translate(state.x() + box.minX() + (x + .5f) * sx,
-                                state.y() + box.minY() + (y + .5f) * sy,
-                                state.z() + box.minZ() + (z + .5f) * sz).scale(sx, sy, sz);
-                shader.setUniform("uModel", modelMatrix);
-                fragment.render();
-            }
+        int key = (((state.x() * 31 + state.y()) * 31 + state.z()) * 67) + removed;
+        if (key != voxelBreakMeshKey) {
+            if (voxelBreakMesh != null) voxelBreakMesh.dispose();
+            voxelBreakMesh = Mesh.createBreakingVoxelMesh(BREAK_VOXELS_PER_AXIS, removed);
+            voxelBreakMeshKey = key;
         }
+        modelMatrix.identity().translate(state.x(), state.y(), state.z());
+        shader.setUniform("uModel", modelMatrix);
+        voxelBreakMesh.render();
         shader.setUniform("uUVBounds", new Vector4f(0, 0, 1, 1));
     }
 
