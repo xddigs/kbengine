@@ -27,8 +27,8 @@ public class EquipmentController {
     private static final float LAYER_DEPTH = 0.0025f;
 
     private static final float ITEM_SCALE = 0.35f;
-    private static final float ITEM_X = 0.20f;
-    private static final float ITEM_Y = 0.25f;
+    private static final float ITEM_X = -0.05f;
+    private static final float ITEM_Y = -0.25f;
     private static final float ITEM_Z = -0.15f;
 
     private static final float SHIELD_SCALE = 0.52f;
@@ -145,7 +145,7 @@ public class EquipmentController {
         float offset = 0.05f;
         currentActiveNode.setTranslation(new Vector3f(ITEM_X, ITEM_Y, ITEM_Z));
         if (item instanceof Tool) {
-            currentActiveNode.setTranslation(new Vector3f(ITEM_X, ITEM_Y + offset, ITEM_Z - offset));
+            currentActiveNode.setTranslation(new Vector3f(ITEM_X + offset, ITEM_Y + offset, ITEM_Z - offset));
             currentActiveNode.setRotation(new Quaternionf()
                     .rotateX((float) Math.toRadians(30.0f))
                     .rotateY((float) Math.toRadians(90.0f)));
