@@ -4,8 +4,8 @@ import com.isofarm.data.*;
 import com.isofarm.entity.Entity;
 import com.isofarm.entity.Player;
 import com.isofarm.entity.WorldItem;
-import com.isofarm.graphics.ParticleEngine;
 import com.isofarm.graphics.ChunkMeshBuilder;
+import com.isofarm.graphics.ParticleEngine;
 import com.isofarm.graphics.SpriteSheet;
 import com.isofarm.item.*;
 import com.isofarm.service.*;
@@ -15,8 +15,8 @@ import com.isofarm.utils.K;
 import com.isofarm.utils.Settings;
 import com.isofarm.utils.ToastFactory;
 import com.isofarm.wrld.Chunk;
-import com.isofarm.wrld.GameMaster;
 import com.isofarm.wrld.FluidSimulation;
+import com.isofarm.wrld.GameMaster;
 import com.isofarm.wrld.World;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
@@ -36,7 +36,6 @@ import static org.joml.Math.lerp;
 public class GameInteraction {
     public static final GameInteraction gami = new GameInteraction();
     private static final float PICKUP_DISTANCE = 1.5f;
-    private static final float TIMER_MAX = 5.0f;
 
     private static final Logger log = LoggerFactory.getLogger(GameInteraction.class);
 
@@ -45,8 +44,6 @@ public class GameInteraction {
     private int breakingZ = Integer.MIN_VALUE;
 
     private float breakProgress = 0.0f;
-    private float dropTimer = TIMER_MAX;
-
     private boolean isSmartShift = false;
     
     /**
@@ -145,11 +142,6 @@ public class GameInteraction {
 
         if (!Player.plyr.getGamemode().isNoClip()) {
             pickUp();
-            dropTimer -= GameMaster.game.getGenDelta();
-            if (dropTimer <= 0.0f) {
-                addItem();
-                dropTimer = TIMER_MAX;
-            }
         }
 
         if (Controls.isPressed(ControlAction.TOGGLE_MUSIC) && !GameMaster.game.isChatOpen()) {
