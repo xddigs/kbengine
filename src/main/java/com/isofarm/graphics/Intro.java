@@ -30,6 +30,10 @@ import static org.lwjgl.opengl.GL11.*;
 public class Intro {
     private static final float CLEAR_COLOR_ALPHA = 1.0f;
     private static final long LOADING_FRAME_INTERVAL_NANOS = 100_000_000L;
+    private static final String SPLASH_LOGO_PATH = K.Paths.LOGO;
+    private static final float SPLASH_DURATION_SECONDS = 4.0f;
+    private static final float SPLASH_FADE_DURATION_SECONDS = 1.5f;
+    private static final float SPLASH_MAX_WIDTH = 900.0f;
     private static long window;
     private static UIManager uiManager;
     private UIProgressBar progressBar;
@@ -39,7 +43,7 @@ public class Intro {
     private int framebufferHeight;
     private long lastLoadingFrameNanos;
 
-    private boolean fullscreen = false;
+    private boolean isFullScreen = false;
 
     private int windowedX;
     private int windowedY;
@@ -114,6 +118,7 @@ public class Intro {
         updateFramebufferSize();
         GameMaster.game.onResize(framebufferWidth, framebufferHeight);
         setupCallbacks();
+        showSplashScreen();
 
         int r = Settings.getRenderDistance();
         int totalChunks = (2 * r + 1) * (2 * r + 1);
@@ -189,6 +194,64 @@ public class Intro {
         progressBar.hide();
         requestPlayerName();
         loop();
+    }
+
+    /**
+     * Displays the game logo before loading begins.
+     */
+    private void showSplashScreen() {
+        Texture logo = new Texture(SPLASH_LOGO_PATH);
+        double startTime = glfwGetTime();
+
+        try {
+            while (!glfwWindowShouldClose(window)) {
+                glfwPollEvents();
+                float elapsed = (float) (glfwGetTime() - startTime);
+                if (elapsed >= SPLASH_DURATION_SECONDS) {
+                    return;
+                }
+
+                renderSplashFrame(logo, elapsed);
+            }
+        } finally {
+            logo.dispose();
+        }
+    }
+
+    /**
+     * Renders one frame of the animated splash screen.
+     * @param logo the logo texture to render
+     * @param elapsed the elapsed animation time in seconds
+     */
+    private void renderSplashFrame(Texture logo, float elapsed) {
+        updateFramebufferSize();
+        glViewport(0, 0, framebufferWidth, framebufferHeight);
+        glClearColor(0.15f, 0.15f, 0.15f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        float fadeProgress = Math.min(elapsed, SPLASH_DURATION_SECONDS - elapsed)
+                / SPLASH_FADE_DURATION_SECONDS;
+        float opacity = smoothStep(Math.clamp(fadeProgress, 0.0f, 1.0f));
+        float scale = 0.9f + 0.1f * opacity;
+        float logoWidth = Math.min(SPLASH_MAX_WIDTH, framebufferWidth * 0.7f) * scale;
+        float logoHeight = logoWidth * logo.getHeight() / logo.getWidth();
+        float x = (framebufferWidth - logoWidth) / 2.0f;
+        float y = (framebufferHeight - logoHeight) / 2.0f;
+
+        Frontend.begin(framebufferWidth, framebufferHeight);
+        Frontend.drawTexture(logo, x, y, logoWidth, logoHeight,
+                new Vector4f(1.0f, 1.0f, 1.0f, opacity));
+        Frontend.end();
+        glfwSwapBuffers(window);
+    }
+
+    /**
+     * Smoothly interpolates a normalized animation value.
+     * @param value the normalized value to interpolate
+     * @return the smoothed value
+     */
+    private float smoothStep(float value) {
+        return value * value * (3.0f - 2.0f * value);
     }
 
     /**
@@ -376,8 +439,8 @@ public class Intro {
      * Toggles the setting represented by fullscreen and applies it immediately.
      */
     private void toggleFullscreen() {
-        fullscreen = !fullscreen;
-        if (fullscreen) {
+        isFullScreen = !isFullScreen;
+        if (isFullScreen) {
             try (MemoryStack stack = MemoryStack.stackPush()) {
                 IntBuffer x = stack.mallocInt(1);
                 IntBuffer y = stack.mallocInt(1);
@@ -396,13 +459,13 @@ public class Intro {
             long monitor = glfwGetPrimaryMonitor();
 
             if (monitor == 0) {
-                fullscreen = false;
+                isFullScreen = false;
                 return;
             }
 
             GLFWVidMode videoMode = glfwGetVideoMode(monitor);
             if (videoMode == null) {
-                fullscreen = false;
+                isFullScreen = false;
                 return;
             }
 
