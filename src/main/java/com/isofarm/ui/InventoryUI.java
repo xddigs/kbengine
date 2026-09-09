@@ -55,7 +55,6 @@ public class InventoryUI extends UIElement {
 
     private final InventorySlotUI[] slotUIs;
     private final InventorySlotUI[] containerSlotUIs;
-    private InventorySlotUI shieldSlotUI;
     private final InventorySlot[] creativeSlotData;
     private final Set<InventorySlot> creativeSlots;
     private final List<Item> creativeItems;
@@ -332,11 +331,6 @@ public class InventoryUI extends UIElement {
             slotUIs[i] = slotUI;
             addChild(slotUI);
         }
-        float shieldX = -Settings.getScaledSlot() - Settings.getScaledSpacing();
-        float shieldY = Settings.getScaledPadding() + Settings.getScaledHeader();
-        shieldSlotUI = new InventorySlotUI(shieldX, shieldY,
-                Settings.getScaledSlot(), Settings.getScaledSlot(), SlotType.SHIELD);
-        addChild(shieldSlotUI);
         createContainerSlots();
     }
 
@@ -590,15 +584,8 @@ public class InventoryUI extends UIElement {
 
         updateInventoryMode();
         if (isGodmode && isCreativeInventoryVisible) {
-            if (shieldSlotUI != null) shieldSlotUI.hide();
             syncCreativeInventory();
             return;
-        }
-
-        if (shieldSlotUI != null) {
-            shieldSlotUI.setSlot(inventory.getShieldSlot());
-            updateItemSprite(shieldSlotUI);
-            shieldSlotUI.show();
         }
 
         for (int i = 0; i < slotUIs.length; i++) {
@@ -905,6 +892,7 @@ public class InventoryUI extends UIElement {
             }
         }
 
+        InventorySlotUI shieldSlotUI = hotbarUI == null ? null : hotbarUI.getShieldSlotUI();
         if (shieldSlotUI != null && shieldSlotUI.isVisible()) {
             shieldSlotUI.setHovered(shieldSlotUI.contains(mouseX, mouseY));
         }
@@ -945,6 +933,7 @@ public class InventoryUI extends UIElement {
                 backpackUI.getSlotUIs() : new InventorySlotUI[0];
 
         int containerSlotCount = externalInventory == null ? 0 : containerSlotUIs.length;
+        InventorySlotUI shieldSlotUI = hotbarUI.getShieldSlotUI();
         int shieldSlotCount = shieldSlotUI != null && shieldSlotUI.isVisible() ? 1 : 0;
         InventorySlotUI[] allSlots = new InventorySlotUI[slotUIs.length
                 + containerSlotCount + hotbarSlots.length + backpackSlots.length

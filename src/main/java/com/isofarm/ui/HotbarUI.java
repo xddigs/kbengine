@@ -25,6 +25,7 @@ public class HotbarUI extends UIElement {
     private final Player player = Player.plyr;
     private Inventory inventory;
     private InventorySlotUI backpackSlotUI;
+    private InventorySlotUI shieldSlotUI;
     private Item lastSelectedItem;
 
     private SpriteSheet seedIcons;
@@ -243,6 +244,12 @@ public class HotbarUI extends UIElement {
 
         backpackSlotUI.hide();
         addChild(backpackSlotUI);
+
+        float shieldX = -Settings.getScaledSlot() - Settings.getScaledSpacing();
+        shieldSlotUI = new InventorySlotUI(shieldX, Settings.getScaledPadding(),
+                Settings.getScaledSlot(), Settings.getScaledSlot(), SlotType.SHIELD);
+        shieldSlotUI.hide();
+        addChild(shieldSlotUI);
     }
 
     /**
@@ -292,9 +299,16 @@ public class HotbarUI extends UIElement {
      */
     private void syncExtraSlots() {
         backpackSlotUI.hide();
+        shieldSlotUI.hide();
 
         if (inventory == null) {
             return;
+        }
+
+        if (inventory.getShield() != null || inventoryMode) {
+            shieldSlotUI.setSlot(inventory.getShieldSlot());
+            updateItemSprite(shieldSlotUI);
+            shieldSlotUI.show();
         }
 
         if (inventory.hasBackpackEquipped()) {
@@ -347,6 +361,8 @@ public class HotbarUI extends UIElement {
 
         backpackSlotUI.setSelected(false);
         backpackSlotUI.setHovered(isSlotHovered(backpackSlotUI));
+        shieldSlotUI.setSelected(false);
+        shieldSlotUI.setHovered(shieldSlotUI.isVisible() && isSlotHovered(shieldSlotUI));
 
         if (player == null || inventory == null) {
             return;
@@ -574,5 +590,10 @@ public class HotbarUI extends UIElement {
      */
     public InventorySlotUI[] getSlotUIs() {
         return slotUIs.clone();
+    }
+
+    /** Returns the left-hand equipment slot rendered beside the hotbar. */
+    public InventorySlotUI getShieldSlotUI() {
+        return shieldSlotUI;
     }
 }
