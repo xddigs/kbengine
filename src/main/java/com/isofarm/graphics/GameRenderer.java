@@ -700,6 +700,14 @@ public class GameRenderer {
                 Settings.getUndergroundViewRadius(), service.getFloorY(), service.getCeilingY());
     }
 
+    /**
+     * Represents the state of the view fog.
+     * @param view the current view
+     * @param bounds the bounds of the view
+     * @param radius the radius of the view
+     * @param floorY the floor Y of the view
+     * @param ceilingY the ceiling Y of the view
+     */
     private record ViewFogState(View view, Vector4f bounds, float radius,
                                 float floorY, float ceilingY) { }
 

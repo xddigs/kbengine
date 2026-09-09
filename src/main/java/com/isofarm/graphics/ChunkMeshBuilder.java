@@ -618,14 +618,28 @@ public class ChunkMeshBuilder {
         return neighborData.isTransparent() && neighborData != currentBlock;
     }
 
+    /**
+     * Marks the block whose neighbours must render their exposed faces.
+     * @param position the position of the breaking block
+     */
     public static void setBreakingBlock(BlockPos position) {
         breakingBlock = position;
     }
 
+    /**
+     * Clears the temporary breaking-block render state.
+     */
     public static void clearBreakingBlock() {
         breakingBlock = null;
     }
 
+    /**
+     * Checks whether the supplied position is the temporarily hidden breaking block.
+     * @param x the world x coordinate
+     * @param y the world y coordinate
+     * @param z the world z coordinate
+     * @return {@code true} when the position is the breaking block
+     */
     private static boolean isBreakingBlock(int x, int y, int z) {
         BlockPos position = breakingBlock;
         return position != null && position.x() == x && position.y() == y && position.z() == z;

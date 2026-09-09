@@ -233,6 +233,11 @@ public class ChunkManager {
         if (localZ == Chunk.SIZE_Z - 1) rebuildSingleChunk(chunkX, chunkZ + 1);
     }
 
+    /**
+     * Rebuilds the chunks around a breaking block on the render thread.
+     * @param worldX the world x coordinate of the breaking block
+     * @param worldZ the world z coordinate of the breaking block
+     */
     public void rebuildBreakingChunkMeshAt(int worldX, int worldZ) {
         int chunkX = Math.floorDiv(worldX, Chunk.SIZE_X);
         int chunkZ = Math.floorDiv(worldZ, Chunk.SIZE_Z);
@@ -262,6 +267,11 @@ public class ChunkManager {
         }
     }
 
+    /**
+     * Replaces one chunk mesh immediately and invalidates pending asynchronous builds.
+     * @param cx the chunk x coordinate
+     * @param cz the chunk z coordinate
+     */
     private void rebuildSingleChunkImmediately(int cx, int cz) {
         long key = world.get2DKey(cx, cz);
         Chunk chunk = world.getChunks().get(key);

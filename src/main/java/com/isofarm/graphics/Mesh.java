@@ -155,6 +155,7 @@ public class Mesh {
      * @param top the {@link TextureAtlas.TextureRegion} supplied as {@code top}
      * @param bottom the {@link TextureAtlas.TextureRegion} supplied as {@code bottom}
      * @param side the {@link TextureAtlas.TextureRegion} supplied as {@code side}
+     * @param neighborSolid whether each outer face is blocked by a solid neighbouring block
      * @return the {@link Mesh} representing the created mesh
      */
     public static Mesh createVoxelBlockMesh(Block block,

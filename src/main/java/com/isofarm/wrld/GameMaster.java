@@ -653,6 +653,11 @@ public class GameMaster {
         rebuildChunkMeshAt(pos.x(), pos.z());
     }
 
+    /**
+     * Rebuilds the chunks around a breaking block immediately.
+     * @param worldX the world x coordinate of the breaking block
+     * @param worldZ the world z coordinate of the breaking block
+     */
     public void rebuildBreakingChunkMeshAt(int worldX, int worldZ) {
         chunkManager.rebuildBreakingChunkMeshAt(worldX, worldZ);
     }
