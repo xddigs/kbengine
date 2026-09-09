@@ -34,6 +34,7 @@ import static org.lwjgl.opengl.GL13.*;
  */
 public class GameRenderer {
     private static final int MAX_TORCH_LIGHTS = 32;
+    private static final int BREAK_VOXELS_PER_AXIS = 4;
     public static final GameRenderer gamr = new GameRenderer();
     private final List<Vector3f> torchLights = new ArrayList<>();
     private final Matrix4f modelMatrix = new Matrix4f();
@@ -80,6 +81,7 @@ public class GameRenderer {
         defaultShader.bind();
         defaultShader.setUniform("uIsWater", false);
         defaultShader.setUniform("uIsSubmergedEntity", false);
+        defaultShader.setUniform("uVoxelBreakActive", false);
 
         int textureUnit = K.Render.PRIMARY_TEXTURE_UNIT;
         int shadowUnit = 1;
@@ -145,6 +147,10 @@ public class GameRenderer {
         defaultShader.setUniform("uIsWater", false);
         defaultShader.setUniform("uIsSubmergedEntity", false);
         Player player = Player.plyr;
+        VoxelBreakState voxelBreak = getVoxelBreakState(gameMaster);
+        defaultShader.setUniform("uVoxelBreakActive", voxelBreak != null);
+        if (voxelBreak != null) defaultShader.setUniform("uVoxelBreakPosition",
+                new Vector3f(voxelBreak.x(), voxelBreak.y(), voxelBreak.z()));
         chunkMeshes.forEach((chunk, chunkMesh) -> {
             if (chunkMesh != null && chunkMesh.solidMesh() != null && chunkMesh.solidMesh().getIndicesCount() > 0) {
                 float minX = chunk.getChunkX() * Chunk.SIZE_X;
@@ -160,6 +166,8 @@ public class GameRenderer {
                 }
             }
         });
+        defaultShader.setUniform("uVoxelBreakActive", false);
+        if (voxelBreak != null) renderVoxelBreak(defaultShader, voxelBreak);
 
         Shader grassShader = ResourceManager.rem.getGrassShader();
         grassShader.bind();
@@ -382,10 +390,6 @@ public class GameRenderer {
         }
 
         if (blockAtlas != null) blockAtlas.unbind();
-
-        renderDestroyOverlay(GameInteraction.gami, ResourceManager.rem.getDestroyShader(),
-                ResourceManager.rem.getDestroyOverlayMesh(),
-                ResourceManager.rem.getDestroyTexture(), camera);
 
         if (hoveredCell != null) {
             Vector3f outlineColor = getOutlineColor();
@@ -650,72 +654,44 @@ public class GameRenderer {
         return (minimum + maximum) * 0.5f;
     }
 
-    /**
-     * Renders the destroy overlay.
-     * @param interaction the {@link GameInteraction} supplied as {@code interaction}
-     * @param shader the {@link Shader} supplied as {@code shader}
-     * @param blockMesh the {@link Mesh} supplied as {@code blockMesh}
-     * @param destroyTexture the {@link SpriteSheet} supplied as {@code destroyTexture}
-     * @param camera the {@link CameraView} supplied as {@code camera}
-     */
-    public void renderDestroyOverlay(GameInteraction interaction, Shader shader, Mesh blockMesh,
-                                     SpriteSheet destroyTexture, CameraView camera) {
-        if (!interaction.isBreakingBlock() || destroyTexture == null) return;
-        Vector3i pos = interaction.getBreakingBlockPos();
-
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glEnable(GL_DEPTH_TEST);
-        glDepthFunc(GL_LEQUAL);
-        glDepthMask(false);
-        glDisable(GL_CULL_FACE);
-
-        glEnable(GL_POLYGON_OFFSET_FILL);
-        glPolygonOffset(-0.5f, -0.5f);
-        shader.bind();
-        glActiveTexture(GL_TEXTURE0 + K.Render.PRIMARY_TEXTURE_UNIT);
-        destroyTexture.bind();
-
-        shader.setUniform("uTexture", K.Render.PRIMARY_TEXTURE_UNIT);
-        shader.setUniform("uProjection", camera.getProjectionMatrix());
-        shader.setUniform("uView", camera.getViewMatrix());
-
-        int totalFrames = destroyTexture.getCols() * destroyTexture.getRows();
-        int frame = (int) (interaction.getBreakProgress() * totalFrames);
-        frame = Math.clamp(frame, 0, totalFrames - 1);
-
-        Vector4f uv = destroyTexture.getUVBounds(frame);
-        Vector4f uvBounds = new Vector4f(uv.x, uv.w, uv.z, uv.y);
-        shader.setUniform("uUVBounds", uvBounds);
-
-        BlockData breakingData = BlockData.fromId(
-                GameMaster.game.getWorld().getBlockTypeAt(pos.x, pos.y, pos.z));
-        BlockShape shape = breakingData == null ? BlockShape.FULL_CUBE
-                : GameMaster.game.getWorld().getBlockShapeAt(pos.x, pos.y, pos.z);
-        for (BlockShape.Box box : shape.getBoxes()) {
-            modelMatrix.identity()
-                    .translate(pos.x + box.minX(), pos.y + box.minY(), pos.z + box.minZ())
-                    .scale((box.maxX() - box.minX()) * 1.0001f,
-                            (box.maxY() - box.minY()) * 1.0001f,
-                            (box.maxZ() - box.minZ()) * 1.0001f);
-            shader.setUniform("uShapeMin", new Vector3f(box.minX(), box.minY(), box.minZ()));
-            shader.setUniform("uShapeMax", new Vector3f(box.maxX(), box.maxY(), box.maxZ()));
-            shader.setUniform("uModel", modelMatrix);
-            blockMesh.render();
-        }
-
-        destroyTexture.unbind();
-        shader.unbind();
-
-        glDisable(GL_POLYGON_OFFSET_FILL);
-        glPolygonOffset(0.0f, 0.0f);
-        glDepthFunc(GL_LESS);
-        glDepthMask(true);
-        glEnable(GL_CULL_FACE);
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glActiveTexture(GL_TEXTURE0);
+    private VoxelBreakState getVoxelBreakState(GameMaster gameMaster) {
+        if (!GameInteraction.gami.isBreakingBlock()) return null;
+        Vector3i pos = GameInteraction.gami.getBreakingBlockPos();
+        BlockData data = BlockData.fromId(gameMaster.getWorld().getBlockTypeAt(pos.x, pos.y, pos.z));
+        if (data == null || data == BlockData.AIR || data.isFluid()) return null;
+        return new VoxelBreakState(pos.x, pos.y, pos.z, data,
+                gameMaster.getWorld().getBlockShapeAt(pos.x, pos.y, pos.z),
+                GameInteraction.gami.getBreakProgress());
     }
+
+    private void renderVoxelBreak(Shader shader, VoxelBreakState state) {
+        TextureAtlas.TextureRegion region = state.data().getSideRegion();
+        if (region == null) region = state.data().getTopRegion();
+        if (region == null) return;
+        int stages = Math.clamp((int) Math.ceil(state.data().getDestroyTime() * 10.0f), 6, 24);
+        int removed = Math.min(stages - 1, (int) (state.progress() * stages))
+                * BREAK_VOXELS_PER_AXIS * BREAK_VOXELS_PER_AXIS * BREAK_VOXELS_PER_AXIS / stages;
+        shader.setUniform("uUVBounds", new Vector4f(region.uvMin().x, region.uvMin().y,
+                region.uvMax().x, region.uvMax().y));
+        Mesh fragment = ResourceManager.rem.getBlockFragmentMesh();
+        for (BlockShape.Box box : state.shape().getBoxes()) {
+            float sx = (box.maxX() - box.minX()) / BREAK_VOXELS_PER_AXIS;
+            float sy = (box.maxY() - box.minY()) / BREAK_VOXELS_PER_AXIS;
+            float sz = (box.maxZ() - box.minZ()) / BREAK_VOXELS_PER_AXIS;
+            for (int x = 0; x < BREAK_VOXELS_PER_AXIS; x++) for (int y = 0; y < BREAK_VOXELS_PER_AXIS; y++) for (int z = 0; z < BREAK_VOXELS_PER_AXIS; z++) {
+                int order = ((x * 17 + y * 31 + z * 47) ^ (x * y * 13 + z * 7)) & 63;
+                if (order < removed) continue;
+                modelMatrix.identity().translate(state.x() + box.minX() + (x + .5f) * sx,
+                                state.y() + box.minY() + (y + .5f) * sy,
+                                state.z() + box.minZ() + (z + .5f) * sz).scale(sx, sy, sz);
+                shader.setUniform("uModel", modelMatrix);
+                fragment.render();
+            }
+        }
+        shader.setUniform("uUVBounds", new Vector4f(0, 0, 1, 1));
+    }
+
+    private record VoxelBreakState(int x, int y, int z, BlockData data, BlockShape shape, float progress) { }
 
     /**
      * Updates the blur.

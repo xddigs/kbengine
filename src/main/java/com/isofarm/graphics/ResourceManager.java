@@ -42,7 +42,6 @@ public class ResourceManager {
     private static final SpriteSheet bookCloseIcon = new SpriteSheet(K.Paths.BOOK_CLOSE, 1, 1);
     private static final SpriteSheet heartsSpriteSheet = new SpriteSheet(K.Paths.HEARTS_SPRITESHEET, 1, K.UI.ICON_HEARTS_ROWS);
     private static final SpriteSheet hungerSpriteSheet = new SpriteSheet(K.Paths.HUNGER_SPRITESHEET, 1, K.UI.ICON_HEARTS_ROWS);
-    private static final SpriteSheet destroyTexture = new SpriteSheet(K.Paths.DESTROY_STAGES, K.UI.DESTROY_FRAMES, 1);
 
     private static final SpriteSheet wheat = new SpriteSheet(K.Paths.WHEAT_TEXTURE, K.Render.CROP_TOTAL_FRAMES, 1);
     private static final SpriteSheet carrot = new SpriteSheet(K.Paths.CARROT_TEXTURE, K.Render.CROP_TOTAL_FRAMES, 1);
@@ -57,7 +56,6 @@ public class ResourceManager {
 
     private static final Shader defaultShader = new Shader(K.Paths.DEFAULT_VERT_SHADER, K.Paths.DEFAULT_FRAG_SHADER);
     private static final Shader grassShader = new Shader(K.Paths.GRASS_VERT_SHADER, K.Paths.GRASS_FRAG_SHADER);
-    private static final Shader destroyShader = new Shader(K.Paths.DESTROY_VERT_SHADER, K.Paths.DESTROY_FRAG_SHADER);
     private static final Shader outlineShader = new Shader(K.Paths.OUTLINE_VERT_SHADER, K.Paths.OUTLINE_FRAG_SHADER);
     private static final Shader rainShader = new Shader(K.Paths.RAIN_VERT_SHADER, K.Paths.RAIN_FRAG_SHADER);
     private static final Shader motionBlurShader = new Shader(K.Paths.MOTION_BLUR_VERT_SHADER, K.Paths.MOTION_BLUR_FRAG_SHADER);
@@ -73,7 +71,7 @@ public class ResourceManager {
     private static final Mesh spriteMesh = Mesh.createCrop();
     private static final Mesh flowerMesh = Mesh.createCrossMesh();
     private static final Mesh playerMesh = Mesh.quadVertical();
-    private static final Mesh destroyOverlayMesh = Mesh.createDestroyOverlayMesh();
+    private static final Mesh blockFragmentMesh = Mesh.createCube();
     private static final Texture backgroundUI = new Texture(K.Paths.DEFAULT_BACKGROUND_UI);
     private static final Texture selectorUI = new Texture(K.Paths.DEFAULT_SELECTOR_UI);
     private static final Texture scrollBar = new Texture(K.Paths.SCROLL_BAR);
@@ -247,7 +245,7 @@ public class ResourceManager {
         spriteMesh.dispose();
         screenQuadMesh.dispose();
         playerMesh.dispose();
-        destroyOverlayMesh.dispose();
+        blockFragmentMesh.dispose();
 
         backgroundUI.dispose();
         selectorUI.dispose();
@@ -282,7 +280,6 @@ public class ResourceManager {
 
         defaultShader.dispose();
         grassShader.dispose();
-        destroyShader.dispose();
         outlineShader.dispose();
         motionBlurShader.dispose();
         rainShader.dispose();
@@ -329,13 +326,6 @@ public class ResourceManager {
         return new Vector3f(grassTint);
     }
 
-    /**
-     * Returns the shader dedicated to the block destruction overlay.
-     * @return the {@link Shader} used to render block cracks
-     */
-    public Shader getDestroyShader() {
-        return destroyShader;
-    }
 
     /**
      * Returns the rain shader.
@@ -396,13 +386,8 @@ public class ResourceManager {
         return flowerMesh;
     }
 
-    /**
-     * Returns the destroy overlay mesh.
-     * @return the {@link Mesh} representing the destroy overlay mesh
-     */
-    public Mesh getDestroyOverlayMesh() {
-        return destroyOverlayMesh;
-    }
+    /** Returns the unit cube used by the voxel breaking effect. */
+    public Mesh getBlockFragmentMesh() { return blockFragmentMesh; }
 
     /**
      * Returns the selection mesh.
@@ -474,13 +459,6 @@ public class ResourceManager {
         return blocksAtlas;
     }
 
-    /**
-     * Returns the destroy texture.
-     * @return the {@link SpriteSheet} representing the destroy texture
-     */
-    public SpriteSheet getDestroyTexture() {
-        return destroyTexture;
-    }
 
     /**
      * Returns the player model.

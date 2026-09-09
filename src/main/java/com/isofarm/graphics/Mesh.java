@@ -160,19 +160,6 @@ public class Mesh {
     }
 
     /**
-     * Creates and returns the destroy overlay mesh.
-     * @return the {@link Mesh} representing the created destroy overlay mesh
-     */
-    public static Mesh createDestroyOverlayMesh() {
-        float[] positions = new float[]{0,1,0, 0,1,1, 1,1,1, 1,1,0, 0,0,1, 0,1,1, 1,1,1, 1,0,1, 1,0,1, 1,1,1, 1,1,0, 1,0,0, 1,0,0, 1,1,0, 0,1,0, 0,0,0, 0,0,0, 0,1,0, 0,1,1, 0,0,1, 0,0,1, 0,0,0, 1,0,0, 1,0,1};
-        float[] normals = new float[]{0,1,0, 0,1,0, 0,1,0, 0,1,0, 0,0,1, 0,0,1, 0,0,1, 0,0,1, 1,0,0, 1,0,0, 1,0,0, 1,0,0, 0,0,-1, 0,0,-1, 0,0,-1, 0,0,-1, -1,0,0, -1,0,0, -1,0,0, -1,0,0, 0,-1,0, 0,-1,0, 0,-1,0, 0,-1,0};
-        float[] texCoords = new float[]{0,0, 0,1, 1,1, 1,0, 0,0, 0,1, 1,1, 1,0, 0,0, 0,1, 1,1, 1,0, 0,0, 0,1, 1,1, 1,0, 0,0, 0,1, 1,1, 1,0, 0,0, 0,1, 1,1, 1,0};
-        int[] indices = new int[36];
-        for (int i = 0; i < 6; i++) { int v = i * 4; int idx = i * 6; indices[idx] = v; indices[idx + 1] = v + 1; indices[idx + 2] = v + 3; indices[idx + 3] = v + 3; indices[idx + 4] = v + 1; indices[idx + 5] = v + 2; }
-        return new Mesh(positions, normals, texCoords, indices);
-    }
-
-    /**
      * Creates and returns the centered quad.
      * @return the {@link Mesh} representing the created centered quad
      */

@@ -95,7 +95,6 @@ public final class K {
         public static final int ICON_MATERIAL_ROWS = 2;
         public static final int ICON_INV_COLS = 4;
 
-        public static final int DESTROY_FRAMES = 9;
 
         public static final float TOAST_WIDTH = 500f;
         public static final float TOAST_HEIGHT = 64.0f;
@@ -142,8 +141,6 @@ public final class K {
         public static final String DEFAULT_FRAG_SHADER = "shaders/default.frag";
         public static final String GRASS_VERT_SHADER = "shaders/grass.vert";
         public static final String GRASS_FRAG_SHADER = "shaders/grass.frag";
-        public static final String DESTROY_VERT_SHADER = "shaders/destroy.vert";
-        public static final String DESTROY_FRAG_SHADER = "shaders/destroy.frag";
         public static final String OUTLINE_VERT_SHADER = "shaders/outline.vert";
         public static final String OUTLINE_FRAG_SHADER = "shaders/outline.frag";
 
@@ -183,7 +180,6 @@ public final class K {
 
         public static final String PLAYER_MODEL = "assets/models/player/player.gltf";
 
-        public static final String DESTROY_STAGES = "assets/textures/blocks/destroy.png";
         public static final String HEARTS_SPRITESHEET = "assets/ui/hearts.png";
         public static final String HUNGER_SPRITESHEET = "assets/ui/hunger.png";
 
