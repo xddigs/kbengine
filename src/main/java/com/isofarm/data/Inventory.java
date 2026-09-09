@@ -399,11 +399,10 @@ public class Inventory {
     public static int sortByOrder(Item item) {
         return switch (item) {
             case Block ignored -> 0;
-            case iBlock ignored -> 1;
-            case Tool ignored -> 2;
-            case Usable ignored -> 3;
-            case Material ignored -> 4;
-            case Food ignored -> 5;
+            case Tool ignored -> 1;
+            case Usable ignored -> 2;
+            case Material ignored -> 3;
+            case Food ignored -> 4;
             case Produce ignored -> 5;
             case null, default -> 6;
         };

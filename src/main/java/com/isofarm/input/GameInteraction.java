@@ -550,10 +550,16 @@ public class GameInteraction {
         int z = block.getZ();
 
         if (breakingX != x || breakingY != y || breakingZ != z) {
+            if (breakingX != Integer.MIN_VALUE) {
+                ChunkMeshBuilder.clearBreakingBlock();
+                gameMaster.rebuildBreakingChunkMeshAt(breakingX, breakingZ);
+            }
             breakingX = x;
             breakingY = y;
             breakingZ = z;
             breakProgress = 0.0f;
+            ChunkMeshBuilder.setBreakingBlock(new BlockPos(block.getType(), x, y, z));
+            gameMaster.rebuildBreakingChunkMeshAt(x, z);
         }
 
         if (Player.plyr.getGamemode().isGodmode()) {

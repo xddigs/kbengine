@@ -4,6 +4,7 @@ import com.isofarm.data.*;
 import com.isofarm.entity.Player;
 import com.isofarm.input.GameInteraction;
 import com.isofarm.item.Block;
+import com.isofarm.item.iBlock;
 import com.isofarm.service.BookService;
 import com.isofarm.service.TimeService;
 import com.isofarm.service.ViewService;
@@ -216,56 +217,67 @@ public class GameRenderer {
         grassShader.setUniform("uVoxelBreakActive", false);
 
         if (breakingBlock) {
-            Block targetBlock = gameMaster.getWorld().getBlockAt(breakingPosition.x(),
+            iBlock interactiveBlock = gameMaster.getWorld().getInteractiveBlockAt(breakingPosition.x(),
                     breakingPosition.y(), breakingPosition.z());
+            Block targetBlock = interactiveBlock != null ? interactiveBlock : gameMaster.getWorld().getBlockAt(
+                    breakingPosition.x(), breakingPosition.y(), breakingPosition.z());
 
             if (targetBlock != null) {
-                targetBlock.initVoxels();
                 float breakProgress = GameInteraction.gami.getBreakProgress();
-                targetBlock.updateBreakingProgress(breakProgress);
+                if (interactiveBlock != null && interactiveBlock.getBlockModel() != null) {
+                    defaultShader.bind();
+                    defaultShader.setUniform("uVoxelBreakActive", false);
+                    defaultShader.setUniform("uModelBreakActive", true);
+                    defaultShader.setUniform("uModelBreakProgress", breakProgress);
+                    interactiveBlock.getModelTransform(modelMatrix);
+                    interactiveBlock.getBlockModel().render(defaultShader, modelMatrix);
+                    defaultShader.setUniform("uModelBreakActive", false);
+                } else if (interactiveBlock == null) {
+                    targetBlock.initVoxels();
+                    targetBlock.updateBreakingProgress(breakProgress);
 
-                BlockData data = targetBlock.getType();
-                int[][] offsets = {
+                    BlockData data = targetBlock.getType();
+                    int[][] offsets = {
                         {0, 1, 0}, {0, -1, 0},
                         {0, 0, 1}, {0, 0, -1},
                         {1, 0, 0}, {-1, 0, 0}
-                };
+                    };
 
-                int sides = 6;
-                boolean[] neighbourSolid = new boolean[sides];
-                for (int i = 0; i < sides; i++) {
-                    int nx = breakingPosition.x() + offsets[i][0];
-                    int ny = breakingPosition.y() + offsets[i][1];
-                    int nz = breakingPosition.z() + offsets[i][2];
-                    Block neighbour = World.wrld.getBlockAt(nx, ny, nz);
-                    neighbourSolid[i] = (neighbour != null && neighbour.getType().isSolid());
+                    int sides = 6;
+                    boolean[] neighbourSolid = new boolean[sides];
+                    for (int i = 0; i < sides; i++) {
+                        int nx = breakingPosition.x() + offsets[i][0];
+                        int ny = breakingPosition.y() + offsets[i][1];
+                        int nz = breakingPosition.z() + offsets[i][2];
+                        Block neighbour = World.wrld.getBlockAt(nx, ny, nz);
+                        neighbourSolid[i] = (neighbour != null && neighbour.getType().isSolid());
+                    }
+
+                    Mesh voxelMesh = Mesh.createVoxelBlockMesh(
+                            targetBlock,
+                            data.getTopRegion(),
+                            data.getBottomRegion(),
+                            data.getSideRegion(),
+                            neighbourSolid
+                    );
+
+                    defaultShader.bind();
+                    defaultShader.setUniform("uVoxelBreakActive", false);
+
+                    if (blockAtlas != null) {
+                        glActiveTexture(GL_TEXTURE0 + textureUnit);
+                        blockAtlas.bind();
+                        defaultShader.setUniform("uTexture", textureUnit);
+                        defaultShader.setUniform("uUseTexture", true);
+                        defaultShader.setUniform("uUseFaceAtlas", false);
+                        defaultShader.setUniform("uUVBounds", new Vector4f(0.0f, 0.0f, 1.0f, 1.0f));
+                    }
+
+                    modelMatrix.identity().translate(breakingPosition.x(), breakingPosition.y(), breakingPosition.z());
+                    defaultShader.setUniform("uModel", modelMatrix);
+                    voxelMesh.render();
+                    voxelMesh.dispose();
                 }
-
-                Mesh voxelMesh = Mesh.createVoxelBlockMesh(
-                        targetBlock,
-                        data.getTopRegion(),
-                        data.getBottomRegion(),
-                        data.getSideRegion(),
-                        neighbourSolid
-                );
-
-                defaultShader.bind();
-                defaultShader.setUniform("uVoxelBreakActive", false);
-
-                if (blockAtlas != null) {
-                    glActiveTexture(GL_TEXTURE0 + textureUnit);
-                    blockAtlas.bind();
-                    defaultShader.setUniform("uTexture", textureUnit);
-                    defaultShader.setUniform("uUseTexture", true);
-                    defaultShader.setUniform("uUseFaceAtlas", false);
-                    defaultShader.setUniform("uUVBounds", new Vector4f(0.0f, 0.0f, 1.0f, 1.0f));
-                }
-
-                modelMatrix.identity().translate(breakingPosition.x(), breakingPosition.y(), breakingPosition.z());
-                defaultShader.setUniform("uModel", modelMatrix);
-
-                voxelMesh.render();
-                voxelMesh.dispose();
             }
         }
 
@@ -327,13 +339,13 @@ public class GameRenderer {
         glDepthMask(true);
 
         BlockPos hoveredCell = HoveredCell.get(gameMaster);
-        renderTorches(gameMaster, camera, defaultShader);
+        renderTorches(camera, defaultShader);
 
         defaultShader.bind();
         defaultShader.setUniform("uIsWater", false);
         defaultShader.setUniform("uIsSubmergedEntity", false);
 
-        gameMaster.getWorld().forEach(block -> {
+        World.wrld.forEach(block -> {
             if (!(block instanceof Crop crop)) return;
             SpriteSheet sheet = ResourceManager.rem.getCropSpritesheets().get(crop.getCropType());
             if (sheet == null) return;
@@ -371,8 +383,11 @@ public class GameRenderer {
             sheet.unbind();
         });
 
-        gameMaster.getWorld().forEachInteractiveBlock(block -> {
+        World.wrld.forEachInteractiveBlock(block -> {
             if (block.getBlockModel() == null) return;
+            if (breakingBlock && block.getX() == breakingPosition.x()
+                    && block.getY() == breakingPosition.y()
+                    && block.getZ() == breakingPosition.z()) return;
 
             defaultShader.setUniform("uUseFaceAtlas", false);
             defaultShader.setUniform("uIsSprite", false);
@@ -390,7 +405,7 @@ public class GameRenderer {
         defaultShader.setUniform("uIsWater", false);
         defaultShader.setUniform("uIsSubmergedEntity", false);
 
-        gameMaster.getWorld().forEachPlant(plant -> {
+        World.wrld.forEachPlant(plant -> {
             BlockData data = plant.data();
             TextureAtlas.TextureRegion region = data.getTopRegion();
             if (region == null) return;
@@ -446,7 +461,7 @@ public class GameRenderer {
 
             gameMaster.getRainEngine().render(ResourceManager.rem.getRainShader(),
                     camera.getViewMatrix(), camera.getProjectionMatrix(),
-                    rainTargetPos, gameMaster.getWorld());
+                    rainTargetPos, World.wrld);
         }
 
         if (blockAtlas != null) blockAtlas.unbind();
@@ -469,7 +484,7 @@ public class GameRenderer {
             defaultShader.setUniform("uUseParticleAlpha", false);
             defaultShader.setUniform("uParticleAlpha", 1.0f);
 
-            var selectedInteractiveBlock = gameMaster.getWorld().getInteractiveBlockAt(
+            var selectedInteractiveBlock = World.wrld.getInteractiveBlockAt(
                     hoveredCell.x(), hoveredCell.y(), hoveredCell.z());
             if (selectedInteractiveBlock != null
                     && selectedInteractiveBlock.getType().isDoor()) {
@@ -481,7 +496,7 @@ public class GameRenderer {
 
             defaultShader.setUniform("uModel", modelMatrix);
             BlockShape selectedShape = hoveredCell.data() instanceof BlockData
-                    ? gameMaster.getWorld().getBlockShapeAt(
+                    ? World.wrld.getBlockShapeAt(
                     hoveredCell.x(), hoveredCell.y(), hoveredCell.z()) : null;
             ResourceManager.rem.getSelectionMesh(selectedShape).renderLines();
 
@@ -574,8 +589,8 @@ public class GameRenderer {
         float searchDistance = 24.0f;
         float searchDistanceSq = searchDistance * searchDistance;
 
-        gameMaster.getWorld().forEachTorch(torch -> {
-            BlockShape.Box bounds = getTorchBounds(gameMaster, torch);
+        World.wrld.forEachTorch(torch -> {
+            BlockShape.Box bounds = getTorchBounds(torch);
             Vector3f position = new Vector3f(
                     torch.x() + center(bounds.minX(), bounds.maxX()),
                     torch.y() + bounds.maxY() - 0.15f,
@@ -586,7 +601,7 @@ public class GameRenderer {
             }
         });
 
-        gameMaster.getWorld().forEachLava(lava -> {
+        World.wrld.forEachLava(lava -> {
             Vector3f position = new Vector3f(lava.x() + 0.5f, lava.y() + 0.5f, lava.z() + 0.5f);
             if (viewService.isVisible(position)
                     && position.distanceSquared(centerPosition) <= searchDistanceSq) {
@@ -608,7 +623,7 @@ public class GameRenderer {
     }
 
     /** Renders every torch as an animated, camera-facing billboard. */
-    private void renderTorches(GameMaster gameMaster, CameraView camera, Shader shader) {
+    private void renderTorches(CameraView camera, Shader shader) {
         SpriteSheet torchFrames = ResourceManager.rem.getTorchIcons();
         if (torchFrames == null) return;
 
@@ -625,8 +640,8 @@ public class GameRenderer {
         glActiveTexture(GL_TEXTURE0 + K.Render.PRIMARY_TEXTURE_UNIT);
         torchFrames.bind();
         glDisable(GL_CULL_FACE);
-        gameMaster.getWorld().forEachTorch(torch -> {
-            BlockShape.Box bounds = getTorchBounds(gameMaster, torch);
+        World.wrld.forEachTorch(torch -> {
+            BlockShape.Box bounds = getTorchBounds(torch);
             float centerX = torch.x() + center(bounds.minX(), bounds.maxX());
             float centerZ = torch.z() + center(bounds.minZ(), bounds.maxZ());
             float angle = (float) Math.atan2(camera.getPosition().x - centerX,
@@ -709,8 +724,8 @@ public class GameRenderer {
                                 float floorY, float ceilingY) { }
 
     /** Returns the physical bounds that also anchor a placed torch sprite. */
-    private static BlockShape.Box getTorchBounds(GameMaster gameMaster, BlockPos torch) {
-        BlockShape shape = gameMaster.getWorld().getBlockShapeAt(
+    private static BlockShape.Box getTorchBounds(BlockPos torch) {
+        BlockShape shape = World.wrld.getBlockShapeAt(
                 torch.x(), torch.y(), torch.z());
         BlockShape.Box[] boxes = shape.getBoxes();
         return boxes.length == 0

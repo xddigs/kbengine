@@ -49,6 +49,13 @@ uniform float uViewFogStrength;
 uniform bool uIgnoreViewFog;
 uniform bool uVoxelBreakActive;
 uniform vec3 uVoxelBreakPosition;
+uniform bool uModelBreakActive;
+uniform float uModelBreakProgress;
+
+float breakCell(vec3 position) {
+    vec3 cell = floor(position * vec3(8.0, 4.0, 8.0));
+    return fract(sin(dot(cell, vec3(12.9898, 78.233, 37.719))) * 43758.5453);
+}
 
 float applyViewFog(vec3 worldPosition) {
     if (uIgnoreViewFog || uViewMode == 0 || uViewFogStrength <= 0.0) return 1.0;
@@ -147,6 +154,9 @@ void main() {
     if (uVoxelBreakActive
             && all(greaterThanEqual(blockSample, uVoxelBreakPosition))
             && all(lessThan(blockSample, uVoxelBreakPosition + vec3(1.0)))) {
+        discard;
+    }
+    if (uModelBreakActive && breakCell(vFragPos) < uModelBreakProgress) {
         discard;
     }
     float viewFog = applyViewFog(vFragPos);

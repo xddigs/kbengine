@@ -19,7 +19,7 @@ import org.joml.Vector3f;
  */
 @SuppressWarnings("all")
 @DataClass
-public class iBlock implements Craftable {
+public class iBlock extends Block {
     private static final float ANIMATION_DURATION = 0.10f;
     private static final float CHEST_OPEN_ANGLE = (float) Math.toRadians(35.0);
     private static final float DOOR_OPEN_ANGLE = (float) Math.toRadians(90.0);
