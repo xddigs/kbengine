@@ -78,15 +78,6 @@ public final class ViewService implements Service<View> {
                 || !wallIsClosed(world, minZ, playerY, minX, maxX, false)
                 || !wallIsClosed(world, maxZ, playerY, minX, maxX, false)) return null;
 
-        boolean hasDoor = false;
-        for (int z = minZ; z <= maxZ && !hasDoor; z++) {
-            hasDoor = isDoor(world, minX, playerY, z) || isDoor(world, maxX, playerY, z);
-        }
-        for (int x = minX; x <= maxX && !hasDoor; x++) {
-            hasDoor = isDoor(world, x, playerY, minZ) || isDoor(world, x, playerY, maxZ);
-        }
-        if (!hasDoor) return null;
-
         int ceiling = findOverhead(world, playerX, playerY, playerZ);
         if (ceiling < playerY + MIN_ROOM_HEIGHT) return null;
         int roofColumns = 0;

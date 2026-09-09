@@ -45,10 +45,11 @@ uniform vec4 uViewBounds;
 uniform float uViewRadius;
 uniform float uViewFloorY;
 uniform float uViewCeilingY;
+uniform float uViewFogStrength;
 uniform bool uIgnoreViewFog;
 
 float applyViewFog(vec3 worldPosition) {
-    if (uIgnoreViewFog || uViewMode == 0) return 1.0;
+    if (uIgnoreViewFog || uViewMode == 0 || uViewFogStrength <= 0.0) return 1.0;
 
     vec2 offset = worldPosition.xz - uViewPlayerPosition.xz;
     vec2 cameraOffset = uViewCameraPosition.xz - uViewPlayerPosition.xz;
@@ -57,24 +58,36 @@ float applyViewFog(vec3 worldPosition) {
 
     if (uViewMode == 1) {
         if (worldPosition.x < uViewBounds.x || worldPosition.z < uViewBounds.y
-                || worldPosition.x > uViewBounds.z || worldPosition.z > uViewBounds.w) discard;
-        if (worldPosition.y >= uViewCeilingY - 0.02) discard;
+                || worldPosition.x > uViewBounds.z || worldPosition.z > uViewBounds.w) {
+            if (uViewFogStrength >= 1.0) discard;
+            return 1.0 - uViewFogStrength;
+        }
+        if (worldPosition.y >= uViewCeilingY - 0.02) {
+            if (uViewFogStrength >= 1.0) discard;
+            return 1.0 - uViewFogStrength;
+        }
 
         bool frontWall = (toCamera.x > 0.15 && worldPosition.x > uViewBounds.z - 1.01)
                 || (toCamera.x < -0.15 && worldPosition.x < uViewBounds.x + 1.01)
                 || (toCamera.y > 0.15 && worldPosition.z > uViewBounds.w - 1.01)
                 || (toCamera.y < -0.15 && worldPosition.z < uViewBounds.y + 1.01);
-        if (frontWall && worldPosition.y > uViewFloorY + 0.08) discard;
+        if (frontWall && worldPosition.y > uViewFloorY + 0.08) {
+            if (uViewFogStrength >= 1.0) discard;
+            return 1.0 - uViewFogStrength;
+        }
 
         float edge = min(min(worldPosition.x - uViewBounds.x,
                              uViewBounds.z - worldPosition.x),
                          min(worldPosition.z - uViewBounds.y,
                              uViewBounds.w - worldPosition.z));
-        return mix(0.35, 1.0, smoothstep(0.0, 1.25, edge));
+        return mix(1.0, mix(0.35, 1.0, smoothstep(0.0, 1.25, edge)), uViewFogStrength);
     }
 
     float distanceFromPlayer = length(offset);
-    if (distanceFromPlayer > uViewRadius || worldPosition.y >= uViewCeilingY) discard;
+    if (distanceFromPlayer > uViewRadius || worldPosition.y >= uViewCeilingY) {
+        if (uViewFogStrength >= 1.0) discard;
+        return 1.0 - uViewFogStrength;
+    }
 
     float frontDepth = dot(offset, toCamera);
     float sideDistance = abs(dot(offset, vec2(-toCamera.y, toCamera.x)));
@@ -82,11 +95,11 @@ float applyViewFog(vec3 worldPosition) {
 
     if (frontDepth > 0.20 && sideDistance < corridorWidth
         && worldPosition.y > uViewFloorY + 0.08) {
-        return 0.15;
+        return mix(1.0, 0.15, uViewFogStrength);
     }
 
-    return 1.0 - smoothstep(max(0.0, uViewRadius - 2.0),
-                            uViewRadius, distanceFromPlayer);
+    return mix(1.0, 1.0 - smoothstep(max(0.0, uViewRadius - 2.0),
+                            uViewRadius, distanceFromPlayer), uViewFogStrength);
 }
 
 float calculateShadow(vec4 lightSpacePosition, vec3 normal) {

@@ -43,6 +43,11 @@ public class GameRenderer {
     private float blurX;
     private float blurY;
     private float waterTime;
+    private static final float VIEW_FOG_TRANSITION_DURATION = 0.15f;
+    private ViewFogState displayedViewFog;
+    private ViewFogState previousViewFog;
+    private ViewFogState targetViewFog;
+    private float viewFogTransition = 1.0f;
 
     /**
      * Renders this object in the requested render pass.
@@ -53,6 +58,7 @@ public class GameRenderer {
         ShadowSystem.sys.render(gameMaster, chunkMeshes);
         waterTime += gameMaster.getGenDelta();
         CameraView camera = gameMaster.getActiveCamera();
+        updateViewFogTransition(gameMaster);
         collectTorchLights(gameMaster, camera);
         PointShadowSystem.sys.render(gameMaster, chunkMeshes, torchLights);
         float windowWidth = gameMaster.getWindowWidth();
@@ -579,18 +585,61 @@ public class GameRenderer {
 
     /** Uploads the common cutaway and fog-of-war volume to a world shader. */
     private void uploadView(Shader shader, GameMaster gameMaster, CameraView camera) {
-        ViewService service = gameMaster.getViewService();
+        ViewFogState fog = getRenderedViewFog();
         Player player = Player.plyr;
-        shader.setUniform("uViewMode", service.getView().getShaderId());
+        shader.setUniform("uViewMode", fog.view().getShaderId());
         shader.setUniform("uViewPlayerPosition", player == null
                 ? new Vector3f() : player.getPosition());
         shader.setUniform("uViewCameraPosition", camera.getPosition());
-        shader.setUniform("uViewBounds", service.getBounds());
-        shader.setUniform("uViewRadius", Settings.getUndergroundViewRadius());
-        shader.setUniform("uViewFloorY", service.getFloorY());
-        shader.setUniform("uViewCeilingY", service.getCeilingY());
+        shader.setUniform("uViewBounds", fog.bounds());
+        shader.setUniform("uViewRadius", fog.radius());
+        shader.setUniform("uViewFloorY", fog.floorY());
+        shader.setUniform("uViewCeilingY", fog.ceilingY());
+        shader.setUniform("uViewFogStrength", getViewFogStrength());
         shader.setUniform("uIgnoreViewFog", false);
     }
+
+    private void updateViewFogTransition(GameMaster gameMaster) {
+        ViewFogState current = captureViewFog(gameMaster.getViewService());
+        if (displayedViewFog == null) {
+            displayedViewFog = current;
+            targetViewFog = current;
+            return;
+        }
+        if (current.view() != targetViewFog.view()) {
+            previousViewFog = getRenderedViewFog();
+            targetViewFog = current;
+            viewFogTransition = 0.0f;
+        } else if (viewFogTransition >= 1.0f) {
+            displayedViewFog = current;
+            targetViewFog = current;
+        }
+        if (viewFogTransition < 1.0f) {
+            viewFogTransition = Math.min(1.0f, viewFogTransition
+                    + gameMaster.getGenDelta() / VIEW_FOG_TRANSITION_DURATION);
+            if (viewFogTransition >= 1.0f) displayedViewFog = targetViewFog;
+        }
+    }
+
+    private ViewFogState getRenderedViewFog() {
+        if (viewFogTransition >= 1.0f || targetViewFog.view() != View.EXTERIOR) {
+            return targetViewFog;
+        }
+        return previousViewFog;
+    }
+
+    private float getViewFogStrength() {
+        if (viewFogTransition >= 1.0f) return targetViewFog.view() == View.EXTERIOR ? 0.0f : 1.0f;
+        return targetViewFog.view() == View.EXTERIOR ? 1.0f - viewFogTransition : viewFogTransition;
+    }
+
+    private static ViewFogState captureViewFog(ViewService service) {
+        return new ViewFogState(service.getView(), service.getBounds(),
+                Settings.getUndergroundViewRadius(), service.getFloorY(), service.getCeilingY());
+    }
+
+    private record ViewFogState(View view, Vector4f bounds, float radius,
+                                float floorY, float ceilingY) { }
 
     /** Returns the physical bounds that also anchor a placed torch sprite. */
     private static BlockShape.Box getTorchBounds(GameMaster gameMaster, BlockPos torch) {
