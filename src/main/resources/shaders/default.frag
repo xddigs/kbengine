@@ -47,6 +47,8 @@ uniform float uViewFloorY;
 uniform float uViewCeilingY;
 uniform float uViewFogStrength;
 uniform bool uIgnoreViewFog;
+uniform bool uVoxelBreakActive;
+uniform vec3 uVoxelBreakPosition;
 
 float applyViewFog(vec3 worldPosition) {
     if (uIgnoreViewFog || uViewMode == 0 || uViewFogStrength <= 0.0) return 1.0;
@@ -142,9 +144,11 @@ float torchShadowDepth(int index, vec3 lightToFragment) {
 
 void main() {
     vec3 blockSample = vFragPos - normalize(vNormal) * 0.001;
-    int faceBit = vNormal.y > 0.5 ? 1 : vNormal.y < -0.5 ? 2
-            : vNormal.z > 0.5 ? 4 : vNormal.z < -0.5 ? 8
-            : vNormal.x > 0.5 ? 16 : 32;
+    if (uVoxelBreakActive
+            && all(greaterThanEqual(blockSample, uVoxelBreakPosition))
+            && all(lessThan(blockSample, uVoxelBreakPosition + vec3(1.0)))) {
+        discard;
+    }
     float viewFog = applyViewFog(vFragPos);
     vec4 texColor = vec4(uBaseColor, 1.0);
 

@@ -8,6 +8,7 @@ import com.isofarm.data.RenderPass;
 import com.isofarm.data.View;
 import com.isofarm.entity.Player;
 import com.isofarm.input.GameInteraction;
+import com.isofarm.item.Block;
 import com.isofarm.service.BookService;
 import com.isofarm.service.TimeService;
 import com.isofarm.service.ViewService;
@@ -34,7 +35,6 @@ import static org.lwjgl.opengl.GL13.*;
  */
 public class GameRenderer {
     private static final int MAX_TORCH_LIGHTS = 32;
-    private static final int BREAK_VOXELS_PER_AXIS = 4;
     public static final GameRenderer gamr = new GameRenderer();
     private final List<Vector3f> torchLights = new ArrayList<>();
     private final Matrix4f modelMatrix = new Matrix4f();
@@ -81,11 +81,6 @@ public class GameRenderer {
         defaultShader.bind();
         defaultShader.setUniform("uIsWater", false);
         defaultShader.setUniform("uIsSubmergedEntity", false);
-        defaultShader.setUniform("uBreakingVoxelBlock", GameInteraction.gami.isBreakingBlock());
-        if (GameInteraction.gami.isBreakingBlock()) defaultShader.setUniform("uBreakingVoxelPosition",
-                new Vector3f(GameInteraction.gami.getBreakingBlockPos().x(),
-                        GameInteraction.gami.getBreakingBlockPos().y(),
-                        GameInteraction.gami.getBreakingBlockPos().z()));
 
         int textureUnit = K.Render.PRIMARY_TEXTURE_UNIT;
         int shadowUnit = 1;
@@ -150,6 +145,13 @@ public class GameRenderer {
 
         defaultShader.setUniform("uIsWater", false);
         defaultShader.setUniform("uIsSubmergedEntity", false);
+        boolean breakingBlock = GameInteraction.gami.isBreakingBlock();
+        Vector3i breakingPosition = GameInteraction.gami.getBreakingBlockPos();
+        defaultShader.setUniform("uVoxelBreakActive", breakingBlock);
+        if (breakingBlock) {
+            defaultShader.setUniform("uVoxelBreakPosition", new Vector3f(
+                    breakingPosition.x(), breakingPosition.y(), breakingPosition.z()));
+        }
         Player player = Player.plyr;
         chunkMeshes.forEach((chunk, chunkMesh) -> {
             if (chunkMesh != null && chunkMesh.solidMesh() != null && chunkMesh.solidMesh().getIndicesCount() > 0) {
@@ -182,6 +184,11 @@ public class GameRenderer {
         grassShader.setUniform("uLightSpaceMatrix", ShadowSystem.sys.getLightSpaceMatrix());
         grassShader.setUniform("uEnableShadows", Settings.doEnableShadows());
         grassShader.setUniform("uGrassTint", ResourceManager.rem.getGrassTint());
+        grassShader.setUniform("uVoxelBreakActive", breakingBlock);
+        if (breakingBlock) {
+            grassShader.setUniform("uVoxelBreakPosition", new Vector3f(
+                    breakingPosition.x(), breakingPosition.y(), breakingPosition.z()));
+        }
         uploadTorchLights(grassShader);
         PointShadowSystem.sys.bind(grassShader, 2);
         TextureAtlas.TextureRegion grassTopRegion = BlockData.GRASS.getTopRegion();
@@ -208,7 +215,44 @@ public class GameRenderer {
             });
             glDepthFunc(GL_LESS);
         }
-        grassShader.setUniform("uBreakingVoxelBlock", false);
+        grassShader.setUniform("uVoxelBreakActive", false);
+
+        if (breakingBlock) {
+            Vector3i breakPos = breakingPosition;
+            Block targetBlock = gameMaster.getWorld().getBlockAt(breakPos.x(), breakPos.y(), breakPos.z());
+
+            if (targetBlock != null) {
+                targetBlock.initVoxels();
+                float breakProgress = GameInteraction.gami.getBreakProgress();
+                targetBlock.updateBreakingProgress(breakProgress);
+
+                BlockData data = targetBlock.getType();
+                Mesh voxelMesh = Mesh.createVoxelBlockMesh(
+                        targetBlock,
+                        data.getTopRegion(),
+                        data.getBottomRegion(),
+                        data.getSideRegion()
+                );
+
+                defaultShader.bind();
+                defaultShader.setUniform("uVoxelBreakActive", false);
+
+                if (blockAtlas != null) {
+                    glActiveTexture(GL_TEXTURE0 + textureUnit);
+                    blockAtlas.bind();
+                    defaultShader.setUniform("uTexture", textureUnit);
+                    defaultShader.setUniform("uUseTexture", true);
+                    defaultShader.setUniform("uUseFaceAtlas", false);
+                    defaultShader.setUniform("uUVBounds", new Vector4f(0.0f, 0.0f, 1.0f, 1.0f));
+                }
+
+                modelMatrix.identity().translate(breakPos.x(), breakPos.y(), breakPos.z());
+                defaultShader.setUniform("uModel", modelMatrix);
+
+                voxelMesh.render();
+                voxelMesh.dispose();
+            }
+        }
 
         if (player != null) {
             defaultShader.bind();
@@ -235,7 +279,6 @@ public class GameRenderer {
 
         defaultShader.bind();
         defaultShader.setUniform("uIsWater", true);
-        defaultShader.setUniform("uBreakingVoxelBlock", false);
         defaultShader.setUniform("uUVBounds", new Vector4f(0.0f, 0.0f, 1.0f, 1.0f));
         defaultShader.setUniform("uParticleAlpha", 1.0f);
 

@@ -11,6 +11,8 @@ import com.isofarm.utils.K;
  */
 @DataClass
 public class Block implements Craftable {
+    private static final int VOXEL_SIZE = 4;
+    private final byte[][][] voxels = new byte[VOXEL_SIZE][VOXEL_SIZE][VOXEL_SIZE];
     private final int waterLevelMax = K.World.WATER_LEVEL_MAX;
     private final byte id;
     private final String name;
@@ -106,6 +108,63 @@ public class Block implements Craftable {
     @Override
     public int getValue() {
         return value;
+    }
+
+    /**
+     * Returns the {@code voxels} value
+     * @return {@link byte[][][]} value of voxels
+     */
+    public byte[][][] getVoxels() {
+        return voxels;
+    }
+
+    /**
+     * Initializes the voxels for breaking.
+     */
+    public void initVoxels() {
+        for (int x = 0; x < VOXEL_SIZE; x++) {
+            for (int y = 0; y < VOXEL_SIZE; y++) {
+                for (int z = 0; z < VOXEL_SIZE; z++) {
+                    voxels[x][y][z] = 1;
+                }
+            }
+        }
+    }
+
+    /**
+     * Updates the breaking progress.
+     * @param progress the {@code float} supplied as {@code progress}
+     */
+    public void updateBreakingProgress(float progress) {
+        int totalVoxels = VOXEL_SIZE * VOXEL_SIZE * VOXEL_SIZE;
+        int voxelsToRemove = Math.min(totalVoxels, (int) (progress * totalVoxels));
+        int removedCount = 0;
+        for (int y = VOXEL_SIZE - 1; y >= 0; y--) {
+            for (int x = 0; x < VOXEL_SIZE; x++) {
+                for (int z = 0; z < VOXEL_SIZE; z++) {
+                    if (removedCount < voxelsToRemove) {
+                        voxels[x][y][z] = 0;
+                        removedCount++;
+                    } else {
+                        voxels[x][y][z] = 1;
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Checks whether the voxel at the specified coordinates is solid
+     * @param x the x coordinate
+     * @param y the y coordinate
+     * @param z the z coordinate
+     * @return {@code true} if voxel solid; otherwise {@code false}
+     */
+    public boolean isVoxelSolid(int x, int y, int z) {
+        if (x < 0 || x >= VOXEL_SIZE || y < 0 || y >= VOXEL_SIZE || z < 0 || z >= VOXEL_SIZE) {
+            return false;
+        }
+        return voxels[x][y][z] != 0;
     }
 
     /**

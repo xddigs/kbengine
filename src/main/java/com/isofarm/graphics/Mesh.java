@@ -2,6 +2,7 @@ package com.isofarm.graphics;
 
 import com.isofarm.data.BlockShape;
 import com.isofarm.graphics.gltf.GLTFModel;
+import com.isofarm.item.Block;
 import com.isofarm.utils.K;
 import org.lwjgl.system.MemoryUtil;
 import org.slf4j.Logger;
@@ -146,6 +147,68 @@ public class Mesh {
         int[] indices = new int[36];
         for (int i = 0; i < 6; i++) { int v = i * 4; int idx = i * 6; indices[idx] = v; indices[idx + 1] = v + 1; indices[idx + 2] = v + 3; indices[idx + 3] = v + 3; indices[idx + 4] = v + 1; indices[idx + 5] = v + 2; }
         return new Mesh(positions, normals, textCoords, indices);
+    }
+
+    /**
+     * Creates and returns the mesh.
+     * @param block the {@link Block} supplied as {@code block}
+     * @param top the {@link TextureAtlas.TextureRegion} supplied as {@code top}
+     * @param bottom the {@link TextureAtlas.TextureRegion} supplied as {@code bottom}
+     * @param side the {@link TextureAtlas.TextureRegion} supplied as {@code side}
+     * @return the {@link Mesh} representing the created mesh
+     */
+    public static Mesh createVoxelBlockMesh(Block block,
+                                            TextureAtlas.TextureRegion top,
+                                            TextureAtlas.TextureRegion bottom,
+                                            TextureAtlas.TextureRegion side) {
+        int subdivisions = 4;
+        int maxFaces = subdivisions * subdivisions * subdivisions * 6;
+        float[] positions = new float[maxFaces * 12];
+        float[] normals = new float[maxFaces * 12];
+        float[] uv = new float[maxFaces * 8];
+        int[] indices = new int[maxFaces * 6];
+
+        int pos = 0, normal = 0, tex = 0, index = 0, vertex = 0;
+        float size = 1.0f / subdivisions;
+        for (int x = 0; x < subdivisions; x++) {
+            for (int y = 0; y < subdivisions; y++) {
+                for (int z = 0; z < subdivisions; z++) {
+                    if (!block.isVoxelSolid(x, y, z)) continue;
+
+                    float x0 = x * size, x1 = x0 + size;
+                    float y0 = y * size, y1 = y0 + size;
+                    float z0 = z * size, z1 = z0 + size;
+
+                    if (!block.isVoxelSolid(x, y + 1, z)) {
+                        int[] next = addVoxelFace(positions, normals, uv, indices, pos, normal, tex, index, vertex, x0,y1,z0, x0,y1,z1, x1,y1,z1, x1,y1,z0, 0,1,0, top,bottom,side);
+                        pos=next[0]; normal=next[1]; tex=next[2]; index=next[3]; vertex=next[4];
+                    }
+                    if (!block.isVoxelSolid(x, y - 1, z)) {
+                        int[] next = addVoxelFace(positions, normals, uv, indices, pos, normal, tex, index, vertex, x0,y0,z1, x0,y0,z0, x1,y0,z0, x1,y0,z1, 0,-1,0, top,bottom,side);
+                        pos=next[0]; normal=next[1]; tex=next[2]; index=next[3]; vertex=next[4];
+                    }
+                    if (!block.isVoxelSolid(x, y, z + 1)) {
+                        int[] next = addVoxelFace(positions, normals, uv, indices, pos, normal, tex, index, vertex, x0,y0,z1, x0,y1,z1, x1,y1,z1, x1,y0,z1, 0,0,1, top,bottom,side);
+                        pos=next[0]; normal=next[1]; tex=next[2]; index=next[3]; vertex=next[4];
+                    }
+                    if (!block.isVoxelSolid(x, y, z - 1)) {
+                        int[] next = addVoxelFace(positions, normals, uv, indices, pos, normal, tex, index, vertex, x1,y0,z0, x1,y1,z0, x0,y1,z0, x0,y0,z0, 0,0,-1, top,bottom,side);
+                        pos=next[0]; normal=next[1]; tex=next[2]; index=next[3]; vertex=next[4];
+                    }
+                    if (!block.isVoxelSolid(x + 1, y, z)) {
+                        int[] next = addVoxelFace(positions, normals, uv, indices, pos, normal, tex, index, vertex, x1,y0,z1, x1,y0,z0, x1,y1,z0, x1,y1,z1, 1,0,0, top,bottom,side);
+                        pos=next[0]; normal=next[1]; tex=next[2]; index=next[3]; vertex=next[4];
+                    }
+                    if (!block.isVoxelSolid(x - 1, y, z)) {
+                        int[] next = addVoxelFace(positions, normals, uv, indices, pos, normal, tex, index, vertex, x0,y0,z0, x0,y0,z1, x0,y1,z1, x0,y1,z0, -1,0,0, top,bottom,side);
+                        pos=next[0]; normal=next[1]; tex=next[2]; index=next[3]; vertex=next[4];
+                    }
+                }
+            }
+        }
+
+        return new Mesh(Arrays.copyOf(positions, pos), Arrays.copyOf(normals, normal),
+                Arrays.copyOf(uv, tex), Arrays.copyOf(indices, index));
     }
 
     /**
