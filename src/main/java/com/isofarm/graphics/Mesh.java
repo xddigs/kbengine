@@ -195,13 +195,13 @@ public class Mesh {
 
                     boolean northOccluded = (z < subdivisions - 1) ? block.isVoxelSolid(x, y, z + 1) : neighborSolid[2];
                     if (!northOccluded) {
-                        int[] next = addVoxelFace(positions, normals, uv, indices, pos, normal, tex, index, vertex, x0,y0,z1, x0,y1,z1, x1,y1,z1, x1,y0,z1, 0,0,1, top,bottom,side);
+                        int[] next = addVoxelFace(positions, normals, uv, indices, pos, normal, tex, index, vertex, x1,y0,z1, x1,y1,z1, x0,y1,z1, x0,y0,z1, 0,0,1, top,bottom,side);
                         pos=next[0]; normal=next[1]; tex=next[2]; index=next[3]; vertex=next[4];
                     }
 
                     boolean southOccluded = (z > 0) ? block.isVoxelSolid(x, y, z - 1) : neighborSolid[3];
                     if (!southOccluded) {
-                        int[] next = addVoxelFace(positions, normals, uv, indices, pos, normal, tex, index, vertex, x1,y0,z0, x1,y1,z0, x0,y1,z0, x0,y0,z0, 0,0,-1, top,bottom,side);
+                        int[] next = addVoxelFace(positions, normals, uv, indices, pos, normal, tex, index, vertex, x0,y0,z0, x0,y1,z0, x1,y1,z0, x1,y0,z0, 0,0,-1, top,bottom,side);
                         pos=next[0]; normal=next[1]; tex=next[2]; index=next[3]; vertex=next[4];
                     }
 
