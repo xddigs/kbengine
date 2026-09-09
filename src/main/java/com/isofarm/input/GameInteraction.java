@@ -508,12 +508,7 @@ public class GameInteraction {
             return;
         }
 
-        if (blockId == 0) {
-            resetBreaking();
-            return;
-        }
-
-        if (blockData == null) {
+        if (blockId == 0 || blockData == null) {
             resetBreaking();
             return;
         }

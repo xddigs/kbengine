@@ -30,6 +30,7 @@ import static org.lwjgl.opengl.GL13.*;
 
 /**
  * Encapsulates the state and operations required by game renderer within the game runtime.
+ * It is the main output for the graphics of the game
  */
 public class GameRenderer {
     private static final int MAX_TORCH_LIGHTS = 32;
@@ -95,7 +96,7 @@ public class GameRenderer {
 
         defaultShader.setUniform("uProjection", camera.getProjectionMatrix());
         defaultShader.setUniform("uView", camera.getViewMatrix());
-        uploadView(defaultShader, gameMaster, camera);
+        uploadView(defaultShader, camera);
 
         CelestialLighting lighting = gameMaster.getCelestialLighting();
         defaultShader.setUniform("uSunColor", lighting.getColor());
@@ -166,7 +167,7 @@ public class GameRenderer {
         grassShader.setUniform("uShadowMap", shadowUnit);
         grassShader.setUniform("uProjection", camera.getProjectionMatrix());
         grassShader.setUniform("uView", camera.getViewMatrix());
-        uploadView(grassShader, gameMaster, camera);
+        uploadView(grassShader, camera);
         grassShader.setUniform("uSunColor", lighting.getColor());
         grassShader.setUniform("uLightIntensity", lighting.getIntensity());
         grassShader.setUniform("uLightDirection", lighting.getDirection());
@@ -203,6 +204,7 @@ public class GameRenderer {
         }
 
         if (player != null) {
+            defaultShader.bind();
             defaultShader.setUniform("uIgnoreViewFog", true);
             player.render(gameMaster, RenderPass.NORMAL);
             defaultShader.bind();
@@ -217,10 +219,19 @@ public class GameRenderer {
             }
         }
 
+        defaultShader.bind();
+        defaultShader.setUniform("uIsWater", false);
+        defaultShader.setUniform("uIsSubmergedEntity", false);
+        defaultShader.setUniform("uParticleAlpha", 1.0f);
+        ParticleEngine.peng.render(defaultShader, ResourceManager.rem.getSpriteMesh(),
+                gameMaster.getActiveCamera());
+
+        defaultShader.bind();
         defaultShader.setUniform("uIsWater", true);
+
         glEnable(GL_DEPTH_TEST);
-        glDepthFunc(GL_LESS);
-        glDepthMask(true);
+        glDepthFunc(GL_LEQUAL);
+        glDepthMask(false);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -246,12 +257,11 @@ public class GameRenderer {
         });
 
         glDepthMask(true);
-        glEnable(GL_DEPTH_TEST);
 
         BlockPos hoveredCell = HoveredCell.get(gameMaster);
-
         renderTorches(gameMaster, camera, defaultShader);
 
+        defaultShader.bind();
         defaultShader.setUniform("uIsWater", false);
         defaultShader.setUniform("uIsSubmergedEntity", false);
 
@@ -360,25 +370,6 @@ public class GameRenderer {
                 .filter(entity -> entity != player)
                 .forEach(entity -> entity.render(gameMaster, RenderPass.NORMAL));
 
-        glDepthFunc(GL_LESS);
-        glDepthMask(true);
-
-        defaultShader.setUniform("uIsWater", false);
-        defaultShader.setUniform("uIsSubmergedEntity", false);
-        glDepthFunc(GL_LESS);
-        glDepthMask(true);
-        glEnable(GL_DEPTH_TEST);
-        renderDestroyOverlay(GameInteraction.gami, ResourceManager.rem.getDestroyShader(),
-                ResourceManager.rem.getDestroyOverlayMesh(),
-                ResourceManager.rem.getDestroyTexture(), camera);
-
-        glDepthMask(false);
-        defaultShader.setUniform("uParticleAlpha", 1.0f);
-        ParticleEngine.peng.render(defaultShader, ResourceManager.rem.getSpriteMesh(),
-                gameMaster.getActiveCamera());
-
-        glDepthMask(true);
-
         if (WeatherService.isRaining() && viewService.getView() == View.EXTERIOR) {
             Vector3f rainTargetPos = (player != null)
                     ? new Vector3f(player.getPosition().x(), player.getPosition().y() + 10.0f,
@@ -391,6 +382,10 @@ public class GameRenderer {
         }
 
         if (blockAtlas != null) blockAtlas.unbind();
+
+        renderDestroyOverlay(GameInteraction.gami, ResourceManager.rem.getDestroyShader(),
+                ResourceManager.rem.getDestroyOverlayMesh(),
+                ResourceManager.rem.getDestroyTexture(), camera);
 
         if (hoveredCell != null) {
             Vector3f outlineColor = getOutlineColor();
@@ -423,7 +418,7 @@ public class GameRenderer {
             defaultShader.setUniform("uModel", modelMatrix);
             BlockShape selectedShape = hoveredCell.data() instanceof BlockData
                     ? gameMaster.getWorld().getBlockShapeAt(
-                            hoveredCell.x(), hoveredCell.y(), hoveredCell.z()) : null;
+                    hoveredCell.x(), hoveredCell.y(), hoveredCell.z()) : null;
             ResourceManager.rem.getSelectionMesh(selectedShape).renderLines();
 
             glDepthMask(true);
@@ -584,7 +579,7 @@ public class GameRenderer {
     }
 
     /** Uploads the common cutaway and fog-of-war volume to a world shader. */
-    private void uploadView(Shader shader, GameMaster gameMaster, CameraView camera) {
+    private void uploadView(Shader shader, CameraView camera) {
         ViewFogState fog = getRenderedViewFog();
         Player player = Player.plyr;
         shader.setUniform("uViewMode", fog.view().getShaderId());
@@ -671,11 +666,12 @@ public class GameRenderer {
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LEQUAL);
         glDepthMask(false);
         glDisable(GL_CULL_FACE);
 
         glEnable(GL_POLYGON_OFFSET_FILL);
-        glPolygonOffset(-1.0f, -1.0f);
+        glPolygonOffset(-0.5f, -0.5f);
         shader.bind();
         glActiveTexture(GL_TEXTURE0 + K.Render.PRIMARY_TEXTURE_UNIT);
         destroyTexture.bind();
@@ -713,8 +709,8 @@ public class GameRenderer {
 
         glDisable(GL_POLYGON_OFFSET_FILL);
         glPolygonOffset(0.0f, 0.0f);
+        glDepthFunc(GL_LESS);
         glDepthMask(true);
-        glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
