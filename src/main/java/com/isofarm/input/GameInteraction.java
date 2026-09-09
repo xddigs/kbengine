@@ -434,7 +434,8 @@ public class GameInteraction {
     private boolean isVisibleToPlayer(BlockPos cell) {
         if (cell == null) return false;
         return GameMaster.game.getViewService().isVisible(
-                new Vector3f(cell.x() + 0.5f, cell.y() + 0.5f, cell.z() + 0.5f));
+                new Vector3f(cell.x() + 0.5f, cell.y() + 0.5f, cell.z() + 0.5f),
+                GameMaster.game.getActiveCamera().getPosition());
     }
 
     /**
@@ -525,7 +526,7 @@ public class GameInteraction {
         }
 
         float destroyTime = Player.plyr.isInGodMode() ? 0.2f :
-                blockData.getDestroyTime();
+                blockData.getDestroyTime(selectedItem);
 
         if (destroyTime <= 0.0f) {
             resetBreaking();

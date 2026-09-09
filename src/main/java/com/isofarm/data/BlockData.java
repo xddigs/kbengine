@@ -675,7 +675,8 @@ public enum BlockData implements Blockable {
     /**
      * Returns the effective destroy time for the item currently being used.
      * Incompatible items keep the block's base time. Compatible, usable tools
-     * apply their type speed and gain 25% more speed per material tier.
+     * apply their type speed. Each material tier above wooden then adds 35%
+     * of that speed, making upgrades visibly faster on compatible blocks.
      * @param item item used to break this block, or {@code null} for an empty hand
      * @return effective destroy time in seconds
      */
@@ -686,8 +687,8 @@ public enum BlockData implements Blockable {
             return destroyTime;
         }
 
-        int tierLevel = Math.max(0, tool.getTier().getId());
-        float tierSpeed = 1.0f + tierLevel * 0.25f;
+        int tierLevel = Math.max(0, tool.getTier().ordinal() - Tier.WOODEN.ordinal());
+        float tierSpeed = 1.0f + tierLevel * 0.15f;
         return destroyTime / (tool.getType().getDestroySpeed() * tierSpeed);
     }
 

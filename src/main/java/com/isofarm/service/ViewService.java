@@ -23,6 +23,7 @@ public final class ViewService implements Service<View> {
 
     private View view = View.EXTERIOR;
     private final Vector4f bounds = new Vector4f();
+    private final Vector3f playerPosition = new Vector3f();
     private float floorY;
     private float ceilingY;
 
@@ -36,6 +37,7 @@ public final class ViewService implements Service<View> {
         int playerX = (int) Math.floor(player.getPosition().x);
         int playerY = (int) Math.floor(player.getPosition().y + 0.05f);
         int playerZ = (int) Math.floor(player.getPosition().z);
+        playerPosition.set(player.getPosition());
         floorY = player.getPosition().y;
 
         int overheadY = findOverhead(world, playerX, playerY, playerZ);
@@ -190,16 +192,55 @@ public final class ViewService implements Service<View> {
 
     /** True when an emissive or interactive world object belongs to the visible volume. */
     public boolean isVisible(Vector3f position) {
+        return isVisible(position, null);
+    }
+
+    /**
+     * Returns whether a cell belongs to the visible, interactable volume.
+     * This mirrors the directional cutaway rules used by the world shaders.
+     */
+    public boolean isVisible(Vector3f position, Vector3f cameraPosition) {
         if (view == View.EXTERIOR || position == null) return true;
         if (position.y >= ceilingY) return false;
         if (view == View.INTERIOR) {
-            return position.x >= bounds.x && position.x <= bounds.z
-                    && position.z >= bounds.y && position.z <= bounds.w;
+            if (position.x < bounds.x || position.x > bounds.z
+                    || position.z < bounds.y || position.z > bounds.w) return false;
+            return cameraPosition == null || !isFrontCutaway(position, cameraPosition);
         }
-        float dx = position.x - (bounds.x + bounds.z) * 0.5f;
-        float dz = position.z - (bounds.y + bounds.w) * 0.5f;
-        return dx * dx + dz * dz <= Settings.getUndergroundViewRadius()
-                * Settings.getUndergroundViewRadius();
+        float offsetX = position.x - playerPosition.x;
+        float offsetZ = position.z - playerPosition.z;
+        float radius = Settings.getUndergroundViewRadius();
+        if (offsetX * offsetX + offsetZ * offsetZ > radius * radius) return false;
+        return cameraPosition == null || !isUndergroundCutaway(
+                position, cameraPosition, offsetX, offsetZ, radius);
+    }
+
+    private boolean isFrontCutaway(Vector3f position, Vector3f cameraPosition) {
+        float cameraOffsetX = cameraPosition.x - playerPosition.x;
+        float cameraOffsetZ = cameraPosition.z - playerPosition.z;
+        float length = (float) Math.sqrt(cameraOffsetX * cameraOffsetX
+                + cameraOffsetZ * cameraOffsetZ);
+        float toCameraX = length > 0.001f ? cameraOffsetX / length : 0.7071f;
+        float toCameraZ = length > 0.001f ? cameraOffsetZ / length : 0.7071f;
+        boolean frontWall = (toCameraX > 0.15f && position.x > bounds.z - 1.01f)
+                || (toCameraX < -0.15f && position.x < bounds.x + 1.01f)
+                || (toCameraZ > 0.15f && position.z > bounds.w - 1.01f)
+                || (toCameraZ < -0.15f && position.z < bounds.y + 1.01f);
+        return frontWall && position.y > floorY + 0.08f;
+    }
+
+    private boolean isUndergroundCutaway(Vector3f position, Vector3f cameraPosition,
+                                         float offsetX, float offsetZ, float radius) {
+        float cameraOffsetX = cameraPosition.x - playerPosition.x;
+        float cameraOffsetZ = cameraPosition.z - playerPosition.z;
+        float length = (float) Math.sqrt(cameraOffsetX * cameraOffsetX
+                + cameraOffsetZ * cameraOffsetZ);
+        float toCameraX = length > 0.001f ? cameraOffsetX / length : 0.7071f;
+        float toCameraZ = length > 0.001f ? cameraOffsetZ / length : 0.7071f;
+        float frontDepth = offsetX * toCameraX + offsetZ * toCameraZ;
+        float sideDistance = Math.abs(offsetX * -toCameraZ + offsetZ * toCameraX);
+        return frontDepth > 0.20f && sideDistance < Math.max(1.5f, radius * 0.32f)
+                && position.y > floorY + 0.08f;
     }
 
     private record Room(int minX, int maxX, int minZ, int maxZ, int ceilingY) {}

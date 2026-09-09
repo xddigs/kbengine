@@ -339,7 +339,7 @@ public class Camera implements CameraView {
 
         do {
             boolean isVisible = GameMaster.game.getViewService().isVisible(
-                    new Vector3f(x + 0.5f, y + 0.5f, z + 0.5f));
+                    new Vector3f(x + 0.5f, y + 0.5f, z + 0.5f), getPosition());
 
             var interactiveBlock = world.getInteractiveBlockAt(x, y, z);
             if (isVisible && interactiveBlock != null
@@ -394,14 +394,21 @@ public class Camera implements CameraView {
 
             if (doorHit != null && doorHit.distance() <= cellExit) {
                 var door = doorHit.block();
-                float distance = playerPos.distance(
-                        door.getX() + 0.5f, door.getY() + 1.0f, door.getZ() + 0.5f);
-                if (distance > Settings.getMaxInteractionDistance()) return null;
+                boolean isDoorVisible = GameMaster.game.getViewService().isVisible(
+                        new Vector3f(door.getX() + 0.5f, door.getY() + 1.0f,
+                                door.getZ() + 0.5f), getPosition());
+                if (!isDoorVisible) {
+                    doorHit = null;
+                } else {
+                    float distance = playerPos.distance(
+                            door.getX() + 0.5f, door.getY() + 1.0f, door.getZ() + 0.5f);
+                    if (distance > Settings.getMaxInteractionDistance()) return null;
 
-                lastHitNormalX = previousX - x;
-                lastHitNormalY = previousY - y;
-                lastHitNormalZ = previousZ - z;
-                return new BlockPos(door.getType(), door.getX(), door.getY(), door.getZ());
+                    lastHitNormalX = previousX - x;
+                    lastHitNormalY = previousY - y;
+                    lastHitNormalZ = previousZ - z;
+                    return new BlockPos(door.getType(), door.getX(), door.getY(), door.getZ());
+                }
             }
 
             previousX = x;
