@@ -35,8 +35,8 @@ public class EquipmentController {
     private static final float SHIELD_X = -0.08f;
     private static final float SHIELD_Y = -0.29f;
     private static final float SHIELD_Z = 0.0f;
-    private static final float SHIELD_ARM_ROTATION = (float) Math.toRadians(-90.0f);
-    private static final float SHIELD_RAISE_ANGLE = (float) Math.toRadians(70.0f);
+    private static final float SHIELD_ARM_ROTATION = (float) Math.toRadians(90.0f);
+    private static final float SHIELD_RAISE_ANGLE = (float) Math.toRadians(80.0f);
 
     private GLTFNode currentActiveNode = null;
     private GLTFNode shieldNode = null;
@@ -53,7 +53,7 @@ public class EquipmentController {
     public void init(GLTFModel playerModel) {
         if (playerModel == null) return;
 
-        GLTFNode arm = playerModel.findNode("Right Arm");
+        GLTFNode arm = playerModel.findNode("RightArm");
         if (arm == null) {
             arm = playerModel.getNodes().stream()
                     .filter(n -> n.getName() != null && n.getName().toLowerCase().contains("right")
