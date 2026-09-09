@@ -31,7 +31,7 @@ public final class CharacterAnimator {
     private static final float HEAD_SPEED = 12.0f;
     private static final float DEATH_FALL_DURATION = 0.75f;
     private static final float DEATH_FADE_DURATION = 0.75f;
-    private static final float FOCUS_OUTLINE_WIDTH = 0.015f;
+    private static final float FOCUS_OUTLINE_WIDTH = 0.025f;
     private static final Vector4f FOCUS_OUTLINE_COLOR = new Vector4f(1.0f);
     private final Character character;
     private final Matrix4f modelMatrix = new Matrix4f();
