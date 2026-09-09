@@ -841,6 +841,9 @@ public class GameInteraction {
                     && normalY != 1 && normalX == 0 && normalZ == 0) return;
 
             BlockShape placedShape = block.getType().getShape();
+            if (block.getType().isTorch()) {
+                placedShape = BlockShape.torchFacing(normalX, normalY, normalZ);
+            }
             if (block.getType().isSlab() && placedShape.isVerticalSlab()) {
                 Vector3f playerPosition = player.getPosition();
                 placedShape = BlockShape.verticalSlabFacing(

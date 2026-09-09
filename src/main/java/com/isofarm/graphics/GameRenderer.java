@@ -501,7 +501,11 @@ public class GameRenderer {
         float searchDistanceSq = searchDistance * searchDistance;
 
         gameMaster.getWorld().forEachTorch(torch -> {
-            Vector3f position = new Vector3f(torch.x() + 0.5f, torch.y() + 0.65f, torch.z() + 0.5f);
+            BlockShape.Box bounds = getTorchBounds(gameMaster, torch);
+            Vector3f position = new Vector3f(
+                    torch.x() + center(bounds.minX(), bounds.maxX()),
+                    torch.y() + bounds.maxY() - 0.15f,
+                    torch.z() + center(bounds.minZ(), bounds.maxZ()));
             if (position.distanceSquared(centerPosition) <= searchDistanceSq) {
                 torchLights.add(position);
             }
@@ -546,11 +550,12 @@ public class GameRenderer {
         torchFrames.bind();
         glDisable(GL_CULL_FACE);
         gameMaster.getWorld().forEachTorch(torch -> {
-            float centerX = torch.x() + 0.5f;
-            float centerZ = torch.z() + 0.5f;
+            BlockShape.Box bounds = getTorchBounds(gameMaster, torch);
+            float centerX = torch.x() + center(bounds.minX(), bounds.maxX());
+            float centerZ = torch.z() + center(bounds.minZ(), bounds.maxZ());
             float angle = (float) Math.atan2(camera.getPosition().x - centerX,
                     camera.getPosition().z - centerZ);
-            modelMatrix.identity().translate(centerX, torch.y(), centerZ)
+            modelMatrix.identity().translate(centerX, torch.y() + bounds.minY(), centerZ)
                     .rotateY(angle).scale(0.45f, 0.8f, 0.45f);
             shader.setUniform("uModel", modelMatrix);
             ResourceManager.rem.getPlayerMesh().render();
@@ -559,6 +564,20 @@ public class GameRenderer {
         torchFrames.unbind();
         shader.setUniform("uIsTorch", false);
         shader.setUniform("uIsSprite", false);
+    }
+
+    /** Returns the physical bounds that also anchor a placed torch sprite. */
+    private static BlockShape.Box getTorchBounds(GameMaster gameMaster, BlockPos torch) {
+        BlockShape shape = gameMaster.getWorld().getBlockShapeAt(
+                torch.x(), torch.y(), torch.z());
+        BlockShape.Box[] boxes = shape.getBoxes();
+        return boxes.length == 0
+                ? BlockShape.TORCH_FLOOR.getBoxes()[0]
+                : boxes[0];
+    }
+
+    private static float center(float minimum, float maximum) {
+        return (minimum + maximum) * 0.5f;
     }
 
     /**

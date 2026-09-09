@@ -567,7 +567,7 @@ public enum BlockData implements Blockable {
 
     /** Returns whether this block needs a shape-specific mesh. */
     public boolean hasCustomShape() {
-        return isSlab || isStaircase || isFence;
+        return isSlab || isStaircase || isFence || isTorch();
     }
 
     /** Returns whether this block is represented by an interactive model. */
@@ -592,6 +592,7 @@ public enum BlockData implements Blockable {
 
     /** Returns the physical/render shape used by this block. */
     public BlockShape getShape() {
+        if (isTorch()) return BlockShape.TORCH_FLOOR;
         if (isFence) return BlockShape.FENCE_NONE;
         if (isStaircase) return BlockShape.STAIRCASE_WEST;
         if (isSlab) {

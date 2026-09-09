@@ -29,6 +29,12 @@ public enum BlockShape {
     STAIRCASE_CORNER_NE(new Box(0.0f, 0.0f, 0.0f, 1.0f, 0.5f, 1.0f), new Box(0.0f, 0.5f, 0.5f, 0.5f, 1.0f, 1.0f), new Box(0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 1.0f)),
     STAIRCASE_CORNER_SE(new Box(0.0f, 0.0f, 0.0f, 1.0f, 0.5f, 1.0f), new Box(0.0f, 0.5f, 0.0f, 0.5f, 1.0f, 0.5f), new Box(0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 0.5f)),
 
+    TORCH_FLOOR(new Box(0.4f, 0.0f, 0.4f, 0.6f, 0.8f, 0.6f)),
+    TORCH_WEST(new Box(0.0f, 0.0f, 0.4f, 0.16f, 0.8f, 0.6f)),
+    TORCH_EAST(new Box(0.84f, 0.0f, 0.4f, 1.0f, 0.8f, 0.6f)),
+    TORCH_NORTH(new Box(0.4f, 0.0f, 0.0f, 0.6f, 0.8f, 0.16f)),
+    TORCH_SOUTH(new Box(0.4f, 0.0f, 0.84f, 0.6f, 0.8f, 1.0f)),
+
     FENCE_NONE(0),
     FENCE_N(1), FENCE_S(2), FENCE_NS(3),
     FENCE_W(4), FENCE_NW(5), FENCE_SW(6), FENCE_NSW(7),
@@ -134,6 +140,22 @@ public enum BlockShape {
                 || this == STAIRCASE_NORTH || this == STAIRCASE_SOUTH
                 || this == STAIRCASE_CORNER_NW || this == STAIRCASE_CORNER_SW
                 || this == STAIRCASE_CORNER_NE || this == STAIRCASE_CORNER_SE;
+    }
+
+    /** Returns whether this shape describes a floor- or wall-mounted torch. */
+    public boolean isTorch() {
+        return this == TORCH_FLOOR || this == TORCH_WEST || this == TORCH_EAST
+                || this == TORCH_NORTH || this == TORCH_SOUTH;
+    }
+
+    /** Resolves the torch shape attached to the face represented by a hit normal. */
+    public static BlockShape torchFacing(int normalX, int normalY, int normalZ) {
+        if (normalY > 0) return TORCH_FLOOR;
+        if (normalX > 0) return TORCH_WEST;
+        if (normalX < 0) return TORCH_EAST;
+        if (normalZ > 0) return TORCH_NORTH;
+        if (normalZ < 0) return TORCH_SOUTH;
+        return TORCH_FLOOR;
     }
 
     /**
