@@ -144,7 +144,7 @@ public class WorldGenerator implements Generator {
         int requested = Math.max(0, LAKE_COUNT);
         for (int attempts = 0; lakes.size() < requested && attempts < requested * 100 + 100; attempts++) {
             int x = random.nextInt((int) ISLAND_RADIUS * 2 - 12) - (int) ISLAND_RADIUS + 6;
-            int z = random.nextInt((int) ISLAND_RADIUS - 7); // Keep lakes away from the northern mountain.
+            int z = random.nextInt((int) ISLAND_RADIUS - 7);
             if (distance(x, z, 0, 0) > ISLAND_RADIUS - LAKE_RADIUS - 2
                     || overlapsLake(x, z) || isLakeTooCloseToLava(x, z)) continue;
             lakes.add(new Lake(x, z, LAKE_RADIUS));
