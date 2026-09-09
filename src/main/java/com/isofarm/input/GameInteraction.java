@@ -1010,7 +1010,7 @@ public class GameInteraction {
      * @return {@code true} if breaking block; otherwise {@code false}
      */
     public boolean isBreakingBlock() {
-        return breakProgress > 0.0f && breakingX != Integer.MIN_VALUE;
+        return breakingX != Integer.MIN_VALUE;
     }
 
     /**

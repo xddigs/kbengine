@@ -27,6 +27,8 @@ uniform float uViewRadius;
 uniform float uViewFloorY;
 uniform float uViewCeilingY;
 uniform float uViewFogStrength;
+uniform bool uVoxelBreakActive;
+uniform vec3 uVoxelBreakPosition;
 
 const int MAX_TORCH_LIGHTS = 32;
 uniform int uTorchCount;
@@ -111,6 +113,12 @@ float torchShadowDepth(int index, vec3 lightToFragment) {
 }
 
 void main() {
+    vec3 blockSample = vFragPos - normalize(vNormal) * 0.001;
+    if (uVoxelBreakActive
+            && all(greaterThanEqual(blockSample, uVoxelBreakPosition))
+            && all(lessThan(blockSample, uVoxelBreakPosition + vec3(1.0)))) {
+        discard;
+    }
     float viewFog = applyViewFog(vFragPos);
     if (!isInside(vTexCoord, uGrassTopUVBounds) && !isInside(vTexCoord, uGrassSideUVBounds)) discard;
 

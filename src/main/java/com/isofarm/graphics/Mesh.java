@@ -300,7 +300,9 @@ public class Mesh {
     }
 
     /** Creates the visible shell of a partially removed voxel block. */
-    public static Mesh createBreakingVoxelMesh(int subdivisions, int removed) {
+    public static Mesh createBreakingVoxelMesh(int subdivisions, int removed, boolean exposeBottom,
+                                                TextureAtlas.TextureRegion top, TextureAtlas.TextureRegion bottom,
+                                                TextureAtlas.TextureRegion side) {
         int maxFaces = subdivisions * subdivisions * subdivisions * 6;
         float[] positions = new float[maxFaces * 12];
         float[] normals = new float[maxFaces * 12];
@@ -315,12 +317,12 @@ public class Mesh {
                 float x0 = x * size, x1 = x0 + size;
                 float y0 = y * size, y1 = y0 + size;
                 float z0 = z * size, z1 = z0 + size;
-                if (isRemovedVoxel(x, y + 1, z, removed)) { int[] next = addVoxelFace(positions, normals, uv, indices, pos, normal, tex, index, vertex, x0,y1,z0, x0,y1,z1, x1,y1,z1, x1,y1,z0, 0,1,0); pos=next[0]; normal=next[1]; tex=next[2]; index=next[3]; vertex=next[4]; }
-                if (isRemovedVoxel(x, y - 1, z, removed)) { int[] next = addVoxelFace(positions, normals, uv, indices, pos, normal, tex, index, vertex, x0,y0,z1, x0,y0,z0, x1,y0,z0, x1,y0,z1, 0,-1,0); pos=next[0]; normal=next[1]; tex=next[2]; index=next[3]; vertex=next[4]; }
-                if (isRemovedVoxel(x, y, z + 1, removed)) { int[] next = addVoxelFace(positions, normals, uv, indices, pos, normal, tex, index, vertex, x0,y0,z1, x0,y1,z1, x1,y1,z1, x1,y0,z1, 0,0,1); pos=next[0]; normal=next[1]; tex=next[2]; index=next[3]; vertex=next[4]; }
-                if (isRemovedVoxel(x, y, z - 1, removed)) { int[] next = addVoxelFace(positions, normals, uv, indices, pos, normal, tex, index, vertex, x1,y0,z0, x1,y1,z0, x0,y1,z0, x0,y0,z0, 0,0,-1); pos=next[0]; normal=next[1]; tex=next[2]; index=next[3]; vertex=next[4]; }
-                if (isRemovedVoxel(x + 1, y, z, removed)) { int[] next = addVoxelFace(positions, normals, uv, indices, pos, normal, tex, index, vertex, x1,y0,z1, x1,y0,z0, x1,y1,z0, x1,y1,z1, 1,0,0); pos=next[0]; normal=next[1]; tex=next[2]; index=next[3]; vertex=next[4]; }
-                if (isRemovedVoxel(x - 1, y, z, removed)) { int[] next = addVoxelFace(positions, normals, uv, indices, pos, normal, tex, index, vertex, x0,y0,z0, x0,y0,z1, x0,y1,z1, x0,y1,z0, -1,0,0); pos=next[0]; normal=next[1]; tex=next[2]; index=next[3]; vertex=next[4]; }
+                if (isRemovedVoxel(x, y + 1, z, removed)) { int[] next = addVoxelFace(positions, normals, uv, indices, pos, normal, tex, index, vertex, x0,y1,z0, x0,y1,z1, x1,y1,z1, x1,y1,z0, 0,1,0, top,bottom,side); pos=next[0]; normal=next[1]; tex=next[2]; index=next[3]; vertex=next[4]; }
+                if ((y > 0 || exposeBottom) && isRemovedVoxel(x, y - 1, z, removed)) { int[] next = addVoxelFace(positions, normals, uv, indices, pos, normal, tex, index, vertex, x0,y0,z1, x0,y0,z0, x1,y0,z0, x1,y0,z1, 0,-1,0, top,bottom,side); pos=next[0]; normal=next[1]; tex=next[2]; index=next[3]; vertex=next[4]; }
+                if (isRemovedVoxel(x, y, z + 1, removed)) { int[] next = addVoxelFace(positions, normals, uv, indices, pos, normal, tex, index, vertex, x0,y0,z1, x0,y1,z1, x1,y1,z1, x1,y0,z1, 0,0,1, top,bottom,side); pos=next[0]; normal=next[1]; tex=next[2]; index=next[3]; vertex=next[4]; }
+                if (isRemovedVoxel(x, y, z - 1, removed)) { int[] next = addVoxelFace(positions, normals, uv, indices, pos, normal, tex, index, vertex, x1,y0,z0, x1,y1,z0, x0,y1,z0, x0,y0,z0, 0,0,-1, top,bottom,side); pos=next[0]; normal=next[1]; tex=next[2]; index=next[3]; vertex=next[4]; }
+                if (isRemovedVoxel(x + 1, y, z, removed)) { int[] next = addVoxelFace(positions, normals, uv, indices, pos, normal, tex, index, vertex, x1,y0,z1, x1,y0,z0, x1,y1,z0, x1,y1,z1, 1,0,0, top,bottom,side); pos=next[0]; normal=next[1]; tex=next[2]; index=next[3]; vertex=next[4]; }
+                if (isRemovedVoxel(x - 1, y, z, removed)) { int[] next = addVoxelFace(positions, normals, uv, indices, pos, normal, tex, index, vertex, x0,y0,z0, x0,y0,z1, x0,y1,z1, x0,y1,z0, -1,0,0, top,bottom,side); pos=next[0]; normal=next[1]; tex=next[2]; index=next[3]; vertex=next[4]; }
             }
         return new Mesh(Arrays.copyOf(positions, pos), Arrays.copyOf(normals, normal),
                 Arrays.copyOf(uv, tex), Arrays.copyOf(indices, index));
@@ -335,11 +337,23 @@ public class Mesh {
                                       int pos, int normal, int tex, int index, int vertex,
                                       float x1, float y1, float z1, float x2, float y2, float z2,
                                       float x3, float y3, float z3, float x4, float y4, float z4,
-                                      float nx, float ny, float nz) {
+                                      float nx, float ny, float nz,
+                                      TextureAtlas.TextureRegion top, TextureAtlas.TextureRegion bottom,
+                                      TextureAtlas.TextureRegion side) {
         float[] face = {x1,y1,z1, x2,y2,z2, x3,y3,z3, x4,y4,z4};
         System.arraycopy(face, 0, positions, pos, 12);
         for (int i = 0; i < 4; i++) { normals[normal++] = nx; normals[normal++] = ny; normals[normal++] = nz; }
-        float[] coords = {0,0, 0,1, 1,1, 1,0};
+        float[] local = nx != 0.0f ? new float[]{z1,y1, z2,y2, z3,y3, z4,y4}
+                : ny != 0.0f ? new float[]{x1,z1, x2,z2, x3,z3, x4,z4}
+                : new float[]{x1,y1, x2,y2, x3,y3, x4,y4};
+        TextureAtlas.TextureRegion region = ny > 0.0f ? top : ny < 0.0f ? bottom : side;
+        if (region == null) region = side != null ? side : top;
+        float[] coords = new float[8];
+        for (int i = 0; i < 8; i += 2) {
+            coords[i] = region.uvMin().x + local[i] * (region.uvMax().x - region.uvMin().x);
+            float v = ny == 0.0f ? 1.0f - local[i + 1] : local[i + 1];
+            coords[i + 1] = region.uvMin().y + v * (region.uvMax().y - region.uvMin().y);
+        }
         System.arraycopy(coords, 0, uv, tex, 8);
         indices[index++] = vertex; indices[index++] = vertex + 1; indices[index++] = vertex + 3;
         indices[index++] = vertex + 3; indices[index++] = vertex + 1; indices[index++] = vertex + 2;
