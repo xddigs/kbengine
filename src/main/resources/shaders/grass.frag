@@ -29,6 +29,7 @@ uniform float uViewCeilingY;
 uniform float uViewFogStrength;
 uniform bool uVoxelBreakActive;
 uniform vec3 uVoxelBreakPosition;
+uniform int uVoxelBreakExteriorMask;
 
 const int MAX_TORCH_LIGHTS = 32;
 uniform int uTorchCount;
@@ -114,6 +115,9 @@ float torchShadowDepth(int index, vec3 lightToFragment) {
 
 void main() {
     vec3 blockSample = vFragPos - normalize(vNormal) * 0.001;
+    int faceBit = vNormal.y > 0.5 ? 1 : vNormal.y < -0.5 ? 2
+            : vNormal.z > 0.5 ? 4 : vNormal.z < -0.5 ? 8
+            : vNormal.x > 0.5 ? 16 : 32;
     if (uVoxelBreakActive
             && all(greaterThanEqual(blockSample, uVoxelBreakPosition))
             && all(lessThan(blockSample, uVoxelBreakPosition + vec3(1.0)))) {

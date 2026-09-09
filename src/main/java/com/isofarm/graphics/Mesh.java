@@ -299,8 +299,18 @@ public class Mesh {
         return new Mesh(positions, normals, textCoords, indices);
     }
 
-    /** Creates the visible shell of a partially removed voxel block. */
-    public static Mesh createBreakingVoxelMesh(int subdivisions, int removed, boolean exposeBottom,
+    /**
+     * Creates the visible faces of a block divided into removable voxels.
+     * Faces shared by two surviving voxels are omitted while faces next to a
+     * removed voxel or the exterior remain in the mesh.
+     * @param subdivisions number of voxels per axis
+     * @param removed number of voxels removed in the deterministic break order
+     * @param top atlas region used by upward-facing faces
+     * @param bottom atlas region used by downward-facing faces
+     * @param side atlas region used by lateral faces
+     * @return mesh containing the visible voxel faces
+     */
+    public static Mesh createBreakingVoxelMesh(int subdivisions, int removed,
                                                 TextureAtlas.TextureRegion top, TextureAtlas.TextureRegion bottom,
                                                 TextureAtlas.TextureRegion side) {
         int maxFaces = subdivisions * subdivisions * subdivisions * 6;
@@ -318,7 +328,7 @@ public class Mesh {
                 float y0 = y * size, y1 = y0 + size;
                 float z0 = z * size, z1 = z0 + size;
                 if (isRemovedVoxel(x, y + 1, z, removed)) { int[] next = addVoxelFace(positions, normals, uv, indices, pos, normal, tex, index, vertex, x0,y1,z0, x0,y1,z1, x1,y1,z1, x1,y1,z0, 0,1,0, top,bottom,side); pos=next[0]; normal=next[1]; tex=next[2]; index=next[3]; vertex=next[4]; }
-                if ((y > 0 || exposeBottom) && isRemovedVoxel(x, y - 1, z, removed)) { int[] next = addVoxelFace(positions, normals, uv, indices, pos, normal, tex, index, vertex, x0,y0,z1, x0,y0,z0, x1,y0,z0, x1,y0,z1, 0,-1,0, top,bottom,side); pos=next[0]; normal=next[1]; tex=next[2]; index=next[3]; vertex=next[4]; }
+                if (isRemovedVoxel(x, y - 1, z, removed)) { int[] next = addVoxelFace(positions, normals, uv, indices, pos, normal, tex, index, vertex, x0,y0,z1, x0,y0,z0, x1,y0,z0, x1,y0,z1, 0,-1,0, top,bottom,side); pos=next[0]; normal=next[1]; tex=next[2]; index=next[3]; vertex=next[4]; }
                 if (isRemovedVoxel(x, y, z + 1, removed)) { int[] next = addVoxelFace(positions, normals, uv, indices, pos, normal, tex, index, vertex, x0,y0,z1, x0,y1,z1, x1,y1,z1, x1,y0,z1, 0,0,1, top,bottom,side); pos=next[0]; normal=next[1]; tex=next[2]; index=next[3]; vertex=next[4]; }
                 if (isRemovedVoxel(x, y, z - 1, removed)) { int[] next = addVoxelFace(positions, normals, uv, indices, pos, normal, tex, index, vertex, x1,y0,z0, x1,y1,z0, x0,y1,z0, x0,y0,z0, 0,0,-1, top,bottom,side); pos=next[0]; normal=next[1]; tex=next[2]; index=next[3]; vertex=next[4]; }
                 if (isRemovedVoxel(x + 1, y, z, removed)) { int[] next = addVoxelFace(positions, normals, uv, indices, pos, normal, tex, index, vertex, x1,y0,z1, x1,y0,z0, x1,y1,z0, x1,y1,z1, 1,0,0, top,bottom,side); pos=next[0]; normal=next[1]; tex=next[2]; index=next[3]; vertex=next[4]; }
@@ -328,11 +338,23 @@ public class Mesh {
                 Arrays.copyOf(uv, tex), Arrays.copyOf(indices, index));
     }
 
+    /**
+     * Determines whether a voxel is outside the block or already removed.
+     * @param x local voxel x coordinate
+     * @param y local voxel y coordinate
+     * @param z local voxel z coordinate
+     * @param removed removal threshold for the current stage
+     * @return whether the voxel must be treated as empty
+     */
     private static boolean isRemovedVoxel(int x, int y, int z, int removed) {
         if (x < 0 || y < 0 || z < 0 || x >= 4 || y >= 4 || z >= 4) return true;
         return (((x * 17 + y * 31 + z * 47) ^ (x * y * 13 + z * 7)) & 63) < removed;
     }
 
+    /**
+     * Appends a textured quad for one exposed voxel face.
+     * @return updated write offsets for positions, normals, UVs, indices and vertices
+     */
     private static int[] addVoxelFace(float[] positions, float[] normals, float[] uv, int[] indices,
                                       int pos, int normal, int tex, int index, int vertex,
                                       float x1, float y1, float z1, float x2, float y2, float z2,

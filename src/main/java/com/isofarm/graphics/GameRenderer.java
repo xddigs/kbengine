@@ -153,6 +153,7 @@ public class GameRenderer {
         defaultShader.setUniform("uVoxelBreakActive", voxelBreak != null);
         if (voxelBreak != null) defaultShader.setUniform("uVoxelBreakPosition",
                 new Vector3f(voxelBreak.x(), voxelBreak.y(), voxelBreak.z()));
+        defaultShader.setUniform("uVoxelBreakExteriorMask", voxelBreak == null ? 0 : voxelBreak.exteriorMask());
         chunkMeshes.forEach((chunk, chunkMesh) -> {
             if (chunkMesh != null && chunkMesh.solidMesh() != null && chunkMesh.solidMesh().getIndicesCount() > 0) {
                 float minX = chunk.getChunkX() * Chunk.SIZE_X;
@@ -178,6 +179,7 @@ public class GameRenderer {
         grassShader.setUniform("uVoxelBreakActive", voxelBreak != null);
         if (voxelBreak != null) grassShader.setUniform("uVoxelBreakPosition",
                 new Vector3f(voxelBreak.x(), voxelBreak.y(), voxelBreak.z()));
+        grassShader.setUniform("uVoxelBreakExteriorMask", voxelBreak == null ? 0 : voxelBreak.exteriorMask());
         grassShader.setUniform("uProjection", camera.getProjectionMatrix());
         grassShader.setUniform("uView", camera.getViewMatrix());
         uploadView(grassShader, camera);
@@ -660,18 +662,61 @@ public class GameRenderer {
         return (minimum + maximum) * 0.5f;
     }
 
+    /**
+     * Builds the render state for the block currently being broken.
+     * @param gameMaster active game state and world access
+     * @return the current voxel-break state, or {@code null} when no normal block is breaking
+     */
     private VoxelBreakState getVoxelBreakState(GameMaster gameMaster) {
         if (!GameInteraction.gami.isBreakingBlock()) return null;
         Vector3i pos = GameInteraction.gami.getBreakingBlockPos();
         BlockData data = BlockData.fromId(gameMaster.getWorld().getBlockTypeAt(pos.x, pos.y, pos.z));
         if (data == null || data == BlockData.AIR || data.isFluid()) return null;
-        BlockData below = pos.y <= 0 ? null : BlockData.fromId(gameMaster.getWorld()
-                .getBlockTypeAt(pos.x, pos.y - 1, pos.z));
         return new VoxelBreakState(pos.x, pos.y, pos.z, data,
                 gameMaster.getWorld().getBlockShapeAt(pos.x, pos.y, pos.z),
-                GameInteraction.gami.getBreakProgress(), below == null || !below.isSolid());
+                GameInteraction.gami.getBreakProgress(), exteriorMask(gameMaster, pos, data));
     }
 
+    /**
+     * Calculates which of the six faces are exposed by the chunk mesh rules.
+     * @param gameMaster active game state
+     * @param pos world position of the block
+     * @param data block being broken
+     * @return bit mask for top, bottom, front, back, right and left exposed faces
+     */
+    private int exteriorMask(GameMaster gameMaster, Vector3i pos, BlockData data) {
+        int mask = 0;
+        int[][] directions = {{0,1,0,1}, {0,-1,0,2}, {0,0,1,4}, {0,0,-1,8}, {1,0,0,16}, {-1,0,0,32}};
+        for (int[] direction : directions) {
+            int x = pos.x + direction[0], y = pos.y + direction[1], z = pos.z + direction[2];
+            if (y >= Chunk.SIZE_Y || (y >= 0 && gameMaster.getWorld().isChunkLoadedAt(x, z)
+                    && isFaceExposed(gameMaster, x, y, z, data))) mask |= direction[3];
+        }
+        return mask;
+    }
+
+    /**
+     * Applies the terrain-face visibility rule to one neighbouring world cell.
+     * @param gameMaster active game state
+     * @param x neighbour world x coordinate
+     * @param y neighbour world y coordinate
+     * @param z neighbour world z coordinate
+     * @param data block whose face is being checked
+     * @return whether that neighbour leaves the face visible
+     */
+    private static boolean isFaceExposed(GameMaster gameMaster, int x, int y, int z, BlockData data) {
+        byte id = gameMaster.getWorld().getBlockTypeAt(x, y, z);
+        if (id == 0) return true;
+        BlockData neighbor = BlockData.fromId(id);
+        return neighbor == null || neighbor.isFluid() || neighbor.isFullCube()
+                || (neighbor.isTransparent() && neighbor != data);
+    }
+
+    /**
+     * Renders the cached voxel mesh for the current breaking stage.
+     * @param shader world shader configured for the block atlas
+     * @param state current breaking state
+     */
     private void renderVoxelBreak(Shader shader, VoxelBreakState state) {
         TextureAtlas.TextureRegion top = state.data().getTopRegion();
         TextureAtlas.TextureRegion side = state.data().getSideRegion();
@@ -684,7 +729,7 @@ public class GameRenderer {
         if (key != voxelBreakMeshKey) {
             if (voxelBreakMesh != null) voxelBreakMesh.dispose();
             voxelBreakMesh = Mesh.createBreakingVoxelMesh(BREAK_VOXELS_PER_AXIS, removed,
-                    state.exposeBottom(), top, state.data().getBottomRegion(), side);
+                    top, state.data().getBottomRegion(), side);
             voxelBreakMeshKey = key;
         }
         modelMatrix.identity().translate(state.x(), state.y(), state.z());
@@ -694,7 +739,7 @@ public class GameRenderer {
     }
 
     private record VoxelBreakState(int x, int y, int z, BlockData data, BlockShape shape,
-                                   float progress, boolean exposeBottom) { }
+                                   float progress, int exteriorMask) { }
 
     /**
      * Updates the blur.
