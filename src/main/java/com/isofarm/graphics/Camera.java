@@ -22,6 +22,8 @@ public class Camera implements CameraView {
 
     private static final float DEFAULT_YAW = 45.0f;
     private static final float PITCH = 35.2643897f;
+    private static final float MIN_PITCH = 15.0f;
+    private static final float MAX_PITCH = 80.0f;
     private static final float MAX_DAMAGE_TILT = 8.0f;
     private static final float DAMAGE_TILT_RECOVERY = 7.0f;
 
@@ -29,6 +31,7 @@ public class Camera implements CameraView {
     private static final float FAR_PLANE = 2000.0f;
     private static final float ZOOM_SPEED = 0.2f;
     private float yaw = DEFAULT_YAW;
+    private float pitch = PITCH;
     private final Vector3f position;
     private final Matrix4f projectionMatrix;
     private float zoom = 25.0f;
@@ -89,7 +92,7 @@ public class Camera implements CameraView {
         return new Matrix4f()
                 .identity()
                 .rotateZ((float) Math.toRadians(damageTilt))
-                .rotateX((float) Math.toRadians(PITCH))
+                .rotateX((float) Math.toRadians(pitch))
                 .rotateY((float) Math.toRadians(yaw))
                 .translate(-position.x, -position.y, -position.z);
     }
@@ -113,7 +116,7 @@ public class Camera implements CameraView {
      */
     @Override
     public float getPitch() {
-        return PITCH;
+        return pitch;
     }
 
     /**
@@ -129,12 +132,19 @@ public class Camera implements CameraView {
 
     /**
      * Rotates the camera horizontally by the supplied number of degrees.
-     *
      * @param degrees signed horizontal rotation in degrees
      */
     public void rotateYaw(float degrees) {
         yaw = (yaw + degrees) % K.Camera.FULL_DEGREES;
         if (yaw < 0.0f) yaw += K.Camera.FULL_DEGREES;
+    }
+
+    /**
+     * Rotates the camera vertically by the supplied number of degrees
+     * @param degrees signed vertical rotation in degrees
+     */
+    public void rotatePitch(float degrees) {
+        pitch = Math.clamp(pitch + degrees, MIN_PITCH, MAX_PITCH);
     }
 
     /**
@@ -183,7 +193,7 @@ public class Camera implements CameraView {
      */
     public Vector3f getForwardVector() {
         float yawRad = (float) Math.toRadians(yaw);
-        float pitchRad = (float) Math.toRadians(PITCH);
+        float pitchRad = (float) Math.toRadians(pitch);
         Vector3f direction = new Vector3f();
         direction.x = (float) (Math.sin(yawRad) * Math.cos(pitchRad));
         direction.y = (float) (-Math.sin(pitchRad));

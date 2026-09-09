@@ -2,6 +2,7 @@ package com.isofarm.input;
 
 import com.isofarm.data.BlockPos;
 import com.isofarm.data.Ray;
+import com.isofarm.data.View;
 import com.isofarm.entity.Player;
 import com.isofarm.entity.states.SwimmingState;
 import com.isofarm.graphics.Camera;
@@ -23,6 +24,7 @@ import static org.lwjgl.glfw.GLFW.*;
 public record CameraController(Camera camera) implements Service<Camera> {
     private static final float NORMAL_ZOOM = 18.0f;
     private static final float ZOOMED_ZOOM = NORMAL_ZOOM / 2.5f;
+    private static final float INTERIOR_ZOOM = 15.5f;
     private static final float VERTICAL_OFFSET = 0.0f;
     private static final float DISTANCE = 500.0f;
     private static final Vector3f currentOffset = new Vector3f(0, 0, 0);
@@ -68,7 +70,7 @@ public record CameraController(Camera camera) implements Service<Camera> {
         }
 
         boolean isZoomed = Controls.isToggled(ControlAction.ZOOM);
-        updateZoom(isZoomed);
+        updateZoom(gameMaster, isZoomed);
         followPlayer(gameMaster, delta, isZoomed);
     }
 
@@ -80,17 +82,19 @@ public record CameraController(Camera camera) implements Service<Camera> {
      * @param delta the time since the last frame
      */
     private void rotateAroundPlayer(Player player, float delta) {
-        float rotation = 0.0f;
-        if (Controls.isDown(ControlAction.CAMERA_ROTATE_LEFT)) {
-            rotation -= ROTATION_STEP * delta;
-        }
-        if (Controls.isDown(ControlAction.CAMERA_ROTATE_RIGHT)) {
-            rotation += ROTATION_STEP * delta;
-        }
-        if (rotation == 0.0f) return;
+        float yawRotation = 0.0f;
+        float pitchRotation = 0.0f;
+        if (Controls.isDown(ControlAction.CAMERA_ROTATE_LEFT)) yawRotation -= ROTATION_STEP * delta;
+        if (Controls.isDown(ControlAction.CAMERA_ROTATE_RIGHT)) yawRotation += ROTATION_STEP * delta;
+        if (Controls.isDown(ControlAction.CAMERA_ROTATE_UP)) pitchRotation += ROTATION_STEP * delta;
+        if (Controls.isDown(ControlAction.CAMERA_ROTATE_DOWN)) pitchRotation -= ROTATION_STEP * delta;
+        if (yawRotation == 0.0f && pitchRotation == 0.0f) return;
 
-        camera.rotateYaw(rotation);
-        currentOffset.rotateY((float) Math.toRadians(-rotation));
+        if (yawRotation != 0.0f) {
+            camera.rotateYaw(yawRotation);
+            currentOffset.rotateY((float) Math.toRadians(-yawRotation));
+        }
+        if (pitchRotation != 0.0f) camera.rotatePitch(pitchRotation);
         positionCamera(player.getPosition(), currentOffset);
     }
 
@@ -98,8 +102,10 @@ public record CameraController(Camera camera) implements Service<Camera> {
      * Updates the zoom.
      * @param isZoomed whether the zoom toggle is active
      */
-    private void updateZoom(boolean isZoomed) {
-        float targetZoom = isZoomed ? ZOOMED_ZOOM : NORMAL_ZOOM;
+    private void updateZoom(GameMaster gameMaster, boolean isZoomed) {
+        View view = gameMaster.getViewService().getView();
+        float defaultZoom = view == View.EXTERIOR ? NORMAL_ZOOM : INTERIOR_ZOOM;
+        float targetZoom = isZoomed ? ZOOMED_ZOOM : defaultZoom;
         if (camera.getZoom() != targetZoom) {
             camera.setZoom(targetZoom);
         }
