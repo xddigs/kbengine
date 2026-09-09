@@ -1,14 +1,16 @@
 #version 330 core
 
 layout(location = 0) in vec3 aPos;
-layout(location = 1) in vec3 aNormal;
 
 uniform mat4 uProjection;
 uniform mat4 uView;
 uniform mat4 uModel;
-uniform float uOutlineWidth;
+uniform vec2 uViewportSize;
+uniform vec2 uOutlineOffset;
 
 void main() {
-    vec3 expandedPosition = aPos + normalize(aNormal) * uOutlineWidth;
-    gl_Position = uProjection * uView * uModel * vec4(expandedPosition, 1.0);
+    vec4 clipPosition = uProjection * uView * uModel * vec4(aPos, 1.0);
+    vec2 pixelOffset = (uOutlineOffset * 2.0) / max(uViewportSize, vec2(1.0));
+    clipPosition.xy += pixelOffset * clipPosition.w;
+    gl_Position = clipPosition;
 }

@@ -31,8 +31,14 @@ public final class CharacterAnimator {
     private static final float HEAD_SPEED = 12.0f;
     private static final float DEATH_FALL_DURATION = 0.75f;
     private static final float DEATH_FADE_DURATION = 0.75f;
-    private static final float FOCUS_OUTLINE_WIDTH = 0.025f;
+    private static final float FOCUS_OUTLINE_WIDTH = 2.0f;
     private static final Vector4f FOCUS_OUTLINE_COLOR = new Vector4f(1.0f);
+    private static final float[][] FOCUS_OUTLINE_DIRECTIONS = {
+            {1.0f, 0.0f}, {0.9239f, 0.3827f}, {0.7071f, 0.7071f}, {0.3827f, 0.9239f},
+            {0.0f, 1.0f}, {-0.3827f, 0.9239f}, {-0.7071f, 0.7071f}, {-0.9239f, 0.3827f},
+            {-1.0f, 0.0f}, {-0.9239f, -0.3827f}, {-0.7071f, -0.7071f}, {-0.3827f, -0.9239f},
+            {0.0f, -1.0f}, {0.3827f, -0.9239f}, {0.7071f, -0.7071f}, {0.9239f, -0.3827f}
+    };
     private final Character character;
     private final Matrix4f modelMatrix = new Matrix4f();
     private GLTFNode head, torso, backpack, rightArm, leftArm, rightLeg, leftLeg;
@@ -437,7 +443,7 @@ public final class CharacterAnimator {
         if (pass == RenderPass.NORMAL && character instanceof NPC npc
                 && Player.plyr.isFocusedOn(npc)) {
             shader.unbind();
-            renderFocusOutline(camera, model);
+            renderFocusOutline(game, camera, model);
             shader.bind();
         }
         shader.setUniform("uModel", modelMatrix);
@@ -464,25 +470,29 @@ public final class CharacterAnimator {
     }
 
     /**
-     * Draws only the back faces of a slightly expanded model. The regular model
-     * then covers the interior, leaving a clean external silhouette.
+     * Dilates the complete model silhouette in screen space. The regular model
+     * covers the centre afterwards, leaving only its continuous external edge.
      */
-    private void renderFocusOutline(CameraView camera, GLTFModel model) {
+    private void renderFocusOutline(GameMaster game, CameraView camera, GLTFModel model) {
         Shader shader = ResourceManager.rem.getOutlineShader();
         if (shader == null) return;
         shader.bind();
         shader.setUniform("uProjection", camera.getProjectionMatrix());
         shader.setUniform("uView", camera.getViewMatrix());
-        shader.setUniform("uOutlineWidth", FOCUS_OUTLINE_WIDTH);
+        shader.setUniform("uViewportSize", (float) game.getWindowWidth(), (float) game.getWindowHeight());
         shader.setUniform("uOutlineColor", FOCUS_OUTLINE_COLOR);
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LESS);
         glDepthMask(false);
         glEnable(GL_CULL_FACE);
-        glCullFace(GL_FRONT);
-        glDisable(GL_BLEND);
-        model.render(shader, modelMatrix);
         glCullFace(GL_BACK);
+        glDisable(GL_BLEND);
+        for (float[] direction : FOCUS_OUTLINE_DIRECTIONS) {
+            shader.setUniform("uOutlineOffset",
+                    direction[0] * FOCUS_OUTLINE_WIDTH,
+                    direction[1] * FOCUS_OUTLINE_WIDTH);
+            model.render(shader, modelMatrix);
+        }
         glDepthMask(true);
         glDepthFunc(GL_LESS);
         glBindTexture(GL_TEXTURE_2D, 0);
