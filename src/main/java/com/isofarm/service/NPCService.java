@@ -38,6 +38,7 @@ public class NPCService implements Service<NPC> {
         NPCGender[] genders = NPCGender.values();
         NPCGender gender = genders[(int) (Math.random() * genders.length)];
         add(new NPC(gender, Job.TRADER));
+        add(new NPC(gender, Job.FARMER));
     }
 
     /**
