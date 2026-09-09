@@ -45,8 +45,6 @@ public class GameRenderer {
     private float blurX;
     private float blurY;
     private float waterTime;
-    private Mesh voxelBreakMesh;
-    private int voxelBreakMeshKey = Integer.MIN_VALUE;
     private static final float VIEW_FOG_TRANSITION_DURATION = 0.15f;
     private ViewFogState displayedViewFog;
     private ViewFogState previousViewFog;
@@ -83,7 +81,11 @@ public class GameRenderer {
         defaultShader.bind();
         defaultShader.setUniform("uIsWater", false);
         defaultShader.setUniform("uIsSubmergedEntity", false);
-        defaultShader.setUniform("uVoxelBreakActive", false);
+        defaultShader.setUniform("uBreakingVoxelBlock", GameInteraction.gami.isBreakingBlock());
+        if (GameInteraction.gami.isBreakingBlock()) defaultShader.setUniform("uBreakingVoxelPosition",
+                new Vector3f(GameInteraction.gami.getBreakingBlockPos().x(),
+                        GameInteraction.gami.getBreakingBlockPos().y(),
+                        GameInteraction.gami.getBreakingBlockPos().z()));
 
         int textureUnit = K.Render.PRIMARY_TEXTURE_UNIT;
         int shadowUnit = 1;
@@ -149,11 +151,6 @@ public class GameRenderer {
         defaultShader.setUniform("uIsWater", false);
         defaultShader.setUniform("uIsSubmergedEntity", false);
         Player player = Player.plyr;
-        VoxelBreakState voxelBreak = getVoxelBreakState(gameMaster);
-        defaultShader.setUniform("uVoxelBreakActive", voxelBreak != null);
-        if (voxelBreak != null) defaultShader.setUniform("uVoxelBreakPosition",
-                new Vector3f(voxelBreak.x(), voxelBreak.y(), voxelBreak.z()));
-        defaultShader.setUniform("uVoxelBreakExteriorMask", voxelBreak == null ? 0 : voxelBreak.exteriorMask());
         chunkMeshes.forEach((chunk, chunkMesh) -> {
             if (chunkMesh != null && chunkMesh.solidMesh() != null && chunkMesh.solidMesh().getIndicesCount() > 0) {
                 float minX = chunk.getChunkX() * Chunk.SIZE_X;
@@ -169,17 +166,11 @@ public class GameRenderer {
                 }
             }
         });
-        defaultShader.setUniform("uVoxelBreakActive", false);
-        if (voxelBreak != null) renderVoxelBreak(defaultShader, voxelBreak);
 
         Shader grassShader = ResourceManager.rem.getGrassShader();
         grassShader.bind();
         grassShader.setUniform("uTexture", textureUnit);
         grassShader.setUniform("uShadowMap", shadowUnit);
-        grassShader.setUniform("uVoxelBreakActive", voxelBreak != null);
-        if (voxelBreak != null) grassShader.setUniform("uVoxelBreakPosition",
-                new Vector3f(voxelBreak.x(), voxelBreak.y(), voxelBreak.z()));
-        grassShader.setUniform("uVoxelBreakExteriorMask", voxelBreak == null ? 0 : voxelBreak.exteriorMask());
         grassShader.setUniform("uProjection", camera.getProjectionMatrix());
         grassShader.setUniform("uView", camera.getViewMatrix());
         uploadView(grassShader, camera);
@@ -217,7 +208,7 @@ public class GameRenderer {
             });
             glDepthFunc(GL_LESS);
         }
-        grassShader.setUniform("uVoxelBreakActive", false);
+        grassShader.setUniform("uBreakingVoxelBlock", false);
 
         if (player != null) {
             defaultShader.bind();
@@ -244,6 +235,9 @@ public class GameRenderer {
 
         defaultShader.bind();
         defaultShader.setUniform("uIsWater", true);
+        defaultShader.setUniform("uBreakingVoxelBlock", false);
+        defaultShader.setUniform("uUVBounds", new Vector4f(0.0f, 0.0f, 1.0f, 1.0f));
+        defaultShader.setUniform("uParticleAlpha", 1.0f);
 
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LEQUAL);
@@ -661,85 +655,6 @@ public class GameRenderer {
     private static float center(float minimum, float maximum) {
         return (minimum + maximum) * 0.5f;
     }
-
-    /**
-     * Builds the render state for the block currently being broken.
-     * @param gameMaster active game state and world access
-     * @return the current voxel-break state, or {@code null} when no normal block is breaking
-     */
-    private VoxelBreakState getVoxelBreakState(GameMaster gameMaster) {
-        if (!GameInteraction.gami.isBreakingBlock()) return null;
-        Vector3i pos = GameInteraction.gami.getBreakingBlockPos();
-        BlockData data = BlockData.fromId(gameMaster.getWorld().getBlockTypeAt(pos.x, pos.y, pos.z));
-        if (data == null || data == BlockData.AIR || data.isFluid()) return null;
-        return new VoxelBreakState(pos.x, pos.y, pos.z, data,
-                gameMaster.getWorld().getBlockShapeAt(pos.x, pos.y, pos.z),
-                GameInteraction.gami.getBreakProgress(), exteriorMask(gameMaster, pos, data));
-    }
-
-    /**
-     * Calculates which of the six faces are exposed by the chunk mesh rules.
-     * @param gameMaster active game state
-     * @param pos world position of the block
-     * @param data block being broken
-     * @return bit mask for top, bottom, front, back, right and left exposed faces
-     */
-    private int exteriorMask(GameMaster gameMaster, Vector3i pos, BlockData data) {
-        int mask = 0;
-        int[][] directions = {{0,1,0,1}, {0,-1,0,2}, {0,0,1,4}, {0,0,-1,8}, {1,0,0,16}, {-1,0,0,32}};
-        for (int[] direction : directions) {
-            int x = pos.x + direction[0], y = pos.y + direction[1], z = pos.z + direction[2];
-            if (y >= Chunk.SIZE_Y || (y >= 0 && gameMaster.getWorld().isChunkLoadedAt(x, z)
-                    && isFaceExposed(gameMaster, x, y, z, data))) mask |= direction[3];
-        }
-        return mask;
-    }
-
-    /**
-     * Applies the terrain-face visibility rule to one neighbouring world cell.
-     * @param gameMaster active game state
-     * @param x neighbour world x coordinate
-     * @param y neighbour world y coordinate
-     * @param z neighbour world z coordinate
-     * @param data block whose face is being checked
-     * @return whether that neighbour leaves the face visible
-     */
-    private static boolean isFaceExposed(GameMaster gameMaster, int x, int y, int z, BlockData data) {
-        byte id = gameMaster.getWorld().getBlockTypeAt(x, y, z);
-        if (id == 0) return true;
-        BlockData neighbor = BlockData.fromId(id);
-        return neighbor == null || neighbor.isFluid() || neighbor.isFullCube()
-                || (neighbor.isTransparent() && neighbor != data);
-    }
-
-    /**
-     * Renders the cached voxel mesh for the current breaking stage.
-     * @param shader world shader configured for the block atlas
-     * @param state current breaking state
-     */
-    private void renderVoxelBreak(Shader shader, VoxelBreakState state) {
-        TextureAtlas.TextureRegion top = state.data().getTopRegion();
-        TextureAtlas.TextureRegion side = state.data().getSideRegion();
-        if (top == null && side == null) return;
-        int stages = Math.clamp((int) Math.ceil(state.data().getDestroyTime() * 10.0f), 6, 24);
-        int removed = Math.min(stages - 1, (int) (state.progress() * stages))
-                * BREAK_VOXELS_PER_AXIS * BREAK_VOXELS_PER_AXIS * BREAK_VOXELS_PER_AXIS / stages;
-        shader.setUniform("uUVBounds", new Vector4f(0, 0, 1, 1));
-        int key = (((state.x() * 31 + state.y()) * 31 + state.z()) * 67) + removed;
-        if (key != voxelBreakMeshKey) {
-            if (voxelBreakMesh != null) voxelBreakMesh.dispose();
-            voxelBreakMesh = Mesh.createBreakingVoxelMesh(BREAK_VOXELS_PER_AXIS, removed,
-                    top, state.data().getBottomRegion(), side);
-            voxelBreakMeshKey = key;
-        }
-        modelMatrix.identity().translate(state.x(), state.y(), state.z());
-        shader.setUniform("uModel", modelMatrix);
-        voxelBreakMesh.render();
-        shader.setUniform("uUVBounds", new Vector4f(0, 0, 1, 1));
-    }
-
-    private record VoxelBreakState(int x, int y, int z, BlockData data, BlockShape shape,
-                                   float progress, int exteriorMask) { }
 
     /**
      * Updates the blur.

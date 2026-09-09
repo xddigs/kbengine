@@ -518,6 +518,9 @@ public class GameInteraction {
             breakingY = y;
             breakingZ = z;
             breakProgress = 0.0f;
+            Vector3f hitDirection = new Vector3f(x + 0.5f - Player.plyr.getPosition().x(),
+                    y + 0.5f - Player.plyr.getPosition().y(),
+                    z + 0.5f - Player.plyr.getPosition().z()).normalize();
         }
 
         float destroyTime = Player.plyr.isInGodMode() ? 0.2f :
