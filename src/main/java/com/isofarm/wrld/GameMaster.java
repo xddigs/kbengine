@@ -652,4 +652,8 @@ public class GameMaster {
     public void rebuildChunkMeshAt(BlockPos pos) {
         rebuildChunkMeshAt(pos.x(), pos.z());
     }
+
+    public void rebuildBreakingChunkMeshAt(int worldX, int worldZ) {
+        chunkManager.rebuildBreakingChunkMeshAt(worldX, worldZ);
+    }
 }

@@ -233,6 +233,20 @@ public class ChunkManager {
         if (localZ == Chunk.SIZE_Z - 1) rebuildSingleChunk(chunkX, chunkZ + 1);
     }
 
+    public void rebuildBreakingChunkMeshAt(int worldX, int worldZ) {
+        int chunkX = Math.floorDiv(worldX, Chunk.SIZE_X);
+        int chunkZ = Math.floorDiv(worldZ, Chunk.SIZE_Z);
+        rebuildSingleChunkImmediately(chunkX, chunkZ);
+
+        int localX = Math.floorMod(worldX, Chunk.SIZE_X);
+        int localZ = Math.floorMod(worldZ, Chunk.SIZE_Z);
+
+        if (localX == 0) rebuildSingleChunkImmediately(chunkX - 1, chunkZ);
+        if (localX == Chunk.SIZE_X - 1) rebuildSingleChunkImmediately(chunkX + 1, chunkZ);
+        if (localZ == 0) rebuildSingleChunkImmediately(chunkX, chunkZ - 1);
+        if (localZ == Chunk.SIZE_Z - 1) rebuildSingleChunkImmediately(chunkX, chunkZ + 1);
+    }
+
     /**
      * Rebuilds single chunk from the authoritative runtime state.
      * @param cx the {@code int} supplied as {@code cx}
@@ -246,6 +260,20 @@ public class ChunkManager {
             dirtyChunks.add(key);
             queueMeshBuild(chunk, true);
         }
+    }
+
+    private void rebuildSingleChunkImmediately(int cx, int cz) {
+        long key = world.get2DKey(cx, cz);
+        Chunk chunk = world.getChunks().get(key);
+        if (chunk == null) return;
+
+        meshVersions.merge(key, 1L, Long::sum);
+        dirtyChunks.remove(key);
+        ChunkMeshBuilder.ChunkRenderMesh oldMesh = chunkMeshes.get(chunk);
+        ChunkMeshBuilder.ChunkRenderMesh renderMesh = ChunkMeshBuilder.createMesh(
+                ChunkMeshBuilder.buildMesh(world, chunk));
+        if (oldMesh != null) oldMesh.dispose();
+        chunkMeshes.put(chunk, renderMesh);
     }
 
     /**
