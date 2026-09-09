@@ -22,6 +22,9 @@ public class Settings {
     private static boolean doKeepInventory = true;
     private static boolean doEnableMotions = false;
     private static float maxInteractionDistance = 6.0f;
+    private static int interiorDetectionRadius = 12;
+    private static float undergroundViewRadius = 8.0f;
+    private static float undergroundCutHeight = 2.25f;
     private static boolean doEnableMusic = true;
     private static boolean doEnableDebugInfo = true;
     private static boolean doEnableShadows = true;
@@ -196,6 +199,33 @@ public class Settings {
      */
     public static void setMaxInteractionDistance(float maxInteractionDistance) {
         Settings.maxInteractionDistance = maxInteractionDistance;
+    }
+
+    /** Maximum distance used while looking for the four walls of an interior. */
+    public static int getInteriorDetectionRadius() {
+        return interiorDetectionRadius;
+    }
+
+    public static void setInteriorDetectionRadius(int radius) {
+        interiorDetectionRadius = Math.clamp(radius, 2, 32);
+    }
+
+    /** Radius, in world blocks, revealed around the player underground. */
+    public static float getUndergroundViewRadius() {
+        return undergroundViewRadius;
+    }
+
+    public static void setUndergroundViewRadius(float radius) {
+        undergroundViewRadius = Math.clamp(radius, 2.0f, 32.0f);
+    }
+
+    /** Height of the underground ceiling cut above the player's feet. */
+    public static float getUndergroundCutHeight() {
+        return undergroundCutHeight;
+    }
+
+    public static void setUndergroundCutHeight(float height) {
+        undergroundCutHeight = Math.clamp(height, 1.25f, 8.0f);
     }
 
     /**

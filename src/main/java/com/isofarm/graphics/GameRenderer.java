@@ -5,10 +5,12 @@ import com.isofarm.data.BlockPos;
 import com.isofarm.data.BlockShape;
 import com.isofarm.data.Crop;
 import com.isofarm.data.RenderPass;
+import com.isofarm.data.View;
 import com.isofarm.entity.Player;
 import com.isofarm.input.GameInteraction;
 import com.isofarm.service.BookService;
 import com.isofarm.service.TimeService;
+import com.isofarm.service.ViewService;
 import com.isofarm.service.WeatherService;
 import com.isofarm.utils.HoveredCell;
 import com.isofarm.utils.K;
@@ -60,7 +62,9 @@ public class GameRenderer {
         sceneFbo.bind();
         glViewport(0, 0, (int) windowWidth, (int) windowHeight);
 
-        Vector3f skyColor = TimeService.getSkyColor();
+        ViewService viewService = gameMaster.getViewService();
+        Vector3f skyColor = viewService.getView() == View.EXTERIOR
+                ? TimeService.getSkyColor() : new Vector3f(0.0f);
         glClearColor(skyColor.x, skyColor.y, skyColor.z, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -85,6 +89,7 @@ public class GameRenderer {
 
         defaultShader.setUniform("uProjection", camera.getProjectionMatrix());
         defaultShader.setUniform("uView", camera.getViewMatrix());
+        uploadView(defaultShader, gameMaster, camera);
 
         CelestialLighting lighting = gameMaster.getCelestialLighting();
         defaultShader.setUniform("uSunColor", lighting.getColor());
@@ -155,6 +160,7 @@ public class GameRenderer {
         grassShader.setUniform("uShadowMap", shadowUnit);
         grassShader.setUniform("uProjection", camera.getProjectionMatrix());
         grassShader.setUniform("uView", camera.getViewMatrix());
+        uploadView(grassShader, gameMaster, camera);
         grassShader.setUniform("uSunColor", lighting.getColor());
         grassShader.setUniform("uLightIntensity", lighting.getIntensity());
         grassShader.setUniform("uLightDirection", lighting.getDirection());
@@ -191,8 +197,12 @@ public class GameRenderer {
         }
 
         if (player != null) {
+            // The cutaway belongs to the world. The avatar must remain whole
+            // while crossing the exterior/interior/underground boundary.
+            defaultShader.setUniform("uIgnoreViewFog", true);
             player.render(gameMaster, RenderPass.NORMAL);
             defaultShader.bind();
+            defaultShader.setUniform("uIgnoreViewFog", false);
             if (blockAtlas != null) {
                 glActiveTexture(GL_TEXTURE0 + textureUnit);
                 blockAtlas.bind();
@@ -365,7 +375,7 @@ public class GameRenderer {
 
         glDepthMask(true);
 
-        if (WeatherService.isRaining()) {
+        if (WeatherService.isRaining() && viewService.getView() == View.EXTERIOR) {
             Vector3f rainTargetPos = (player != null)
                     ? new Vector3f(player.getPosition().x(), player.getPosition().y() + 10.0f,
                     player.getPosition().z())
@@ -495,6 +505,7 @@ public class GameRenderer {
     /** Uploads nearby emissive blocks so the world shader can light them. */
     private void collectTorchLights(GameMaster gameMaster, CameraView camera) {
         torchLights.clear();
+        ViewService viewService = gameMaster.getViewService();
         Player player = Player.plyr;
         Vector3f centerPosition = (player != null) ? player.getPosition() : camera.getPosition();
         float searchDistance = 24.0f;
@@ -506,14 +517,16 @@ public class GameRenderer {
                     torch.x() + center(bounds.minX(), bounds.maxX()),
                     torch.y() + bounds.maxY() - 0.15f,
                     torch.z() + center(bounds.minZ(), bounds.maxZ()));
-            if (position.distanceSquared(centerPosition) <= searchDistanceSq) {
+            if (viewService.isVisible(position)
+                    && position.distanceSquared(centerPosition) <= searchDistanceSq) {
                 torchLights.add(position);
             }
         });
 
         gameMaster.getWorld().forEachLava(lava -> {
             Vector3f position = new Vector3f(lava.x() + 0.5f, lava.y() + 0.5f, lava.z() + 0.5f);
-            if (position.distanceSquared(centerPosition) <= searchDistanceSq) {
+            if (viewService.isVisible(position)
+                    && position.distanceSquared(centerPosition) <= searchDistanceSq) {
                 torchLights.add(position);
             }
         });
@@ -564,6 +577,21 @@ public class GameRenderer {
         torchFrames.unbind();
         shader.setUniform("uIsTorch", false);
         shader.setUniform("uIsSprite", false);
+    }
+
+    /** Uploads the common cutaway and fog-of-war volume to a world shader. */
+    private void uploadView(Shader shader, GameMaster gameMaster, CameraView camera) {
+        ViewService service = gameMaster.getViewService();
+        Player player = Player.plyr;
+        shader.setUniform("uViewMode", service.getView().getShaderId());
+        shader.setUniform("uViewPlayerPosition", player == null
+                ? new Vector3f() : player.getPosition());
+        shader.setUniform("uViewCameraPosition", camera.getPosition());
+        shader.setUniform("uViewBounds", service.getBounds());
+        shader.setUniform("uViewRadius", Settings.getUndergroundViewRadius());
+        shader.setUniform("uViewFloorY", service.getFloorY());
+        shader.setUniform("uViewCeilingY", service.getCeilingY());
+        shader.setUniform("uIgnoreViewFog", false);
     }
 
     /** Returns the physical bounds that also anchor a placed torch sprite. */

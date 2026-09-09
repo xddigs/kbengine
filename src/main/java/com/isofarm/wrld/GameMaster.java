@@ -45,6 +45,7 @@ public class GameMaster {
     private final CommandService commandService = new CommandService(commandRegistry);
     private final ItemRegistry itemRegistry = new ItemRegistry();
     private final RainEngine rainEngine = new RainEngine();
+    private final ViewService viewService = new ViewService();
     private List<Entity> entities = new LinkedList<>();
     private List<Recipe> recipes;
     private ShadowMap shadowMap;
@@ -221,6 +222,11 @@ public class GameMaster {
      */
     public RainEngine getRainEngine() {
         return rainEngine;
+    }
+
+    /** Returns the active isometric visibility classifier. */
+    public ViewService getViewService() {
+        return viewService;
     }
 
     /**
@@ -517,6 +523,7 @@ public class GameMaster {
         TreeService.ts.update(this);
         world.forEachInteractiveBlock(iBlock::animate);
         updateEntities(delta);
+        viewService.update(world, Player.plyr);
         cameraController.update(this, delta);
         ParticleEngine.peng.update(delta);
         StepController.step.update(this, SoundService.fx, delta);

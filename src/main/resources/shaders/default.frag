@@ -38,6 +38,54 @@ uniform bool uIsSubmergedEntity;
 uniform bool uIsWater;
 uniform vec4 uLavaUVBounds;
 
+uniform int uViewMode;
+uniform vec3 uViewPlayerPosition;
+uniform vec3 uViewCameraPosition;
+uniform vec4 uViewBounds;
+uniform float uViewRadius;
+uniform float uViewFloorY;
+uniform float uViewCeilingY;
+uniform bool uIgnoreViewFog;
+
+float applyViewFog(vec3 worldPosition) {
+    if (uIgnoreViewFog || uViewMode == 0) return 1.0;
+
+    vec2 offset = worldPosition.xz - uViewPlayerPosition.xz;
+    vec2 cameraOffset = uViewCameraPosition.xz - uViewPlayerPosition.xz;
+    vec2 toCamera = length(cameraOffset) > 0.001
+            ? normalize(cameraOffset) : vec2(0.7071, 0.7071);
+
+    if (uViewMode == 1) {
+        if (worldPosition.x < uViewBounds.x || worldPosition.z < uViewBounds.y
+                || worldPosition.x > uViewBounds.z || worldPosition.z > uViewBounds.w) discard;
+        if (worldPosition.y >= uViewCeilingY - 0.02) discard;
+
+        bool frontWall = (toCamera.x > 0.15 && worldPosition.x > uViewBounds.z - 1.01)
+                || (toCamera.x < -0.15 && worldPosition.x < uViewBounds.x + 1.01)
+                || (toCamera.y > 0.15 && worldPosition.z > uViewBounds.w - 1.01)
+                || (toCamera.y < -0.15 && worldPosition.z < uViewBounds.y + 1.01);
+        if (frontWall && worldPosition.y > uViewFloorY + 0.08) discard;
+
+        float edge = min(min(worldPosition.x - uViewBounds.x,
+                             uViewBounds.z - worldPosition.x),
+                         min(worldPosition.z - uViewBounds.y,
+                             uViewBounds.w - worldPosition.z));
+        return mix(0.35, 1.0, smoothstep(0.0, 1.25, edge));
+    }
+
+    float distanceFromPlayer = length(offset);
+    if (distanceFromPlayer > uViewRadius || worldPosition.y >= uViewCeilingY) discard;
+
+    float frontDepth = dot(offset, toCamera);
+    float sideDistance = abs(dot(offset, vec2(-toCamera.y, toCamera.x)));
+    float corridorWidth = max(1.5, uViewRadius * 0.32);
+    if (frontDepth > 0.20 && sideDistance < corridorWidth
+            && worldPosition.y > uViewFloorY + 0.08) discard;
+
+    return 1.0 - smoothstep(max(0.0, uViewRadius - 2.0),
+                            uViewRadius, distanceFromPlayer);
+}
+
 float calculateShadow(vec4 lightSpacePosition, vec3 normal) {
     vec3 projectionCoordinates = lightSpacePosition.xyz / lightSpacePosition.w;
     projectionCoordinates = projectionCoordinates * 0.5 + 0.5;
@@ -77,6 +125,7 @@ float torchShadowDepth(int index, vec3 lightToFragment) {
 }
 
 void main() {
+    float viewFog = applyViewFog(vFragPos);
     vec4 texColor = vec4(uBaseColor, 1.0);
 
     if (uUseTexture) {
@@ -139,7 +188,7 @@ void main() {
     vec3 totalLight = ambient + directLight + torchLight;
     if (uIsTorch) totalLight = max(totalLight, vec3(1.0, 0.62, 0.24));
     float alpha = texColor.a * uParticleAlpha;
-    vec3 finalColor = texColor.rgb * totalLight;
+    vec3 finalColor = texColor.rgb * totalLight * viewFog;
 
     if (vIsWater > 0.5 && uIsWater) {
         bool isLava = vTexCoord.x > uLavaUVBounds.x && vTexCoord.x < uLavaUVBounds.z &&
