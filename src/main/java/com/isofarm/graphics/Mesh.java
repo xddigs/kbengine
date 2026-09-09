@@ -160,7 +160,8 @@ public class Mesh {
     public static Mesh createVoxelBlockMesh(Block block,
                                             TextureAtlas.TextureRegion top,
                                             TextureAtlas.TextureRegion bottom,
-                                            TextureAtlas.TextureRegion side) {
+                                            TextureAtlas.TextureRegion side,
+                                            boolean[] neighborSolid) {
         int subdivisions = 4;
         int maxFaces = subdivisions * subdivisions * subdivisions * 6;
         float[] positions = new float[maxFaces * 12];
@@ -170,6 +171,7 @@ public class Mesh {
 
         int pos = 0, normal = 0, tex = 0, index = 0, vertex = 0;
         float size = 1.0f / subdivisions;
+
         for (int x = 0; x < subdivisions; x++) {
             for (int y = 0; y < subdivisions; y++) {
                 for (int z = 0; z < subdivisions; z++) {
@@ -179,27 +181,38 @@ public class Mesh {
                     float y0 = y * size, y1 = y0 + size;
                     float z0 = z * size, z1 = z0 + size;
 
-                    if (!block.isVoxelSolid(x, y + 1, z)) {
+                    boolean topOccluded = (y < subdivisions - 1) ? block.isVoxelSolid(x, y + 1, z) : neighborSolid[0];
+                    if (!topOccluded) {
                         int[] next = addVoxelFace(positions, normals, uv, indices, pos, normal, tex, index, vertex, x0,y1,z0, x0,y1,z1, x1,y1,z1, x1,y1,z0, 0,1,0, top,bottom,side);
                         pos=next[0]; normal=next[1]; tex=next[2]; index=next[3]; vertex=next[4];
                     }
-                    if (!block.isVoxelSolid(x, y - 1, z)) {
+
+                    boolean bottomOccluded = (y > 0) ? block.isVoxelSolid(x, y - 1, z) : neighborSolid[1];
+                    if (!bottomOccluded) {
                         int[] next = addVoxelFace(positions, normals, uv, indices, pos, normal, tex, index, vertex, x0,y0,z1, x0,y0,z0, x1,y0,z0, x1,y0,z1, 0,-1,0, top,bottom,side);
                         pos=next[0]; normal=next[1]; tex=next[2]; index=next[3]; vertex=next[4];
                     }
-                    if (!block.isVoxelSolid(x, y, z + 1)) {
+
+                    boolean northOccluded = (z < subdivisions - 1) ? block.isVoxelSolid(x, y, z + 1) : neighborSolid[2];
+                    if (!northOccluded) {
                         int[] next = addVoxelFace(positions, normals, uv, indices, pos, normal, tex, index, vertex, x0,y0,z1, x0,y1,z1, x1,y1,z1, x1,y0,z1, 0,0,1, top,bottom,side);
                         pos=next[0]; normal=next[1]; tex=next[2]; index=next[3]; vertex=next[4];
                     }
-                    if (!block.isVoxelSolid(x, y, z - 1)) {
+
+                    boolean southOccluded = (z > 0) ? block.isVoxelSolid(x, y, z - 1) : neighborSolid[3];
+                    if (!southOccluded) {
                         int[] next = addVoxelFace(positions, normals, uv, indices, pos, normal, tex, index, vertex, x1,y0,z0, x1,y1,z0, x0,y1,z0, x0,y0,z0, 0,0,-1, top,bottom,side);
                         pos=next[0]; normal=next[1]; tex=next[2]; index=next[3]; vertex=next[4];
                     }
-                    if (!block.isVoxelSolid(x + 1, y, z)) {
+
+                    boolean eastOccluded = (x < subdivisions - 1) ? block.isVoxelSolid(x + 1, y, z) : neighborSolid[4];
+                    if (!eastOccluded) {
                         int[] next = addVoxelFace(positions, normals, uv, indices, pos, normal, tex, index, vertex, x1,y0,z1, x1,y0,z0, x1,y1,z0, x1,y1,z1, 1,0,0, top,bottom,side);
                         pos=next[0]; normal=next[1]; tex=next[2]; index=next[3]; vertex=next[4];
                     }
-                    if (!block.isVoxelSolid(x - 1, y, z)) {
+
+                    boolean westOccluded = (x > 0) ? block.isVoxelSolid(x - 1, y, z) : neighborSolid[5];
+                    if (!westOccluded) {
                         int[] next = addVoxelFace(positions, normals, uv, indices, pos, normal, tex, index, vertex, x0,y0,z0, x0,y0,z1, x0,y1,z1, x0,y1,z0, -1,0,0, top,bottom,side);
                         pos=next[0]; normal=next[1]; tex=next[2]; index=next[3]; vertex=next[4];
                     }

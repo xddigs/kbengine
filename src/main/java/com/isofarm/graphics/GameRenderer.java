@@ -18,6 +18,7 @@ import com.isofarm.utils.K;
 import com.isofarm.utils.Settings;
 import com.isofarm.wrld.Chunk;
 import com.isofarm.wrld.GameMaster;
+import com.isofarm.wrld.World;
 import org.joml.*;
 
 import java.lang.Math;
@@ -227,11 +228,28 @@ public class GameRenderer {
                 targetBlock.updateBreakingProgress(breakProgress);
 
                 BlockData data = targetBlock.getType();
+                int[][] offsets = {
+                        {1, 0, 0}, {-1, 0, 0},
+                        {0, 1, 0}, {0, -1, 0},
+                        {0, 0, 1}, {0, 0, -1}
+                };
+
+                int sides = 6;
+                boolean[] neighbourSolid = new boolean[sides];
+                for (int i = 0; i < sides; i++) {
+                    int nx = breakingPosition.x() + offsets[i][0];
+                    int ny = breakingPosition.y() + offsets[i][1];
+                    int nz = breakingPosition.z() + offsets[i][2];
+                    Block neighbour = World.wrld.getBlockAt(nx, ny, nz);
+                    neighbourSolid[i] = (neighbour != null && neighbour.getType().isSolid());
+                }
+
                 Mesh voxelMesh = Mesh.createVoxelBlockMesh(
                         targetBlock,
                         data.getTopRegion(),
                         data.getBottomRegion(),
-                        data.getSideRegion()
+                        data.getSideRegion(),
+                        neighbourSolid
                 );
 
                 defaultShader.bind();
