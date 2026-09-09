@@ -58,6 +58,7 @@ public class ResourceManager {
     private static final Shader defaultShader = new Shader(K.Paths.DEFAULT_VERT_SHADER, K.Paths.DEFAULT_FRAG_SHADER);
     private static final Shader grassShader = new Shader(K.Paths.GRASS_VERT_SHADER, K.Paths.GRASS_FRAG_SHADER);
     private static final Shader destroyShader = new Shader(K.Paths.DESTROY_VERT_SHADER, K.Paths.DESTROY_FRAG_SHADER);
+    private static final Shader outlineShader = new Shader(K.Paths.OUTLINE_VERT_SHADER, K.Paths.OUTLINE_FRAG_SHADER);
     private static final Shader rainShader = new Shader(K.Paths.RAIN_VERT_SHADER, K.Paths.RAIN_FRAG_SHADER);
     private static final Shader motionBlurShader = new Shader(K.Paths.MOTION_BLUR_VERT_SHADER, K.Paths.MOTION_BLUR_FRAG_SHADER);
     private static final Shader shadowMapShader = new Shader(K.Paths.SHADOW_VERT_SHADER, K.Paths.SHADOW_FRAG_SHADER);
@@ -282,6 +283,7 @@ public class ResourceManager {
         defaultShader.dispose();
         grassShader.dispose();
         destroyShader.dispose();
+        outlineShader.dispose();
         motionBlurShader.dispose();
         rainShader.dispose();
         shadowMapShader.dispose();
@@ -295,6 +297,11 @@ public class ResourceManager {
      */
     public Shader getDefaultShader() {
         return defaultShader;
+    }
+
+    /** Returns the shader used for focused-entity silhouette outlines. */
+    public Shader getOutlineShader() {
+        return outlineShader;
     }
 
     /**
@@ -656,6 +663,7 @@ public class ResourceManager {
             case "blur" -> blurShader;
             case "shadow" -> shadowMapShader;
             case "grass" -> grassShader;
+            case "outline" -> outlineShader;
             case "default", "item" -> defaultShader;
             default -> {
                 log.warn("Shader '{}' not found, using defaultShader", name);
