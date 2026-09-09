@@ -22,7 +22,7 @@ import org.joml.Vector3f;
 public class iBlock implements Craftable {
     private static final float ANIMATION_DURATION = 0.10f;
     private static final float CHEST_OPEN_ANGLE = (float) Math.toRadians(35.0);
-    private static final float DOOR_OPEN_ANGLE = (float) Math.toRadians(-90.0);
+    private static final float DOOR_OPEN_ANGLE = (float) Math.toRadians(90.0);
     private static final float DOOR_MIN_Z = 0.0625f;
     private static final float DOOR_DEPTH = 0.0625f;
     private static final float DOOR_MODEL_MIN_X = -0.5f;
@@ -302,42 +302,31 @@ public class iBlock implements Craftable {
                               float maxX, float maxY, float maxZ) {
         if (!type.isDoor() || maxY <= y || minY >= y + 2.0f) return false;
 
-        float angle = orientation + DOOR_OPEN_ANGLE * animationProgress;
-        float cosine = (float) Math.cos(angle);
-        float sine = (float) Math.sin(angle);
+        Matrix4f inverse = getSelectionTransform(new Matrix4f()).invert();
+        float localMinX = Float.POSITIVE_INFINITY;
+        float localMinY = Float.POSITIVE_INFINITY;
+        float localMinZ = Float.POSITIVE_INFINITY;
+        float localMaxX = Float.NEGATIVE_INFINITY;
+        float localMaxY = Float.NEGATIVE_INFINITY;
+        float localMaxZ = Float.NEGATIVE_INFINITY;
 
-        Vector3f hinge = getClosedDoorTransform(new Matrix4f()).transformPosition(
-                new Vector3f(DOOR_MODEL_HINGE_X, 0.0f, DOOR_MODEL_HINGE_Z));
-        float hingeX = hinge.x;
-        float hingeZ = hinge.z;
-
-        float localCenterX = 0.5f;
-        float localCenterZ = 0.0f;
-        float centerX = hingeX + cosine * localCenterX + sine * localCenterZ;
-        float centerZ = hingeZ - sine * localCenterX + cosine * localCenterZ;
-
-        float boxCenterX = (minX + maxX) * 0.5f;
-        float boxCenterZ = (minZ + maxZ) * 0.5f;
-        float boxHalfX = (maxX - minX) * 0.5f;
-        float boxHalfZ = (maxZ - minZ) * 0.5f;
-        float deltaX = boxCenterX - centerX;
-        float deltaZ = boxCenterZ - centerZ;
-
-        float axisXX = cosine;
-        float axisXZ = -sine;
-        float axisZX = sine;
-        float axisZZ = cosine;
-        float halfWidth = 0.5f;
-        float halfDepth = DOOR_DEPTH * 0.5f;
-
-        if (Math.abs(deltaX) > boxHalfX
-                + halfWidth * Math.abs(axisXX) + halfDepth * Math.abs(axisZX)) return false;
-        if (Math.abs(deltaZ) > boxHalfZ
-                + halfWidth * Math.abs(axisXZ) + halfDepth * Math.abs(axisZZ)) return false;
-        if (Math.abs(deltaX * axisXX + deltaZ * axisXZ) > halfWidth
-                + boxHalfX * Math.abs(axisXX) + boxHalfZ * Math.abs(axisXZ)) return false;
-        return Math.abs(deltaX * axisZX + deltaZ * axisZZ) <= halfDepth
-                + boxHalfX * Math.abs(axisZX) + boxHalfZ * Math.abs(axisZZ);
+        for (float worldX : new float[]{minX, maxX}) {
+            for (float worldY : new float[]{minY, maxY}) {
+                for (float worldZ : new float[]{minZ, maxZ}) {
+                    Vector3f local = inverse.transformPosition(
+                            new Vector3f(worldX, worldY, worldZ));
+                    localMinX = Math.min(localMinX, local.x);
+                    localMinY = Math.min(localMinY, local.y);
+                    localMinZ = Math.min(localMinZ, local.z);
+                    localMaxX = Math.max(localMaxX, local.x);
+                    localMaxY = Math.max(localMaxY, local.y);
+                    localMaxZ = Math.max(localMaxZ, local.z);
+                }
+            }
+        }
+        return localMaxX >= 0.0f && localMinX <= 1.0f
+                && localMaxY >= 0.0f && localMinY <= 1.0f
+                && localMaxZ >= 0.0f && localMinZ <= 1.0f;
     }
 
     /**
