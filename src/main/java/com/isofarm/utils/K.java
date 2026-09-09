@@ -27,7 +27,7 @@ public final class K {
      */
     public static final class World {
         public static final float GRAVITY = -25.0f;
-        public static final float JUMP_FORCE = 9.0f;
+        public static final float JUMP_FORCE = 8.0f;
 
         public static final float TILE_SIZE = 1.0f;
         public static final float DEFAULT_BLOCK_DEPTH = 0.4f;

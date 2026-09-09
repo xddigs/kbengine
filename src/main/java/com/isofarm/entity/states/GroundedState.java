@@ -32,6 +32,14 @@ public class GroundedState implements PlayerState {
             return;
         }
 
+        if (Controls.isPressed(ControlAction.JUMP)) {
+            player.jump();
+        }
+
+        if (Controls.isToggled(ControlAction.THIRD_ACTION)) {
+            player.focus();
+        }
+
         if (Controls.isDown(ControlAction.SNEAK)) {
             player.changeState(new SneakingState());
             return;

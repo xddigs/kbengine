@@ -4,6 +4,7 @@
     "move_backward": "GLFW_KEY_S",
     "move_left": "GLFW_KEY_A",
     "move_right": "GLFW_KEY_D",
+    "jump": "GLFW_KEY_SPACE",
     "swim_up": "GLFW_KEY_SPACE",
     "swim_down": "GLFW_KEY_LEFT_CONTROL",
     "sneak": "GLFW_KEY_LEFT_CONTROL",
@@ -30,6 +31,7 @@
   "mouse": {
     "primary_action": "GLFW_MOUSE_BUTTON_LEFT",
     "secondary_action": "GLFW_MOUSE_BUTTON_RIGHT",
+    "third_action": "GLFW_MOUSE_BUTTON_MIDDLE",
     "pathfind": "GLFW_MOUSE_BUTTON_RIGHT",
     "zoom": "GLFW_MOUSE_BUTTON_MIDDLE",
     "ui_select": "GLFW_MOUSE_BUTTON_LEFT",
