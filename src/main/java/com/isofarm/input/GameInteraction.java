@@ -5,6 +5,7 @@ import com.isofarm.entity.Entity;
 import com.isofarm.entity.Player;
 import com.isofarm.entity.WorldItem;
 import com.isofarm.graphics.ParticleEngine;
+import com.isofarm.graphics.ChunkMeshBuilder;
 import com.isofarm.graphics.SpriteSheet;
 import com.isofarm.item.*;
 import com.isofarm.service.*;
@@ -514,10 +515,16 @@ public class GameInteraction {
         }
 
         if (breakingX != x || breakingY != y || breakingZ != z) {
+            if (breakingX != Integer.MIN_VALUE) {
+                ChunkMeshBuilder.clearBreakingBlock();
+                gameMaster.rebuildChunkMeshAt(breakingX, breakingZ);
+            }
             breakingX = x;
             breakingY = y;
             breakingZ = z;
             breakProgress = 0.0f;
+            ChunkMeshBuilder.setBreakingBlock(cell);
+            gameMaster.rebuildChunkMeshAt(x, z);
             Vector3f hitDirection = new Vector3f(x + 0.5f - Player.plyr.getPosition().x(),
                     y + 0.5f - Player.plyr.getPosition().y(),
                     z + 0.5f - Player.plyr.getPosition().z()).normalize();
@@ -748,6 +755,12 @@ public class GameInteraction {
      */
     private void resetBreaking() {
         SoundService.fx.stopBreakingSound();
+        if (breakingX != Integer.MIN_VALUE) {
+            int previousX = breakingX;
+            int previousZ = breakingZ;
+            ChunkMeshBuilder.clearBreakingBlock();
+            GameMaster.game.rebuildChunkMeshAt(previousX, previousZ);
+        }
         breakingX = Integer.MIN_VALUE;
         breakingY = Integer.MIN_VALUE;
         breakingZ = Integer.MIN_VALUE;

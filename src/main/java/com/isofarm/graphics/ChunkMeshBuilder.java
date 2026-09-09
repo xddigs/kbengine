@@ -1,6 +1,7 @@
 package com.isofarm.graphics;
 
 import com.isofarm.data.BlockData;
+import com.isofarm.data.BlockPos;
 import com.isofarm.data.BlockShape;
 import com.isofarm.utils.K;
 import com.isofarm.wrld.Chunk;
@@ -30,6 +31,7 @@ public class ChunkMeshBuilder {
     private static final ThreadLocal<int[]> WATER_INDEX_BUFFER = ThreadLocal.withInitial(() -> new int[MAX_INDICES]);
     private static final ThreadLocal<boolean[]> OCEAN_MERGED_BUFFER = ThreadLocal.withInitial(
             () -> new boolean[Chunk.SIZE_X * Chunk.SIZE_Y * Chunk.SIZE_Z]);
+    private static volatile BlockPos breakingBlock;
 
     static {
         for (BlockData data : BlockData.values()) {
@@ -598,6 +600,7 @@ public class ChunkMeshBuilder {
         if (worldY < 0) return false;
         if (worldY >= Chunk.SIZE_Y) return true;
         if (!world.isChunkLoadedAt(worldX, worldZ)) return false;
+        if (isBreakingBlock(worldX, worldY, worldZ)) return true;
 
         byte neighborId = world.getBlockTypeAt(worldX, worldY, worldZ);
         if (neighborId == 0) return true;
@@ -613,6 +616,19 @@ public class ChunkMeshBuilder {
         if (neighborData.isFluid()) return true;
         if (neighborData.isFullCube()) return true;
         return neighborData.isTransparent() && neighborData != currentBlock;
+    }
+
+    public static void setBreakingBlock(BlockPos position) {
+        breakingBlock = position;
+    }
+
+    public static void clearBreakingBlock() {
+        breakingBlock = null;
+    }
+
+    private static boolean isBreakingBlock(int x, int y, int z) {
+        BlockPos position = breakingBlock;
+        return position != null && position.x() == x && position.y() == y && position.z() == z;
     }
 
     /**

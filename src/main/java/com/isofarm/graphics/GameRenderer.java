@@ -218,8 +218,8 @@ public class GameRenderer {
         grassShader.setUniform("uVoxelBreakActive", false);
 
         if (breakingBlock) {
-            Vector3i breakPos = breakingPosition;
-            Block targetBlock = gameMaster.getWorld().getBlockAt(breakPos.x(), breakPos.y(), breakPos.z());
+            Block targetBlock = gameMaster.getWorld().getBlockAt(breakingPosition.x(),
+                    breakingPosition.y(), breakingPosition.z());
 
             if (targetBlock != null) {
                 targetBlock.initVoxels();
@@ -246,7 +246,7 @@ public class GameRenderer {
                     defaultShader.setUniform("uUVBounds", new Vector4f(0.0f, 0.0f, 1.0f, 1.0f));
                 }
 
-                modelMatrix.identity().translate(breakPos.x(), breakPos.y(), breakPos.z());
+                modelMatrix.identity().translate(breakingPosition.x(), breakingPosition.y(), breakingPosition.z());
                 defaultShader.setUniform("uModel", modelMatrix);
 
                 voxelMesh.render();
