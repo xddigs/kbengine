@@ -25,10 +25,10 @@ public class iBlock implements Craftable {
     private static final float DOOR_OPEN_ANGLE = (float) Math.toRadians(-90.0);
     private static final float DOOR_MIN_Z = 0.0625f;
     private static final float DOOR_DEPTH = 0.0625f;
-    // The door asset is authored around its hinge/origin, rather than from a
-    // cell corner. These are its local panel bounds after node transforms.
     private static final float DOOR_MODEL_MIN_X = -0.5f;
     private static final float DOOR_MODEL_MIN_Z = -0.4375f;
+    private static final float DOOR_MODEL_HINGE_X = DOOR_MODEL_MIN_X + 1.0f;
+    private static final float DOOR_MODEL_HINGE_Z = DOOR_MODEL_MIN_Z + DOOR_DEPTH * 0.5f;
 
     private final BlockData type;
     private final GLTFModel blockModel;
@@ -276,10 +276,10 @@ public class iBlock implements Craftable {
                     .rotateY(orientation);
         }
 
-        return destination.identity()
-                .translate(x, y, z)
-                .rotateY(orientation)
-                .rotateY(DOOR_OPEN_ANGLE * animationProgress);
+        return getClosedDoorTransform(destination)
+                .translate(DOOR_MODEL_HINGE_X, 0.0f, DOOR_MODEL_HINGE_Z)
+                .rotateY(DOOR_OPEN_ANGLE * animationProgress)
+                .translate(-DOOR_MODEL_HINGE_X, 0.0f, -DOOR_MODEL_HINGE_Z);
     }
 
     /**
@@ -306,11 +306,13 @@ public class iBlock implements Craftable {
         float cosine = (float) Math.cos(angle);
         float sine = (float) Math.sin(angle);
 
-        float hingeX = x;
-        float hingeZ = z;
+        Vector3f hinge = getClosedDoorTransform(new Matrix4f()).transformPosition(
+                new Vector3f(DOOR_MODEL_HINGE_X, 0.0f, DOOR_MODEL_HINGE_Z));
+        float hingeX = hinge.x;
+        float hingeZ = hinge.z;
 
-        float localCenterX = DOOR_MODEL_MIN_X + 0.5f;
-        float localCenterZ = DOOR_MODEL_MIN_Z + DOOR_DEPTH * 0.5f;
+        float localCenterX = 0.5f;
+        float localCenterZ = 0.0f;
         float centerX = hingeX + cosine * localCenterX + sine * localCenterZ;
         float centerZ = hingeZ - sine * localCenterX + cosine * localCenterZ;
 
@@ -343,9 +345,6 @@ public class iBlock implements Craftable {
      */
     public float rayIntersection(Vector3f origin, Vector3f direction) {
         if (!type.isDoor()) return Float.POSITIVE_INFINITY;
-
-        // Keep mouse targeting in the same volume as the rendered selection
-        // outline, regardless of the model's local pivot.
         Matrix4f inverse = getSelectionTransform(new Matrix4f()).invert();
         Vector3f localOrigin = inverse.transformPosition(new Vector3f(origin));
         Vector3f localDirection = inverse.transformDirection(new Vector3f(direction));
@@ -386,6 +385,17 @@ public class iBlock implements Craftable {
         return !type.isDoor() || !isActivated;
     }
 
+    /** Returns the closed-door transform before the panel swings around its hinge. */
+    private Matrix4f getClosedDoorTransform(Matrix4f destination) {
+        return destination.identity()
+                .translate(x + 0.5f, y, z + 0.5f)
+                .rotateY(orientation);
+    }
+
+    /**
+     * Applies the current animation progress to the block model. In this case,
+     * {@link BlockData#CHEST} blocks only.
+     */
     private void applyAnimation() {
         if (type != BlockData.CHEST) {
             return;
