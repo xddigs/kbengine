@@ -101,12 +101,20 @@ public class RecipeRegistry {
      * @param primaryMat the {@link Craftable} supplied as {@code primaryMat}
      */
     private void registerShields(Tier tier, Craftable primaryMat) {
+        RecipeBuilder recipe = create().result(new Shield(tier), 1);
+        if (primaryMat != null) recipe.with(primaryMat, 1);
+
+        boolean hasPlanks = false;
         for (BlockData block : BlockData.all()) {
             if (!block.isPlanks()) continue;
-            RecipeBuilder recipe = create().result(new Shield(tier), 1);
-            if (primaryMat != null) recipe.with(primaryMat, 1);
-            recipe.with(new Block(block), 6).add();
+            if (hasPlanks) {
+                recipe.or(new Block(block), 6);
+            } else {
+                recipe.with(new Block(block), 6);
+                hasPlanks = true;
+            }
         }
+        recipe.add();
     }
 
     /**
