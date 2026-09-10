@@ -49,7 +49,7 @@ public class UITooltip extends UIElement {
             Vector4f color = K.UI.UI_TEXT_COLOR;
             if (Settings.doEnableIds()) {
                 color = Arrays.stream(lines).toList().getLast().equals(line) ?
-                        new Vector4f(0.6f) : K.UI.UI_TEXT_COLOR;
+                        new Vector4f(0.75f) : K.UI.UI_TEXT_COLOR;
             }
 
             Frontend.drawString(line, getAbsoluteX() + padding, textY, font, color);
