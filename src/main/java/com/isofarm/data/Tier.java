@@ -7,16 +7,16 @@ import java.util.function.Consumer;
  * Enumerates the supported tier values.
  */
 public enum Tier {
-    NONE((byte) -1, 5.0f, 0),
-    LEATHER((byte) 0, 5.0f, 1),
-    WOODEN((byte) 0, 5.0f, 64),
-    STONE((byte) 1, 5.0f, 128),
-    COPPER((byte) 2, 5.0f, 156),
-    IRON((byte) 3, 5.0f, 198),
+    NONE((byte) -1, 0.0f, 0),
+    LEATHER((byte) 0, 1.0f, 1),
+    WOODEN((byte) 0, 0.0f, 64),
+    STONE((byte) 1, 3.0f, 128),
+    COPPER((byte) 2, 4.0f, 156),
+    IRON((byte) 3, 4.0f, 198),
     STEEL((byte) 4, 5.0f, 230),
-    GOLDEN((byte) 5, 5.0f, 64),
-    PLATINUM((byte) 6, 5.0f, 512),
-    DIAMOND((byte) 7, 5.0f, 1024);
+    GOLDEN((byte) 5, 6.0f, 64),
+    PLATINUM((byte) 6, 8.0f, 512),
+    DIAMOND((byte) 7, 10.0f, 1024);
 
     private final byte id;
     private final float defense;
