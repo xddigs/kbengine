@@ -26,8 +26,9 @@ public class ResourceManager {
     private static final SpriteSheet cropIcons = new SpriteSheet(K.Paths.CROP_ICONS, K.UI.ICON_SEED_CROPS_COLS, 1);
     private static final SpriteSheet foodIcons = new SpriteSheet(K.Paths.FOOD_ICONS, K.UI.ICON_FOOD_COLS, 1);
     private static final SpriteSheet toolIcons = new SpriteSheet(K.Paths.TOOL_ICONS, K.UI.ICON_TOOL_COLS, K.UI.ICON_TOOL_ROWS);
-    private static final SpriteSheet shieldBack = new SpriteSheet(
-            K.Paths.SHIELD_BACK, 1, K.UI.ICON_TOOL_ROWS);
+    private static final SpriteSheet armorIcons = new SpriteSheet(K.Paths.ARMOR_ICONS, K.UI.ICON_ARMOR_COLS, K.UI.ICON_ARMOR_ROWS);
+    private static final SpriteSheet shieldBack = new SpriteSheet(K.Paths.SHIELD_BACK, 1, K.UI.ICON_TOOL_ROWS);
+
     private static final SpriteSheet blockIcons = new SpriteSheet(K.Paths.BLOCK_ICONS, K.UI.ICON_BLOCK_COLS, K.UI.ICON_BLOCK_ROWS);
     private static final SpriteSheet torchIcons = new SpriteSheet(K.Paths.TORCH_ICONS, K.UI.TORCH_COLS, 1);
     private static final SpriteSheet materialIcons = new SpriteSheet(K.Paths.MATERIAL_ICONS, K.UI.ICON_MATERIAL_COLS, K.UI.ICON_MATERIAL_ROWS);
@@ -124,13 +125,13 @@ public class ResourceManager {
             case Crop crop -> cropSpritesheets.get(crop.getCropType());
             case Produce ignored -> cropIcons;
             case Food ignored -> foodIcons;
+            case Block ignored -> blockIcons;
             case Seed seed when seed.getType() == CropType.SUGAR_CANE_CROP -> sugarCane;
             case Seed ignored -> seedIcons;
             case Tool ignored -> toolIcons;
+            case Armor ignored -> armorIcons;
             case Material ignored -> materialIcons;
             case Usable ignored -> usablesIcons;
-            case iBlock ignored -> blockIcons;
-            case Block ignored -> blockIcons;
             case null, default -> null;
         };
     }
@@ -210,6 +211,12 @@ public class ResourceManager {
 
         if (item instanceof Tool tool) {
             return (tool.getRow() * K.UI.ICON_TOOL_COLS) + tool.getCol();
+        }
+
+        if (item instanceof Armor armor) {
+            int col = armor.getType().getCol();
+            int row = armor.getTier().getId();
+            return (row * K.UI.ICON_ARMOR_COLS) + col;
         }
 
         if (item instanceof Usable usable) {
@@ -499,6 +506,14 @@ public class ResourceManager {
      */
     public SpriteSheet getToolIcons() {
         return toolIcons;
+    }
+
+    /**
+     * Returns the armor icons.
+     * @return the {@link SpriteSheet} representing the armor icons
+     */
+    public SpriteSheet getArmorIcons() {
+        return armorIcons;
     }
 
     /**

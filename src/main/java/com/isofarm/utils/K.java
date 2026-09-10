@@ -88,7 +88,10 @@ public final class K {
 
         public static final int ICON_TOOL_COLS = 6;
         public static final int ICON_TOOL_ROWS = 8;
+        public static final int ICON_ARMOR_ROWS = 8;
+        public static final int ICON_ARMOR_COLS = 3;
         public static final int ICON_USABLES_COLS = 7;
+
         public static final int ICON_HEARTS_ROWS = 3;
 
         public static final int ICON_MATERIAL_COLS = 12;
@@ -171,6 +174,7 @@ public final class K {
         public static final String CROP_ICONS = "assets/sprites/crops.png";
         public static final String FOOD_ICONS = "assets/sprites/food.png";
         public static final String TOOL_ICONS = "assets/sprites/tools.png";
+        public static final String ARMOR_ICONS = "assets/sprites/armor.png";
         public static final String SHIELD_BACK = "assets/sprites/shield_back.png";
         public static final String BLOCK_ICONS = "assets/sprites/blocks.png";
         public static final String TORCH_ICONS = "assets/sprites/torch.png";
