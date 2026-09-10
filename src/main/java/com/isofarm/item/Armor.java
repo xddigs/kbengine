@@ -4,6 +4,7 @@ import com.isofarm.data.ArmorData;
 import com.isofarm.data.ArmorSlot;
 import com.isofarm.data.Tier;
 import com.isofarm.entity.Player;
+import com.isofarm.utils.Local;
 
 /**
  * Defines the armor contract, whether an item is armor, it's equippable and
@@ -69,7 +70,7 @@ public abstract class Armor implements
     /** {@inheritDoc} */
     @Override
     public String getDisplayName() {
-        return type.getDisplayName();
+        return Local.lang.item(type.getDisplayName(), tier.getDisplayName());
     }
 
     /** {@inheritDoc} */
