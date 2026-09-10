@@ -33,6 +33,7 @@ public class InventorySlotUI extends UIElement {
     private int lastAmount = 0;
     private Item lastItem = null;
     private float squishTimer = 0.0f;
+    private String tooltipCornerText;
     /**
      * Creates a new {@code InventorySlotUI} instance.
      * @param x the {@code float} supplied as {@code x}
@@ -138,6 +139,16 @@ public class InventorySlotUI extends UIElement {
         } else {
             this.slot = slot;
         }
+    }
+
+    /** Returns the optional text rendered in the tooltip's upper-right corner. */
+    public String getTooltipCornerText() {
+        return tooltipCornerText;
+    }
+
+    /** Sets the optional text rendered in the tooltip's upper-right corner. */
+    public void setTooltipCornerText(String text) {
+        tooltipCornerText = text;
     }
 
     /**

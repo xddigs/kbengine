@@ -701,10 +701,14 @@ public class InventoryUI extends UIElement {
             if (containerInventory != null && i < containerInventory.getSlots().size()) {
                 slotUI.setSlot(containerInventory.getSlot(i));
                 updateItemSprite(slotUI);
+                Item item = slotUI.getItem();
+                slotUI.setTooltipCornerText(getExternalTrader() != null && item != null
+                        ? "$" + item.getValue() : null);
                 slotUI.show();
             } else {
                 slotUI.setSlot(null);
                 updateItemSprite(slotUI);
+                slotUI.setTooltipCornerText(null);
                 slotUI.hide();
             }
         }
@@ -923,6 +927,7 @@ public class InventoryUI extends UIElement {
             slotUI.setSpriteSheet(null);
             slotUI.setSpriteFrame(0);
             slotUI.setTooltipText(null);
+            slotUI.setTooltipCornerText(null);
             return;
         }
 
@@ -932,6 +937,7 @@ public class InventoryUI extends UIElement {
             slotUI.setSpriteSheet(null);
             slotUI.setSpriteFrame(0);
             slotUI.setTooltipText(null);
+            slotUI.setTooltipCornerText(null);
             return;
         }
 

@@ -11,6 +11,7 @@ import com.isofarm.utils.Settings;
 public class UITooltip extends UIElement {
     private static final float OFFSET_PADDING = 2.2f;
     private String text = "";
+    private String cornerText = "";
     private float padding = Settings.getScaledPadding();
     private float offsetX = Settings.getScaledSpacing();
     private float offsetY = Settings.getScaledSpacing();
@@ -45,6 +46,12 @@ public class UITooltip extends UIElement {
             Frontend.drawString(line, getAbsoluteX() + padding, textY, font, K.UI.UI_TEXT_COLOR);
             textY += lineHeight;
         }
+        if (!cornerText.isBlank()) {
+            float cornerX = getAbsoluteX() + getAbsoluteWidth() - padding
+                    - Frontend.getStringWidth(cornerText, font);
+            Frontend.drawString(cornerText, cornerX,
+                    getAbsoluteY() + padding * 2.2f, font, K.UI.UI_TEXT_COLOR);
+        }
 
         renderChildren();
     }
@@ -72,6 +79,18 @@ public class UITooltip extends UIElement {
      */
     public UITooltip text(String text) {
         setText(text);
+        updateSize();
+        return this;
+    }
+
+    /** Sets the optional upper-right text, such as a trader price. */
+    public UITooltip cornerText(String text) {
+        cornerText = text == null ? "" : text;
+        updateSize();
+        return this;
+    }
+
+    private void updateSize() {
         UIFont font = Frontend.getNormalFont();
         String[] lines = this.text.split("\n", -1);
         float maxWidth = 0.0f;
@@ -81,12 +100,16 @@ public class UITooltip extends UIElement {
                     Frontend.getStringWidth(line, font)
             );
         }
+        if (!cornerText.isBlank()) {
+            float firstLineWidth = Frontend.getStringWidth(lines[0], font);
+            maxWidth = Math.max(maxWidth, firstLineWidth + padding +
+                    Frontend.getStringWidth(cornerText, font));
+        }
 
         float lineHeight = font.getSize();
         float totalWidth = maxWidth + padding * 2.0f;
         float totalHeight = (lineHeight * lines.length) + padding * 2.0f;
         setSize(totalWidth, totalHeight);
-        return this;
     }
 
     /**

@@ -39,7 +39,9 @@ public class UIManager {
         if (hovered != null && hovered != tooltip
                 && hovered.getTooltipText() != null
                 && !hovered.getTooltipText().isBlank()) {
-            tooltip.text(hovered.getTooltipText());
+            String cornerText = hovered instanceof InventorySlotUI slot
+                    ? slot.getTooltipCornerText() : null;
+            tooltip.cornerText(cornerText).text(hovered.getTooltipText());
             float cursorX = Mouse.getX() + MOUSE_OFFSET + MOUSE_OFFSET / 2;
             float cursorY = Mouse.getY() - MOUSE_OFFSET / 2;
             tooltip.updatePosition(
