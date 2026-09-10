@@ -40,11 +40,9 @@ public class UIManager {
         if (hovered != null && hovered != tooltip
                 && hovered.getTooltipText() != null
                 && !hovered.getTooltipText().isBlank()) {
-            String cornerText = hovered instanceof InventorySlotUI slot
-                    ? slot.getTooltipCornerText() : null;
-            String tooltipText = hovered instanceof InventorySlotUI slot
-                    ? ItemIds.appendToTooltip(hovered.getTooltipText(), slot.getItem())
-                    : hovered.getTooltipText();
+            String cornerText = hovered instanceof InventorySlotUI slot ? slot.getTooltipCornerText() : null;
+            String tooltipText = hovered instanceof InventorySlotUI slot ?
+                    ItemIds.appendToTooltip(hovered.getTooltipText(), slot.getItem()) : hovered.getTooltipText();
             tooltip.cornerText(cornerText).text(tooltipText);
             float cursorX = Mouse.getX() + MOUSE_OFFSET + MOUSE_OFFSET / 2;
             float cursorY = Mouse.getY() - MOUSE_OFFSET / 2;
@@ -80,12 +78,7 @@ public class UIManager {
         }
 
         if (Mouse.getScrollY() != 0.0f) {
-            root.mouseScrolled(
-                    Mouse.getX(),
-                    Mouse.getY(),
-                    0.0f,
-                    Mouse.getScrollY()
-            );
+            root.mouseScrolled(Mouse.getX(), Mouse.getY(), 0.0f, Mouse.getScrollY());
         }
 
         if (focusedElement != null) {
@@ -103,17 +96,13 @@ public class UIManager {
             }
 
             String typedCharacters = Keyboard.getTypedCharacters();
-
             for (int i = 0; i < typedCharacters.length();) {
                 int codePoint = typedCharacters.codePointAt(i);
-
                 if (focusedElement.charTyped(codePoint)) {
                     break;
                 }
-
                 i += Character.charCount(codePoint);
             }
-
             if (!focusedElement.isFocused()) {
                 clearFocus();
             }

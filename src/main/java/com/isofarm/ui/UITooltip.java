@@ -3,6 +3,9 @@ package com.isofarm.ui;
 import com.isofarm.utils.K;
 import com.isofarm.utils.Local;
 import com.isofarm.utils.Settings;
+import org.joml.Vector4f;
+
+import java.util.Arrays;
 
 /**
  * Encapsulates the state and operations required by uitooltip within the game runtime.
@@ -43,7 +46,10 @@ public class UITooltip extends UIElement {
         String[] lines = text.split("\n", -1);
         float textY = getAbsoluteY() + padding * 2.2f;
         for (String line : lines) {
-            Frontend.drawString(line, getAbsoluteX() + padding, textY, font, K.UI.UI_TEXT_COLOR);
+            Vector4f color = Arrays.stream(lines).toList().getLast().equals(line) ?
+                    new Vector4f(0.6f) : K.UI.UI_TEXT_COLOR;
+
+            Frontend.drawString(line, getAbsoluteX() + padding, textY, font, color);
             textY += lineHeight;
         }
         if (!cornerText.isBlank()) {
