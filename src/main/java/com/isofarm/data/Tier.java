@@ -7,27 +7,31 @@ import java.util.function.Consumer;
  * Enumerates the supported tier values.
  */
 public enum Tier {
-    NONE((byte) -1, 0),
-    LEATHER((byte) 0, 1),
-    WOODEN((byte) 0, 64),
-    STONE((byte) 1, 128),
-    COPPER((byte) 2, 156),
-    IRON((byte) 3, 198),
-    STEEL((byte) 4, 230),
-    GOLDEN((byte) 5, 64),
-    PLATINUM((byte) 6, 512),
-    DIAMOND((byte) 7, 1024);
+    NONE((byte) -1, 5.0f, 0),
+    LEATHER((byte) 0, 5.0f, 1),
+    WOODEN((byte) 0, 5.0f, 64),
+    STONE((byte) 1, 5.0f, 128),
+    COPPER((byte) 2, 5.0f, 156),
+    IRON((byte) 3, 5.0f, 198),
+    STEEL((byte) 4, 5.0f, 230),
+    GOLDEN((byte) 5, 5.0f, 64),
+    PLATINUM((byte) 6, 5.0f, 512),
+    DIAMOND((byte) 7, 5.0f, 1024);
 
     private final byte id;
+    private final float defense;
     private final int durability;
 
     /**
      * Creates a new {@code Tier} instance.
-     * @param id the {@code byte} supplied as {@code id}
+     *
+     * @param id         the {@code byte} supplied as {@code id}
+     * @param defense    the {@code float} supplied as {@code defense}
      * @param durability the {@code int} supplied as {@code durability}
      */
-    Tier(byte id, int durability) {
+    Tier(byte id, float defense, int durability) {
         this.id = id;
+        this.defense = defense;
         this.durability = durability;
     }
 
@@ -63,6 +67,14 @@ public enum Tier {
      */
     public static String toStr(Tier tier) {
         return tier.name().toLowerCase(Locale.ROOT);
+    }
+
+    /**
+     * Returns the {@code defense} value
+     * @return {@link float} value of defense
+     */
+    public float getDefense() {
+        return defense;
     }
 
     /**
