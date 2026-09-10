@@ -428,7 +428,7 @@ public class NPC extends Character {
 
     /** Resets the trader's stock on the configured schedule. */
     public void updateShop(TimeService timeService) {
-        if (job == Job.TRADER && timeService.getDay() % 10 == 0) {
+        if (job == Job.TRADER && timeService.getDay() % 3 == 0) {
             resetShop();
         }
     }
