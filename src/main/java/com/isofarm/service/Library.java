@@ -32,6 +32,8 @@ public class Library implements Service<GameMaster> {
         registerDefault(itemR, CraftingBook::new);
         registerDefault(itemR, () -> new Book(false));
         registerDefault(itemR, () -> new Bucket(BlockData.AIR));
+        registerDefault(itemR, () -> new Bucket(BlockData.WATER));
+        registerDefault(itemR, () -> new Bucket(BlockData.LAVA));
         registerDefault(itemR, () -> new Wallet());
 
         MaterialID.forEach(material -> {
@@ -64,21 +66,21 @@ public class Library implements Service<GameMaster> {
             registerDefault(itemR, () -> new Food(foodData));
         });
 
-        for (CropType type : CropType.values()) {
+        CropType.forEach(type -> {
             registerDefault(itemR, () -> new Produce(type));
-            if (type.equals(CropType.SUGAR_CANE_CROP)) continue;
+            if (type.equals(CropType.SUGAR_CANE_CROP)) return;
             registerDefault(itemR, () -> new Seed(type));
-        }
+        });
 
-        for (BlockData block : BlockData.values()) {
-            if (block.equals(BlockData.WATER) || block.equals(BlockData.LAVA)) continue;
+        BlockData.forEach(block -> {
+            if (block.equals(BlockData.WATER) || block.equals(BlockData.LAVA)) return;
             if (block.getId() > 0 && !block.isInteractive()) {
                 registerDefault(itemR, () -> new Block(block));
             }
             if (block.isInteractive()) {
                 registerDefault(itemR, () -> new iBlock(block));
             }
-        }
+        });
     }
 
     /**

@@ -3,6 +3,7 @@ package com.isofarm.data;
 import com.isofarm.utils.Local;
 
 import java.util.Locale;
+import java.util.function.Consumer;
 
 /**
  * Enumerates the supported crop type values.
@@ -113,5 +114,15 @@ public enum CropType {
             }
         }
         return null;
+    }
+
+    /**
+     * Performs the given action for each crop in the enum.
+     * @param consumer the action to be performed for each crop
+     */
+    public static void forEach(Consumer<CropType> consumer) {
+        for (CropType crop : CropType.values()) {
+            consumer.accept(crop);
+        }
     }
 }

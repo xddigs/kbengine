@@ -11,6 +11,7 @@ import com.isofarm.utils.Local;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Consumer;
 
 /**
  * Enumerates voxel and model-backed interactive block data in one registry.
@@ -731,5 +732,11 @@ public enum BlockData implements Blockable {
             return rawDrop;
         }
         return null;
+    }
+
+    public static void forEach(Consumer<BlockData> consumer) {
+        for (BlockData block : values()) {
+            consumer.accept(block);
+        }
     }
 }
