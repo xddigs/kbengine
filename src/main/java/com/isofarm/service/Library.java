@@ -19,6 +19,9 @@ import java.util.function.Supplier;
 @SuppressWarnings("all")
 public class Library implements Service<GameMaster> {
     private static final Logger log = LoggerFactory.getLogger(Library.class);
+    private static final String NAMESPACE = "isofarm";
+    private static final String SEPARATOR = ":";
+    public static final String NAMESPACE_ID = NAMESPACE + SEPARATOR;
 
     /**
      * Initializes the items.
@@ -338,7 +341,8 @@ public class Library implements Service<GameMaster> {
         for (String s : name) {
             builder.append(s);
         }
-        return builder.toString().trim()
-                .replaceAll(" ", "_").toLowerCase();
+        builder.toString().trim().replaceAll(" ", "_").toLowerCase();
+        builder.insert(0, NAMESPACE_ID);
+        return builder.toString();
     }
 }

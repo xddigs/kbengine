@@ -8,8 +8,10 @@ import com.isofarm.item.Item;
 import com.isofarm.item.Material;
 import com.isofarm.item.Tool;
 import com.isofarm.item.Usable;
+import com.isofarm.service.Library;
 
 /** Provides the stable, non-localized identifier shown in item tooltips. */
+@Utils
 public final class ItemIds {
     private ItemIds() {}
 
@@ -19,29 +21,16 @@ public final class ItemIds {
      * @return the non-localized item identifier, or an empty string for null
      */
     public static String of(Item item) {
-        if (item == null) return "";
-
-        if (item instanceof Armor armor) {
-            return tiered(armor.getTier(), armor.getType().getName());
-        }
-        if (item instanceof Tool tool) {
-            return tiered(tool.getTier(), tool.getType().getName());
-        }
-        if (item instanceof Material material) {
-            return tiered(material.getTier(), material.getMaterialID().getName());
-        }
-        if (item instanceof Block block) {
-            return block.getType().getName();
-        }
-        if (item instanceof Bucket bucket) {
-            return bucket.isFull()
-                    ? bucket.getBlockType().getName() + "_bucket"
-                    : "bucket";
-        }
-        if (item instanceof Usable usable) {
-            return usable.getUsablesID().getName();
-        }
-        return item.getName();
+        return switch (item) {
+            case null -> "";
+            case Armor armor -> tiered(armor.getTier(), armor.getType().getName());
+            case Tool tool -> tiered(tool.getTier(), tool.getType().getName());
+            case Material material -> tiered(material.getTier(), material.getMaterialID().getName());
+            case Block block -> block.getType().getName();
+            case Bucket bucket -> bucket.isFull() ? bucket.getBlockType().getName() + "_bucket" : "bucket";
+            case Usable usable -> usable.getUsablesID().getName();
+            default -> item.getName();
+        };
     }
 
     /**
@@ -54,12 +43,10 @@ public final class ItemIds {
         String id = of(item);
         if (id.isBlank()) return tooltip;
         if (tooltip == null || tooltip.isBlank()) return id;
-        return tooltip + "\n" + id;
+        return tooltip + "\n" + Library.NAMESPACE_ID + id;
     }
 
     private static String tiered(Tier tier, String name) {
-        return tier != null && tier != Tier.NONE
-                ? tier.getName() + "_" + name
-                : name;
+        return tier != null && tier != Tier.NONE ? tier.getName() + "_" + name : name;
     }
 }
