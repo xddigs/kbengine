@@ -146,8 +146,9 @@ public class GameMaster {
                 ResourceManager.rem.getMaterialIcons(),
                 ResourceManager.rem.getInventoryIcons());
 
-        GameUIService.ui.setTrader(NPCService.npcs.getTrader());
-
+        if (NPCService.npcs.getTrader() != null) {
+            GameUIService.ui.setTrader(NPCService.npcs.getTrader());
+        }
     }
 
     /**
