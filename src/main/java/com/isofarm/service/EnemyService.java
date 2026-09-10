@@ -38,7 +38,6 @@ public class EnemyService implements Service<Enemy> {
      */
     public void init() {
         clear();
-        add(new Goblin());
     }
 
     /**
