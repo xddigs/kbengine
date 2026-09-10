@@ -4,7 +4,20 @@ import org.joml.Vector3f;
 import org.joml.Vector4f;
 
 /**
- * Encapsulates the state and operations required by k within the game runtime.
+ * Represents the k component of the Isofarm runtime.
+ *
+ * <p>This type centralizes the state, lifecycle and behavior required by its callers,
+ * keeping domain rules together with the data they operate on.
+ *
+ * <p><b>Responsibilities:</b>
+ * <ul>
+ *   <li><b>State:</b> Owns the data needed to represent the component consistently.</li>
+ *   <li><b>Lifecycle:</b> Exposes the operations used to create, update and release its state.</li>
+ *   <li><b>Integration:</b> Coordinates with the surrounding game, rendering or UI systems through its public API.</li>
+ * </ul>
+ *
+ * <p>Callers should use the documented public operations and allow this type to preserve
+ * its invariants rather than modifying implementation details directly.
  */
 @Utils
 public final class K {
@@ -15,16 +28,42 @@ public final class K {
     private K() {}
 
     /**
-     * Encapsulates the state and operations required by camera within the game runtime.
-     */
+ * Represents the camera component of the Isofarm runtime.
+ *
+ * <p>This type centralizes the state, lifecycle and behavior required by its callers,
+ * keeping domain rules together with the data they operate on.
+ *
+ * <p><b>Responsibilities:</b>
+ * <ul>
+ *   <li><b>State:</b> Owns the data needed to represent the component consistently.</li>
+ *   <li><b>Lifecycle:</b> Exposes the operations used to create, update and release its state.</li>
+ *   <li><b>Integration:</b> Coordinates with the surrounding game, rendering or UI systems through its public API.</li>
+ * </ul>
+ *
+ * <p>Callers should use the documented public operations and allow this type to preserve
+ * its invariants rather than modifying implementation details directly.
+ */
     public static final class Camera {
         public static final float FULL_DEGREES = 360.0f;
         public static final float HALF_DEGREES = 180.0f;
     }
 
     /**
-     * Encapsulates the state and operations required by world within the game runtime.
-     */
+ * Represents the world component of the Isofarm runtime.
+ *
+ * <p>This type centralizes the state, lifecycle and behavior required by its callers,
+ * keeping domain rules together with the data they operate on.
+ *
+ * <p><b>Responsibilities:</b>
+ * <ul>
+ *   <li><b>State:</b> Owns the data needed to represent the component consistently.</li>
+ *   <li><b>Lifecycle:</b> Exposes the operations used to create, update and release its state.</li>
+ *   <li><b>Integration:</b> Coordinates with the surrounding game, rendering or UI systems through its public API.</li>
+ * </ul>
+ *
+ * <p>Callers should use the documented public operations and allow this type to preserve
+ * its invariants rather than modifying implementation details directly.
+ */
     public static final class World {
         public static final float GRAVITY = -25.0f;
         public static final float JUMP_FORCE = 8.0f;
@@ -43,16 +82,42 @@ public final class K {
     }
 
     /**
-     * Encapsulates the state and operations required by window within the game runtime.
-     */
+ * Represents the window component of the Isofarm runtime.
+ *
+ * <p>This type centralizes the state, lifecycle and behavior required by its callers,
+ * keeping domain rules together with the data they operate on.
+ *
+ * <p><b>Responsibilities:</b>
+ * <ul>
+ *   <li><b>State:</b> Owns the data needed to represent the component consistently.</li>
+ *   <li><b>Lifecycle:</b> Exposes the operations used to create, update and release its state.</li>
+ *   <li><b>Integration:</b> Coordinates with the surrounding game, rendering or UI systems through its public API.</li>
+ * </ul>
+ *
+ * <p>Callers should use the documented public operations and allow this type to preserve
+ * its invariants rather than modifying implementation details directly.
+ */
     public static final class Window {
         public static final float DEFAULT_WIDTH = 1280.0f;
         public static final float DEFAULT_HEIGHT = 720.0f;
     }
 
     /**
-     * Encapsulates the state and operations required by style within the game runtime.
-     */
+ * Represents the style component of the Isofarm runtime.
+ *
+ * <p>This type centralizes the state, lifecycle and behavior required by its callers,
+ * keeping domain rules together with the data they operate on.
+ *
+ * <p><b>Responsibilities:</b>
+ * <ul>
+ *   <li><b>State:</b> Owns the data needed to represent the component consistently.</li>
+ *   <li><b>Lifecycle:</b> Exposes the operations used to create, update and release its state.</li>
+ *   <li><b>Integration:</b> Coordinates with the surrounding game, rendering or UI systems through its public API.</li>
+ * </ul>
+ *
+ * <p>Callers should use the documented public operations and allow this type to preserve
+ * its invariants rather than modifying implementation details directly.
+ */
     public static final class Style {
         public static final float[] COLOR_TOAST_SUCCESS = {0.30f, 0.85f, 0.40f, 1.0f};
         public static final float[] COLOR_TOAST_SUCCESS_BG = {0.08f, 0.16f, 0.10f, 0.95f};
@@ -67,8 +132,21 @@ public final class K {
     }
 
     /**
-     * Encapsulates the state and operations required by ui within the game runtime.
-     */
+ * Represents the ui component of the Isofarm runtime.
+ *
+ * <p>This type centralizes the state, lifecycle and behavior required by its callers,
+ * keeping domain rules together with the data they operate on.
+ *
+ * <p><b>Responsibilities:</b>
+ * <ul>
+ *   <li><b>State:</b> Owns the data needed to represent the component consistently.</li>
+ *   <li><b>Lifecycle:</b> Exposes the operations used to create, update and release its state.</li>
+ *   <li><b>Integration:</b> Coordinates with the surrounding game, rendering or UI systems through its public API.</li>
+ * </ul>
+ *
+ * <p>Callers should use the documented public operations and allow this type to preserve
+ * its invariants rather than modifying implementation details directly.
+ */
     public static final class UI {
         public static final int INVENTORY_COLUMNS = 9;
         public static final int INVENTORY_ROWS = 3;
@@ -134,8 +212,21 @@ public final class K {
     }
 
     /**
-     * Encapsulates the state and operations required by paths within the game runtime.
-     */
+ * Represents the paths component of the Isofarm runtime.
+ *
+ * <p>This type centralizes the state, lifecycle and behavior required by its callers,
+ * keeping domain rules together with the data they operate on.
+ *
+ * <p><b>Responsibilities:</b>
+ * <ul>
+ *   <li><b>State:</b> Owns the data needed to represent the component consistently.</li>
+ *   <li><b>Lifecycle:</b> Exposes the operations used to create, update and release its state.</li>
+ *   <li><b>Integration:</b> Coordinates with the surrounding game, rendering or UI systems through its public API.</li>
+ * </ul>
+ *
+ * <p>Callers should use the documented public operations and allow this type to preserve
+ * its invariants rather than modifying implementation details directly.
+ */
     public static final class Paths {
         public static final String FONT = "font/LeagueSpartan-Regular.ttf";
         public static final String FONT_BOLD = "font/LeagueSpartan-SemiBold.ttf";
@@ -206,8 +297,21 @@ public final class K {
     }
 
     /**
-     * Encapsulates the state and operations required by render within the game runtime.
-     */
+ * Represents the render component of the Isofarm runtime.
+ *
+ * <p>This type centralizes the state, lifecycle and behavior required by its callers,
+ * keeping domain rules together with the data they operate on.
+ *
+ * <p><b>Responsibilities:</b>
+ * <ul>
+ *   <li><b>State:</b> Owns the data needed to represent the component consistently.</li>
+ *   <li><b>Lifecycle:</b> Exposes the operations used to create, update and release its state.</li>
+ *   <li><b>Integration:</b> Coordinates with the surrounding game, rendering or UI systems through its public API.</li>
+ * </ul>
+ *
+ * <p>Callers should use the documented public operations and allow this type to preserve
+ * its invariants rather than modifying implementation details directly.
+ */
     public static final class Render {
         public static final float LINE_WIDTH = 2.0f;
         public static final int CROP_TOTAL_FRAMES = 5;
@@ -215,8 +319,21 @@ public final class K {
     }
 
     /**
-     * Encapsulates the state and operations required by colors within the game runtime.
-     */
+ * Represents the colors component of the Isofarm runtime.
+ *
+ * <p>This type centralizes the state, lifecycle and behavior required by its callers,
+ * keeping domain rules together with the data they operate on.
+ *
+ * <p><b>Responsibilities:</b>
+ * <ul>
+ *   <li><b>State:</b> Owns the data needed to represent the component consistently.</li>
+ *   <li><b>Lifecycle:</b> Exposes the operations used to create, update and release its state.</li>
+ *   <li><b>Integration:</b> Coordinates with the surrounding game, rendering or UI systems through its public API.</li>
+ * </ul>
+ *
+ * <p>Callers should use the documented public operations and allow this type to preserve
+ * its invariants rather than modifying implementation details directly.
+ */
     public static final class Colors {
         public static final Vector3f OUTLINE_DEFAULT = new Vector3f(0.0f, 0.0f, 0.0f);
         public static final Vector3f RAIN = new Vector3f(0.35f, 0.55f, 1.0f);

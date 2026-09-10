@@ -19,10 +19,16 @@ import org.joml.Vector3f;
 import java.util.List;
 
 /**
- * Represents the local player and orchestrates its focused components.
- * Inherits from {@link Character}.
+ * Controller class representing the local user-driven player entity.
+ *
+ * <p>Key Responsibilities:</p>
+ * <ul>
+ *   <li>Processes raw user input to drive physics-based locomotion, jumping, crouching, and camera control.</li>
+ *   <li>Coordinates the combat system, executing melee/ranged attacks, hit registration, and damage calculation.</li>
+ *   <li>Manages player-centric subsystems including vital statistics (health, stamina, mana),
+ *       inventory management, equipment slots, and world object interactions.</li>
+ * </ul>
  */
-@SuppressWarnings("all")
 @Singleton
 public class Player extends Character {
     private static final float AUTO_JUMP_CLEARANCE = 1.05f;

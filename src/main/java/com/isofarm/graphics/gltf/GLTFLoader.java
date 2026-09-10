@@ -27,7 +27,20 @@ import static org.lwjgl.opengl.GL30.*;
 import static org.lwjgl.stb.STBImage.*;
 
 /**
- * Encapsulates the state and operations required by gltfloader within the game runtime.
+ * Represents the gltfloader component of the Isofarm runtime.
+ *
+ * <p>This type centralizes the state, lifecycle and behavior required by its callers,
+ * keeping domain rules together with the data they operate on.
+ *
+ * <p><b>Responsibilities:</b>
+ * <ul>
+ *   <li><b>State:</b> Owns the data needed to represent the component consistently.</li>
+ *   <li><b>Lifecycle:</b> Exposes the operations used to create, update and release its state.</li>
+ *   <li><b>Integration:</b> Coordinates with the surrounding game, rendering or UI systems through its public API.</li>
+ * </ul>
+ *
+ * <p>Callers should use the documented public operations and allow this type to preserve
+ * its invariants rather than modifying implementation details directly.
  */
 @SuppressWarnings("all")
 public final class GLTFLoader {

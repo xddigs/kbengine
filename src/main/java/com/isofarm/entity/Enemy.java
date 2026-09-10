@@ -24,9 +24,6 @@ import org.joml.Vector3f;
  *
  * <p>Subclasses must implement {@link #update(float)} to drive specific AI state machines
  * (e.g., pathfinding, aggro range, attack cooldowns).
- * @see Character
- * @see Player
- * @see GLTFModel
  */
 @DataClass
 public abstract class Enemy extends Character {

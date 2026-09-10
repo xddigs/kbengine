@@ -7,9 +7,19 @@ import com.isofarm.utils.Local;
 import com.isofarm.utils.ToastFactory;
 
 /**
- * Encapsulates the state and operations required by character within the game runtime.
+ * Abstract extension of {@link Entity} representing sentient or actor-based entities within the game.
+ * <p>This class introduces core RPG mechanics, progression systems, and inventory management
+ * to the physical entity base, including:
+ * <ul>
+ *   <li><b>Progression & Statistics:</b> Leveling system implementing {@link Levelable}, experience
+ *       scaling, and core attributes (strength, intelligence, dexterity, constitution, wisdom, charisma, luck).</li>
+ *   <li><b>Inventory & Storage:</b> Dual-inventory handling with primary {@link Inventory} support
+ *       (with optional hotbar slots) and secondary {@link Inventory} backpack storage.</li>
+ *   <li><b>Vitality & Survival:</b> Enhanced damage mitigation based on defense values, fall damage resolution,
+ *       healing, and hunger management.</li>
+ *   <li><b>State & Alignment:</b> Social alignment via {@link Reputation} and runtime play styles via {@link Gamemode}.</li>
+ * </ul>
  */
-@SuppressWarnings("all")
 @DataClass
 public abstract class Character extends
         Entity implements Levelable {

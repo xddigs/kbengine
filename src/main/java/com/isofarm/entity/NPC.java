@@ -31,8 +31,16 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
- * Represents an NPC, with their own state and behavior, in contrast to {@link Player},
- * who starts with their own {@link Singleton} instance. Inherits from {@link Character}.
+ * Represents a non-player character (NPC) driven by artificial intelligence.
+ *
+ * <p>Key Responsibilities:</p>
+ * <ul>
+ *   <li>Executes AI behavior logic, including field-of-view target detection, threat evaluation,
+ *       and autonomous pathfinding/wandering within specified bounds.</li>
+ *   <li>Manages interactive dialogue state trees, branching narrative triggers, and quest assignment.</li>
+ *   <li>Handles merchant trade mechanics, inventory exchange, and currency transactions
+ *       with the player.</li>
+ * </ul>
  */
 @DataClass
 public class NPC extends Character {

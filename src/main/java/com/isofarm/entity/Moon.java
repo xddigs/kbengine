@@ -6,7 +6,16 @@ import com.isofarm.wrld.GameMaster;
 import org.joml.Vector3f;
 
 /**
- * Encapsulates the state and operations required by moon within the game runtime.
+ * Represents the lunar celestial body and its corresponding directional lighting system.
+ *
+ * <p>Key Responsibilities:</p>
+ * <ul>
+ *   <li>Calculates orbital position, elevation, and azimuth relative to the world origin
+ *       based on the global day-night time controller.</li>
+ *   <li>Updates directional light properties, including ambient color, light intensity,
+ *       and shadow parameters for nighttime scenes.</li>
+ *   <li>Renders the visual moon quad and manages lunar phase transitions across game days.</li>
+ * </ul>
  */
 public class Moon extends Entity {
     private final Vector3f direction;

@@ -11,7 +11,20 @@ import com.isofarm.wrld.World;
 import java.util.Arrays;
 
 /**
- * Encapsulates the state and operations required by chunk mesh builder within the game runtime.
+ * Represents the chunk mesh builder component of the Isofarm runtime.
+ *
+ * <p>This type centralizes the state, lifecycle and behavior required by its callers,
+ * keeping domain rules together with the data they operate on.
+ *
+ * <p><b>Responsibilities:</b>
+ * <ul>
+ *   <li><b>State:</b> Owns the data needed to represent the component consistently.</li>
+ *   <li><b>Lifecycle:</b> Exposes the operations used to create, update and release its state.</li>
+ *   <li><b>Integration:</b> Coordinates with the surrounding game, rendering or UI systems through its public API.</li>
+ * </ul>
+ *
+ * <p>Callers should use the documented public operations and allow this type to preserve
+ * its invariants rather than modifying implementation details directly.
  */
 public class ChunkMeshBuilder {
     private static final float PIXEL = 1.0f / K.World.DEFAULT_TEXTURE_SCALE;
@@ -48,7 +61,9 @@ public class ChunkMeshBuilder {
      */
     public record ChunkMeshData(RawMeshData solidData, RawMeshData waterData) {}
 
+    /** Tracks write offsets while assembling transparent water geometry. */
     private record WaterMeshCursor(int position, int normal, int uv, int element, int vertices) {}
+    /** Tracks write offsets while assembling solid block geometry. */
     private record MeshCursor(int position, int normal, int uv, int element, int vertices) {}
 
     /**

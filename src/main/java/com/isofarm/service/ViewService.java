@@ -243,5 +243,6 @@ public final class ViewService implements Service<View> {
                 && position.y > floorY + 0.08f;
     }
 
+    /** Describes the rectangular bounds and ceiling of a visible room. */
     private record Room(int minX, int maxX, int minZ, int maxZ, int ceilingY) {}
 }

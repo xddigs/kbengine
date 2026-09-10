@@ -403,6 +403,7 @@ public class EquipmentController {
         }
     }
 
+    /** Builds transient vertex data for dynamically recolored equipment meshes. */
     private static final class MeshBuilder {
         private final float[] positions;
         private final float[] normals;

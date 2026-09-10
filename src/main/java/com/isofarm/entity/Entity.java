@@ -26,9 +26,6 @@ import org.joml.Vector3f;
  * <p>Subclasses must implement {@link #render(GameMaster, RenderPass)} to define visual representation
  * and optionally override {@link #adjustVelocity(float)}, {@link #onDamageTaken(float)}, or
  * {@link #onDeath(Cause)} to hook custom entity behaviors.
- * @see World
- * @see Cause
- * @see RenderPass
  */
 
 @DataClass

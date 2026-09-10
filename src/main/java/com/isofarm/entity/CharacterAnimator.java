@@ -23,7 +23,16 @@ import static org.joml.Math.lerp;
 import static org.lwjgl.opengl.GL13.*;
 
 /**
- * Owns the character model, its rendering, facing and procedural animation.
+ * Manages the 3D visual representation, transform hierarchy, and procedural animation state
+ * for character entities.
+ *
+ * <p>Key Responsibilities:</p>
+ * <ul>
+ *   <li>Loads and renders the 3D character mesh and associated materials.</li>
+ *   <li>Calculates head, eyes, and torso look-at orientations based on target positions.</li>
+ *   <li>Executes procedural skeletal and blend-shape animations, including locomotion
+ *       (walking, running, sneaking), combat attacks, damage reactions, and death states.</li>
+ * </ul>
  */
 public final class CharacterAnimator {
     private static final float ZERO = 0.0f, MOVE_THRESHOLD = 0.05f;

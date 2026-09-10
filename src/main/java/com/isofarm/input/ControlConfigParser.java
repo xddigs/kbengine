@@ -216,6 +216,7 @@ public final class ControlConfigParser {
         return Map.copyOf(constants);
     }
 
+    /** Parsed control bindings grouped by input device. */
     private record Bindings(
             Map<String, int[]> keyboard,
             Map<String, int[]> mouse,
@@ -224,6 +225,7 @@ public final class ControlConfigParser {
             int preferredJoystick,
             float joystickDeadZone) {}
 
+    /** Supported control-device namespaces used by the configuration parser. */
     private enum BindingType {
         KEYBOARD("GLFW_KEY_", "keyboard key", GLFW.GLFW_KEY_UNKNOWN, GLFW.GLFW_KEY_LAST),
         MOUSE("GLFW_MOUSE_BUTTON_", "mouse button", GLFW.GLFW_MOUSE_BUTTON_1,
