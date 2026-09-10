@@ -11,10 +11,11 @@ import java.util.Random;
  * a continuous land mass rooted in the seabed rather than a floating volume.
  */
 public final class IslandGenerator implements Generator {
-    public static final int OCEAN_DEPTH = 24;
+    public static final int OCEAN_DEPTH = 36;
     public static final int SEA_LEVEL = OCEAN_DEPTH + 1;
 
     private static final int OCEAN_FLOOR_Y = 1;
+    private static final int VOID_SEAL_Y = OCEAN_FLOOR_Y - 1;
     private static final int CENTER_X = 0;
     private static final int CENTER_Z = 0;
     private static final float ISLAND_RADIUS = 24.0f;
@@ -26,11 +27,8 @@ public final class IslandGenerator implements Generator {
     private static final float LAVA_RADIUS = 1.75f;
     private static final float LAKE_CHANCE = 0.50f;
     private static final float LAVA_CHANCE = 0.25f;
-    /** Maximum horizontal reach of NPC spawning and wandering around the origin. */
     private static final float NPC_SAFE_RADIUS = 12.0f;
-    /** Radius of the level spawn platform before its terrain transition begins. */
-    private static final float SPAWN_PLATFORM_RADIUS = 6.0f;
-    /** Width of the smooth terrain transition outside the spawn platform. */
+    private static final float SPAWN_PLATFORM_RADIUS = 3.0f;
     private static final float SPAWN_PLATFORM_TRANSITION = 6.0f;
     private static final int PLANT_ATTEMPTS_PER_CHUNK = 24;
     private static final int TALL_GRASS_CLUSTER_ATTEMPTS = 24;
@@ -106,6 +104,7 @@ public final class IslandGenerator implements Generator {
      * @param worldZ the {@code int} supplied as {@code worldZ}
      */
     private void generateColumn(Chunk chunk, int localX, int localZ, int worldX, int worldZ) {
+        chunk.setBlock(localX, VOID_SEAL_Y, localZ, BlockData.VOIDSEAL.getId());
         boolean island = isIsland(worldX, worldZ);
         boolean inLake = island && isInLake(worldX, worldZ);
         boolean inLava = island && isInLavaPool(worldX, worldZ);
