@@ -1,11 +1,6 @@
 package com.isofarm.entity;
 
-import com.isofarm.data.BlockData;
-import com.isofarm.data.BlockPos;
-import com.isofarm.data.BlockShape;
-import com.isofarm.data.Cause;
-import com.isofarm.data.DataClass;
-import com.isofarm.data.RenderPass;
+import com.isofarm.data.*;
 import com.isofarm.item.iBlock;
 import com.isofarm.utils.K;
 import com.isofarm.wrld.GameMaster;
@@ -22,17 +17,22 @@ public abstract class Entity {
     protected static final float INVULNERABILITY_DURATION = 0.4f;
     private static final float LAVA_DAMAGE_INTERVAL = 1.0f;
     private static final float LAVA_DAMAGE_STEP = 0.1f;
-    /** Entities which fall below the world leave the playable space. */
     private static final float VOID_DEATH_Y = -16.0f;
     private static final float KNOCKBACK_STRENGTH = 8.0f;
     private static final float UPWARD_FORCE = 4.0f;
+    private static final int AVAILABLE_ARMOR_SLOTS = 3;
 
     private final byte id;
     protected Vector3f position;
     protected Vector3f velocity;
     protected Vector3f dimensions;
+
     protected float hitpoints;
     protected float maxHitpoints;
+    protected float defense;
+    protected float maxDefense;
+    protected ArmorSlot[] armorSlots;
+
     private String name;
     private float standingHeight;
     private float crouchingHeight;
@@ -51,6 +51,10 @@ public abstract class Entity {
     public Entity(String name) {
         this.id = (byte) (Math.floor((Math.random() * Math.random()) * 100));
         this.name = name;
+        this.armorSlots = new ArmorSlot[AVAILABLE_ARMOR_SLOTS];
+        if (this.armorSlots.length > AVAILABLE_ARMOR_SLOTS) {
+            throw new IllegalArgumentException("Too many armor slots");
+        }
 
         this.position = new Vector3f();
         this.velocity = new Vector3f();
@@ -152,6 +156,42 @@ public abstract class Entity {
      */
     public float getMaxHitpoints() {
         return maxHitpoints;
+    }
+
+    /**
+     * Returns the {@code defense} value
+     * @return {@link float} value of defense
+     */
+    public float getDefense() {
+        return defense;
+    }
+
+    /**
+     * Sets the defense value
+     * @return {@link field.type} value of defense
+     */
+    public Entity setDefense(float defense) {
+        this.defense = defense;
+        return this;
+    }
+
+    /**
+     * Returns the {@code maxDefense} value
+     *
+     * @return {@link float} value of maxDefense
+     */
+    public float getMaxDefense() {
+        return maxDefense;
+    }
+
+    /**
+     * Sets the maxDefense value
+     *
+     * @return {@link field.type} value of maxDefense
+     */
+    public Entity setMaxDefense(float maxDefense) {
+        this.maxDefense = maxDefense;
+        return this;
     }
 
     /**

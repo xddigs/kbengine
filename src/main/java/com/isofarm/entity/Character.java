@@ -5,7 +5,6 @@ import com.isofarm.item.Item;
 import com.isofarm.item.Wallet;
 import com.isofarm.utils.Local;
 import com.isofarm.utils.ToastFactory;
-import com.isofarm.wrld.GameMaster;
 
 /**
  * Encapsulates the state and operations required by character within the game runtime.
@@ -65,71 +64,43 @@ public abstract class Character extends Entity implements Levelable {
         this.luck = 50;
     }
 
-    /**
-     * {@inheritDoc}
-     * Returns the level.
-     * @return {@code int}; the level
-     */
+    /** {@inheritDoc} */
     @Override
     public int getLevel() {
         return level;
     }
 
-    /**
-     * {@inheritDoc}
-     * Sets the level.
-     * @param level the {@code int} supplied as {@code level}
-     */
+    /** {@inheritDoc} */
     @Override
     public void setLevel(int level) {
         this.level = level;
     }
 
-    /**
-     * {@inheritDoc}
-     * Returns the experience.
-     * @return {@code int}; the experience
-     */
+    /** {@inheritDoc} */
     @Override
     public int getExperience() {
         return experience;
     }
 
-    /**
-     * {@inheritDoc}
-     * Sets the experience.
-     * @param experience the {@code int} supplied as {@code experience}
-     */
+    /** {@inheritDoc} */
     @Override
     public void setExperience(int experience) {
         this.experience = experience;
     }
 
-    /**
-     * {@inheritDoc}
-     * Returns the experience for next level.
-     * @return {@code int}; the experience for next level
-     */
+    /** {@inheritDoc} */
     @Override
     public int getExperienceForNextLevel() {
         return experienceForNextLevel;
     }
 
-    /**
-     * {@inheritDoc}
-     * Sets the experience for next level.
-     * @param experienceForNextLevel the {@code int} supplied as {@code experienceForNextLevel}
-     */
+    /** {@inheritDoc} */
     @Override
     public void setExperienceForNextLevel(int experienceForNextLevel) {
         this.experienceForNextLevel = experienceForNextLevel;
     }
 
-    /**
-     * {@inheritDoc}
-     * Adds the supplied amount to accumulated progression and applies any resulting transitions.
-     * @param experience the {@code int} supplied as {@code experience}
-     */
+    /** {@inheritDoc} */
     @Override
     public void gain(int experience) {
         if (experience <= 0) return;
@@ -145,42 +116,26 @@ public abstract class Character extends Entity implements Levelable {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     * Calculates next level from the current inputs.
-     * @return {@code int}; the calc next level result
-     */
+    /** {@inheritDoc} */
     @Override
     public int calcNextLevel() {
         return (int) (100 * Math.pow(1.2, level - 1));
     }
 
-    /**
-     * {@inheritDoc}
-     * Advances this object to the next progression level and updates dependent statistics.
-     */
+    /** {@inheritDoc} */
     @Override
     public void levelUp() {
         level++;
         ToastFactory.success(Local.lang.f("toast.level_up", level));
     }
 
-    /**
-     * {@inheritDoc}
-     * Applies the supplied damage amount and triggers the associated health-state changes.
-     * @param amount the {@code float} supplied as {@code amount}
-     */
+    /** {@inheritDoc} */
     @Override
     public void damage(float amount) {
         damage(amount, Cause.ENTITY);
     }
 
-    /**
-     * {@inheritDoc}
-     * Applies damage attributed to a specific cause.
-     * @param amount the {@code float} argument; the damage amount
-     * @param cause the {@link Cause} argument; the damage cause
-     */
+    /** {@inheritDoc} */
     @Override
     public void damage(float amount, Cause cause) {
         if (!isAlive() || amount <= 0) return;
@@ -188,22 +143,62 @@ public abstract class Character extends Entity implements Levelable {
         super.damage(amount, cause);
     }
 
-    /**
-     * {@inheritDoc}
-     * Handles damage taken and updates the affected state.
-     * @param amount the {@code float} supplied as {@code amount}
-     */
+    /** {@inheritDoc} */
     @Override
     protected void onDamageTaken(float amount) {}
 
-    /**
-     * {@inheritDoc}
-     * Returns the max hitpoints.
-     * @return {@code float}; the max hitpoints
-     */
+    /** {@inheritDoc} */
     @Override
     public float getMaxHitpoints() {
         return maxHitpoints * level;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public float getDefense() {
+        return defense * level;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public float getMaxDefense() {
+        return maxDefense * level;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public Entity setDefense(float defense) {
+        this.maxDefense = defense;
+        this.defense = maxDefense;
+        return this;
+    }
+
+    /**
+     * Returns the specific armor slot by id
+     * @param id the {@code byte} argument; the armor slot id
+     * @return the {@link ArmorSlot} representing the armor slot
+     */
+    public ArmorSlot getArmorSlot(byte id) {
+        for (int i = 0; i < armorSlots.length; i++) {
+            if (armorSlots[i].getId() == id) return armorSlots[i];
+        }
+        return null;
+    }
+
+    /**
+     * Sets the specific armor slot by id
+     * @param id the {@code byte} argument; the armor slot id
+     * @param slot the {@link ArmorSlot} argument; the armor slot to set
+     */
+    public void setArmorSlot(byte id, ArmorSlot slot) {
+        for (int i = 0; i < armorSlots.length; i++) {
+            if (armorSlots[i].getId() == id) {
+                if (armorSlots[i] == null) {
+                    armorSlots[i] = slot;
+                }
+                return;
+            }
+        }
     }
 
     /**
