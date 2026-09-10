@@ -35,6 +35,9 @@ import static org.lwjgl.opengl.GL13.*;
 public class GameRenderer {
     private static final int MAX_TORCH_LIGHTS = 32;
     public static final GameRenderer gamr = new GameRenderer();
+    private static final float TORCH_SCALE_X = 0.5625f;
+    private static final float TORCH_SCALE_Y = 1.0f;
+    private static final float TORCH_SCALE_Z = 0.5625f;
     private final List<Vector3f> torchLights = new ArrayList<>();
     private final Matrix4f modelMatrix = new Matrix4f();
     private final Matrix4f viewProjMatrix = new Matrix4f();
@@ -647,7 +650,7 @@ public class GameRenderer {
             float angle = (float) Math.atan2(camera.getPosition().x - centerX,
                     camera.getPosition().z - centerZ);
             modelMatrix.identity().translate(centerX, torch.y() + bounds.minY(), centerZ)
-                    .rotateY(angle).scale(0.45f, 0.8f, 0.45f);
+                    .rotateY(angle).scale(TORCH_SCALE_X, TORCH_SCALE_Y, TORCH_SCALE_Z);
             shader.setUniform("uModel", modelMatrix);
             ResourceManager.rem.getPlayerMesh().render();
         });

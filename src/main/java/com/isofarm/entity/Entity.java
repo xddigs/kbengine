@@ -70,14 +70,6 @@ public abstract class Entity {
     }
 
     /**
-     * Checks whether the dead condition is met.
-     * @return {@code true} if dead; otherwise {@code false}
-     */
-    public boolean isDead() {
-        return !isAlive();
-    }
-
-    /**
      * Applies damage to the entity.
      * @param amount the {@code float} argument; the damage amount
      */
