@@ -50,7 +50,6 @@ public class InventoryUI extends UIElement {
     private static final int GUI_SLICE_SIZE = 3;
     private static final float QUICK_MOVE_ANIMATION_DURATION_SECONDS = 0.12f;
     private static final float ANIMATION_COMPLETE = 1.0f;
-    private static final float ARMOR_SLOT_HOTBAR_OFFSET = 12.0f;
 
     private static final Logger log = LoggerFactory.getLogger(InventoryUI.class);
 
@@ -348,16 +347,36 @@ public class InventoryUI extends UIElement {
     private void createArmorSlots() {
         float slotSize = Settings.getScaledSlot();
         float spacing = Settings.getScaledSpacing();
-        float x = getWidth() + spacing;
-        float bottomY = getHeight() + ARMOR_SLOT_HOTBAR_OFFSET;
+        float x = getArmorPanelX() + Settings.getScaledPadding();
+        float y = getArmorPanelY() + Settings.getScaledPadding();
         for (ArmorSlot armorSlot : ArmorSlot.values()) {
             int index = armorSlot.ordinal();
-            float y = bottomY - (armorSlotUIs.length - index) * (slotSize + spacing);
-            InventorySlotUI slotUI = new InventorySlotUI(x, y, slotSize, slotSize,
+            InventorySlotUI slotUI = new InventorySlotUI(x, y + index * (slotSize + spacing),
+                    slotSize, slotSize,
                     SlotType.ARMOR);
             armorSlotUIs[index] = slotUI;
             addChild(slotUI);
         }
+    }
+
+    /** Returns the armor panel x-position immediately to the inventory's right. */
+    private float getArmorPanelX() {
+        return getWidth() + Settings.getScaledSpacing();
+    }
+
+    /** Centers the armor panel vertically against the complete inventory panel. */
+    private float getArmorPanelY() {
+        return (getHeight() - getArmorPanelHeight()) * 0.5f;
+    }
+
+    private float getArmorPanelWidth() {
+        return Settings.getScaledSlot() + Settings.getScaledPadding() * 2.0f;
+    }
+
+    private float getArmorPanelHeight() {
+        return Settings.getScaledPadding() * 2.0f
+                + armorSlotUIs.length * Settings.getScaledSlot()
+                + (armorSlotUIs.length - 1) * Settings.getScaledSpacing();
     }
 
     /** Creates the chest slots in a separate panel above the player inventory. */
@@ -1630,6 +1649,7 @@ public class InventoryUI extends UIElement {
     public void render() {
         renderContainerBackground();
         renderBackground();
+        renderArmorBackground();
         renderChildren();
         renderQuickMoveAnimations();
         renderCarriedItem();
@@ -1665,6 +1685,25 @@ public class InventoryUI extends UIElement {
                 textureHeight, GUI_SLICE_SIZE);
         Frontend.drawTexture(background, getAbsoluteX(), y, width,
                 height, new Vector4f(1.0f, 1.0f, 1.0f, getWorldOpacity()));
+    }
+
+    /** Draws the compact panel which frames the vertically centered armor slots. */
+    private void renderArmorBackground() {
+        if (armorSlotUIs.length == 0 || armorSlotUIs[0] == null
+                || !armorSlotUIs[0].isVisible()) return;
+
+        float width = getArmorPanelWidth();
+        float height = getArmorPanelHeight();
+        int textureWidth = Math.max(GUI_SLICE_SIZE * 2,
+                Math.round(width / Settings.getScale()));
+        int textureHeight = Math.max(GUI_SLICE_SIZE * 2,
+                Math.round(height / Settings.getScale()));
+        Texture background = Frontend.createNineSliceTexture(
+                ResourceManager.rem.getBackgroundUI(), textureWidth,
+                textureHeight, GUI_SLICE_SIZE);
+        Frontend.drawTexture(background, getAbsoluteX() + getArmorPanelX(),
+                getAbsoluteY() + getArmorPanelY(), width, height,
+                new Vector4f(1.0f, 1.0f, 1.0f, getWorldOpacity()));
     }
 
     /** Positions external slots independently when the open inventory belongs to a trader. */
