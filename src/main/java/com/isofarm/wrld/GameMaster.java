@@ -179,6 +179,7 @@ public class GameMaster {
         float spawnY = spawn.y() + 1.8f;
         Player.plyr.setPosition(0.5f, spawnY, 0.5f);
         NPCService.npcs.spawn();
+        EnemyService.enms.spawn();
         camera.setPosition(0.5f, spawnY + 10.0f, 0.5f);
         areEntitiesActive = true;
     }

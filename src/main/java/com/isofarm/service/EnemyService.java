@@ -4,6 +4,7 @@ import com.isofarm.data.Singleton;
 import com.isofarm.entity.Enemy;
 import com.isofarm.entity.enemies.Goblin;
 import com.isofarm.wrld.GameMaster;
+import org.joml.Vector3f;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -38,6 +39,22 @@ public class EnemyService implements Service<Enemy> {
     public void init() {
         clear();
         add(new Goblin());
+    }
+
+    /**
+     * Places all registered enemies on the generated terrain around the player
+     * spawn point. Positions are deterministic so enemy placement is stable
+     * across repeated world spawns.
+     */
+    public void spawn() {
+        for (int index = 0; index < enemies.size(); index++) {
+            float angle = (float) (index * Math.PI * 2.0 / Math.max(1, enemies.size()));
+            float radius = 6.0f + index % 3;
+            float x = 0.5f + (float) Math.sin(angle) * radius;
+            float z = 0.5f + (float) Math.cos(angle) * radius;
+            float y = GameMaster.game.getWorld().getHighestY(x, z).y() + 1.0f;
+            enemies.get(index).setPosition(new Vector3f(x, y, z));
+        }
     }
 
     /**

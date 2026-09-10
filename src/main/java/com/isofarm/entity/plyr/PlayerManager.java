@@ -66,7 +66,7 @@ public final class PlayerManager {
         if (game == null || game.isInventoryOpen() || game.isBackpackOpen()
                 || game.isChatOpen() || BookService.bs.isOpen()) return;
         if (Controls.isPressed(ControlAction.THIRD_ACTION)) {
-            Player.plyr.focus(NPCService.npcs.getNearestToPlayer());
+            Player.plyr.focus(NPCService.npcs.getClosest());
         }
     }
 

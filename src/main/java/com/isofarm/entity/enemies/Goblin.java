@@ -32,6 +32,7 @@ public class Goblin extends Enemy {
 
     @Override
     public void render(GameMaster gameMaster, RenderPass pass) {
+        if (!isAlive() || model == null) return;
         animator.render(gameMaster, model, pass);
     }
 }
