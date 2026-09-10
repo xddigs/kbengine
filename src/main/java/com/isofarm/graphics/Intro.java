@@ -187,6 +187,7 @@ public class Intro {
         renderLoadingFrame(Local.lang.t("engine.spawning_player"));
 
         GameMaster.game.initUI();
+        GameUIService.ui.getHotbarUI().hide();
         completedTasks[0]++;
         progressBar.setValue(100.0f);
         renderLoadingFrame(Local.lang.t("engine.post_processing"));
@@ -392,6 +393,7 @@ public class Intro {
      * Processes each applicable element for loop.
      */
     private void loop() {
+        GameUIService.ui.getHotbarUI().show();
         double lastTime = glfwGetTime();
         while (!glfwWindowShouldClose(window)) {
             double currentTime = glfwGetTime();
