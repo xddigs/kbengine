@@ -50,10 +50,13 @@ public class InventoryUI extends UIElement {
     private static final int GUI_SLICE_SIZE = 3;
     private static final float QUICK_MOVE_ANIMATION_DURATION_SECONDS = 0.12f;
     private static final float ANIMATION_COMPLETE = 1.0f;
+    /** Gap between the armor column and the hotbar below the inventory panel. */
+    private static final float ARMOR_SLOT_HOTBAR_OFFSET = 12.0f;
 
     private static final Logger log = LoggerFactory.getLogger(InventoryUI.class);
 
     private final InventorySlotUI[] slotUIs;
+    private final InventorySlotUI[] armorSlotUIs;
     private final InventorySlotUI[] containerSlotUIs;
     private final InventorySlot[] creativeSlotData;
     private final Set<InventorySlot> creativeSlots;
@@ -112,6 +115,7 @@ public class InventoryUI extends UIElement {
 
         int totalVisualSlots = K.UI.INVENTORY_SLOTS;
         this.slotUIs = new InventorySlotUI[totalVisualSlots];
+        this.armorSlotUIs = new InventorySlotUI[ArmorSlot.values().length];
         this.containerSlotUIs = new InventorySlotUI[totalVisualSlots];
         this.creativeSlotData = new InventorySlot[totalVisualSlots];
         this.creativeSlots = Collections.newSetFromMap(new IdentityHashMap<>());
@@ -193,6 +197,11 @@ public class InventoryUI extends UIElement {
      */
     public InventorySlotUI[] getSlotUIs() {
         return slotUIs;
+    }
+
+    /** Returns the armor slot views in ArmorSlot ordinal order. */
+    public InventorySlotUI[] getArmorSlotUIs() {
+        return armorSlotUIs.clone();
     }
 
     /**
@@ -331,7 +340,24 @@ public class InventoryUI extends UIElement {
             slotUIs[i] = slotUI;
             addChild(slotUI);
         }
+        createArmorSlots();
         createContainerSlots();
+    }
+
+    /** Creates the vertically aligned armor equipment slots in ArmorSlot order. */
+    private void createArmorSlots() {
+        float slotSize = Settings.getScaledSlot();
+        float spacing = Settings.getScaledSpacing();
+        float x = (getWidth() - slotSize) * 0.5f;
+        float bottomY = getHeight() + ARMOR_SLOT_HOTBAR_OFFSET;
+        for (ArmorSlot armorSlot : ArmorSlot.values()) {
+            int index = armorSlot.ordinal();
+            float y = bottomY - (armorSlotUIs.length - index) * (slotSize + spacing);
+            InventorySlotUI slotUI = new InventorySlotUI(x, y, slotSize, slotSize,
+                    SlotType.ARMOR);
+            armorSlotUIs[index] = slotUI;
+            addChild(slotUI);
+        }
     }
 
     /** Creates the chest slots in a separate panel above the player inventory. */
@@ -584,6 +610,7 @@ public class InventoryUI extends UIElement {
 
         updateInventoryMode();
         if (isGodmode && isCreativeInventoryVisible) {
+            syncArmorSlots(false);
             syncCreativeInventory();
             return;
         }
@@ -600,6 +627,8 @@ public class InventoryUI extends UIElement {
 
             updateItemSprite(slotUI);
         }
+
+        syncArmorSlots(true);
 
         syncContainerInventory();
 
@@ -627,6 +656,18 @@ public class InventoryUI extends UIElement {
 
             backpackButton.setSpriteSheet(inventoryIcons);
             backpackButton.setSpriteColumn(2);
+        }
+    }
+
+    /** Synchronizes the wearable slots with the player inventory equipment data. */
+    private void syncArmorSlots(boolean visible) {
+        for (ArmorSlot armorSlot : ArmorSlot.values()) {
+            InventorySlotUI slotUI = armorSlotUIs[armorSlot.ordinal()];
+            if (slotUI == null) continue;
+            slotUI.setSlot(visible && inventory != null ? inventory.getArmorSlot(armorSlot) : null);
+            updateItemSprite(slotUI);
+            if (visible) slotUI.show();
+            else slotUI.hide();
         }
     }
 
@@ -793,6 +834,7 @@ public class InventoryUI extends UIElement {
     private boolean isSupportedCreativeItem(Item item) {
         boolean supportedCategory = item instanceof Block
                 || item instanceof Tool
+                || item instanceof Armor
                 || item instanceof Usable
                 || item instanceof Material
                 || item instanceof iBlock
@@ -814,7 +856,7 @@ public class InventoryUI extends UIElement {
             case ALL -> true;
             case FOOD -> item instanceof Food;
             case BLOCKS -> item instanceof Block || item instanceof iBlock;
-            case TOOLS -> item instanceof Tool;
+            case TOOLS -> item instanceof Tool || item instanceof Armor;
             case MATERIALS -> item instanceof Material;
             case PRODUCE -> item instanceof Produce;
             case SEEDS -> item instanceof Seed;
@@ -892,6 +934,12 @@ public class InventoryUI extends UIElement {
             }
         }
 
+        for (InventorySlotUI slotUI : armorSlotUIs) {
+            if (slotUI != null && slotUI.isVisible()) {
+                slotUI.setHovered(slotUI.contains(mouseX, mouseY));
+            }
+        }
+
         InventorySlotUI shieldSlotUI = hotbarUI == null ? null : hotbarUI.getShieldSlotUI();
         if (shieldSlotUI != null && shieldSlotUI.isVisible()) {
             shieldSlotUI.setHovered(shieldSlotUI.contains(mouseX, mouseY));
@@ -935,15 +983,17 @@ public class InventoryUI extends UIElement {
         int containerSlotCount = externalInventory == null ? 0 : containerSlotUIs.length;
         InventorySlotUI shieldSlotUI = hotbarUI.getShieldSlotUI();
         int shieldSlotCount = shieldSlotUI != null && shieldSlotUI.isVisible() ? 1 : 0;
-        InventorySlotUI[] allSlots = new InventorySlotUI[slotUIs.length
+        InventorySlotUI[] allSlots = new InventorySlotUI[slotUIs.length + armorSlotUIs.length
                 + containerSlotCount + hotbarSlots.length + backpackSlots.length
                 + shieldSlotCount];
         System.arraycopy(slotUIs, 0, allSlots, 0, slotUIs.length);
+        System.arraycopy(armorSlotUIs, 0, allSlots, slotUIs.length, armorSlotUIs.length);
+        int armorOffset = slotUIs.length + armorSlotUIs.length;
         if (containerSlotCount > 0) {
             System.arraycopy(containerSlotUIs, 0, allSlots,
-                    slotUIs.length, containerSlotCount);
+                    armorOffset, containerSlotCount);
         }
-        int hotbarOffset = slotUIs.length + containerSlotCount;
+        int hotbarOffset = armorOffset + containerSlotCount;
         System.arraycopy(hotbarSlots, 0, allSlots, hotbarOffset, hotbarSlots.length);
         if (backpackSlots.length > 0) {
             System.arraycopy(backpackSlots, 0, allSlots,
@@ -1150,6 +1200,11 @@ public class InventoryUI extends UIElement {
             return;
         }
 
+        if (isArmorSlot(slot)) {
+            handleArmorSlotClick(slot);
+            return;
+        }
+
         if (carriedItem == null) {
             pickEntireStack(slot);
             return;
@@ -1252,6 +1307,11 @@ public class InventoryUI extends UIElement {
             return;
         }
 
+        if (isArmorSlot(slot)) {
+            handleArmorSlotClick(slot);
+            return;
+        }
+
         if (carriedItem == null && player != null
                 && ownsSlot(player.getBackpack(), slot)
                 && (slot.getItem() instanceof CraftingBook
@@ -1293,6 +1353,37 @@ public class InventoryUI extends UIElement {
 
     private boolean isShieldSlot(InventorySlot slot) {
         return inventory != null && slot == inventory.getShieldSlot();
+    }
+
+    /** Moves only the matching armor category into its dedicated single-item slot. */
+    private void handleArmorSlotClick(InventorySlot slot) {
+        if (carriedItem == null) {
+            pickEntireStack(slot);
+            return;
+        }
+
+        ArmorSlot armorSlot = getArmorSlotType(slot);
+        if (!(carriedItem instanceof Armor armor) || armorSlot == null
+                || armor.getType() != armorSlot.getEquippable() || !slot.isEmpty()) {
+            return;
+        }
+
+        slot.setItem(carriedItem);
+        slot.setAmount(1);
+        carriedAmount--;
+        if (carriedAmount <= 0) clearCarriedItem();
+    }
+
+    private boolean isArmorSlot(InventorySlot slot) {
+        return getArmorSlotType(slot) != null;
+    }
+
+    private ArmorSlot getArmorSlotType(InventorySlot slot) {
+        if (inventory == null || slot == null) return null;
+        for (ArmorSlot armorSlot : ArmorSlot.values()) {
+            if (inventory.getArmorSlot(armorSlot) == slot) return armorSlot;
+        }
+        return null;
     }
 
     /**
@@ -1378,7 +1469,8 @@ public class InventoryUI extends UIElement {
     /** Returns whether a slot belongs to either of the player's visible inventories. */
     private boolean isPlayerInventorySlot(InventorySlot slot) {
         if (player == null || slot == null) return false;
-        return ownsSlot(player.getInventory(), slot) || ownsSlot(player.getBackpack(), slot);
+        return ownsSlot(player.getInventory(), slot) || ownsSlot(player.getBackpack(), slot)
+                || getArmorSlotType(slot) != null;
     }
 
     /** Buys a complete or partial stack from a trader into the player's inventory. */
