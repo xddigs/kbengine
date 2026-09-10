@@ -9,6 +9,7 @@ import com.isofarm.input.ControlAction;
 import com.isofarm.input.Controls;
 import com.isofarm.input.Mouse;
 import com.isofarm.item.Book;
+import com.isofarm.utils.ItemIds;
 import com.isofarm.item.CraftingBook;
 import com.isofarm.item.Item;
 import com.isofarm.item.Page;
@@ -332,7 +333,8 @@ public class BookUI extends UIElement {
                 hoveredBookLine = bookLine;
                 float mouseX = Mouse.getX() + MOUSE_OFFSET + MOUSE_OFFSET / 2;
                 float mouseY = Mouse.getY() - MOUSE_OFFSET / 2;
-                GameUIService.ui.getUIManager().showTooltip(bookLine.getTooltipText(),
+                GameUIService.ui.getUIManager().showTooltip(
+                        ItemIds.appendToTooltip(bookLine.getTooltipText(), bookLine.getItem()),
                         mouseX, mouseY);
                 break;
             }
@@ -366,7 +368,8 @@ public class BookUI extends UIElement {
                 float mouseX = Mouse.getX() + MOUSE_OFFSET + MOUSE_OFFSET / 2;
                 float mouseY = Mouse.getY() - MOUSE_OFFSET / 2;
                 GameUIService.ui.getUIManager().showTooltip(
-                        bookLine.getTooltipText(), mouseX, mouseY);
+                        ItemIds.appendToTooltip(bookLine.getTooltipText(), bookLine.getItem()),
+                        mouseX, mouseY);
                 return;
             }
         }

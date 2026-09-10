@@ -2,6 +2,7 @@ package com.isofarm.ui;
 
 import com.isofarm.input.Keyboard;
 import com.isofarm.input.Mouse;
+import com.isofarm.utils.ItemIds;
 
 /**
  * Encapsulates the state and operations required by uimanager within the game runtime.
@@ -41,7 +42,10 @@ public class UIManager {
                 && !hovered.getTooltipText().isBlank()) {
             String cornerText = hovered instanceof InventorySlotUI slot
                     ? slot.getTooltipCornerText() : null;
-            tooltip.cornerText(cornerText).text(hovered.getTooltipText());
+            String tooltipText = hovered instanceof InventorySlotUI slot
+                    ? ItemIds.appendToTooltip(hovered.getTooltipText(), slot.getItem())
+                    : hovered.getTooltipText();
+            tooltip.cornerText(cornerText).text(tooltipText);
             float cursorX = Mouse.getX() + MOUSE_OFFSET + MOUSE_OFFSET / 2;
             float cursorY = Mouse.getY() - MOUSE_OFFSET / 2;
             tooltip.updatePosition(
