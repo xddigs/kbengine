@@ -33,6 +33,7 @@ public class HotbarUI extends UIElement {
     private SpriteSheet blockIcons;
     private SpriteSheet toolIcons;
     private SpriteSheet materialIcons;
+    private SpriteSheet armorIcons;
     private SpriteSheet inventoryIcons;
 
     private int selectedSlot = 0;
@@ -558,6 +559,23 @@ public class HotbarUI extends UIElement {
      */
     public void setMaterialIcons(SpriteSheet materialIcons) {
         this.materialIcons = materialIcons;
+    }
+
+    /**
+     * Returns the {@code armorIcons} value
+     * @return {@link SpriteSheet} value of armorIcons
+     */
+    public SpriteSheet getArmorIcons() {
+        return armorIcons;
+    }
+
+    /**
+     * Sets the armorIcons value
+     * @return {@link SpriteSheet} value of armorIcons
+     */
+    public HotbarUI setArmorIcons(SpriteSheet armorIcons) {
+        this.armorIcons = armorIcons;
+        return this;
     }
 
     /**

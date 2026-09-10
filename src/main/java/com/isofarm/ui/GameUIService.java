@@ -106,7 +106,8 @@ public final class GameUIService implements Service<GameMaster> {
             SpriteSheet blockIcons,
             SpriteSheet toolIcons,
             SpriteSheet materialIcons,
-            SpriteSheet inventoryIcons, SpriteSheet armorIcons) {
+            SpriteSheet armorIcons,
+            SpriteSheet inventoryIcons) {
         this.gameMaster = gameMaster;
         this.uiManager = uiManager;
 
@@ -115,10 +116,10 @@ public final class GameUIService implements Service<GameMaster> {
         this.blockIcons = blockIcons;
         this.toolIcons = toolIcons;
         this.materialIcons = materialIcons;
+        this.armorIcons = armorIcons;
 
         this.windowWidth = gameMaster.getWindowWidth();
         this.windowHeight = gameMaster.getWindowHeight();
-        this.armorIcons = armorIcons;
 
         this.chatHistory = new ArrayList<>();
         this.inventoryUI = new InventoryUI(windowWidth, windowHeight);
@@ -152,7 +153,7 @@ public final class GameUIService implements Service<GameMaster> {
         backpackUI.setHotbarUI(hotbarUI);
         inventoryUI.setBackpackUI(backpackUI);
         inventoryUI.setIcons(seedIcons, cropIcons, blockIcons,
-                toolIcons, materialIcons, inventoryIcons);
+                toolIcons, materialIcons, armorIcons, inventoryIcons);
 
         uiManager.getRoot().addChild(inventoryUI);
         uiManager.getRoot().addChild(hotbarUI);

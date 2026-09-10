@@ -50,7 +50,6 @@ public class InventoryUI extends UIElement {
     private static final int GUI_SLICE_SIZE = 3;
     private static final float QUICK_MOVE_ANIMATION_DURATION_SECONDS = 0.12f;
     private static final float ANIMATION_COMPLETE = 1.0f;
-    /** Gap between the armor column and the hotbar below the inventory panel. */
     private static final float ARMOR_SLOT_HOTBAR_OFFSET = 12.0f;
 
     private static final Logger log = LoggerFactory.getLogger(InventoryUI.class);
@@ -66,12 +65,12 @@ public class InventoryUI extends UIElement {
     private final List<UIButton> buttons;
     private final UIScrollBar creativeScrollBar;
     private final Player player = Player.plyr;
+    private final Map<CreativeFilter, UIButton> creativeFilterButtons =
+            new EnumMap<>(CreativeFilter.class);
     private UIButton sortButton;
     private UIButton groupButton;
     private UIButton backpackButton;
     private UIButton inventoryModeButton;
-    private final Map<CreativeFilter, UIButton> creativeFilterButtons =
-            new EnumMap<>(CreativeFilter.class);
     private Inventory inventory;
     private iBlock containerBlock;
     private Inventory externalInventory;
@@ -80,6 +79,7 @@ public class InventoryUI extends UIElement {
     private SpriteSheet blockIcons;
     private SpriteSheet toolIcons;
     private SpriteSheet materialIcons;
+    private SpriteSheet armorIcons;
     private SpriteSheet inventoryIcons;
     private Item carriedItem;
     private HotbarUI hotbarUI;
@@ -1817,12 +1817,14 @@ public class InventoryUI extends UIElement {
      */
     public void setIcons(SpriteSheet seed, SpriteSheet crop,
                          SpriteSheet block, SpriteSheet tool,
-                         SpriteSheet material, SpriteSheet inv) {
+                         SpriteSheet material, SpriteSheet armor,
+                         SpriteSheet inv) {
         this.seedIcons = seed;
         this.cropIcons = crop;
         this.blockIcons = block;
         this.toolIcons = tool;
         this.materialIcons = material;
+        this.armorIcons = armor;
         this.inventoryIcons = inv;
 
         if (hotbarUI != null) {
@@ -1831,6 +1833,7 @@ public class InventoryUI extends UIElement {
             hotbarUI.setBlockIcons(blockIcons);
             hotbarUI.setToolIcons(toolIcons);
             hotbarUI.setMaterialIcons(materialIcons);
+            hotbarUI.setArmorIcons(armorIcons);
             hotbarUI.setInventoryIcons(inventoryIcons);
         }
     }
