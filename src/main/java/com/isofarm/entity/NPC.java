@@ -4,9 +4,20 @@ import com.isofarm.data.*;
 import com.isofarm.graphics.gltf.GLTFLoader;
 import com.isofarm.graphics.gltf.GLTFModel;
 import com.isofarm.item.Item;
+import com.isofarm.item.Armor;
+import com.isofarm.item.Axe;
 import com.isofarm.item.Backpack;
+import com.isofarm.item.Boots;
+import com.isofarm.item.Chestplate;
+import com.isofarm.item.Helmet;
+import com.isofarm.item.Hoe;
 import com.isofarm.item.Material;
 import com.isofarm.item.MiningComponent;
+import com.isofarm.item.Pickaxe;
+import com.isofarm.item.Shield;
+import com.isofarm.item.Shovel;
+import com.isofarm.item.Sword;
+import com.isofarm.item.Tool;
 import com.isofarm.item.Wallet;
 import com.isofarm.service.SoundService;
 import com.isofarm.service.TimeService;
@@ -351,7 +362,60 @@ public class NPC extends Character {
             }
         });
 
+        ToolType.forEach(toolType -> {
+            if (random.nextBoolean()) {
+                add(createTool(toolType, randomToolTier(random)), 1);
+            }
+        });
+
+        ArmorData.forEach(armorData -> {
+            if (random.nextBoolean()) {
+                add(createArmor(armorData, randomArmorTier(random)), 1);
+            }
+        });
+
         add(new Material(MaterialID.CHARCOAL), random.nextInt(16, 65));
+    }
+
+    /** Selects one tier that is registered for tradeable weapons and tools. */
+    private static Tier randomToolTier(ThreadLocalRandom random) {
+        Tier[] tiers = Tier.values();
+        Tier tier;
+        do {
+            tier = tiers[random.nextInt(tiers.length)];
+        } while (tier == Tier.NONE || tier == Tier.LEATHER);
+        return tier;
+    }
+
+    /** Selects one tier that is registered for tradeable armor. */
+    private static Tier randomArmorTier(ThreadLocalRandom random) {
+        Tier[] tiers = Tier.values();
+        Tier tier;
+        do {
+            tier = tiers[random.nextInt(tiers.length)];
+        } while (tier == Tier.NONE || tier == Tier.WOODEN);
+        return tier;
+    }
+
+    /** Creates the concrete stock item for a tool or weapon type. */
+    private static Tool createTool(ToolType type, Tier tier) {
+        return switch (type) {
+            case SWORD -> new Sword(tier);
+            case PICKAXE -> new Pickaxe(tier);
+            case AXE -> new Axe(tier);
+            case HOE -> new Hoe(tier);
+            case SHOVEL -> new Shovel(tier);
+            case SHIELD -> new Shield(tier);
+        };
+    }
+
+    /** Creates the concrete stock item for an armor slot type. */
+    private static Armor createArmor(ArmorData type, Tier tier) {
+        return switch (type) {
+            case HELMET -> new Helmet(tier);
+            case CHESTPLATE -> new Chestplate(tier);
+            case BOOTS -> new Boots(tier);
+        };
     }
 
     /** Resets the trader's stock on the configured schedule. */

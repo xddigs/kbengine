@@ -3,6 +3,7 @@ package com.isofarm.data;
 import com.isofarm.item.Item;
 
 import java.util.Locale;
+import java.util.function.Consumer;
 
 /**
  * Enumerates the supported tool type values.
@@ -157,5 +158,11 @@ public enum ToolType implements Item {
      */
     public float getDestroySpeed() {
         return destroySpeed;
+    }
+
+    public static void forEach(Consumer<ToolType> consumer) {
+        for (ToolType toolType : ToolType.values()) {
+            consumer.accept(toolType);
+        }
     }
 }
