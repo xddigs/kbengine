@@ -1,7 +1,9 @@
 package com.isofarm.item;
 
 import com.isofarm.data.ArmorData;
+import com.isofarm.data.ArmorSlot;
 import com.isofarm.data.Tier;
+import com.isofarm.entity.Player;
 
 /**
  * Defines the armor contract, whether an item is armor, it's equippable and
@@ -34,19 +36,22 @@ public abstract class Armor implements
     /** {@inheritDoc} */
     @Override
     public boolean equip() {
-        return false;
+        return Player.plyr != null && Player.plyr.getInventory().equipArmor(this);
     }
 
     /** {@inheritDoc} */
     @Override
     public boolean unequip() {
-        return false;
+        return Player.plyr != null && Player.plyr.getInventory()
+                .unequipArmor(ArmorSlot.values()[type.getId()]);
     }
 
     /** {@inheritDoc} */
     @Override
     public boolean isEquipped() {
-        return false;
+        if (Player.plyr == null) return false;
+        ArmorSlot slot = ArmorSlot.values()[type.getId()];
+        return Player.plyr.getInventory().getArmorSlot(slot).getItem() == this;
     }
 
     /** {@inheritDoc} */
@@ -101,5 +106,13 @@ public abstract class Armor implements
      */
     public ArmorData getType() {
         return type;
+    }
+
+    /**
+     * Stable location reserved for this piece's future wearable model. The
+     * model is intentionally not loaded until armor visuals are implemented.
+     */
+    public String getModelPath() {
+        return "assets/models/armor/" + tier.getName() + "_" + type.getName() + ".gltf";
     }
 }

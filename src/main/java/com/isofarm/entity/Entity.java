@@ -20,7 +20,6 @@ public abstract class Entity {
     private static final float VOID_DEATH_Y = -16.0f;
     private static final float KNOCKBACK_STRENGTH = 8.0f;
     private static final float UPWARD_FORCE = 4.0f;
-    private static final int AVAILABLE_ARMOR_SLOTS = 3;
 
     private final byte id;
     protected Vector3f position;
@@ -31,7 +30,6 @@ public abstract class Entity {
     protected float maxHitpoints;
     protected float defense;
     protected float maxDefense;
-    protected ArmorSlot[] armorSlots;
 
     private String name;
     private float standingHeight;
@@ -51,11 +49,6 @@ public abstract class Entity {
     public Entity(String name) {
         this.id = (byte) (Math.floor((Math.random() * Math.random()) * 100));
         this.name = name;
-        this.armorSlots = new ArmorSlot[AVAILABLE_ARMOR_SLOTS];
-        if (this.armorSlots.length > AVAILABLE_ARMOR_SLOTS) {
-            throw new IllegalArgumentException("Too many armor slots");
-        }
-
         this.position = new Vector3f();
         this.velocity = new Vector3f();
         this.dimensions = new Vector3f();

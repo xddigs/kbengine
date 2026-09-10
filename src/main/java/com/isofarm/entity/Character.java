@@ -140,7 +140,8 @@ public abstract class Character extends Entity implements Levelable {
     public void damage(float amount, Cause cause) {
         if (!isAlive() || amount <= 0) return;
         if (gamemode.isGodmode() || gamemode.isNoClip()) return;
-        super.damage(amount, cause);
+        float mitigation = Math.min(0.75f, getDefense() * 0.03f);
+        super.damage(amount * (1.0f - mitigation), cause);
     }
 
     /** {@inheritDoc} */
@@ -156,13 +157,13 @@ public abstract class Character extends Entity implements Levelable {
     /** {@inheritDoc} */
     @Override
     public float getDefense() {
-        return defense * level;
+        return defense + (inventory == null ? 0.0f : inventory.getArmorDefense());
     }
 
     /** {@inheritDoc} */
     @Override
     public float getMaxDefense() {
-        return maxDefense * level;
+        return maxDefense + (inventory == null ? 0.0f : inventory.getArmorDefense());
     }
 
     /** {@inheritDoc} */
@@ -173,32 +174,9 @@ public abstract class Character extends Entity implements Levelable {
         return this;
     }
 
-    /**
-     * Returns the specific armor slot by id
-     * @param id the {@code byte} argument; the armor slot id
-     * @return the {@link ArmorSlot} representing the armor slot
-     */
-    public ArmorSlot getArmorSlot(byte id) {
-        for (int i = 0; i < armorSlots.length; i++) {
-            if (armorSlots[i].getId() == id) return armorSlots[i];
-        }
-        return null;
-    }
-
-    /**
-     * Sets the specific armor slot by id
-     * @param id the {@code byte} argument; the armor slot id
-     * @param slot the {@link ArmorSlot} argument; the armor slot to set
-     */
-    public void setArmorSlot(byte id, ArmorSlot slot) {
-        for (int i = 0; i < armorSlots.length; i++) {
-            if (armorSlots[i].getId() == id) {
-                if (armorSlots[i] == null) {
-                    armorSlots[i] = slot;
-                }
-                return;
-            }
-        }
+    /** Returns the inventory slot reserved for one armor category. */
+    public InventorySlot getArmorSlot(ArmorSlot slot) {
+        return inventory == null ? null : inventory.getArmorSlot(slot);
     }
 
     /**
