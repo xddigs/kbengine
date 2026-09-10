@@ -1,6 +1,7 @@
 package com.isofarm.entity;
 
 import com.isofarm.data.Direction;
+import com.isofarm.data.ArmorFinish;
 import com.isofarm.data.ArmorSlot;
 import com.isofarm.data.Ray;
 import com.isofarm.data.RenderPass;
@@ -263,21 +264,21 @@ public final class CharacterAnimator {
         copyTransform(leftLeg, armorLeftLeg);
 
         armorHead.setVisible(hasArmor(player, ArmorSlot.HEAD));
-        tintArmor(armorHead, equippedArmor(player, ArmorSlot.HEAD));
+        applyArmorMaterial(armorHead, equippedArmor(player, ArmorSlot.HEAD));
         boolean chestEquipped = hasArmor(player, ArmorSlot.CHEST);
         armorChestplate.setVisible(chestEquipped);
         armorRightArm.setVisible(chestEquipped);
         armorLeftArm.setVisible(chestEquipped);
         Armor chestplate = equippedArmor(player, ArmorSlot.CHEST);
-        tintArmor(armorChestplate, chestplate);
-        tintArmor(armorRightArm, chestplate);
-        tintArmor(armorLeftArm, chestplate);
+        applyArmorMaterial(armorChestplate, chestplate);
+        applyArmorMaterial(armorRightArm, chestplate);
+        applyArmorMaterial(armorLeftArm, chestplate);
         boolean bootsEquipped = hasArmor(player, ArmorSlot.FEET);
         armorRightLeg.setVisible(bootsEquipped);
         armorLeftLeg.setVisible(bootsEquipped);
         Armor boots = equippedArmor(player, ArmorSlot.FEET);
-        tintArmor(armorRightLeg, boots);
-        tintArmor(armorLeftLeg, boots);
+        applyArmorMaterial(armorRightLeg, boots);
+        applyArmorMaterial(armorLeftLeg, boots);
         armorModel.updateTransforms();
     }
 
@@ -297,16 +298,20 @@ public final class CharacterAnimator {
                 && player.getArmorSlot(slot).getItem() instanceof Armor armor ? armor : null;
     }
 
-    private static void tintArmor(GLTFNode node, Armor armor) {
+    private static void applyArmorMaterial(GLTFNode node, Armor armor) {
         if (node == null || armor == null) return;
         SpriteSheet icons = ResourceManager.rem.getArmorIcons();
         Vector3f tint = icons.getFrameColor(ResourceManager.getItemFrame(armor));
-        tintArmorNodes(node, tint);
+        applyArmorMaterialNodes(node, tint, ArmorFinish.forTier(armor.getTier()));
     }
 
-    private static void tintArmorNodes(GLTFNode node, Vector3f tint) {
+    private static void applyArmorMaterialNodes(GLTFNode node, Vector3f tint,
+                                                ArmorFinish finish) {
         node.setColorTint(tint);
-        for (GLTFNode child : node.getChildren()) tintArmorNodes(child, tint);
+        node.setArmorFinish(finish);
+        for (GLTFNode child : node.getChildren()) {
+            applyArmorMaterialNodes(child, tint, finish);
+        }
     }
 
     /**
@@ -546,6 +551,7 @@ public final class CharacterAnimator {
         model.render(shader, modelMatrix);
         if (armorModel != null) armorModel.render(shader, modelMatrix);
         shader.setUniform("uUseColorTint", false);
+        shader.setUniform("uArmorFinish", ArmorFinish.NONE.getShaderValue());
         glDepthFunc(GL_LESS);
         glDepthMask(true);
         glBindTexture(GL_TEXTURE_2D, 0);

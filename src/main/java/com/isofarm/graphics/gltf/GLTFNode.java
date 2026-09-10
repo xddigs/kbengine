@@ -1,5 +1,6 @@
 package com.isofarm.graphics.gltf;
 
+import com.isofarm.data.ArmorFinish;
 import com.isofarm.graphics.Shader;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
@@ -31,6 +32,7 @@ public class GLTFNode {
     private int textureOverride = 0;
     private Vector4f uvOverride = null;
     private Vector3f colorTint = null;
+    private ArmorFinish armorFinish = ArmorFinish.NONE;
 
     /**
      * Creates a new {@code GLTFNode} instance.
@@ -90,6 +92,7 @@ public class GLTFNode {
         }
 
         if (meshIndex >= 0) {
+            shader.setUniform("uArmorFinish", armorFinish.getShaderValue());
             if (textureOverride != 0 && uvOverride != null && colorTint != null) {
                 model.renderMesh(meshIndex, worldMatrix, shader, textureOverride, uvOverride, colorTint);
             } else if (textureOverride != 0 && uvOverride != null) {
@@ -286,5 +289,10 @@ public class GLTFNode {
     /** Clears this node's material tint. */
     public void clearColorTint() {
         colorTint = null;
+    }
+
+    /** Sets the material finish used by this node during armor rendering. */
+    public void setArmorFinish(ArmorFinish value) {
+        armorFinish = value == null ? ArmorFinish.NONE : value;
     }
 }

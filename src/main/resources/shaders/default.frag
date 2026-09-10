@@ -17,6 +17,7 @@ uniform vec3 uBaseColor;
 uniform bool uUseFaceAtlas;
 uniform bool uUseColorTint;
 uniform vec3 uColorTint;
+uniform int uArmorFinish;
 
 uniform vec3 uSkyColor;
 uniform vec3 uSunColor;
@@ -223,6 +224,20 @@ void main() {
 
     vec3 totalLight = ambient + directLight + torchLight;
     if (uIsTorch) totalLight = max(totalLight, vec3(1.0, 0.62, 0.24));
+    if (uArmorFinish != 0) {
+        vec3 viewDirection = normalize(uViewCameraPosition - vFragPos);
+        vec3 halfDirection = normalize(lightDir + viewDirection);
+        float reflection = max(dot(normal, halfDirection), 0.0);
+        if (uArmorFinish == 1) {
+            totalLight += uSunColor * pow(reflection, 8.0) * 0.08;
+        } else if (uArmorFinish == 2) {
+            float pearlescence = pow(1.0 - max(dot(normal, viewDirection), 0.0), 3.0);
+            totalLight += mix(vec3(0.72, 0.46, 1.0), vec3(0.30, 0.90, 1.0),
+                    normal.y * 0.5 + 0.5) * pearlescence * 0.28;
+        } else if (uArmorFinish == 3) {
+            totalLight += uSunColor * pow(reflection, 48.0) * 0.75;
+        }
+    }
     float alpha = texColor.a * uParticleAlpha;
     vec3 tint = uUseColorTint ? uColorTint : vec3(1.0);
     vec3 finalColor = texColor.rgb * tint * totalLight * viewFog;
