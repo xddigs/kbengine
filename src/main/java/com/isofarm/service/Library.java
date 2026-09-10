@@ -165,6 +165,17 @@ public class Library implements Service<GameMaster> {
             ToastFactory.success(Local.lang.f("toast.item_added", amount, item.getDisplayName()));
         }));
 
+        cr.register(new Command("clear", new CommandArgument[]{}, args -> {
+            if (player == null) {
+                log.warn("Cannot execute command: player does not exist.");
+                return;
+            }
+
+            player.clear();
+            log.info("Command clear executed");
+            ToastFactory.success(Local.lang.t("toast.inventory_cleared"));
+        }));
+
         cr.register(new Command("/rain", new CommandArgument[]{literal("action", "start", "stop")}, args -> {
             if (player == null) {
                 log.warn("Cannot execute command: player does not exist.");

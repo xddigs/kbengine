@@ -325,7 +325,7 @@ public final class PlayerGameplay {
     /**
      * Clears non-backpack inventory items.
      */
-    public void clear() { for (Item item :List.copyOf(player.getInventory().getItems().keySet())) if (item != null && !(item instanceof CraftingBook)) remove(item); log.info("Cleared inventory"); }
+    public void clear() { for (Item item :List.copyOf(player.getInventory().getItems().keySet())) if (item != null && !(item instanceof Backpack)) remove(item); log.info("Cleared inventory"); }
     /**
      * Determines whether this object contains no elements or active content.
      * @return {@code true} if inventory is empty; otherwise {@code false}
