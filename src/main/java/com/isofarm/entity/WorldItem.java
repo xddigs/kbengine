@@ -18,7 +18,7 @@ public class WorldItem extends Entity {
     private static final float GRAVITY = -20.0f;
     private static final float GROUND_OFFSET = 0.02f;
     private static final float ITEM_HEIGHT = 0.45f;
-    private static final float PICKUP_DELAY = 0.2f;
+    private static final float PICKUP_DELAY = 0.08f;
     private static final float AIR_DRAG = 2.5f;
     private static final float GROUND_FRICTION = 8.0f;
     private static final float BOUNCE_FACTOR = 0.20f;
@@ -70,6 +70,9 @@ public class WorldItem extends Entity {
             pickupTimer -= delta;
         }
         rotation = (rotation + ROTATION_SPEED * delta) % 360.0f;
+        // Attraction owns the position until the item is absorbed. Letting the
+        // ground/bob physics run here resets its vertical progress every frame.
+        if (isAttracting) return;
         if (!isOnGround()) {
             velocity.y += GRAVITY * delta;
             float airDamping = Math.max(0.0f, 1.0f - AIR_DRAG * delta);
@@ -186,22 +189,6 @@ public class WorldItem extends Entity {
      */
     public void setRotation(float rotation) {
         this.rotation = rotation;
-    }
-
-    /**
-     * Returns the bob time.
-     * @return {@code float}; the bob time
-     */
-    public float getBobTime() {
-        return bobTime;
-    }
-
-    /**
-     * Sets the bob time.
-     * @param bobTime the {@code float} supplied as {@code bobTime}
-     */
-    public void setBobTime(float bobTime) {
-        this.bobTime = bobTime;
     }
 
     /**
