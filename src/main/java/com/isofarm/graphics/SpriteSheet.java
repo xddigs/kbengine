@@ -206,6 +206,7 @@ public class SpriteSheet {
                 : new Vector3f(red / (255.0f * weight), green / (255.0f * weight),
                         blue / (255.0f * weight));
         increaseSaturation(color, 1.65f);
+        increaseBrightness(color, 1.40f);
         frameColors.put(frameIndex, color);
         return new Vector3f(color);
     }
@@ -216,6 +217,13 @@ public class SpriteSheet {
         color.x = Math.clamp(brightness + (color.x - brightness) * factor, 0.0f, 1.0f);
         color.y = Math.clamp(brightness + (color.y - brightness) * factor, 0.0f, 1.0f);
         color.z = Math.clamp(brightness + (color.z - brightness) * factor, 0.0f, 1.0f);
+    }
+
+    /** Compensates for the dark base material used by the shared 3D armor mesh. */
+    private static void increaseBrightness(Vector3f color, float factor) {
+        color.x = Math.min(color.x * factor, 1.0f);
+        color.y = Math.min(color.y * factor, 1.0f);
+        color.z = Math.min(color.z * factor, 1.0f);
     }
 
     private static float luminance(int pixel) {
