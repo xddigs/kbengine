@@ -26,6 +26,7 @@ public class Inventory {
     private final boolean hasHotbar;
     private final InventorySlot backpackSlot;
     private final InventorySlot shieldSlot;
+    private final InventorySlot[] armorSlots;
     private final Character owner;
 
     /**
@@ -52,6 +53,10 @@ public class Inventory {
         this.hasHotbar = includeHotbar;
         this.backpackSlot = new InventorySlot();
         this.shieldSlot = new InventorySlot();
+        this.armorSlots = new InventorySlot[ArmorSlot.values().length];
+        for (int i = 0; i < armorSlots.length; i++) {
+            armorSlots[i] = new InventorySlot();
+        }
 
         int capacity = includeHotbar
                 ? K.UI.PLAYER_INVENTORY_SLOTS
@@ -117,6 +122,54 @@ public class Inventory {
     /** Returns the currently equipped shield, if any. */
     public Shield getShield() {
         return shieldSlot.getItem() instanceof Shield shield ? shield : null;
+    }
+
+    /** Returns the equipment slot reserved for the requested armor piece. */
+    public InventorySlot getArmorSlot(ArmorSlot slot) {
+        return slot == null ? null : armorSlots[slot.ordinal()];
+    }
+
+    /** Returns the three dedicated armor equipment slots in ArmorSlot order. */
+    public InventorySlot[] getArmorSlots() {
+        return armorSlots.clone();
+    }
+
+    /** Returns the total defense granted by currently equipped armor. */
+    public float getArmorDefense() {
+        float total = 0.0f;
+        for (InventorySlot slot : armorSlots) {
+            if (slot.getItem() instanceof Armor armor) total += armor.getDefense();
+        }
+        return total;
+    }
+
+    /** Equips an armor item from normal storage into its matching dedicated slot. */
+    public boolean equipArmor(Armor armor) {
+        if (armor == null) return false;
+        ArmorSlot armorSlot = ArmorSlot.values()[armor.getType().getId()];
+        InventorySlot destination = getArmorSlot(armorSlot);
+        if (destination == null || !destination.isEmpty()) return false;
+
+        InventorySlot source = slots.stream()
+                .filter(slot -> slot.getItem() == armor && slot.getAmount() > 0)
+                .findFirst().orElse(null);
+        if (source == null) return false;
+
+        source.setAmount(source.getAmount() - 1);
+        destination.setItem(armor);
+        destination.setAmount(1);
+        SoundService.fx.playUseSound(SoundGroup.ITEMS);
+        return true;
+    }
+
+    /** Returns an equipped armor item to normal storage if there is room. */
+    public boolean unequipArmor(ArmorSlot armorSlot) {
+        InventorySlot source = getArmorSlot(armorSlot);
+        if (source == null || !(source.getItem() instanceof Armor armor)) return false;
+        if (add(armor, 1) > 0) return false;
+        source.clear();
+        SoundService.fx.playUseSound(SoundGroup.ITEMS);
+        return true;
     }
 
     /** Equips the exact shield instance from this inventory. */
@@ -747,6 +800,7 @@ public class Inventory {
 
         return switch (item) {
             case Tool ignored -> 1;
+            case Armor ignored -> 1;
             case Usable usable -> switch (usable) {
                 case Bucket bucket -> bucket.isFull() ? 1 : 16;
                 default -> 1;
@@ -772,6 +826,8 @@ public class Inventory {
         }
 
         return switch (a) {
+            case Armor armorA when b instanceof Armor armorB -> armorA.getType() == armorB.getType()
+                    && armorA.getTier() == armorB.getTier();
             case Seed s1 when b instanceof Seed s2 -> s1.getType() == s2.getType();
             case Crop c1 when b instanceof Crop c2 -> c1.getCropType() == c2.getCropType();
             case Block b1 when b instanceof Block b2 -> b1.getType() == b2.getType();
