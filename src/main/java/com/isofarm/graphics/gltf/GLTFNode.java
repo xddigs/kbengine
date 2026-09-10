@@ -30,6 +30,7 @@ public class GLTFNode {
 
     private int textureOverride = 0;
     private Vector4f uvOverride = null;
+    private Vector3f colorTint = null;
 
     /**
      * Creates a new {@code GLTFNode} instance.
@@ -89,8 +90,12 @@ public class GLTFNode {
         }
 
         if (meshIndex >= 0) {
-            if (textureOverride != 0 && uvOverride != null) {
+            if (textureOverride != 0 && uvOverride != null && colorTint != null) {
+                model.renderMesh(meshIndex, worldMatrix, shader, textureOverride, uvOverride, colorTint);
+            } else if (textureOverride != 0 && uvOverride != null) {
                 model.renderMesh(meshIndex, worldMatrix, shader, textureOverride, uvOverride);
+            } else if (colorTint != null) {
+                model.renderMesh(meshIndex, worldMatrix, shader, colorTint);
             } else {
                 model.renderMesh(meshIndex, worldMatrix, shader);
             }
@@ -271,5 +276,15 @@ public class GLTFNode {
      */
     public Vector4f getUvOverride() {
         return uvOverride;
+    }
+
+    /** Sets the multiplicative material tint used while rendering this node. */
+    public void setColorTint(Vector3f value) {
+        colorTint = value == null ? null : new Vector3f(value);
+    }
+
+    /** Clears this node's material tint. */
+    public void clearColorTint() {
+        colorTint = null;
     }
 }

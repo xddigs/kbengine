@@ -2,6 +2,7 @@ package com.isofarm.graphics.gltf;
 
 import com.isofarm.graphics.Shader;
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 import org.joml.Vector4f;
 
 import java.util.ArrayList;
@@ -83,6 +84,16 @@ public class GLTFModel {
         meshes.get(meshIndex).render(shader);
     }
 
+    /** Renders one mesh with a multiplicative material tint. */
+    public void renderMesh(int meshIndex, Matrix4f worldMatrix, Shader shader,
+                           Vector3f colorTint) {
+        if (meshIndex < 0 || meshIndex >= meshes.size()) return;
+        shader.setUniform("uModel", worldMatrix);
+        GLTFMesh mesh = meshes.get(meshIndex);
+        mesh.render(shader, mesh.getTextureId(),
+                new Vector4f(0.0f, 0.0f, 1.0f, 1.0f), colorTint);
+    }
+
     /**
      * Renders the mesh.
      * @param meshIndex the {@code int} supplied as {@code meshIndex}
@@ -99,6 +110,14 @@ public class GLTFModel {
         shader.setUniform("uModel", worldMatrix);
 
         meshes.get(meshIndex).render(shader, textureId, uvBounds);
+    }
+
+    /** Renders one mesh with texture overrides and a material tint. */
+    public void renderMesh(int meshIndex, Matrix4f worldMatrix, Shader shader,
+                           int textureId, Vector4f uvBounds, Vector3f colorTint) {
+        if (meshIndex < 0 || meshIndex >= meshes.size()) return;
+        shader.setUniform("uModel", worldMatrix);
+        meshes.get(meshIndex).render(shader, textureId, uvBounds, colorTint);
     }
 
     /**
@@ -218,7 +237,7 @@ public class GLTFModel {
          * @param shader the {@link Shader} supplied as {@code shader}
          */
         public void render(Shader shader) {
-            render(shader, textureId, new Vector4f(0.0f, 0.0f, 1.0f, 1.0f));
+            render(shader, textureId, new Vector4f(0.0f, 0.0f, 1.0f, 1.0f), null);
         }
 
         /**
@@ -229,7 +248,16 @@ public class GLTFModel {
          */
         public void render(Shader shader, int renderTextureId,
                            Vector4f uvBounds) {
+            render(shader, renderTextureId, uvBounds, null);
+        }
+
+        /** Renders this mesh with optional texture and color overrides. */
+        public void render(Shader shader, int renderTextureId,
+                           Vector4f uvBounds, Vector3f colorTint) {
             glActiveTexture(GL_TEXTURE0);
+
+            shader.setUniform("uUseColorTint", colorTint != null);
+            if (colorTint != null) shader.setUniform("uColorTint", colorTint);
 
             if (renderTextureId > 0) {
                 glBindTexture(GL_TEXTURE_2D, renderTextureId);

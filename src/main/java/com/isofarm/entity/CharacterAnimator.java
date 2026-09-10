@@ -263,13 +263,21 @@ public final class CharacterAnimator {
         copyTransform(leftLeg, armorLeftLeg);
 
         armorHead.setVisible(hasArmor(player, ArmorSlot.HEAD));
+        tintArmor(armorHead, equippedArmor(player, ArmorSlot.HEAD));
         boolean chestEquipped = hasArmor(player, ArmorSlot.CHEST);
         armorChestplate.setVisible(chestEquipped);
         armorRightArm.setVisible(chestEquipped);
         armorLeftArm.setVisible(chestEquipped);
+        Armor chestplate = equippedArmor(player, ArmorSlot.CHEST);
+        tintArmor(armorChestplate, chestplate);
+        tintArmor(armorRightArm, chestplate);
+        tintArmor(armorLeftArm, chestplate);
         boolean bootsEquipped = hasArmor(player, ArmorSlot.FEET);
         armorRightLeg.setVisible(bootsEquipped);
         armorLeftLeg.setVisible(bootsEquipped);
+        Armor boots = equippedArmor(player, ArmorSlot.FEET);
+        tintArmor(armorRightLeg, boots);
+        tintArmor(armorLeftLeg, boots);
         armorModel.updateTransforms();
     }
 
@@ -281,8 +289,24 @@ public final class CharacterAnimator {
     }
 
     private static boolean hasArmor(Player player, ArmorSlot slot) {
+        return equippedArmor(player, slot) != null;
+    }
+
+    private static Armor equippedArmor(Player player, ArmorSlot slot) {
         return player.getArmorSlot(slot) != null
-                && player.getArmorSlot(slot).getItem() instanceof Armor;
+                && player.getArmorSlot(slot).getItem() instanceof Armor armor ? armor : null;
+    }
+
+    private static void tintArmor(GLTFNode node, Armor armor) {
+        if (node == null || armor == null) return;
+        SpriteSheet icons = ResourceManager.rem.getArmorIcons();
+        Vector3f tint = icons.getAverageFrameColor(ResourceManager.getItemFrame(armor));
+        tintArmorNodes(node, tint);
+    }
+
+    private static void tintArmorNodes(GLTFNode node, Vector3f tint) {
+        node.setColorTint(tint);
+        for (GLTFNode child : node.getChildren()) tintArmorNodes(child, tint);
     }
 
     /**
@@ -521,6 +545,7 @@ public final class CharacterAnimator {
         }
         model.render(shader, modelMatrix);
         if (armorModel != null) armorModel.render(shader, modelMatrix);
+        shader.setUniform("uUseColorTint", false);
         glDepthFunc(GL_LESS);
         glDepthMask(true);
         glBindTexture(GL_TEXTURE_2D, 0);

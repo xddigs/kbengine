@@ -1,6 +1,14 @@
 package com.isofarm.graphics;
 
 import org.joml.Vector4f;
+import org.joml.Vector3f;
+
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Encapsulates the state and operations required by sprite sheet within the game runtime.
@@ -10,6 +18,8 @@ public class SpriteSheet {
     private final int totalFrames;
     private final int cols;
     private final int rows;
+    private final BufferedImage sourceImage;
+    private final Map<Integer, Vector3f> frameColors = new HashMap<>();
 
     /**
      * Creates a new {@code SpriteSheet} instance.
@@ -30,6 +40,15 @@ public class SpriteSheet {
         this.cols = cols;
         this.rows = rows;
         this.totalFrames = cols * rows;
+        this.sourceImage = loadSourceImage(path);
+    }
+
+    private static BufferedImage loadSourceImage(String path) {
+        try (InputStream input = SpriteSheet.class.getClassLoader().getResourceAsStream(path)) {
+            return input == null ? null : ImageIO.read(input);
+        } catch (IOException ignored) {
+            return null;
+        }
     }
 
     /**
@@ -137,6 +156,40 @@ public class SpriteSheet {
         float vMax = 1.0f - row * frameHeight;
         float vMin = vMax - frameHeight;
         return new Vector4f(uMin, vMin, uMax, vMax);
+    }
+
+    /**
+     * Returns the alpha-weighted average colour of an individual sprite frame.
+     * This lets 3D equipment reuse the visual identity of its inventory icon.
+     */
+    public Vector3f getAverageFrameColor(int frameIndex) {
+        frameIndex = Math.clamp(frameIndex, 0, totalFrames - 1);
+        Vector3f cached = frameColors.get(frameIndex);
+        if (cached != null) return new Vector3f(cached);
+        if (sourceImage == null) return new Vector3f(1.0f);
+
+        int column = frameIndex % cols;
+        int row = frameIndex / cols;
+        int frameWidth = sourceImage.getWidth() / cols;
+        int frameHeight = sourceImage.getHeight() / rows;
+        int startX = column * frameWidth;
+        int startY = row * frameHeight;
+        float red = 0.0f, green = 0.0f, blue = 0.0f, weight = 0.0f;
+        for (int y = startY; y < startY + frameHeight; y++) {
+            for (int x = startX; x < startX + frameWidth; x++) {
+                int pixel = sourceImage.getRGB(x, y);
+                float alpha = ((pixel >>> 24) & 0xFF) / 255.0f;
+                red += ((pixel >>> 16) & 0xFF) * alpha;
+                green += ((pixel >>> 8) & 0xFF) * alpha;
+                blue += (pixel & 0xFF) * alpha;
+                weight += alpha;
+            }
+        }
+        Vector3f color = weight == 0.0f ? new Vector3f(1.0f)
+                : new Vector3f(red / (255.0f * weight), green / (255.0f * weight),
+                        blue / (255.0f * weight));
+        frameColors.put(frameIndex, color);
+        return new Vector3f(color);
     }
 
     /**

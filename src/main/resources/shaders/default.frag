@@ -15,6 +15,8 @@ uniform sampler2D uShadowMap;
 uniform bool uUseTexture;
 uniform vec3 uBaseColor;
 uniform bool uUseFaceAtlas;
+uniform bool uUseColorTint;
+uniform vec3 uColorTint;
 
 uniform vec3 uSkyColor;
 uniform vec3 uSunColor;
@@ -222,7 +224,8 @@ void main() {
     vec3 totalLight = ambient + directLight + torchLight;
     if (uIsTorch) totalLight = max(totalLight, vec3(1.0, 0.62, 0.24));
     float alpha = texColor.a * uParticleAlpha;
-    vec3 finalColor = texColor.rgb * totalLight * viewFog;
+    vec3 tint = uUseColorTint ? uColorTint : vec3(1.0);
+    vec3 finalColor = texColor.rgb * tint * totalLight * viewFog;
 
     if (vIsWater > 0.5 && uIsWater) {
         bool isLava = vTexCoord.x > uLavaUVBounds.x && vTexCoord.x < uLavaUVBounds.z &&
