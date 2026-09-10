@@ -34,7 +34,7 @@ public class Settings {
     private static int guiScaleIndex = 2;
     private static boolean doKeepInventory = true;
     private static boolean doEnableMotions = false;
-    private static float maxInteractionDistance = 6.0f;
+    private static float maxInteractionDistance = 4.0f;
     private static int interiorDetectionRadius = 6;
     private static float undergroundViewRadius = 6.0f;
     private static float undergroundCutHeight = 2.25f;
