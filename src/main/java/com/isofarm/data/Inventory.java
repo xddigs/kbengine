@@ -242,10 +242,10 @@ public class Inventory {
     }
 
     /**
-     * Adds add.
+     * Adds addEnemy.
      * @param item the {@link Item} supplied as {@code item}
      * @param amount the {@code int} supplied as {@code amount}
-     * @return {@code int}; the add result
+     * @return {@code int}; the addEnemy result
      */
     public int add(Item item, int amount) {
         if (item == null || amount <= 0) {
@@ -274,8 +274,8 @@ public class Inventory {
      * Adds an item only within the supplied slot range, filling compatible
      * stacks before the first empty slot.
      *
-     * @param item the item to add
-     * @param amount the amount to add
+     * @param item the item to addEnemy
+     * @param amount the amount to addEnemy
      * @param startInclusive first destination slot
      * @param endExclusive slot after the final destination
      * @return amount that did not fit
@@ -302,7 +302,7 @@ public class Inventory {
      * @param amount the {@code int} supplied as {@code amount}
      * @param start the {@code int} supplied as {@code start}
      * @param end the {@code int} supplied as {@code end}
-     * @return {@code int}; the add to existing stacks result
+     * @return {@code int}; the addEnemy to existing stacks result
      */
     private int addToExistingStacks(Item item, int amount, int start, int end) {
         int remaining = amount;
@@ -339,7 +339,7 @@ public class Inventory {
      * @param amount the {@code int} supplied as {@code amount}
      * @param start the {@code int} supplied as {@code start}
      * @param end the {@code int} supplied as {@code end}
-     * @return {@code int}; the add to empty slots result
+     * @return {@code int}; the addEnemy to empty slots result
      */
     private int addToEmptySlots(Item item, int amount, int start, int end) {
         int remaining = amount;
@@ -363,7 +363,7 @@ public class Inventory {
     }
 
     /**
-     * Removes remove.
+     * Removes removeEnemy.
      * @param item the {@link Item} supplied as {@code item}
      * @param amount the {@code int} supplied as {@code amount}
      */
@@ -529,7 +529,7 @@ public class Inventory {
      * @param targetIndex the {@code int} supplied as {@code targetIndex}
      * @param item the {@link Item} supplied as {@code item}
      * @param amount the {@code int} supplied as {@code amount}
-     * @return {@code int}; the add to stack result
+     * @return {@code int}; the addEnemy to stack result
      */
     public int addToStack(int targetIndex, Item item, int amount) {
         if (isValidIndex(targetIndex) || item == null || amount <= 0) {
@@ -565,7 +565,7 @@ public class Inventory {
      * Adds the one.
      * @param targetIndex the {@code int} supplied as {@code targetIndex}
      * @param item the {@link Item} supplied as {@code item}
-     * @return {@code int}; the add one result
+     * @return {@code int}; the addEnemy one result
      */
     public int addOne(int targetIndex, Item item) {
         return addToStack(targetIndex, item, 1);

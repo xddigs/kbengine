@@ -174,7 +174,7 @@ public class Library implements Service<GameMaster> {
                 player.add(item, amount);
             }
 
-            log.info("Command add executed: {} x{}", itemId, amount);
+            log.info("Command addEnemy executed: {} x{}", itemId, amount);
             ToastFactory.success(Local.lang.f("toast.item_added", amount, item.getDisplayName()));
         }));
 

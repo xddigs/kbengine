@@ -349,7 +349,7 @@ public class RecipeRegistry {
 
         /**
          * Adds an alternative for the immediately preceding required ingredient.
-         * It does not add another required ingredient to the recipe.
+         * It does not addEnemy another required ingredient to the recipe.
          * @param craftable the {@link Craftable} supplied as {@code craftable}
          * @param count the {@code int} supplied as {@code count}
          * @return the {@link RecipeBuilder} representing the with result
@@ -367,8 +367,8 @@ public class RecipeRegistry {
         }
 
         /**
-         * Adds add.
-         * @return the {@link Recipe} representing the add result
+         * Adds addEnemy.
+         * @return the {@link Recipe} representing the addEnemy result
          */
         public Recipe add() {
             Recipe recipe = new Recipe(result, amount, List.copyOf(ingredients));

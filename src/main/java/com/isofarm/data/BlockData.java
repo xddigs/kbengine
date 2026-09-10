@@ -14,9 +14,28 @@ import java.util.Locale;
 import java.util.function.Consumer;
 
 /**
- * Enumerates voxel and model-backed interactive block data in one registry.
+ * Represents the central registry and specification data for all block types within the engine.
+ * <p>
+ * This enum defines the core physical attributes, collision boundaries, breaking speeds,
+ * rendering shapes, and drop tables associated with each block state. It serves as a static
+ * data source for world generation, physics calculation, and player interaction mechanics.
+ * </p>
+ *
+ * <h2>Key Features & Functionality</h2>
+ * <ul>
+ *   <li><b>Physical Properties:</b> Holds metadata such as blast resistance, hardness,
+ *       solidity, and light emission/opacity levels.</li>
+ *   <li><b>Geometry & Collision:</b> Associates blocks with specific {@code BlockShape} profile
+ *       types (e.g., full cubes, slabs, staircases, fences, or customized bounding boxes).</li>
+ *   <li><b>Loot & Mining Tables:</b> Manages block drop logic, linking appropriate tool prerequisites,
+ *       mining speeds, and item drop pools upon destruction.</li>
+ *   <li><b>Material Conversions:</b> Provides static lookup utilities to convert base materials
+ *       into variant block forms (e.g., transforming primary log types to planks, slabs, or fences).</li>
+ * </ul>
+ *
+ * @see Blockable
+ * @see BlockShape
  */
-@SuppressWarnings("all")
 @DataClass
 public enum BlockData implements Blockable {
     AIR((byte) 0, (byte) 0, (byte) 0, false, false, 0, null, SoundGroup.SILENT, 0f, true, new Object[]{}, Tier.NONE),

@@ -273,8 +273,9 @@ public final class K {
         public static final String USABLES_ICONS = "assets/sprites/usables.png";
         public static final String INVENTORY_ICONS = "assets/sprites/inventory.png";
 
-        public static final String PLAYER_MODEL = "assets/models/player/player.gltf";
         public static final String PLAYER_ARMOR_MODEL = "assets/models/player/armor.gltf";
+        public static final String PLAYER_MODEL = "assets/models/player/player.gltf";
+        public static final String GOBLIN_MODEL = "assets/models/enemies/goblin.gltf";
 
         public static final String HEARTS_SPRITESHEET = "assets/ui/hearts.png";
         public static final String HUNGER_SPRITESHEET = "assets/ui/hunger.png";

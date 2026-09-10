@@ -43,9 +43,9 @@ public class ParticleEngine implements Service<Particle> {
     private ParticleEngine() {}
 
     /**
-     * Adds add.
+     * Adds addEnemy.
      * @param particle the {@link Particle} supplied as {@code particle}
-     * @return the {@link Particle} representing the add result
+     * @return the {@link Particle} representing the addEnemy result
      */
     public Particle add(Particle particle) {
         particles.add(particle);

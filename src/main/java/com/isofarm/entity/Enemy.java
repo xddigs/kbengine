@@ -18,12 +18,8 @@ import org.joml.Vector3f;
  * <p><b>Key Lifecycle & Characteristics:</b>
  * <ul>
  *   <li><b>Visual Representation:</b> Animated via external 3D {@link GLTFModel} assets.</li>
- *   <li><b>Lifecycle:</b> Real-time AI state and pathing are logic-updated via {@link #update(float)}.</li>
  *   <li><b>Non-Interactive:</b> Cannot be conversed with or traded with; interaction is strictly combat.</li>
  * </ul>
- *
- * <p>Subclasses must implement {@link #update(float)} to drive specific AI state machines
- * (e.g., pathfinding, aggro range, attack cooldowns).
  */
 @DataClass
 public abstract class Enemy extends Character {
@@ -55,7 +51,7 @@ public abstract class Enemy extends Character {
      * Updates the behavior of the {@link Enemy}
      * @param delta the {@link Float} supplied as {@code delta}
      */
-    public abstract void update(float delta);
+    public abstract void behave(float delta);
 
     /**
      * Returns the {@code enemyID}

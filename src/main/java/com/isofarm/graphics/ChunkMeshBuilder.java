@@ -782,7 +782,7 @@ public class ChunkMeshBuilder {
      * @param x4 the {@code float} supplied as {@code x4}
      * @param y4 the {@code float} supplied as {@code y4}
      * @param z4 the {@code float} supplied as {@code z4}
-     * @return {@code int}; the add quad pos result
+     * @return {@code int}; the addEnemy quad pos result
      */
     private static int addQuadPos(float[] buf, int idx, float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, float x4, float y4, float z4) {
         buf[idx] = x1; buf[idx + 1] = y1; buf[idx + 2] = z1;
@@ -804,7 +804,7 @@ public class ChunkMeshBuilder {
      * @param v3 the {@code float} supplied as {@code v3}
      * @param u4 the {@code float} supplied as {@code u4}
      * @param v4 the {@code float} supplied as {@code v4}
-     * @return {@code int}; the add quad uv result
+     * @return {@code int}; the addEnemy quad uv result
      */
     private static int addQuadUV(float[] buf, int idx, float u1, float v1, float u2, float v2, float u3, float v3, float u4, float v4) {
         buf[idx] = u1; buf[idx + 1] = v1;
@@ -821,7 +821,7 @@ public class ChunkMeshBuilder {
      * @param nx the {@code float} supplied as {@code nx}
      * @param ny the {@code float} supplied as {@code ny}
      * @param nz the {@code float} supplied as {@code nz}
-     * @return {@code int}; the add quad norm result
+     * @return {@code int}; the addEnemy quad norm result
      */
     private static int addQuadNorm(float[] buf, int idx, float nx, float ny, float nz) {
         for (int i = 0; i < 4; i++) { buf[idx++] = nx; buf[idx++] = ny; buf[idx++] = nz; }
@@ -833,7 +833,7 @@ public class ChunkMeshBuilder {
      * @param buf an array of {@code int} values supplied as {@code buf}
      * @param idx the {@code int} supplied as {@code idx}
      * @param vertexCount the {@code int} supplied as {@code vertexCount}
-     * @return {@code int}; the add quad indices result
+     * @return {@code int}; the addEnemy quad indices result
      */
     private static int addQuadIndices(int[] buf, int idx, int vertexCount) {
         buf[idx] = vertexCount; buf[idx + 1] = vertexCount + 1; buf[idx + 2] = vertexCount + 2;
@@ -865,7 +865,7 @@ public class ChunkMeshBuilder {
      * @param data the {@link BlockData} supplied as {@code data}
      * @param uvB the {@code float} supplied as {@code uvB}
      * @param uvT the {@code float} supplied as {@code uvT}
-     * @return {@code int}; the add side quad direct result
+     * @return {@code int}; the addEnemy side quad direct result
      */
     private static int addSideQuadDirect(float[] pos, float[] norm, float[] uv, int[] idx,
                                          int posI, int normI, int uvI, int elemI, int vertexCount, float x1,

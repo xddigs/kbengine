@@ -72,7 +72,7 @@ public class Wallet extends Usable
 
     /**
      * Adds coins to the wallet
-     * @param coins the {@link Integer} value to add
+     * @param coins the {@link Integer} value to addEnemy
      * @return {@link Wallet}
      */
     public Wallet earn(Integer coins) {

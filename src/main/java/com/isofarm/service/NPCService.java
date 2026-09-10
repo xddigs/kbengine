@@ -19,7 +19,20 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Represents the methods, data, behavior of the {@link NPC}'s.
+ * Represents the NPC service component of the {@link NPC}'s
+ *
+ * <p>This type centralizes the state, lifecycle and behavior required by its callers,
+ * keeping domain rules together with the data they operate on.
+ *
+ * <p><b>Responsibilities:</b>
+ * <ul>
+ *   <li><b>State:</b> Owns the data needed to represent the component consistently.</li>
+ *   <li><b>Lifecycle:</b> Exposes the operations used to create, update and release its state.</li>
+ *   <li><b>Integration:</b> Coordinates with the surrounding game, rendering or UI systems through its public API.</li>
+ * </ul>
+ *
+ * <p>Callers should use the documented public operations and allow this type to preserve
+ * its invariants rather than modifying implementation details directly.
  */
 @SuppressWarnings("all")
 @Singleton
@@ -181,7 +194,7 @@ public class NPCService implements Service<NPC> {
 
     /**
      * Adds an NPC to the managed list and world.
-     * @param npc the NPC to add
+     * @param npc the NPC to addEnemy
      * @return the added NPC
      */
     public NPC add(NPC npc) {
@@ -192,7 +205,7 @@ public class NPCService implements Service<NPC> {
 
     /**
      * Removes an NPC from the managed list and world.
-     * @param npc the NPC to remove
+     * @param npc the NPC to removeEnemy
      * @return the removed NPC
      */
     public NPC remove(NPC npc) {

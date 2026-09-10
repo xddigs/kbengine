@@ -51,7 +51,7 @@ public class ToastFactory implements Service<Toast> {
     }
 
     /**
-     * Adds add.
+     * Adds addEnemy.
      * @param toast the {@link Toast} supplied as {@code toast}
      */
     public static void add(Toast toast) {
@@ -72,7 +72,7 @@ public class ToastFactory implements Service<Toast> {
     }
 
     /**
-     * Removes remove.
+     * Removes removeEnemy.
      * @param toast the {@link Toast} supplied as {@code toast}
      */
     public void remove(Toast toast) {

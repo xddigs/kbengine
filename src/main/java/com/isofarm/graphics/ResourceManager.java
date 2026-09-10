@@ -1,6 +1,8 @@
 package com.isofarm.graphics;
 
 import com.isofarm.data.*;
+import com.isofarm.entity.Enemy;
+import com.isofarm.entity.enemies.Goblin;
 import com.isofarm.graphics.gltf.GLTFLoader;
 import com.isofarm.graphics.gltf.GLTFModel;
 import com.isofarm.item.*;
@@ -67,6 +69,7 @@ public class ResourceManager {
     private static final GLTFModel playerArmorModel = GLTFLoader.load(K.Paths.PLAYER_ARMOR_MODEL);
 
     private static final Map<BlockData, GLTFModel> blockModels = new LinkedHashMap<>();
+    private static final Map<Class<? extends Enemy>, GLTFModel> enemyModels = new LinkedHashMap<>();
     private static final Map<CropType, SpriteSheet> cropSpritesheets = new EnumMap<>(CropType.class);
 
     private static final Shader defaultShader = new Shader(K.Paths.DEFAULT_VERT_SHADER, K.Paths.DEFAULT_FRAG_SHADER);
@@ -112,6 +115,8 @@ public class ResourceManager {
         cropSpritesheets.put(CropType.POTATO, potato);
         cropSpritesheets.put(CropType.BEETROOT, beetroot);
         cropSpritesheets.put(CropType.SUGAR_CANE_CROP, sugarCane);
+
+        enemyModels.put(Goblin.class, GLTFLoader.load(K.Paths.GOBLIN_MODEL));
     }
 
     /**
@@ -293,7 +298,9 @@ public class ResourceManager {
         playerModel.dispose();
         playerArmorModel.dispose();
         blockModels.values().forEach(GLTFModel::dispose);
+        enemyModels.values().forEach(GLTFModel::dispose);
         blockModels.clear();
+        enemyModels.clear();
         bookAnimationSheet.dispose();
         bookUI.dispose();
         bookFavoriteIcon.dispose();
@@ -661,6 +668,23 @@ public class ResourceManager {
      */
     public Map<BlockData, GLTFModel> getBlockModels() {
         return blockModels;
+    }
+
+    /**
+     * Returns the models associated with enemies.
+     * @return {@link Map} of {@link Enemy} and {@link GLTFModel}
+     */
+    public Map<Class<? extends Enemy>, GLTFModel> getEnemyModels() {
+        return enemyModels;
+    }
+
+    /**
+     * Returns the model associated with the specified {@link Enemy}.
+     * @param enemy supplied from {@link Enemy}
+     * @return {@link GLTFModel}
+     */
+    public GLTFModel getModel(Class<? extends Enemy> enemy) {
+        return enemyModels.get(enemy);
     }
 
     /**
