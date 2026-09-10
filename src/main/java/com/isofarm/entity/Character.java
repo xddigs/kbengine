@@ -11,7 +11,8 @@ import com.isofarm.utils.ToastFactory;
  */
 @SuppressWarnings("all")
 @DataClass
-public abstract class Character extends Entity implements Levelable {
+public abstract class Character extends
+        Entity implements Levelable {
     private static final float FRAME_DURATION = 0.15f;
     private Inventory inventory;
     private Inventory backpack;
