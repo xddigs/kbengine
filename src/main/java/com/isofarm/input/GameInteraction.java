@@ -841,7 +841,7 @@ public class GameInteraction {
                         world.getBlockTypeAt(placeX, occupiedY, placeZ));
                 FluidSimulation targetFluid = FluidSimulation.forBlock(target);
                 if (targetFluid != null
-                        && !targetFluid.removeFluid(placeX, occupiedY, placeZ)) return;
+                        && !targetFluid.displaceForBlockPlacement(placeX, occupiedY, placeZ)) return;
             }
 
             world.addInteractiveBlock(placedBlock);
@@ -904,7 +904,7 @@ public class GameInteraction {
                 }
             }
 
-            if (replacesFluid && !targetFluid.removeFluid(placeX, placeY, placeZ)) {
+            if (replacesFluid && !targetFluid.displaceForBlockPlacement(placeX, placeY, placeZ)) {
                 return;
             }
 

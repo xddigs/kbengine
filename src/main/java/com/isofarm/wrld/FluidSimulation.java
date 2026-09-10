@@ -160,6 +160,32 @@ public abstract class FluidSimulation {
     }
 
     /**
+     * Removes a fluid cell that is immediately being occupied by another block.
+     * Unlike collecting fluid in a bucket, placement must not rebuild the whole
+     * connected fluid component: an ocean is one component and rebuilding it on
+     * the render thread can freeze or exhaust the game.
+     *
+     * @param x the world x value
+     * @param y the world y value
+     * @param z the world z value
+     * @return {@code true} when a fluid cell was displaced
+     */
+    public final boolean displaceForBlockPlacement(int x, int y, int z) {
+        FluidPos pos = new FluidPos(x, y, z);
+        if (!isFluid(pos)) return false;
+
+        sources.remove(pos);
+        slopes.remove(pos);
+        queue.remove(pos);
+        queued.remove(pos);
+        World.wrld.setFluidLevelAt(x, y, z, (byte) 0);
+        World.wrld.setBlockTypeAt(x, y, z, BlockData.AIR.getId());
+        mark(pos);
+        enqueueNeighbours(pos);
+        return true;
+    }
+
+    /**
      * Checks whether a position is a source owned by this simulation.
      * @param x the {@code int} argument; the source x value
      * @param y the {@code int} argument; the source y value
