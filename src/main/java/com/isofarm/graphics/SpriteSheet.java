@@ -160,7 +160,7 @@ public class SpriteSheet {
     }
 
     /**
-     * Returns a brightened midtone colour from an individual sprite frame.
+     * Returns a saturated midtone colour from an individual sprite frame.
      * Dark outlines and bright highlights are excluded before averaging.
      */
     public Vector3f getFrameColor(int frameIndex) {
@@ -205,12 +205,17 @@ public class SpriteSheet {
         Vector3f color = weight == 0.0f ? new Vector3f(1.0f)
                 : new Vector3f(red / (255.0f * weight), green / (255.0f * weight),
                         blue / (255.0f * weight));
-        color.mul(1.15f);
-        color.x = Math.min(color.x, 1.0f);
-        color.y = Math.min(color.y, 1.0f);
-        color.z = Math.min(color.z, 1.0f);
+        increaseSaturation(color, 1.65f);
         frameColors.put(frameIndex, color);
         return new Vector3f(color);
+    }
+
+    /** Increases chroma around the original luminance without raising brightness. */
+    private static void increaseSaturation(Vector3f color, float factor) {
+        float brightness = color.x * 0.2126f + color.y * 0.7152f + color.z * 0.0722f;
+        color.x = Math.clamp(brightness + (color.x - brightness) * factor, 0.0f, 1.0f);
+        color.y = Math.clamp(brightness + (color.y - brightness) * factor, 0.0f, 1.0f);
+        color.z = Math.clamp(brightness + (color.z - brightness) * factor, 0.0f, 1.0f);
     }
 
     private static float luminance(int pixel) {
