@@ -51,6 +51,11 @@ public class Library implements Service<GameMaster> {
             registerDefault(itemR, () -> new Shovel(tier));
             registerDefault(itemR, () -> new Shield(tier));
         });
+
+        ArmorData.forEach(armorType -> Tier.forEach(tier -> {
+            if (tier == Tier.NONE || tier == Tier.WOODEN) return;
+            registerDefault(itemR, () -> createArmor(armorType, tier));
+        }));
         
         FoodData.forEach(foodData -> {
             registerDefault(itemR, () -> new Food(foodData));
@@ -83,9 +88,20 @@ public class Library implements Service<GameMaster> {
         String rawName = item.getName();
         if (item instanceof Tool tool && tool.getTier() != null && tool.getTier() != Tier.NONE) {
             rawName = tool.getTier().getName() + " " + rawName;
+        } else if (item instanceof Armor armor) {
+            rawName = armor.getTier().getName() + " " + rawName;
         }
 
         itemR.register(getFormattedName(rawName), supplier);
+    }
+
+    /** Creates the concrete armor item associated with the supplied data value. */
+    private static Armor createArmor(ArmorData armorType, Tier tier) {
+        return switch (armorType) {
+            case HELMET -> new Helmet(tier);
+            case CHESTPLATE -> new Chestplate(tier);
+            case BOOTS -> new Boots(tier);
+        };
     }
 
     /**

@@ -54,6 +54,7 @@ public class RecipeRegistry {
         registerToolSet(BlockData.fromIdTo(BlockData.OAK_PLANK.getId()));
         registerToolSet(BlockData.fromIdTo(BlockData.STONE.getId()));
         registerShieldSet();
+        registerArmorSets();
 
         /* Required tier, Crafted Tier */
         Map<Tier, Tier> metalProgression = Map.of(
@@ -93,6 +94,34 @@ public class RecipeRegistry {
             if (tier.isInvalidTier()) return;
             registerShields(tier, new MiningComponent(tier, MaterialID.INGOT));
         });
+    }
+
+    /** Registers every craftable armor tier and its three wearable pieces. */
+    private void registerArmorSets() {
+        Tier.forEach(tier -> {
+            if (tier == Tier.NONE || tier == Tier.WOODEN) return;
+            Craftable material = getArmorMaterial(tier);
+            registerArmor(material, 5, Helmet::new);
+            registerArmor(material, 8, Chestplate::new);
+            registerArmor(material, 5, Boots::new);
+        });
+    }
+
+    /** Resolves the source material represented by an armor tier. */
+    private Craftable getArmorMaterial(Tier tier) {
+        return switch (tier) {
+            case LEATHER -> new Material(MaterialID.LEATHER);
+            case STONE -> new Block(BlockData.STONE);
+            default -> new MiningComponent(tier, MaterialID.INGOT);
+        };
+    }
+
+    /** Registers one armor recipe using its tier-specific source material. */
+    private void registerArmor(Craftable material, int amount,
+                               Function<Tier, Item> constructor) {
+        create().result(constructor.apply(getTierFromMaterial(material)), 1)
+                .with(material, amount)
+                .add();
     }
 
     /**
@@ -140,6 +169,9 @@ public class RecipeRegistry {
     private Tier getTierFromMaterial(Craftable mat) {
         if (mat instanceof MiningComponent mc) return mc.getTier();
         if (mat instanceof Block block && block.getType() == BlockData.STONE) return Tier.STONE;
+        if (mat instanceof Material material && material.getMaterialID() == MaterialID.LEATHER) {
+            return Tier.LEATHER;
+        }
         return Tier.WOODEN;
     }
 
