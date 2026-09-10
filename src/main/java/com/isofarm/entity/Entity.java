@@ -22,6 +22,8 @@ public abstract class Entity {
     protected static final float INVULNERABILITY_DURATION = 0.4f;
     private static final float LAVA_DAMAGE_INTERVAL = 1.0f;
     private static final float LAVA_DAMAGE_STEP = 0.1f;
+    /** Entities which fall below the world leave the playable space. */
+    private static final float VOID_DEATH_Y = -16.0f;
     private static final float KNOCKBACK_STRENGTH = 8.0f;
     private static final float UPWARD_FORCE = 4.0f;
 
@@ -159,6 +161,11 @@ public abstract class Entity {
      * @param delta the {@code float} argument; the elapsed time in seconds
      */
     public final void updateEnvironmentalDamage(World world, float delta) {
+        if (isAlive() && position.y < VOID_DEATH_Y) {
+            kill(Cause.VOID);
+            return;
+        }
+
         if (!isAlive() || delta <= 0 || !isTouchingLava(world)) {
             lavaDamageTimer = 0;
             lavaDamageTicks = 0;
