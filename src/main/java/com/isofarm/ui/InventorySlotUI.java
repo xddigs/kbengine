@@ -123,7 +123,7 @@ public class InventorySlotUI extends UIElement {
     public InventorySlot getSlotType() {
         return switch (slotType) {
             case BACKPACK -> backpackSlot;
-            case INVENTORY, HOTBAR, SHIELD -> slot;
+            case INVENTORY, HOTBAR, SHIELD, ARMOR -> slot;
             default -> null;
         };
     }

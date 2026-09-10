@@ -1327,7 +1327,7 @@ public class InventoryUI extends UIElement {
         }
 
         if (isArmorSlot(slot)) {
-            handleArmorSlotClick(slot);
+            handleArmorSlotRightClick(slot);
             return;
         }
 
@@ -1391,6 +1391,16 @@ public class InventoryUI extends UIElement {
         slot.setAmount(1);
         carriedAmount--;
         if (carriedAmount <= 0) clearCarriedItem();
+    }
+
+    /** Returns an equipped armor piece to normal inventory on right-click. */
+    private void handleArmorSlotRightClick(InventorySlot slot) {
+        ArmorSlot armorSlot = getArmorSlotType(slot);
+        if (armorSlot != null && !slot.isEmpty() && carriedItem == null) {
+            inventory.unequipArmor(armorSlot);
+            return;
+        }
+        handleArmorSlotClick(slot);
     }
 
     private boolean isArmorSlot(InventorySlot slot) {
