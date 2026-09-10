@@ -46,8 +46,11 @@ public class UITooltip extends UIElement {
         String[] lines = text.split("\n", -1);
         float textY = getAbsoluteY() + padding * 2.2f;
         for (String line : lines) {
-            Vector4f color = Arrays.stream(lines).toList().getLast().equals(line) ?
-                    new Vector4f(0.6f) : K.UI.UI_TEXT_COLOR;
+            Vector4f color = K.UI.UI_TEXT_COLOR;
+            if (Settings.doEnableIds()) {
+                color = Arrays.stream(lines).toList().getLast().equals(line) ?
+                        new Vector4f(0.6f) : K.UI.UI_TEXT_COLOR;
+            }
 
             Frontend.drawString(line, getAbsoluteX() + padding, textY, font, color);
             textY += lineHeight;
