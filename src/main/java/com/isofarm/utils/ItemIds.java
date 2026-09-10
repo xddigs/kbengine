@@ -40,6 +40,7 @@ public final class ItemIds {
      * @return the completed tooltip text
      */
     public static String appendToTooltip(String tooltip, Item item) {
+        if (!Settings.doEnableIds()) return tooltip;
         String id = of(item);
         if (id.isBlank()) return tooltip;
         if (tooltip == null || tooltip.isBlank()) return id;

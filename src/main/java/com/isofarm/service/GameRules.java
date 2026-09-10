@@ -19,11 +19,12 @@ public final class GameRules {
     static {
         RULES.put("doKeepInventory", Settings.doKeepInventory());
         RULES.put("doEnableMotions", Settings.doEnableMotions());
+        RULES.put("doEnableShadows", Settings.doEnableShadows());
+        RULES.put("doBookAnimation", Settings.doBookAnimation());
+        RULES.put("doEnableIds", Settings.doEnableIds());
         RULES.put("renderDistance", Settings.getRenderDistance());
         RULES.put("fov", Settings.getFov());
         RULES.put("unloadMargin", Settings.getUnloadMargin());
-        RULES.put("doEnableShadows", Settings.doEnableShadows());
-        RULES.put("doBookAnimation", Settings.doBookAnimation());
         RULES.put("maxInteractionDistance", Settings.getMaxInteractionDistance());
     }
 
@@ -144,12 +145,20 @@ public final class GameRules {
                     Settings.setDoKeepInventory((Boolean) value);
                 }
 
-                case "fov" -> {
-                    Settings.setFov((Float) value);
-                }
-
                 case "doEnableMotions" -> {
                     Settings.setDoEnableMotions((Boolean) value);
+                }
+
+                case "doEnableShadows" -> {
+                    Settings.setDoEnableShadows((Boolean) value);
+                }
+
+                case "doBookAnimation" -> {
+                    Settings.setDoBookAnimation((Boolean) value);
+                }
+
+                case "doEnableIds" -> {
+                    Settings.setDoEnableIds((Boolean) value);
                 }
 
                 case "renderDistance" -> {
@@ -160,12 +169,8 @@ public final class GameRules {
                     Settings.setUnloadMargin((Integer) value);
                 }
 
-                case "doEnableShadows" -> {
-                    Settings.setDoEnableShadows((Boolean) value);
-                }
-
-                case "doBookAnimation" -> {
-                    Settings.setDoBookAnimation((Boolean) value);
+                case "fov" -> {
+                    Settings.setFov((Float) value);
                 }
 
                 case "maxInteractionDistance" -> {

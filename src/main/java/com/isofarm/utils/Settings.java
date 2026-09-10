@@ -11,7 +11,7 @@ import com.isofarm.item.Item;
 public class Settings {
     private static final float BASE_ICON_SIZE = 16.0f;
     private static final float[] GUI_SCALES = {1.0f, 2.0f, 3.0f};
-    private static final float SHADOW_MAP_SIZE = 4096.0f;
+    private static final float SHADOW_MAP_SIZE = 8192.0f;
     public static Item selectedItem = null;
     private static float fov = 80f;
     private static int ticks = 1200;
@@ -29,6 +29,7 @@ public class Settings {
     private static boolean doEnableDebugInfo = true;
     private static boolean doEnableShadows = true;
     private static boolean doBookAnimation = false;
+    private static boolean doEnableIds = true;
 
     /**
      * Creates a new {@code Settings} instance.
@@ -366,6 +367,22 @@ public class Settings {
     public static boolean setDoBookAnimation(boolean doBookAnimation) {
         Settings.doBookAnimation = doBookAnimation;
         return Settings.doBookAnimation;
+    }
+
+    /**
+     * Toggles the setting represented by enable ids and applies it immediately.
+     * @return {@code boolean}; the enable ids result
+     */
+    public static boolean doEnableIds() {
+        return doEnableIds;
+    }
+
+    /**
+     * Sets the do enable ids.
+     * @param doEnableIds the {@code boolean} supplied as {@code doEnableIds}
+     */
+    public static void setDoEnableIds(boolean doEnableIds) {
+        Settings.doEnableIds = doEnableIds;
     }
 
     /**
