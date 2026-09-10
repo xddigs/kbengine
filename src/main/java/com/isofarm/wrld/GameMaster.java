@@ -452,12 +452,9 @@ public class GameMaster {
      * Removes the entity.
      * @param entity the {@link Entity} supplied as {@code entity}
      */
-    public List<Entity> removeEntity(Consumer<Entity> entity) {
-        if (entity == null) return entities;
-        List<Entity> copy = List.copyOf(entities);
-        copy.remove(entity);
-        entities = copy;
-        return entities;
+    public void removeEntity(Entity entity) {
+        if (entity == null) return;
+        entities.remove(entity);
     }
 
     /**
@@ -466,7 +463,7 @@ public class GameMaster {
      */
     private void updateEntities(float delta) {
         if (!areEntitiesActive) return;
-        removeEntity(entity -> entity.isDead());
+        entities.removeIf(entity -> entity != Player.plyr && entity.isDead());
         for (Entity entity : entities) {
             entity.update(HoveredCell.get(this), delta);
             entity.updateEnvironmentalDamage(world, delta);
