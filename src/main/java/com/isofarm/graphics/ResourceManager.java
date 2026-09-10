@@ -51,6 +51,7 @@ public class ResourceManager {
     private static final SpriteSheet sugarCane = new SpriteSheet(K.Paths.SUGAR_CANE_TEXTURE, K.Render.CROP_TOTAL_FRAMES, 1);
 
     private static final GLTFModel playerModel = GLTFLoader.load(K.Paths.PLAYER_MODEL);
+    private static final GLTFModel playerArmorModel = GLTFLoader.load(K.Paths.PLAYER_ARMOR_MODEL);
 
     private static final Map<BlockData, GLTFModel> blockModels = new LinkedHashMap<>();
     private static final Map<CropType, SpriteSheet> cropSpritesheets = new EnumMap<>(CropType.class);
@@ -277,6 +278,7 @@ public class ResourceManager {
         inventoryIcons.dispose();
 
         playerModel.dispose();
+        playerArmorModel.dispose();
         blockModels.values().forEach(GLTFModel::dispose);
         blockModels.clear();
         bookAnimationSheet.dispose();
@@ -474,6 +476,11 @@ public class ResourceManager {
      */
     public GLTFModel getPlayerModel() {
         return playerModel;
+    }
+
+    /** Returns the wearable player armor model. */
+    public GLTFModel getPlayerArmorModel() {
+        return playerArmorModel;
     }
 
     /**

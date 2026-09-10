@@ -1,6 +1,7 @@
 package com.isofarm.entity;
 
 import com.isofarm.data.Direction;
+import com.isofarm.data.ArmorSlot;
 import com.isofarm.data.Ray;
 import com.isofarm.data.RenderPass;
 import com.isofarm.entity.states.SneakingState;
@@ -42,6 +43,9 @@ public final class CharacterAnimator {
     private final Character character;
     private final Matrix4f modelMatrix = new Matrix4f();
     private GLTFNode head, torso, backpack, rightArm, leftArm, rightLeg, leftLeg;
+    private GLTFModel armorModel;
+    private GLTFNode armorBody, armorHead, armorChestplate, armorRightArm,
+            armorLeftArm, armorRightLeg, armorLeftLeg;
     private Quaternionf baseHeadRotation;
     private Vector3f headPosition, torsoPosition, backpackPosition, rightArmPosition, leftArmPosition, rightLegPosition, leftLegPosition;
     private Direction direction = Direction.S;
@@ -72,6 +76,7 @@ public final class CharacterAnimator {
 
         if (character instanceof Player) {
             EquipmentController.eq.init(model);
+            initializeArmorModel();
         }
 
         if (head != null) {
@@ -86,6 +91,20 @@ public final class CharacterAnimator {
         rightLegPosition = copy(rightLeg);
         leftLegPosition = copy(leftLeg);
         if (backpack != null) backpack.setVisible(false);
+    }
+
+    /** Initializes the armor rig, which mirrors the player model's body nodes. */
+    private void initializeArmorModel() {
+        armorModel = ResourceManager.rem.getPlayerArmorModel();
+        if (armorModel == null) return;
+        armorBody = node(armorModel, "Body");
+        armorHead = node(armorModel, "Head");
+        armorChestplate = node(armorModel, "Chestplate");
+        armorRightArm = node(armorModel, "RightArm");
+        armorLeftArm = node(armorModel, "LeftArm");
+        armorRightLeg = node(armorModel, "RightLeg");
+        armorLeftLeg = node(armorModel, "LeftLeg");
+        syncArmor();
     }
 
     private GLTFNode node(GLTFModel model, String name) { return model.findNode(name); }
@@ -183,6 +202,7 @@ public final class CharacterAnimator {
         updateHead(delta, focusTarget != null);
 
         updateEquipment();
+        syncArmor();
 
         if (model != null) {
             model.updateTransforms();
@@ -225,7 +245,44 @@ public final class CharacterAnimator {
                 .rotateZ((float) Math.toRadians(32.0f) * loosen));
         rotate(leftLeg, new Quaternionf().rotateX((float) Math.toRadians(18.0f) * loosen));
         rotate(rightLeg, new Quaternionf().rotateX((float) Math.toRadians(-12.0f) * loosen));
+        syncArmor();
         if (model != null) model.updateTransforms();
+    }
+
+    /**
+     * Copies the animated player rig to the armor rig and enables only the
+     * model groups represented by currently equipped armor.
+     */
+    private void syncArmor() {
+        if (!(character instanceof Player player) || armorModel == null) return;
+        copyTransform(torso, armorBody);
+        copyTransform(head, armorHead);
+        copyTransform(rightArm, armorRightArm);
+        copyTransform(leftArm, armorLeftArm);
+        copyTransform(rightLeg, armorRightLeg);
+        copyTransform(leftLeg, armorLeftLeg);
+
+        armorHead.setVisible(hasArmor(player, ArmorSlot.HEAD));
+        boolean chestEquipped = hasArmor(player, ArmorSlot.CHEST);
+        armorChestplate.setVisible(chestEquipped);
+        armorRightArm.setVisible(chestEquipped);
+        armorLeftArm.setVisible(chestEquipped);
+        boolean bootsEquipped = hasArmor(player, ArmorSlot.FEET);
+        armorRightLeg.setVisible(bootsEquipped);
+        armorLeftLeg.setVisible(bootsEquipped);
+        armorModel.updateTransforms();
+    }
+
+    private static void copyTransform(GLTFNode source, GLTFNode target) {
+        if (source == null || target == null) return;
+        target.setTranslation(source.getTranslation());
+        target.setRotation(source.getRotation());
+        target.setScale(source.getScale());
+    }
+
+    private static boolean hasArmor(Player player, ArmorSlot slot) {
+        return player.getArmorSlot(slot) != null
+                && player.getArmorSlot(slot).getItem() instanceof Armor;
     }
 
     /**
@@ -413,6 +470,7 @@ public final class CharacterAnimator {
             glDepthMask(true);
             glCullFace(GL_FRONT);
             model.render(shader, modelMatrix);
+            if (armorModel != null) armorModel.render(shader, modelMatrix);
             glCullFace(GL_BACK);
             glDepthMask(true);
             glDepthFunc(GL_LESS);
@@ -462,6 +520,7 @@ public final class CharacterAnimator {
             shader.setUniform("uIsSubmergedEntity", true);
         }
         model.render(shader, modelMatrix);
+        if (armorModel != null) armorModel.render(shader, modelMatrix);
         glDepthFunc(GL_LESS);
         glDepthMask(true);
         glBindTexture(GL_TEXTURE_2D, 0);
