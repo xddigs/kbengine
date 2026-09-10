@@ -7,6 +7,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -159,10 +160,10 @@ public class SpriteSheet {
     }
 
     /**
-     * Returns the alpha-weighted average colour of an individual sprite frame.
-     * This lets 3D equipment reuse the visual identity of its inventory icon.
+     * Returns a brightened midtone colour from an individual sprite frame.
+     * Dark outlines and bright highlights are excluded before averaging.
      */
-    public Vector3f getAverageFrameColor(int frameIndex) {
+    public Vector3f getFrameColor(int frameIndex) {
         frameIndex = Math.clamp(frameIndex, 0, totalFrames - 1);
         Vector3f cached = frameColors.get(frameIndex);
         if (cached != null) return new Vector3f(cached);
@@ -174,11 +175,27 @@ public class SpriteSheet {
         int frameHeight = sourceImage.getHeight() / rows;
         int startX = column * frameWidth;
         int startY = row * frameHeight;
+        float[] luminances = new float[frameWidth * frameHeight];
+        int colorCount = 0;
+        for (int y = startY; y < startY + frameHeight; y++) {
+            for (int x = startX; x < startX + frameWidth; x++) {
+                int pixel = sourceImage.getRGB(x, y);
+                if (((pixel >>> 24) & 0xFF) < 26) continue;
+                luminances[colorCount++] = luminance(pixel);
+            }
+        }
+        if (colorCount == 0) return new Vector3f(1.0f);
+
+        Arrays.sort(luminances, 0, colorCount);
+        float minLuminance = luminances[(int) (colorCount * 0.20f)];
+        float maxLuminance = luminances[Math.max(0, (int) (colorCount * 0.80f) - 1)];
         float red = 0.0f, green = 0.0f, blue = 0.0f, weight = 0.0f;
         for (int y = startY; y < startY + frameHeight; y++) {
             for (int x = startX; x < startX + frameWidth; x++) {
                 int pixel = sourceImage.getRGB(x, y);
                 float alpha = ((pixel >>> 24) & 0xFF) / 255.0f;
+                float luminance = luminance(pixel);
+                if (alpha < 0.10f || luminance < minLuminance || luminance > maxLuminance) continue;
                 red += ((pixel >>> 16) & 0xFF) * alpha;
                 green += ((pixel >>> 8) & 0xFF) * alpha;
                 blue += (pixel & 0xFF) * alpha;
@@ -188,8 +205,18 @@ public class SpriteSheet {
         Vector3f color = weight == 0.0f ? new Vector3f(1.0f)
                 : new Vector3f(red / (255.0f * weight), green / (255.0f * weight),
                         blue / (255.0f * weight));
+        color.mul(1.15f);
+        color.x = Math.min(color.x, 1.0f);
+        color.y = Math.min(color.y, 1.0f);
+        color.z = Math.min(color.z, 1.0f);
         frameColors.put(frameIndex, color);
         return new Vector3f(color);
+    }
+
+    private static float luminance(int pixel) {
+        return (((pixel >>> 16) & 0xFF) * 0.2126f
+                + ((pixel >>> 8) & 0xFF) * 0.7152f
+                + (pixel & 0xFF) * 0.0722f) / 255.0f;
     }
 
     /**

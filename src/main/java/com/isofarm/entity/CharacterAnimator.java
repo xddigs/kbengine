@@ -300,7 +300,7 @@ public final class CharacterAnimator {
     private static void tintArmor(GLTFNode node, Armor armor) {
         if (node == null || armor == null) return;
         SpriteSheet icons = ResourceManager.rem.getArmorIcons();
-        Vector3f tint = icons.getAverageFrameColor(ResourceManager.getItemFrame(armor));
+        Vector3f tint = icons.getFrameColor(ResourceManager.getItemFrame(armor));
         tintArmorNodes(node, tint);
     }
 
