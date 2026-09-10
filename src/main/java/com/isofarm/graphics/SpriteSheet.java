@@ -245,7 +245,6 @@ public class SpriteSheet {
 
         if (max == 0.0f) return;
 
-        // 1. Extraer HSV
         float h = 0.0f;
         if (delta != 0.0f) {
             if (max == r) h = (g - b) / delta + (g < b ? 6.0f : 0.0f);

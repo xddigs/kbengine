@@ -83,8 +83,6 @@ public class WorldItem extends Entity {
             pickupTimer -= delta;
         }
         rotation = (rotation + ROTATION_SPEED * delta) % 360.0f;
-        // Attraction owns the position until the item is absorbed. Letting the
-        // ground/bob physics run here resets its vertical progress every frame.
         if (isAttracting) return;
         if (!isOnGround()) {
             velocity.y += GRAVITY * delta;

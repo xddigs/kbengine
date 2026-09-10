@@ -86,8 +86,14 @@ public class NPCService implements Service<NPC> {
         return interact(closest);
     }
 
+    /**
+     * Interacts with the closest NPC.
+     * @param closest the closest NPC
+     * @return {@code true} when an NPC consumed the click
+     */
     private boolean interact(NPC closest) {
         if (closest == null) return false;
+        Player.plyr.focus(closest);
         closest.interactWith(Player.plyr);
         closest.speak();
         if (closest.getJob() == Job.TRADER && GameUIService.ui != null) {
