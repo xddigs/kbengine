@@ -3,33 +3,54 @@ package com.isofarm.entity;
 import com.isofarm.data.DataClass;
 import com.isofarm.data.RenderPass;
 import com.isofarm.data.Reputation;
+import com.isofarm.graphics.gltf.GLTFModel;
 import com.isofarm.utils.RandomLocal;
 import com.isofarm.wrld.GameMaster;
 import org.joml.Vector3f;
 
 /**
- * States and offers data on {@code Enemy}s, such as health, damage, etc.
+ * Abstract base class for all hostile AI-driven characters in the game.
+ *
+ * <p>Extends {@link Character} by anchoring entity behavior to a 3D {@link GLTFModel}.
+ * Unlike neutral or passive {@link NPC}s, enemies are hardcoded with a {@link Reputation#HOSTILE}
+ * alignment and actively engage in combat calculations against the player.
+ *
+ * <p><b>Key Lifecycle & Characteristics:</b>
+ * <ul>
+ *   <li><b>Visual Representation:</b> Animated via external 3D {@link GLTFModel} assets.</li>
+ *   <li><b>Lifecycle:</b> Real-time AI state and pathing are logic-updated via {@link #update(float)}.</li>
+ *   <li><b>Non-Interactive:</b> Cannot be conversed with or traded with; interaction is strictly combat.</li>
+ * </ul>
+ *
+ * <p>Subclasses must implement {@link #update(float)} to drive specific AI state machines
+ * (e.g., pathfinding, aggro range, attack cooldowns).
+ * @see Character
+ * @see Player
+ * @see GLTFModel
  */
 @DataClass
 public abstract class Enemy extends Character {
-    private static final long enemyID = RandomLocal.get().nextLong();
-    private static final float WIDTH = 0.25f;
-    private static final float HEIGHT = 0.8f;
-    private static final float SPEED = Player.plyr.getLevel() + (Player.plyr.getSpeed() * 1.5f);
-    private static final int LEVEL = Player.plyr.getLevel() + 2;
-    private static final int MAX_HITPOINTS = LEVEL * 10;
+    private final float width = 0.25f;
+    private final float height = 0.8f;
+    private final float speed = Player.plyr.getLevel() + (Player.plyr.getSpeed() * 1.5f);
+    private final int level = Player.plyr.getLevel() + 2;
+    private final long enemyID = RandomLocal.get().nextLong();
+    private final GLTFModel model;
 
     /** Creates a new {@link Enemy} instance. */
-    public Enemy() {
+    public Enemy(GLTFModel model) {
         super(Enemy.class.getSimpleName());
-        setDimensions(new Vector3f(WIDTH, HEIGHT, WIDTH));
-        setSpeed(SPEED);
-        setLevel(LEVEL);
-        setMaxHitpoints(MAX_HITPOINTS);
+        this.model = model;
+        setDimensions(new Vector3f(width, height, width));
+        setSpeed(speed);
+        setLevel(level);
+        setMaxDefense(Player.plyr.getMaxDefense());
+        setMaxHitpoints(getLevel() * 10);
         setHitpoints(getMaxHitpoints());
         setReputation(Reputation.HOSTILE);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void render(GameMaster gameMaster, RenderPass pass) {}
 
@@ -43,7 +64,15 @@ public abstract class Enemy extends Character {
      * Returns the {@code enemyID}
      * @return {@link Long} supplied as {@code enemyID}
      */
-    public static long getEnemyID() {
+    public long getEnemyID() {
         return enemyID;
+    }
+
+    /**
+     * Returns the {@code model} value
+     * @return {@link GLTFModel} value of {@code model}
+     */
+    public GLTFModel getModel() {
+        return model;
     }
 }

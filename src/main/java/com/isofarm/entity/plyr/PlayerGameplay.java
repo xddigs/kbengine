@@ -34,6 +34,7 @@ public final class PlayerGameplay {
     private static final float HUNGER_SECONDS_PER_POINT = 180.0f;
     private static final float HUNGER_LEVEL_SCALING = 0.05f;
     private static final int MAX_HITPOINTS = 20, MAX_HUNGER = 20;
+    private static final float MAX_DEFENSE = MAX_HITPOINTS + (Player.plyr.getLevel() * 2f);
     private Player player;
     private int damageSequence;
     private float respawnTimer = -1.0f;
@@ -54,6 +55,7 @@ public final class PlayerGameplay {
         player.setPosition(new Vector3f(SPAWN_X, altitude.y(), SPAWN_Z));
         player.setVelocity(new Vector3f());
         player.setDimensions(new Vector3f(WIDTH, HEIGHT, WIDTH));
+        player.setMaxDefense(MAX_DEFENSE);
         player.setMaxHitpoints(MAX_HITPOINTS); player.setHitpoints(MAX_HITPOINTS);
         player.setMaxHunger(MAX_HUNGER); player.setHunger(MAX_HUNGER);
         player.setSpeed(SPEED); player.setReputation(Reputation.NEUTRAL);

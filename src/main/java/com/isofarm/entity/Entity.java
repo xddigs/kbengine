@@ -8,10 +8,29 @@ import com.isofarm.wrld.World;
 import org.joml.Vector3f;
 
 /**
- * Encapsulates the state and operations required by entity within the game runtime.
+ * Abstract base class for all physical entities within the 3D world space.
+ *
+ * <p>This class serves as the core foundation for actors (players, mobs, NPCs) and provides
+ * built-in systems for:
+ * <ul>
+ *   <li><b>Transform & Bounds:</b> Axis-Aligned Bounding Box (AABB) spatial positioning,
+ *       dimensions, and movement velocities via JOML {@link Vector3f}.</li>
+ *   <li><b>Physics & Collision:</b> Voxel-based grid collision detection, step resolution,
+ *       fluid submersion logic, and gravity integration.</li>
+ *   <li><b>Combat & Vitality:</b> Hitpoints, defensive attributes, knockback calculations,
+ *       and invulnerability timers.</li>
+ *   <li><b>Environmental Hazards:</b> Real-time environmental triggers such as progressive
+ *       lava burn damage and out-of-bounds void elimination.</li>
+ * </ul>
+ *
+ * <p>Subclasses must implement {@link #render(GameMaster, RenderPass)} to define visual representation
+ * and optionally override {@link #adjustVelocity(float)}, {@link #onDamageTaken(float)}, or
+ * {@link #onDeath(Cause)} to hook custom entity behaviors.
+ * @see World
+ * @see Cause
+ * @see RenderPass
  */
 
-@SuppressWarnings("all")
 @DataClass
 public abstract class Entity {
     protected static final float INVULNERABILITY_DURATION = 0.4f;
@@ -161,7 +180,7 @@ public abstract class Entity {
 
     /**
      * Sets the defense value
-     * @return {@link field.type} value of defense
+     * @return {@link Entity} value of defense
      */
     public Entity setDefense(float defense) {
         this.defense = defense;
@@ -180,7 +199,7 @@ public abstract class Entity {
     /**
      * Sets the maxDefense value
      *
-     * @return {@link field.type} value of maxDefense
+     * @return {@link Entity} value of maxDefense
      */
     public Entity setMaxDefense(float maxDefense) {
         this.maxDefense = maxDefense;
