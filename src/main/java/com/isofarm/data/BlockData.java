@@ -62,7 +62,7 @@ public enum BlockData implements Blockable {
     FOSSIL((byte) 37, (byte) 9, (byte) 4, false, false, 100, "assets/textures/blocks/fossil.png", SoundGroup.STONE, 8.0f, false, new Object[]{}, Tier.NONE),
     OBSIDIAN((byte) 38,(byte) 10,(byte) 4, false,  false, 100, "assets/textures/blocks/obsidian.png", SoundGroup.STONE, 48.0f, false, new Object[]{}, Tier.NONE),
 
-    VOIDSEAL((byte) 39, (byte) 0, (byte) 5, false, false, 100, "assets/textures/blocks/voidseal.png", SoundGroup.STONE, 0.0f, false, new Object[]{}, Tier.NONE),
+    VOIDSEAL((byte) 39, (byte) 1, (byte) 5, false, false, 100, "assets/textures/blocks/voidseal.png", SoundGroup.STONE, 0.0f, false, new Object[]{}, Tier.NONE),
 
     OAK_BONSAI((byte) 40, (byte) 1, (byte) (K.UI.ICON_BLOCK_ROWS - 2), false, true, 100, "assets/textures/blocks/oak_bonsai.png", SoundGroup.SOIL, 0.01f, true, new Object[]{}, Tier.NONE),
     SPRUCE_BONSAI((byte) 41, (byte) 2, (byte) (K.UI.ICON_BLOCK_ROWS - 2), false, true, 100, "assets/textures/blocks/spruce_bonsai.png", SoundGroup.SOIL, 0.01f, true, new Object[]{}, Tier.NONE),
