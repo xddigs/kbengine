@@ -142,6 +142,7 @@ public class GameMaster {
         GameUIService.init(this,
                 uiManager, ResourceManager.rem.getSeedIcons(), ResourceManager.rem.getCropIcons(),
                 ResourceManager.rem.getBlockIcons(), ResourceManager.rem.getToolIcons(),
+                ResourceManager.rem.getArmorIcons(),
                 ResourceManager.rem.getMaterialIcons(),
                 ResourceManager.rem.getInventoryIcons());
 

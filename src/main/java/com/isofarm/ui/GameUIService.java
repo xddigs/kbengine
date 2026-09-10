@@ -67,6 +67,7 @@ public final class GameUIService implements Service<GameMaster> {
     private final SpriteSheet cropIcons;
     private final SpriteSheet blockIcons;
     private final SpriteSheet toolIcons;
+    private final SpriteSheet armorIcons;
     private final SpriteSheet materialIcons;
     private final Player player = Player.plyr;
     private final float startingX = 20.0f;
@@ -95,6 +96,7 @@ public final class GameUIService implements Service<GameMaster> {
      * @param toolIcons      the {@link SpriteSheet} supplied as {@code toolIcons}
      * @param materialIcons  the {@link SpriteSheet} supplied as {@code materialIcons}
      * @param inventoryIcons the {@link SpriteSheet} supplied as {@code inventoryIcons}
+     * @param armorIcons
      */
     private GameUIService(
             GameMaster gameMaster,
@@ -104,7 +106,7 @@ public final class GameUIService implements Service<GameMaster> {
             SpriteSheet blockIcons,
             SpriteSheet toolIcons,
             SpriteSheet materialIcons,
-            SpriteSheet inventoryIcons) {
+            SpriteSheet inventoryIcons, SpriteSheet armorIcons) {
         this.gameMaster = gameMaster;
         this.uiManager = uiManager;
 
@@ -116,6 +118,7 @@ public final class GameUIService implements Service<GameMaster> {
 
         this.windowWidth = gameMaster.getWindowWidth();
         this.windowHeight = gameMaster.getWindowHeight();
+        this.armorIcons = armorIcons;
 
         this.chatHistory = new ArrayList<>();
         this.inventoryUI = new InventoryUI(windowWidth, windowHeight);
@@ -214,10 +217,11 @@ public final class GameUIService implements Service<GameMaster> {
     public static void init(GameMaster gameMaster, UIManager uiManager,
                             SpriteSheet seedIcons, SpriteSheet cropIcons,
                             SpriteSheet blockIcons, SpriteSheet toolIcons,
-                            SpriteSheet materialIcons, SpriteSheet inventoryIcons) {
+                            SpriteSheet armorIcons, SpriteSheet materialIcons,
+                            SpriteSheet inventoryIcons) {
         if (ui != null) return;
         ui = new GameUIService(gameMaster, uiManager, seedIcons, cropIcons,
-                blockIcons, toolIcons, materialIcons, inventoryIcons);
+                blockIcons, toolIcons, armorIcons, materialIcons, inventoryIcons);
     }
 
     /**

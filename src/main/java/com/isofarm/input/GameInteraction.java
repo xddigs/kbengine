@@ -204,6 +204,13 @@ public class GameInteraction {
             }
         }
 
+        if (selectedItem instanceof Equippable e) {
+            if (isRightPressed && !e.isEquipped()) {
+                e.equip();
+                isRightPressed = false;
+            }
+        }
+
         if (selectedItem instanceof Consumable consumable) {
             if (isRightPressed && canInteract && consumable.consume()) {
                 if (!player.isAttacking()) player.interact();
