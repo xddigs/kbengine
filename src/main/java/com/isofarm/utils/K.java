@@ -83,7 +83,7 @@ public final class K {
         public static final int ICON_FOOD_COLS = 4;
 
         public static final int ICON_BLOCK_COLS = 10;
-        public static final int ICON_BLOCK_ROWS = 7;
+        public static final int ICON_BLOCK_ROWS = 8;
         public static final int TORCH_COLS = 4;
 
         public static final int ICON_TOOL_COLS = 6;
