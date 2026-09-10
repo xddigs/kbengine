@@ -348,7 +348,7 @@ public class InventoryUI extends UIElement {
     private void createArmorSlots() {
         float slotSize = Settings.getScaledSlot();
         float spacing = Settings.getScaledSpacing();
-        float x = (getWidth() - slotSize) * 0.5f;
+        float x = getWidth() + spacing;
         float bottomY = getHeight() + ARMOR_SLOT_HOTBAR_OFFSET;
         for (ArmorSlot armorSlot : ArmorSlot.values()) {
             int index = armorSlot.ordinal();
