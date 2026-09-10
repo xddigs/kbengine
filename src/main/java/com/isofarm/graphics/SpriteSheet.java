@@ -1,13 +1,12 @@
 package com.isofarm.graphics;
 
-import org.joml.Vector4f;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -175,61 +174,93 @@ public class SpriteSheet {
         int frameHeight = sourceImage.getHeight() / rows;
         int startX = column * frameWidth;
         int startY = row * frameHeight;
-        float[] luminances = new float[frameWidth * frameHeight];
-        int colorCount = 0;
-        for (int y = startY; y < startY + frameHeight; y++) {
-            for (int x = startX; x < startX + frameWidth; x++) {
-                int pixel = sourceImage.getRGB(x, y);
-                if (((pixel >>> 24) & 0xFF) < 26) continue;
-                luminances[colorCount++] = luminance(pixel);
-            }
-        }
-        if (colorCount == 0) return new Vector3f(1.0f);
 
-        Arrays.sort(luminances, 0, colorCount);
-        float minLuminance = luminances[(int) (colorCount * 0.20f)];
-        float maxLuminance = luminances[Math.max(0, (int) (colorCount * 0.80f) - 1)];
-        float red = 0.0f, green = 0.0f, blue = 0.0f, weight = 0.0f;
+        float red = 0.0f, green = 0.0f, blue = 0.0f, totalWeight = 0.0f;
         for (int y = startY; y < startY + frameHeight; y++) {
             for (int x = startX; x < startX + frameWidth; x++) {
                 int pixel = sourceImage.getRGB(x, y);
-                float alpha = ((pixel >>> 24) & 0xFF) / 255.0f;
-                float luminance = luminance(pixel);
-                if (alpha < 0.10f || luminance < minLuminance || luminance > maxLuminance) continue;
-                red += ((pixel >>> 16) & 0xFF) * alpha;
-                green += ((pixel >>> 8) & 0xFF) * alpha;
-                blue += (pixel & 0xFF) * alpha;
-                weight += alpha;
+                int alpha = (pixel >>> 24) & 0xFF;
+                if (alpha < 50) continue;
+
+                float r = ((pixel >>> 16) & 0xFF) / 255.0f;
+                float g = ((pixel >>> 8) & 0xFF) / 255.0f;
+                float b = (pixel & 0xFF) / 255.0f;
+
+                float max = Math.max(r, Math.max(g, b));
+                float min = Math.min(r, Math.min(g, b));
+                float delta = max - min;
+
+                float value = max;
+                float saturation = (max == 0.0f) ? 0.0f : delta / max;
+
+                if (value < 0.35f || saturation < 0.20f) continue;
+
+                float weight = saturation * value;
+                red += r * weight;
+                green += g * weight;
+                blue += b * weight;
+                totalWeight += weight;
             }
         }
-        Vector3f color = weight == 0.0f ? new Vector3f(1.0f)
-                : new Vector3f(red / (255.0f * weight), green / (255.0f * weight),
-                        blue / (255.0f * weight));
-        increaseSaturation(color, 1.65f);
-        increaseBrightness(color, 1.40f);
+
+        Vector3f color;
+        if (totalWeight == 0.0f) {
+            color = new Vector3f(1.0f);
+        } else {
+            color = new Vector3f(red / totalWeight, green / totalWeight, blue / totalWeight);
+            float satFactor = 1.25f;
+            float valFactor = 1.20f;
+
+            adjustHSV(color, satFactor, valFactor);
+        }
+
         frameColors.put(frameIndex, color);
         return new Vector3f(color);
     }
 
-    /** Increases chroma around the original luminance without raising brightness. */
-    private static void increaseSaturation(Vector3f color, float factor) {
-        float brightness = color.x * 0.2126f + color.y * 0.7152f + color.z * 0.0722f;
-        color.x = Math.clamp(brightness + (color.x - brightness) * factor, 0.0f, 1.0f);
-        color.y = Math.clamp(brightness + (color.y - brightness) * factor, 0.0f, 1.0f);
-        color.z = Math.clamp(brightness + (color.z - brightness) * factor, 0.0f, 1.0f);
-    }
+    /**
+     * Adjusts the HSV values
+     * @param rgb the {@link Vector3f} supplied as {@code rgb}
+     * @param satFactor 1.0f = no change, 0.0f = grayscale
+     * @param valFactor  1.0f = no change, 0.0f = black
+     */
+    private static void adjustHSV(Vector3f rgb, float satFactor, float valFactor) {
+        float r = rgb.x, g = rgb.y, b = rgb.z;
+        float max = Math.max(r, Math.max(g, b));
+        float min = Math.min(r, Math.min(g, b));
+        float delta = max - min;
 
-    /** Compensates for the dark base material used by the shared 3D armor mesh. */
-    private static void increaseBrightness(Vector3f color, float factor) {
-        color.x = Math.min(color.x * factor, 1.0f);
-        color.y = Math.min(color.y * factor, 1.0f);
-        color.z = Math.min(color.z * factor, 1.0f);
-    }
+        if (max == 0.0f) return;
 
-    private static float luminance(int pixel) {
-        return (((pixel >>> 16) & 0xFF) * 0.2126f
-                + ((pixel >>> 8) & 0xFF) * 0.7152f
-                + (pixel & 0xFF) * 0.0722f) / 255.0f;
+        // 1. Extraer HSV
+        float h = 0.0f;
+        if (delta != 0.0f) {
+            if (max == r) h = (g - b) / delta + (g < b ? 6.0f : 0.0f);
+            else if (max == g) h = (b - r) / delta + 2.0f;
+            else h = (r - g) / delta + 4.0f;
+            h /= 6.0f;
+        }
+
+        float s = delta / max;
+        float v = max;
+
+        s = Math.clamp(s * satFactor, 0.0f, 1.0f);
+        v = Math.clamp(v * valFactor, 0.0f, 1.0f);
+
+        int i = (int) (h * 6.0f);
+        float f = h * 6.0f - i;
+        float p = v * (1.0f - s);
+        float q = v * (1.0f - f * s);
+        float t = v * (1.0f - (1.0f - f) * s);
+
+        switch (i % 6) {
+            case 0 -> { rgb.x = v; rgb.y = t; rgb.z = p; }
+            case 1 -> { rgb.x = q; rgb.y = v; rgb.z = p; }
+            case 2 -> { rgb.x = p; rgb.y = v; rgb.z = t; }
+            case 3 -> { rgb.x = p; rgb.y = q; rgb.z = v; }
+            case 4 -> { rgb.x = t; rgb.y = p; rgb.z = v; }
+            case 5 -> { rgb.x = v; rgb.y = p; rgb.z = q; }
+        }
     }
 
     /**
