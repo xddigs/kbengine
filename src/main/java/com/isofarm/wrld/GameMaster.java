@@ -63,6 +63,7 @@ public class GameMaster {
     private boolean isInventoryOpen = false;
     private boolean isBackpackOpen = false;
     private boolean isHUDShown = true;
+    private volatile boolean areEntitiesActive;
 
     private float genDelta;
 
@@ -151,13 +152,15 @@ public class GameMaster {
     /**
      * Transfers or creates the relevant entity or item for spawn.
      */
-    public void spawn() {
+    public synchronized void spawn() {
+        areEntitiesActive = false;
         chunkManager.updateLoadedChunks(0, 0);
         GridPos spawn = world.getHighestY(0.5f, 0.5f);
         float spawnY = spawn.y() + 1.8f;
         Player.plyr.setPosition(0.5f, spawnY, 0.5f);
         NPCService.npcs.spawn();
         camera.setPosition(0.5f, spawnY + 10.0f, 0.5f);
+        areEntitiesActive = true;
     }
 
     /**
@@ -459,6 +462,7 @@ public class GameMaster {
      * @param delta the {@code float} supplied as {@code delta}
      */
     private void updateEntities(float delta) {
+        if (!areEntitiesActive) return;
         for (Entity entity : entities) {
             entity.update(HoveredCell.get(this), delta);
             entity.updateEnvironmentalDamage(world, delta);
