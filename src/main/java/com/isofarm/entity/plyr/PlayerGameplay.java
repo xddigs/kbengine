@@ -121,7 +121,8 @@ public final class PlayerGameplay {
                 for (int z = minZ; z <= maxZ; z++) {
                     if (!world.isGeneratedOceanWaterAt(x, y, z)) continue;
                     float waterTop = y + world.getFluidLevelAt(x, y, z) / 8.0f;
-                    if (position.y < waterTop) {
+                    float bodyTop = position.y + size.y;
+                    if (position.y >= y && bodyTop <= waterTop + 0.001f) {
                         player.kill(Cause.DROWN);
                         return true;
                     }

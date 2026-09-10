@@ -69,7 +69,9 @@ public class Chunk {
         int index = getIndex(x, y, z);
         byte oldBlockId = blocks[index];
         blocks[index] = blockId;
-        generatedOceanWater.clear(index);
+        if (blockId != BlockData.WATER.getId()) {
+            generatedOceanWater.clear(index);
+        }
         boolean oldWasPlant = isPlant(oldBlockId);
         boolean newIsPlant = isPlant(blockId);
         if (oldWasPlant || newIsPlant) {

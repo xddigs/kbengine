@@ -311,6 +311,7 @@ public class GameInteraction {
             ToastFactory.error("toast.item_undroppable");
             return;
         }
+
         Player player = Player.plyr;
         if (player == null) return;
 
@@ -382,7 +383,7 @@ public class GameInteraction {
                 itemPos.y = lerp(itemPos.y, targetPos.y, lerpFactor);
                 itemPos.z = lerp(itemPos.z, targetPos.z, lerpFactor);
 
-                if (distance < 0.4f) {
+                if (itemPos.distance(targetPos) < 0.4f) {
                     Item item = worldItem.getItem();
                     int amount = worldItem.getAmount();
 
@@ -718,7 +719,9 @@ public class GameInteraction {
         GameMaster.game.rebuildChunkMeshAt(cell);
         ParticleEngine.peng.spawnBlock(cell, blockData);
 
-        if (wasBrokenIn != null) {
+        if (wasBrokenIn instanceof MaterialID materialID) {
+            itemToDrop = new Material(materialID);
+        } else if (wasBrokenIn != null) {
             itemToDrop = BlockData.fromIdTo(wasBrokenIn.getId());
         } else if (removedBlock.getType().hasDrops()) {
             Object dropObj = removedBlock.getType().getRandomDrop();
