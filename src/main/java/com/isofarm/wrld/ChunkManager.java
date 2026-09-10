@@ -330,7 +330,11 @@ public class ChunkManager {
     private void updateGrassColumn(int worldX, int worldZ) {
         for (int y = Chunk.SIZE_Y - 2; y >= 0; y--) {
             byte block = world.getBlockTypeAt(worldX, y, worldZ);
-            if (isSoil(block) && isExposedToAir(worldX, y, worldZ)) {
+            boolean exposedToAir = isExposedToAir(worldX, y, worldZ);
+            if (block == BlockData.GRASS.getId() && !exposedToAir) {
+                world.setBlockTypeAt(worldX, y, worldZ, BlockData.DIRT.getId());
+                soilTimers.remove(new SoilPosition(worldX, y, worldZ));
+            } else if (isSoil(block) && exposedToAir) {
                 startSoilTimer(worldX, y, worldZ);
             }
         }

@@ -117,13 +117,16 @@ public final class IslandGenerator implements Generator {
         if (lakeBank) topY = Math.max(topY, lake.surfaceY);
         if (lavaBank) topY = Math.max(topY, lavaPool.surfaceY);
 
+        byte surfaceBlock = islandSurfaceBlock(worldX, worldZ,
+                inLake || lakeBank, inLava || lavaBank);
         for (int y = OCEAN_FLOOR_Y; y <= topY; y++) {
             byte block;
             if (y == topY) {
-                block = islandSurfaceBlock(worldX, worldZ,
-                        inLake || lakeBank, inLava || lavaBank);
+                block = surfaceBlock;
             } else if (y >= topY - 3) {
-                block = BlockData.DIRT.getId();
+                block = surfaceBlock == BlockData.SAND.getId()
+                        ? BlockData.SAND.getId()
+                        : BlockData.DIRT.getId();
             } else {
                 block = BlockData.STONE.getId();
             }
