@@ -141,7 +141,7 @@ public class GameMaster {
         Library.initItems(itemRegistry);
         notifyProgress(progressCallback, ++currentStep / totalSteps);
 
-        Library.initCommands(genDelta, this);
+        Library.initCommands(this);
         notifyProgress(progressCallback, ++currentStep / totalSteps);
     }
 
