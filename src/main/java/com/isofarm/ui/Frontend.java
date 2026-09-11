@@ -4,6 +4,7 @@ import com.isofarm.data.GodObject;
 import com.isofarm.graphics.*;
 import com.isofarm.input.Mouse;
 import com.isofarm.item.Item;
+import com.isofarm.item.Tool;
 import com.isofarm.utils.K;
 import com.isofarm.utils.Settings;
 import com.isofarm.utils.Utils;
@@ -386,6 +387,13 @@ public class Frontend {
     public static void drawSprite(SpriteSheet spriteSheet, int column, int row,
                                   float x, float y, float width, float height,
                                   Vector4f tint) {
+        drawSprite(spriteSheet, column, row, x, y, width, height, tint, false);
+    }
+
+    /** Draws a sprite with the optional paper-mode tool darkening. */
+    public static void drawSprite(SpriteSheet spriteSheet, int column, int row,
+                                  float x, float y, float width, float height,
+                                  Vector4f tint, boolean paperTool) {
         if (spriteSheet == null) return;
         int cols = spriteSheet.getCols();
         int rows = spriteSheet.getRows();
@@ -404,9 +412,11 @@ public class Frontend {
         shader.setUniform("uColor", tint);
         shader.setUniform("uUseTexture", true);
         shader.setUniform("uUseFont", false);
+        shader.setUniform("uPaperTool", paperTool && Settings.doEnablePaper());
         shader.setUniform("uUVBounds", uvBounds);
 
         mesh.render();
+        shader.setUniform("uPaperTool", false);
         spriteSheet.unbind();
     }
 
@@ -424,6 +434,15 @@ public class Frontend {
                                   float x, float y, float width, float height, Vector4f tint) {
         drawSprite(spriteSheet, frame % spriteSheet.getCols(),
                 frame / spriteSheet.getCols(), x, y, width, height, tint);
+    }
+
+    /** Draws a frame with the optional paper-mode tool darkening. */
+    public static void drawSprite(SpriteSheet spriteSheet, int frame,
+                                  float x, float y, float width, float height,
+                                  Vector4f tint, boolean paperTool) {
+        if (spriteSheet == null) return;
+        drawSprite(spriteSheet, frame % spriteSheet.getCols(),
+                frame / spriteSheet.getCols(), x, y, width, height, tint, paperTool);
     }
 
     /**
@@ -853,7 +872,8 @@ public class Frontend {
 
         float renderX = Mouse.getX() + CURSOR_ICON_OFFSET;
         float renderY = Mouse.getY() + CURSOR_ICON_OFFSET;
-        drawSprite(spriteSheet, frameIndex, renderX, renderY, iconSize, iconSize, new Vector4f(1.0f));
+        drawSprite(spriteSheet, frameIndex, renderX, renderY, iconSize, iconSize,
+                new Vector4f(1.0f), (selectedItem instanceof Tool));
         wasCursorIconDrawn = true;
     }
 

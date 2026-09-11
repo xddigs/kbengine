@@ -80,6 +80,7 @@ public class ResourceManager {
     private static final Shader shadowMapShader = new Shader(K.Paths.SHADOW_VERT_SHADER, K.Paths.SHADOW_FRAG_SHADER);
     private static final Shader pointShadowShader = new Shader(K.Paths.POINT_SHADOW_VERT_SHADER, K.Paths.POINT_SHADOW_FRAG_SHADER);
     private static final Shader blurShader = new Shader(K.Paths.BLUR_VERT_SHADER, K.Paths.BLUR_FRAG_SHADER);
+    private static final Shader paperShader = new Shader(K.Paths.PAPER_VERT_SHADER, K.Paths.PAPER_FRAG_SHADER);
     private final Vector3f grassTint = new Vector3f(1.0f, 1.0f, 1.0f);
 
     private static final Mesh screenQuadMesh = Mesh.screenQuad();
@@ -311,6 +312,7 @@ public class ResourceManager {
         shadowMapShader.dispose();
         pointShadowShader.dispose();
         blurShader.dispose();
+        paperShader.dispose();
     }
 
     /**
@@ -385,6 +387,14 @@ public class ResourceManager {
      */
     public Shader getBlurShader() {
         return blurShader;
+    }
+
+    /**
+     * Returns the final paper-style post-processing shader.
+     * @return the {@link Shader} representing the paper shader
+     */
+    public Shader getPaperShader() {
+        return paperShader;
     }
 
     /**
@@ -676,6 +686,7 @@ public class ResourceManager {
             case "rain" -> rainShader;
             case "motion_blur" -> motionBlurShader;
             case "blur" -> blurShader;
+            case "paper" -> paperShader;
             case "shadow" -> shadowMapShader;
             case "grass" -> grassShader;
             case "outline" -> outlineShader;

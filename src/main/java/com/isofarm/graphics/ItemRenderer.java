@@ -2,7 +2,9 @@ package com.isofarm.graphics;
 
 import com.isofarm.entity.WorldItem;
 import com.isofarm.item.Item;
+import com.isofarm.item.Tool;
 import com.isofarm.utils.K;
+import com.isofarm.utils.Settings;
 import com.isofarm.wrld.GameMaster;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
@@ -116,6 +118,7 @@ public class ItemRenderer {
         shader.setUniform("uView", gameMaster.getActiveCamera().getViewMatrix());
         shader.setUniform("uParticleAlpha", 1.0f);
         shader.setUniform("uIsMaskPass", false);
+        shader.setUniform("uPaperTool", Settings.doEnablePaper() && item instanceof Tool);
         shader.setUniform("uEnableShadows", false);
         shader.setUniform("uBaseColor", new Vector3f(1.0f));
 
@@ -128,6 +131,7 @@ public class ItemRenderer {
             quadMesh.render();
         }
         glEnable(GL_CULL_FACE);
+        shader.setUniform("uPaperTool", false);
         spriteSheet.unbind();
         shader.unbind();
     }

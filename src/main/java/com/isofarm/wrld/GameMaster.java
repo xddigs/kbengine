@@ -570,6 +570,7 @@ public class GameMaster {
     public void render() {
         GameRenderer.gamr.render(this, chunkManager.getChunkMeshes());
         GameUIService.ui.render(isHUDShown(), this);
+        GameRenderer.gamr.renderPaper(this);
     }
 
     /**
@@ -631,6 +632,11 @@ public class GameMaster {
         if (sceneFbo != null) {
             sceneFbo.dispose();
             sceneFbo = new Framebuffer(newWidth, newHeight);
+        }
+
+        if (blurFbo != null) {
+            blurFbo.dispose();
+            blurFbo = new Framebuffer(newWidth, newHeight);
         }
 
         if (uiManager != null) {

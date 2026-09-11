@@ -23,6 +23,7 @@ import static org.lwjgl.opengl.GL13.*;
  */
 public class EquipmentController {
     public static final EquipmentController eq = new EquipmentController();
+    private static final Vector3f PAPER_TOOL_TINT = new Vector3f(0.62f);
     private static final int THICKNESS_LAYERS = 24;
     private static final float LAYER_DEPTH = 0.0025f;
 
@@ -118,19 +119,24 @@ public class EquipmentController {
         Item item = Settings.getSelectedItem();
         if (item == null) {
             currentActiveNode.setVisible(false);
+            clearPaperToolTint();
             return;
         }
 
         SpriteSheet sheet = ResourceManager.getItemSpriteSheet(item);
         if (sheet == null) {
             currentActiveNode.setVisible(false);
+            clearPaperToolTint();
             return;
         }
 
         if (item instanceof Equippable e && e.isEquipped()) {
             currentActiveNode.setVisible(false);
+            clearPaperToolTint();
             return;
         }
+
+        setPaperToolTint(item instanceof Tool && Settings.doEnablePaper());
 
         int textureId = sheet.getTextureId();
         int frame = Math.clamp(ResourceManager.getItemFrame(item), 0, sheet.getTotalFrames() - 1);
@@ -156,6 +162,20 @@ public class EquipmentController {
         }
 
         currentActiveNode.setVisible(true);
+    }
+
+    /** Applies the paper-mode tint only to the selected item node hierarchy. */
+    private void setPaperToolTint(boolean enabled) {
+        Vector3f tint = enabled ? PAPER_TOOL_TINT : null;
+        currentActiveNode.setColorTint(tint);
+        for (GLTFNode layer : currentActiveNode.getChildren()) {
+            layer.setColorTint(tint);
+        }
+    }
+
+    /** Clears any paper-mode tint when the selected item is not rendered. */
+    private void clearPaperToolTint() {
+        setPaperToolTint(false);
     }
 
     /** Updates the shield texture while keeping it attached over the left forearm. */

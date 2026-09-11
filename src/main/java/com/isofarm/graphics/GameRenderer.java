@@ -105,6 +105,7 @@ public class GameRenderer {
         defaultShader.setUniform("uParticleAlpha", 1.0f);
         defaultShader.setUniform("uEnableShadows", Settings.doEnableShadows());
         defaultShader.setUniform("uIsMaskPass", false);
+        defaultShader.setUniform("uPaperTool", false);
 
         defaultShader.setUniform("uProjection", camera.getProjectionMatrix());
         defaultShader.setUniform("uView", camera.getViewMatrix());
@@ -581,6 +582,42 @@ public class GameRenderer {
             glCullFace(GL_BACK);
             glEnable(GL_DEPTH_TEST);
         }
+    }
+
+    /**
+     * Applies the paper palette to the complete frame, including the UI.
+     * The UI is rendered by {@code GameMaster} after the world pass, so this
+     * method must run after that UI pass to remain the top-most render layer.
+     *
+     * @param gameMaster the current game runtime
+     */
+    public void renderPaper(GameMaster gameMaster) {
+        if (!Settings.doEnablePaper()) return;
+
+        int windowWidth = (int) gameMaster.getWindowWidth();
+        int windowHeight = (int) gameMaster.getWindowHeight();
+        Framebuffer paperSource = gameMaster.getBlurFbo();
+
+        // Capture the already-composited default framebuffer (world + UI) into
+        // a texture that can safely be sampled by the final post-process pass.
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, paperSource.getTextureId());
+        glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, windowWidth, windowHeight);
+
+        glDisable(GL_DEPTH_TEST);
+        glDisable(GL_CULL_FACE);
+        glDisable(GL_BLEND);
+        glDisable(GL_SCISSOR_TEST);
+
+        Shader paperShader = ResourceManager.rem.getPaperShader();
+        paperShader.bind();
+        paperShader.setUniform("uScene", 0);
+        ResourceManager.rem.getScreenQuadMesh().render();
+        paperShader.unbind();
+
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_CULL_FACE);
     }
 
     /**

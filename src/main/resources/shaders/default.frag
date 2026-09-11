@@ -34,6 +34,7 @@ uniform samplerCube uTorchShadowMaps[4];
 uniform float uTorchShadowFarPlane;
 
 uniform bool uIsMaskPass;
+uniform bool uPaperTool;
 uniform float uParticleAlpha;
 uniform bool uEnableShadows;
 uniform bool uIsSprite;
@@ -241,6 +242,9 @@ void main() {
     float alpha = texColor.a * uParticleAlpha;
     vec3 tint = uUseColorTint ? uColorTint : vec3(1.0);
     vec3 finalColor = texColor.rgb * tint * totalLight * viewFog;
+    if (uPaperTool) {
+        finalColor *= vec3(0.62);
+    }
 
     if (vIsWater > 0.5 && uIsWater) {
         bool isLava = vTexCoord.x > uLavaUVBounds.x && vTexCoord.x < uLavaUVBounds.z &&

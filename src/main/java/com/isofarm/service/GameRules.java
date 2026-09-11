@@ -35,6 +35,7 @@ public final class GameRules {
         RULES.put("doEnableShadows", Settings.doEnableShadows());
         RULES.put("doBookAnimation", Settings.doBookAnimation());
         RULES.put("doEnableIds", Settings.doEnableIds());
+        RULES.put("doEnablePaper", Settings.doEnablePaper());
         RULES.put("renderDistance", Settings.getRenderDistance());
         RULES.put("fov", Settings.getFov());
         RULES.put("unloadMargin", Settings.getUnloadMargin());
@@ -172,6 +173,10 @@ public final class GameRules {
 
                 case "doEnableIds" -> {
                     Settings.setDoEnableIds((Boolean) value);
+                }
+
+                case "doEnablePaper" -> {
+                    Settings.setDoEnablePaper((Boolean) value);
                 }
 
                 case "renderDistance" -> {

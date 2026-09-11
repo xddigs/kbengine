@@ -19,7 +19,6 @@ import com.isofarm.item.Item;
  * <p>Callers should use the documented public operations and allow this type to preserve
  * its invariants rather than modifying implementation details directly.
  */
-@SuppressWarnings({"FieldCanBeLocal", "FieldMayBeFinal"})
 @Singleton
 public class Settings {
     private static final float BASE_ICON_SIZE = 16.0f;
@@ -43,6 +42,7 @@ public class Settings {
     private static boolean doEnableShadows = true;
     private static boolean doBookAnimation = false;
     private static boolean doEnableIds = true;
+    private static boolean doEnablePaper = false;
 
     /**
      * Creates a new {@code Settings} instance.
@@ -315,27 +315,6 @@ public class Settings {
     }
 
     /**
-     * Toggles the setting represented by motion blur and applies it immediately.
-     */
-    public static void toggleMotionBlur() {
-        doEnableMotions = !doEnableMotions;
-    }
-
-    /**
-     * Toggles the setting represented by keep inventory and applies it immediately.
-     */
-    public static void toggleKeepInventory() {
-        doKeepInventory = !doKeepInventory;
-    }
-
-    /**
-     * Toggles the setting represented by shadows and applies it immediately.
-     */
-    public static void toggleShadows() {
-        doEnableShadows = !doEnableShadows;
-    }
-
-    /**
      * Toggles the setting represented by music and applies it immediately.
      */
     public static void toggleMusic() {
@@ -396,6 +375,21 @@ public class Settings {
      */
     public static void setDoEnableIds(boolean doEnableIds) {
         Settings.doEnableIds = doEnableIds;
+    }
+
+    /**
+     * Returns the {@code doEnablePaper} value
+     * @return {@link boolean} value of {@code doEnablePaper}
+     */
+    public static boolean doEnablePaper() {
+        return doEnablePaper;
+    }
+
+    /**
+     * Sets the doEnablePaper value
+     */
+    public static void setDoEnablePaper(boolean doEnablePaper) {
+        Settings.doEnablePaper = doEnablePaper;
     }
 
     /**
