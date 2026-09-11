@@ -24,7 +24,12 @@ public class StartingKit extends Kit {
      */
     public StartingKit() {
         setItems(new Item[]{
-                new Backpack()
+                new Backpack(),
+                new Sword(Tier.WOODEN),
+                new Pickaxe(Tier.WOODEN),
+                new Axe(Tier.WOODEN),
+                new Hoe(Tier.WOODEN),
+                new Shovel(Tier.WOODEN),
         });
     }
 }
