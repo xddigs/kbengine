@@ -2,7 +2,6 @@ package com.isofarm.service;
 
 import com.isofarm.data.Singleton;
 import com.isofarm.entity.Enemy;
-import com.isofarm.entity.enemies.Goblin;
 import com.isofarm.wrld.GameMaster;
 import org.joml.Vector3f;
 
