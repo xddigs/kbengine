@@ -4,6 +4,8 @@ import com.isofarm.data.*;
 import com.isofarm.entity.Player;
 import com.isofarm.input.GameInteraction;
 import com.isofarm.item.Block;
+import com.isofarm.item.Item;
+import com.isofarm.item.Tool;
 import com.isofarm.item.iBlock;
 import com.isofarm.service.BookService;
 import com.isofarm.service.TimeService;
@@ -476,42 +478,45 @@ public class GameRenderer {
 
         if (blockAtlas != null) blockAtlas.unbind();
 
-        if (hoveredCell != null) {
-            Vector3f outlineColor = getOutlineColor();
-            Shader outlineShader = ResourceManager.rem.getOutlineShader();
-            glEnable(GL_DEPTH_TEST);
-            glDepthFunc(GL_LESS);
-            glDepthMask(false);
-            outlineShader.bind();
-            outlineShader.setUniform("uProjection", camera.getProjectionMatrix());
-            outlineShader.setUniform("uView", camera.getViewMatrix());
-            outlineShader.setUniform("uViewportSize", windowWidth, windowHeight);
-            outlineShader.setUniform("uOutlineColor", new Vector4f(outlineColor, 1.0f));
+        Item selectedItem = Settings.selectedItem;
+        if (selectedItem instanceof Tool) {
+            if (hoveredCell != null) {
+                Vector3f outlineColor = getOutlineColor();
+                Shader outlineShader = ResourceManager.rem.getOutlineShader();
+                glEnable(GL_DEPTH_TEST);
+                glDepthFunc(GL_LESS);
+                glDepthMask(false);
+                outlineShader.bind();
+                outlineShader.setUniform("uProjection", camera.getProjectionMatrix());
+                outlineShader.setUniform("uView", camera.getViewMatrix());
+                outlineShader.setUniform("uViewportSize", windowWidth, windowHeight);
+                outlineShader.setUniform("uOutlineColor", new Vector4f(outlineColor, 1.0f));
 
-            var selectedInteractiveBlock = World.wrld.getInteractiveBlockAt(
-                    hoveredCell.x(), hoveredCell.y(), hoveredCell.z());
-            if (selectedInteractiveBlock != null
-                    && selectedInteractiveBlock.getType().isDoor()) {
-                selectedInteractiveBlock.getSelectionTransform(modelMatrix);
-            } else {
-                modelMatrix.identity().translate(
+                var selectedInteractiveBlock = World.wrld.getInteractiveBlockAt(
                         hoveredCell.x(), hoveredCell.y(), hoveredCell.z());
-            }
+                if (selectedInteractiveBlock != null
+                        && selectedInteractiveBlock.getType().isDoor()) {
+                    selectedInteractiveBlock.getSelectionTransform(modelMatrix);
+                } else {
+                    modelMatrix.identity().translate(
+                            hoveredCell.x(), hoveredCell.y(), hoveredCell.z());
+                }
 
-            outlineShader.setUniform("uModel", modelMatrix);
-            BlockShape selectedShape = hoveredCell.data() instanceof BlockData ?
-                    World.wrld.getBlockShapeAt(hoveredCell.x(), hoveredCell.y(), hoveredCell.z()) : null;
-            Mesh selectionMesh = ResourceManager.rem.getSelectionMesh(selectedShape);
-            for (float[] direction : BLOCK_OUTLINE_DIRECTIONS) {
-                outlineShader.setUniform("uOutlineOffset",
-                        direction[0] * BLOCK_OUTLINE_WIDTH,
-                        direction[1] * BLOCK_OUTLINE_WIDTH);
-                selectionMesh.renderLines();
-            }
+                outlineShader.setUniform("uModel", modelMatrix);
+                BlockShape selectedShape = hoveredCell.data() instanceof BlockData ?
+                        World.wrld.getBlockShapeAt(hoveredCell.x(), hoveredCell.y(), hoveredCell.z()) : null;
+                Mesh selectionMesh = ResourceManager.rem.getSelectionMesh(selectedShape);
+                for (float[] direction : BLOCK_OUTLINE_DIRECTIONS) {
+                    outlineShader.setUniform("uOutlineOffset",
+                            direction[0] * BLOCK_OUTLINE_WIDTH,
+                            direction[1] * BLOCK_OUTLINE_WIDTH);
+                    selectionMesh.renderLines();
+                }
 
-            glDepthMask(true);
-            glEnable(GL_DEPTH_TEST);
-            outlineShader.unbind();
+                glDepthMask(true);
+                glEnable(GL_DEPTH_TEST);
+                outlineShader.unbind();
+            }
         }
 
         defaultShader.unbind();
