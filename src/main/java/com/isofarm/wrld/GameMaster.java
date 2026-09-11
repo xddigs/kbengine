@@ -556,8 +556,8 @@ public class GameMaster {
         GameInteraction.gami.update(this, Settings.selectedItem);
 
         FluidSimulation.updateAll(delta);
-        chunkManager.update(Player.plyr.getPosition().x,
-                Player.plyr.getPosition().z, delta);
+        chunkManager.update(Player.plyr.getPosition().x(),
+                Player.plyr.getPosition().z(), delta);
 
         Mouse.update();
         Keyboard.update();

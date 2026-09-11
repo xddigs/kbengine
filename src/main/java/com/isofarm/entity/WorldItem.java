@@ -31,7 +31,7 @@ public class WorldItem extends Entity {
     private static final float GRAVITY = -20.0f;
     private static final float GROUND_OFFSET = 0.02f;
     private static final float ITEM_HEIGHT = 0.45f;
-    private static final float PICKUP_DELAY = 0.08f;
+    private static final float PICKUP_DELAY = 0.75f;
     private static final float AIR_DRAG = 2.5f;
     private static final float GROUND_FRICTION = 8.0f;
     private static final float BOUNCE_FACTOR = 0.20f;

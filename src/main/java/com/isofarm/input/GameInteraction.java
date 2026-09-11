@@ -50,7 +50,6 @@ import static org.joml.Math.lerp;
 public class GameInteraction {
     public static final GameInteraction gami = new GameInteraction();
     private static final float PICKUP_DISTANCE = 1.5f;
-
     private static final Logger log = LoggerFactory.getLogger(GameInteraction.class);
 
     private int breakingX = Integer.MIN_VALUE;
@@ -59,7 +58,7 @@ public class GameInteraction {
 
     private float breakProgress = 0.0f;
     private boolean isSmartShift = false;
-    
+
     /**
      * Creates a new private {@code GameInteraction} instance.
      */
@@ -149,16 +148,19 @@ public class GameInteraction {
             } else {
                 BookService.bs.close();
             }
-        } else if (Controls.isPressed(ControlAction.TOGGLE_INVENTORY) && BookService.bs.isOpen() &&
+        } else if (Controls.isPressed(ControlAction.TOGGLE_INVENTORY)
+                && BookService.bs.isOpen() &&
                 backpackBook == null) {
             BookService.bs.close();
         }
 
-        if (!Player.plyr.getGamemode().isNoClip()) {
+        if (!Player.plyr.getGamemode().isNoClip()
+                && !Controls.isPressed(ControlAction.DROP_ITEM)) {
             pickUp();
         }
 
-        if (Controls.isPressed(ControlAction.TOGGLE_MUSIC) && !GameMaster.game.isChatOpen()) {
+        if (Controls.isPressed(ControlAction.TOGGLE_MUSIC)
+                && !GameMaster.game.isChatOpen()) {
             Settings.toggleMusic();
         }
 
@@ -333,6 +335,10 @@ public class GameInteraction {
         Player player = Player.plyr;
         if (player == null) return;
 
+        if (player.isInGodMode()) {
+            return;
+        }
+
         for (InventorySlot slot : player.getInventory().getSlots()) {
             if (slot.isEmpty()) continue;
 
@@ -341,18 +347,18 @@ public class GameInteraction {
             if (!item.equals(selectedItem)) continue;
             int amount = dropAll ? slot.getAmount() : 1;
             if (amount <= 0) continue;
+            Vector3f forward = new Vector3f(player.getForward()).normalize();
             Vector3f playerPosition = player.getPosition();
-            Vector3f dropPosition = new Vector3f(playerPosition.x, playerPosition.y + 0.8f, playerPosition.z);
+            Vector3f dropPosition = new Vector3f(playerPosition)
+                    .add(forward.x * 0.8f, 0.8f, forward.z * 0.8f);
             WorldItem worldItem = new WorldItem(item, amount, dropPosition);
 
-            Vector3f forward = new Vector3f(player.getForward()).normalize();
             Vector3f playerVelocity = new Vector3f(player.getVelocity());
             float inheritedVelocity = 0.35f;
             float throwStrength = 8.0f;
             float verticalStrength = 4.7f;
 
             Vector3f velocity = new Vector3f(playerVelocity).mul(inheritedVelocity);
-
             velocity.x += forward.x * throwStrength;
             velocity.z += forward.z * throwStrength;
             velocity.y += verticalStrength;
@@ -490,6 +496,8 @@ public class GameInteraction {
 
         Item selectedItem = Settings.selectedItem;
         if (!(selectedItem instanceof Tool)) return;
+        if (selectedItem instanceof Sword) return;
+
         if (!Player.plyr.isAttacking()) {
             Player.plyr.interact();
         }
