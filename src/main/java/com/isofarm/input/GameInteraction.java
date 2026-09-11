@@ -484,10 +484,9 @@ public class GameInteraction {
         int z = cell.z();
 
         Item selectedItem = Settings.selectedItem;
-        {
-            if (!Player.plyr.isAttacking()) {
-                Player.plyr.interact();
-            }
+        if (!(selectedItem instanceof Tool)) return;
+        if (!Player.plyr.isAttacking()) {
+            Player.plyr.interact();
         }
 
         byte blockId = world.getBlockTypeAt(x, y, z);
@@ -666,6 +665,7 @@ public class GameInteraction {
      */
     private void breakBlock(GameMaster gameMaster, BlockPos cell, Blockable blockable,
                             byte blockId, Item selectedItem) {
+        if (!(selectedItem instanceof Tool)) return;
         World world = GameMaster.game.getWorld();
         BlockData blockData = blockable instanceof BlockData data ? data : BlockData.fromId(blockId);
         if (blockData.getSoundGroup() != null) {
