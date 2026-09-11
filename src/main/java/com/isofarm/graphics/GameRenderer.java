@@ -36,8 +36,15 @@ public class GameRenderer {
     private static final int MAX_TORCH_LIGHTS = 32;
     public static final GameRenderer gamr = new GameRenderer();
     private static final float TORCH_SCALE_X = 0.5625f;
-    private static final float TORCH_SCALE_Y = 1.0f;
+    private static final float TORCH_SCALE_Y = 0.5f;
     private static final float TORCH_SCALE_Z = 0.5625f;
+    private static final float BLOCK_OUTLINE_WIDTH = 1.0f;
+    private static final float[][] BLOCK_OUTLINE_DIRECTIONS = {
+            {1.0f, 0.0f}, {0.9239f, 0.3827f}, {0.7071f, 0.7071f}, {0.3827f, 0.9239f},
+            {0.0f, 1.0f}, {-0.3827f, 0.9239f}, {-0.7071f, 0.7071f}, {-0.9239f, 0.3827f},
+            {-1.0f, 0.0f}, {-0.9239f, -0.3827f}, {-0.7071f, -0.7071f}, {-0.3827f, -0.9239f},
+            {0.0f, -1.0f}, {0.3827f, -0.9239f}, {0.7071f, -0.7071f}, {0.9239f, -0.3827f}
+    };
     private final List<Vector3f> torchLights = new ArrayList<>();
     private final Matrix4f modelMatrix = new Matrix4f();
     private final Matrix4f viewProjMatrix = new Matrix4f();
@@ -471,21 +478,15 @@ public class GameRenderer {
 
         if (hoveredCell != null) {
             Vector3f outlineColor = getOutlineColor();
+            Shader outlineShader = ResourceManager.rem.getOutlineShader();
             glEnable(GL_DEPTH_TEST);
-            glLineWidth(2.0f);
+            glDepthFunc(GL_LESS);
             glDepthMask(false);
-            defaultShader.bind();
-            defaultShader.setUniform("uUseTexture", false);
-            defaultShader.setUniform("uUseFaceAtlas", false);
-            defaultShader.setUniform("uBaseColor", outlineColor);
-
-            defaultShader.setUniform("uIsWater", false);
-            defaultShader.setUniform("uIsSprite", false);
-            defaultShader.setUniform("uIsSubmergedEntity", false);
-            defaultShader.setUniform("uEnableShadows", false);
-
-            defaultShader.setUniform("uUseParticleAlpha", false);
-            defaultShader.setUniform("uParticleAlpha", 1.0f);
+            outlineShader.bind();
+            outlineShader.setUniform("uProjection", camera.getProjectionMatrix());
+            outlineShader.setUniform("uView", camera.getViewMatrix());
+            outlineShader.setUniform("uViewportSize", windowWidth, windowHeight);
+            outlineShader.setUniform("uOutlineColor", new Vector4f(outlineColor, 1.0f));
 
             var selectedInteractiveBlock = World.wrld.getInteractiveBlockAt(
                     hoveredCell.x(), hoveredCell.y(), hoveredCell.z());
@@ -497,16 +498,20 @@ public class GameRenderer {
                         hoveredCell.x(), hoveredCell.y(), hoveredCell.z());
             }
 
-            defaultShader.setUniform("uModel", modelMatrix);
-            BlockShape selectedShape = hoveredCell.data() instanceof BlockData
-                    ? World.wrld.getBlockShapeAt(
-                    hoveredCell.x(), hoveredCell.y(), hoveredCell.z()) : null;
-            ResourceManager.rem.getSelectionMesh(selectedShape).renderLines();
+            outlineShader.setUniform("uModel", modelMatrix);
+            BlockShape selectedShape = hoveredCell.data() instanceof BlockData ?
+                    World.wrld.getBlockShapeAt(hoveredCell.x(), hoveredCell.y(), hoveredCell.z()) : null;
+            Mesh selectionMesh = ResourceManager.rem.getSelectionMesh(selectedShape);
+            for (float[] direction : BLOCK_OUTLINE_DIRECTIONS) {
+                outlineShader.setUniform("uOutlineOffset",
+                        direction[0] * BLOCK_OUTLINE_WIDTH,
+                        direction[1] * BLOCK_OUTLINE_WIDTH);
+                selectionMesh.renderLines();
+            }
 
             glDepthMask(true);
             glEnable(GL_DEPTH_TEST);
-            defaultShader.bind();
-            defaultShader.setUniform("uIsMaskPass", false);
+            outlineShader.unbind();
         }
 
         defaultShader.unbind();
@@ -578,9 +583,8 @@ public class GameRenderer {
      * @return the {@link Vector3f} representing the outline color
      */
     private Vector3f getOutlineColor() {
-        boolean isSmartShift = GameInteraction.gami != null
-                && GameInteraction.gami.isSmartShiftActive();
-        return isSmartShift ? new Vector3f(1.0f, 1.0f, 1.0f) : K.Colors.OUTLINE_DEFAULT;
+        boolean isSmartShift = GameInteraction.gami != null && GameInteraction.gami.isSmartShiftActive();
+        return isSmartShift ? new Vector3f(1.0f, 1.0f, 0.0f) : K.Colors.OUTLINE_DEFAULT;
     }
 
     /** Uploads nearby emissive blocks so the world shader can light them. */

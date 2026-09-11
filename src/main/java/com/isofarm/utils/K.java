@@ -336,7 +336,7 @@ public final class K {
  * its invariants rather than modifying implementation details directly.
  */
     public static final class Colors {
-        public static final Vector3f OUTLINE_DEFAULT = new Vector3f(0.0f, 0.0f, 0.0f);
+        public static final Vector3f OUTLINE_DEFAULT = new Vector3f(1.0f, 1.0f, 1.0f);
         public static final Vector3f RAIN = new Vector3f(0.35f, 0.55f, 1.0f);
 
     }

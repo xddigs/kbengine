@@ -1072,6 +1072,8 @@ public class GameInteraction {
      * @return {@code true} if smart shift active; otherwise {@code false}
      */
     public boolean isSmartShiftActive() {
-        return isSmartShift;
+        return Controls.isDown(ControlAction.SMART_SHIFT)
+                && !GameMaster.game.isInventoryOpen()
+                && !GameMaster.game.isBackpackOpen();
     }
 }
