@@ -8,6 +8,7 @@ uniform sampler2D uTexture;
 uniform bool uUseTexture;
 uniform bool uUseFont;
 uniform bool uUseSilhouette;
+uniform bool uPaperTool;
 
 uniform bool uUseRoundedRect;
 uniform vec2 uRectSize;
@@ -44,6 +45,10 @@ void main() {
         } else {
             finalColor *= textureColor;
         }
+    }
+
+    if (uPaperTool) {
+        finalColor.rgb *= vec3(0.62);
     }
 
     if (uUseRoundedRect) {
