@@ -1,6 +1,5 @@
 package org.kbeng.ui;
 
-import com.isofarm.data.*;
 import org.kbeng.data.*;
 import org.kbeng.entity.NPC;
 import org.kbeng.entity.Player;
@@ -14,7 +13,6 @@ import org.kbeng.item.Item;
 import org.kbeng.service.BookService;
 import org.kbeng.service.Service;
 import org.kbeng.service.TimeService;
-import com.isofarm.utils.*;
 import org.kbeng.utils.*;
 import org.kbeng.wrld.GameMaster;
 import org.joml.Vector2f;

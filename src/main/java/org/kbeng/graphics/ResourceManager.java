@@ -1,12 +1,10 @@
 package org.kbeng.graphics;
 
-import com.isofarm.data.*;
 import org.kbeng.data.*;
 import org.kbeng.entity.Enemy;
 import org.kbeng.entity.enemies.Goblin;
 import org.kbeng.graphics.gltf.GLTFLoader;
 import org.kbeng.graphics.gltf.GLTFModel;
-import com.isofarm.item.*;
 import org.kbeng.item.*;
 import org.kbeng.utils.K;
 import org.joml.Vector3f;

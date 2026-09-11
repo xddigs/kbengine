@@ -1,6 +1,5 @@
 package org.kbeng.ui;
 
-import com.isofarm.data.*;
 import org.kbeng.data.BlockData;
 import org.kbeng.data.InventorySlot;
 import org.kbeng.data.SlotType;

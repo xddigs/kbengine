@@ -1,7 +1,5 @@
 package org.kbeng.craft;
 
-import com.isofarm.data.*;
-import com.isofarm.item.*;
 import org.kbeng.data.*;
 import org.kbeng.item.*;
 

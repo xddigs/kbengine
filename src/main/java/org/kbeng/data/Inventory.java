@@ -1,7 +1,6 @@
 package org.kbeng.data;
 
 import org.kbeng.entity.Character;
-import com.isofarm.item.*;
 import org.kbeng.entity.Player;
 import org.kbeng.item.*;
 import org.kbeng.service.BookService;

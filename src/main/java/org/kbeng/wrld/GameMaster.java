@@ -2,10 +2,6 @@ package org.kbeng.wrld;
 
 import org.kbeng.craft.Recipe;
 import org.kbeng.craft.RecipeRegistry;
-import com.isofarm.data.*;
-import com.isofarm.entity.*;
-import com.isofarm.graphics.*;
-import com.isofarm.input.*;
 import org.kbeng.data.*;
 import org.kbeng.entity.*;
 import org.kbeng.graphics.*;
@@ -13,7 +9,6 @@ import org.kbeng.input.*;
 import org.kbeng.item.Item;
 import org.kbeng.item.iBlock;
 import org.kbeng.pathfinding.GridPos;
-import com.isofarm.service.*;
 import org.kbeng.service.*;
 import org.kbeng.ui.Frontend;
 import org.kbeng.ui.GameUIService;

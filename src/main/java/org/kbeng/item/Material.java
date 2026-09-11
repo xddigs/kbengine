@@ -1,6 +1,5 @@
 package org.kbeng.item;
 
-import com.isofarm.data.*;
 import org.kbeng.data.*;
 import org.kbeng.utils.Local;
 

@@ -1,6 +1,5 @@
 package org.kbeng.graphics;
 
-import com.isofarm.data.*;
 import org.kbeng.data.*;
 import org.kbeng.entity.Player;
 import org.kbeng.input.GameInteraction;

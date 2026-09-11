@@ -1,9 +1,7 @@
 package org.kbeng.service;
 
-import com.isofarm.data.*;
 import org.kbeng.data.*;
 import org.kbeng.entity.WorldItem;
-import com.isofarm.item.*;
 import org.kbeng.item.Axe;
 import org.kbeng.item.Block;
 import org.kbeng.item.Item;

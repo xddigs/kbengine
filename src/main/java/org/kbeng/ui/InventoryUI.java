@@ -1,6 +1,5 @@
 package org.kbeng.ui;
 
-import com.isofarm.data.*;
 import org.kbeng.data.*;
 import org.kbeng.entity.NPC;
 import org.kbeng.entity.Player;
@@ -10,7 +9,6 @@ import org.kbeng.graphics.Texture;
 import org.kbeng.input.ControlAction;
 import org.kbeng.input.Controls;
 import org.kbeng.input.Mouse;
-import com.isofarm.item.*;
 import org.kbeng.item.*;
 import org.kbeng.service.SoundService;
 import org.kbeng.utils.K;

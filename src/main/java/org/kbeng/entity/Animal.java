@@ -1,6 +1,5 @@
 package org.kbeng.entity;
 
-import com.isofarm.data.*;
 import org.kbeng.data.*;
 import org.kbeng.wrld.GameMaster;
 

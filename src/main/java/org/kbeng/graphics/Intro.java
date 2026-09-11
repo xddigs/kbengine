@@ -2,7 +2,6 @@ package org.kbeng.graphics;
 
 import org.kbeng.Game;
 import org.kbeng.entity.Player;
-import com.isofarm.ui.*;
 import org.kbeng.input.ControlAction;
 import org.kbeng.input.Controls;
 import org.kbeng.input.Keyboard;

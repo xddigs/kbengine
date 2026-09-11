@@ -1,7 +1,6 @@
 package org.kbeng.ui;
 
 import org.kbeng.data.GodObject;
-import com.isofarm.graphics.*;
 import org.kbeng.graphics.*;
 import org.kbeng.input.Mouse;
 import org.kbeng.item.Item;

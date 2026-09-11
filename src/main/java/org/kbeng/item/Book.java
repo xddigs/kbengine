@@ -1,6 +1,5 @@
 package org.kbeng.item;
 
-import com.isofarm.data.*;
 import org.kbeng.data.Enchantment;
 import org.kbeng.data.SoundGroup;
 import org.kbeng.data.Usables;

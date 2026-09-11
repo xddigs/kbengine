@@ -2,7 +2,6 @@ package org.kbeng.craft;
 
 import org.kbeng.data.MaterialID;
 import org.kbeng.data.Produce;
-import com.isofarm.item.*;
 import org.kbeng.item.*;
 
 import java.util.List;
