@@ -159,8 +159,10 @@ public class Library implements Service<GameMaster> {
                 ToastFactory.error(Local.lang.f("toast.invalid_amount", args[1]));
                 return;
             }
-            if (amount <= 0) {
-                log.warn("Amount must be greater than zero.");
+
+            if (amount < 0) {
+                log.warn("Amount mustn't be less than zero.");
+                ToastFactory.error(Local.lang.f("toast.invalid_amount", args[1]));
                 return;
             }
 
@@ -177,7 +179,7 @@ public class Library implements Service<GameMaster> {
             }
 
             log.info("Command addEnemy executed: {} x{}", itemId, amount);
-            ToastFactory.success(Local.lang.f("toast.item_added", amount, item.getDisplayName()));
+            ToastFactory.reward(Local.lang.f("toast.item_added", amount, item.getDisplayName()));
         }));
 
         cr.register(new Command("/earn", new CommandArgument[]{literal("amount")}, args -> {
