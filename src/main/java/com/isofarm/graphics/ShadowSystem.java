@@ -44,7 +44,6 @@ public class ShadowSystem {
     private static final float SHADOW_SIZE = 70.0f;
     private static final float SHADOW_NEAR = 1.0f;
     private static final float SHADOW_FAR = 220.0f;
-    private static final float SHADOW_UPDATE_INTERVAL = 1.0f / 60.0f;
 
     private final Matrix4f projection = new Matrix4f();
     private final Matrix4f view = new Matrix4f();
@@ -53,10 +52,11 @@ public class ShadowSystem {
     private final Vector3f lightPosition = new Vector3f();
     private final Vector3f target = new Vector3f();
     private final Vector3f lightDirection = new Vector3f();
+    private final Vector3f lightRight = new Vector3f();
+    private final Vector3f lightUp = new Vector3f();
+    private final Vector3f snappedTarget = new Vector3f();
 
     private final Matrix4f modelMatrix = new Matrix4f();
-    private float updateTimer;
-    private boolean hasRendered;
 
     /**
      * Renders this object in the requested render pass.
@@ -66,13 +66,9 @@ public class ShadowSystem {
     public void render(GameMaster gameMaster,
                        Map<Chunk, ChunkMeshBuilder.ChunkRenderMesh> chunkMeshes) {
         if (!Settings.doEnableShadows()) return;
-        updateTimer += Math.min(gameMaster.getGenDelta(), SHADOW_UPDATE_INTERVAL);
-        if (hasRendered && updateTimer < SHADOW_UPDATE_INTERVAL) return;
-        updateTimer = 0.0f;
-        hasRendered = true;
 
         ShadowMap shadowMap = gameMaster.getShadowMap();
-        updateLightMatrix(gameMaster);
+        updateLightMatrix(gameMaster, shadowMap);
         shadowMap.bind();
 
         glEnable(GL_DEPTH_TEST);
@@ -176,8 +172,9 @@ public class ShadowSystem {
     /**
      * Updates the light matrix.
      * @param gameMaster the {@link GameMaster} supplied as {@code gameMaster}
+     * @param shadowMap the {@link ShadowMap} supplied as {@code shadowMap}
      */
-    private void updateLightMatrix(GameMaster gameMaster) {
+    private void updateLightMatrix(GameMaster gameMaster, ShadowMap shadowMap) {
         lightDirection.set(gameMaster.getCelestialLighting().getDirection()).normalize();
 
         Player player = Player.plyr;
@@ -187,15 +184,25 @@ public class ShadowSystem {
             target.set(0.0f, 0.0f, 0.0f);
         }
 
-        lightPosition.set(target).sub(new Vector3f(lightDirection).mul(SHADOW_DISTANCE));
         Vector3f up = new Vector3f(0.0f, 1.0f, 0.0f);
 
         if (Math.abs(lightDirection.y) > 0.98f) {
             up.set(0.0f, 0.0f, 1.0f);
         }
 
+        lightRight.set(lightDirection).cross(up).normalize();
+        lightUp.set(lightRight).cross(lightDirection).normalize();
+        float texelSize = (SHADOW_SIZE * 2.0f) / shadowMap.getWidth();
+        float targetLightX = target.dot(lightRight);
+        float targetLightY = target.dot(lightUp);
+        snappedTarget.set(target)
+                .fma(Math.round(targetLightX / texelSize) * texelSize - targetLightX, lightRight)
+                .fma(Math.round(targetLightY / texelSize) * texelSize - targetLightY, lightUp);
+
+        lightPosition.set(snappedTarget).sub(new Vector3f(lightDirection).mul(SHADOW_DISTANCE));
+
         projection.identity().ortho(-SHADOW_SIZE, SHADOW_SIZE, -SHADOW_SIZE, SHADOW_SIZE, SHADOW_NEAR, SHADOW_FAR);
-        view.identity().lookAt(lightPosition, target, up);
+        view.identity().lookAt(lightPosition, snappedTarget, up);
         lightSpace.set(projection).mul(view);
     }
 

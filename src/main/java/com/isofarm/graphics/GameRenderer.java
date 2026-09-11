@@ -598,8 +598,6 @@ public class GameRenderer {
         int windowHeight = (int) gameMaster.getWindowHeight();
         Framebuffer paperSource = gameMaster.getBlurFbo();
 
-        // Capture the already-composited default framebuffer (world + UI) into
-        // a texture that can safely be sampled by the final post-process pass.
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, paperSource.getTextureId());
         glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, windowWidth, windowHeight);

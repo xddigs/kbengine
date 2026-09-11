@@ -6,10 +6,7 @@ out vec4 FragColor;
 
 uniform sampler2D uScene;
 
-// Warm paper and ink tones. The shader deliberately removes hue so that bright
-// colours become paper white, while shadows and contrast settle into graphite
-// greys and near-black ink.
-const vec3 PAPER_WHITE = vec3(0.96, 0.94, 0.88);
+const vec3 PAPER_WHITE = vec3(1.00, 0.95, 0.85);
 const vec3 PAPER_LIGHT = vec3(0.78, 0.77, 0.73);
 const vec3 PAPER_DARK = vec3(0.45, 0.45, 0.43);
 const vec3 INK_BLACK = vec3(0.055, 0.055, 0.05);
