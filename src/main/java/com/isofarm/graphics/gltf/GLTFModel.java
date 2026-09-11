@@ -35,14 +35,20 @@ public class GLTFModel {
     private final List<GLTFMesh> meshes;
     private final List<GLTFNode> nodes;
     private final List<GLTFNode> rootNodes;
+    private final boolean doesOwnMeshes;
 
     /**
      * Creates a new {@code GLTFModel} instance.
      */
     public GLTFModel() {
+        this(true);
+    }
+
+    private GLTFModel(boolean doesOwnMeshes) {
         this.meshes = new ArrayList<>();
         this.nodes = new ArrayList<>();
         this.rootNodes = new ArrayList<>();
+        this.doesOwnMeshes = doesOwnMeshes;
     }
 
     /**
@@ -134,6 +140,37 @@ public class GLTFModel {
     }
 
     /**
+     * Creates an independently transformable instance of this model.
+     * <p>GPU mesh resources are shared with the source model, while the
+     * node hierarchy and all mutable transform state are copied.</p>
+     * @return independent render instance backed by the same GPU meshes
+     */
+    public GLTFModel createInstance() {
+        GLTFModel instance = new GLTFModel(false);
+        instance.meshes.addAll(meshes);
+
+        for (GLTFNode root : rootNodes) {
+            GLTFNode rootCopy = root.copy();
+            instance.rootNodes.add(rootCopy);
+            instance.collectNodes(rootCopy);
+        }
+
+        instance.updateTransforms();
+        return instance;
+    }
+
+    /**
+     * Registers a copied node hierarchy in the flat node collection.
+     */
+    private void collectNodes(GLTFNode node) {
+        nodes.add(node);
+
+        for (GLTFNode child : node.getChildren()) {
+            collectNodes(child);
+        }
+    }
+
+    /**
      * Finds and returns the node.
      * @param name the {@link String} supplied as {@code name}
      * @return the {@link GLTFNode} representing the located node
@@ -189,6 +226,14 @@ public class GLTFModel {
     }
 
     /**
+     * Returns the {@code ownsMeshes} value
+     * @return {@link boolean} value of {@code ownsMeshes}
+     */
+    public boolean isDoesOwnMeshes() {
+        return doesOwnMeshes;
+    }
+
+    /**
      * Updates the transforms.
      */
     public void updateTransforms() {
@@ -201,8 +246,10 @@ public class GLTFModel {
      * Releases the resources associated with this object.
      */
     public void dispose() {
-        for (GLTFMesh mesh : meshes) {
-            mesh.dispose();
+        if (doesOwnMeshes) {
+            for (GLTFMesh mesh : meshes) {
+                mesh.dispose();
+            }
         }
 
         meshes.clear();

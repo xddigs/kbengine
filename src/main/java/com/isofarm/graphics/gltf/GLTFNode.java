@@ -308,4 +308,27 @@ public class GLTFNode {
     public void setArmorFinish(ArmorFinish value) {
         armorFinish = value == null ? ArmorFinish.NONE : value;
     }
+
+    /**
+     * Creates an independent copy of this node and its complete child hierarchy.
+     *
+     * <p>The copy preserves mesh indices, transforms and rendering overrides,
+     * while keeping all mutable node state independent from the source node.</p>
+     *
+     * @return independent copy of this node hierarchy
+     */
+    public GLTFNode copy() {
+        GLTFNode copy = new GLTFNode(name, meshIndex, translation, rotation, scale);
+        copy.isVisible = isVisible;
+        copy.textureOverride = textureOverride;
+        copy.uvOverride = uvOverride == null ? null : new Vector4f(uvOverride);
+        copy.colorTint = colorTint == null ? null : new Vector3f(colorTint);
+        copy.armorFinish = armorFinish;
+
+        for (GLTFNode child : children) {
+            copy.addChild(child.copy());
+        }
+
+        return copy;
+    }
 }

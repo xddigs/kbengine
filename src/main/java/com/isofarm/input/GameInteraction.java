@@ -4,6 +4,7 @@ import com.isofarm.data.*;
 import com.isofarm.entity.Entity;
 import com.isofarm.entity.Player;
 import com.isofarm.entity.WorldItem;
+import com.isofarm.entity.states.SneakingState;
 import com.isofarm.graphics.ChunkMeshBuilder;
 import com.isofarm.graphics.ParticleEngine;
 import com.isofarm.graphics.SpriteSheet;
@@ -267,14 +268,18 @@ public class GameInteraction {
             if (player != null && !player.isAttacking()) {
                 player.interact();
             }
-            if (hoveredCell.data() instanceof BlockData data && data.isInteractive()) {
-                iBlock interactiveBlock = GameMaster.game.getWorld().getInteractiveBlockAt(
-                        hoveredCell.x(), hoveredCell.y(), hoveredCell.z());
-                if (interactiveBlock != null) {
-                    interactiveBlock.use();
-                    return hoveredCell;
+
+            if (!(Player.plyr.getCurrentState() instanceof SneakingState)) {
+                if (hoveredCell.data() instanceof BlockData data && data.isInteractive()) {
+                    iBlock interactiveBlock = GameMaster.game.getWorld().getInteractiveBlockAt(
+                            hoveredCell.x(), hoveredCell.y(), hoveredCell.z());
+                    if (interactiveBlock != null) {
+                        interactiveBlock.use();
+                        return hoveredCell;
+                    }
                 }
             }
+
             place(gameMaster, hoveredCell, selectedItem);
         }
         return hoveredCell;

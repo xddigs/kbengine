@@ -1,12 +1,12 @@
 package com.isofarm.item;
 
+import com.isofarm.data.BlockData;
 import com.isofarm.data.BlockPos;
 import com.isofarm.data.DataClass;
 import com.isofarm.data.Inventory;
-import com.isofarm.data.BlockData;
 import com.isofarm.graphics.ResourceManager;
-import com.isofarm.graphics.gltf.GLTFNode;
 import com.isofarm.graphics.gltf.GLTFModel;
+import com.isofarm.graphics.gltf.GLTFNode;
 import com.isofarm.service.SoundService;
 import com.isofarm.ui.GameUIService;
 import com.isofarm.wrld.GameMaster;
@@ -63,8 +63,10 @@ public class iBlock extends Block {
         if (type == null || !type.isInteractive()) {
             throw new IllegalArgumentException("Interactive BlockData required");
         }
+
         this.type = type;
-        this.blockModel = ResourceManager.rem.getBlockModels().get(type);
+        GLTFModel template = ResourceManager.rem.getBlockModels().get(type);
+        this.blockModel = template == null ? null : template.createInstance();
         this.inventory = new Inventory();
         this.x = x;
         this.y = y;
@@ -220,11 +222,10 @@ public class iBlock extends Block {
      */
     public void use() {
         if (GameMaster.game == null) return;
-
         switch (type) {
             case OAK_CHEST, SPRUCE_CHEST -> {
                 setActivated(true);
-                GameUIService.ui.getInventoryUI().openContainer(this);
+                GameUIService.ui.getInventoryUI().openContainer(this, isActivated);
             }
             case OAK_DOOR, SPRUCE_DOOR -> {
                 setActivated(!isActivated);
@@ -236,7 +237,6 @@ public class iBlock extends Block {
 
     /**
      * Checks whether the block is currently animating.
-     *
      * @return {@code true} while an activation transition is in progress
      */
     public boolean isAnimating() {
@@ -245,7 +245,6 @@ public class iBlock extends Block {
 
     /**
      * Returns the normalized animation progress.
-     *
      * @return {@code float}; a value between {@code 0} (closed) and {@code 1} (open)
      */
     public float getAnimationProgress() {
@@ -254,7 +253,6 @@ public class iBlock extends Block {
 
     /**
      * Returns the block orientation around the vertical axis.
-     *
      * @return {@code float}; the orientation in radians
      */
     public float getOrientation() {
@@ -284,7 +282,6 @@ public class iBlock extends Block {
 
     /**
      * Builds an outline transform matching the complete animated door model.
-     *
      * @param destination matrix to populate
      * @return the populated matrix
      */

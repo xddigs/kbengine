@@ -1927,8 +1927,8 @@ public class InventoryUI extends UIElement {
      * Opens the inventory owned by an interactive block.
      * @param block the {@link iBlock} argument; the block whose inventory will be displayed
      */
-    public void openContainer(iBlock block) {
-        if (block == null || GameMaster.game == null) return;
+    public void openContainer(iBlock block, boolean isActivated) {
+        if (!isActivated || GameMaster.game == null) return;
         this.containerBlock = block;
         this.externalInventory = block.getInventory();
         this.inventory = player == null ? null : player.getInventory();
