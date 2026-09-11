@@ -620,6 +620,11 @@ public enum BlockData implements Blockable {
         return this == OAK_DOOR || this == SPRUCE_DOOR;
     }
 
+    /** Returns whether this interactive block is a chest. */
+    public boolean isChest() {
+        return this == OAK_CHEST || this == SPRUCE_CHEST;
+    }
+
     /** Returns the interactive GLTF model path, or {@code null} for voxel blocks. */
     public String getModelPath() {
         return modelPath;
