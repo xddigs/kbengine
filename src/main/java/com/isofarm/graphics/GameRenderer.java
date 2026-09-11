@@ -313,7 +313,7 @@ public class GameRenderer {
         defaultShader.setUniform("uIsWater", false);
         defaultShader.setUniform("uIsSubmergedEntity", false);
         defaultShader.setUniform("uParticleAlpha", 1.0f);
-        ParticleEngine.peng.render(defaultShader, ResourceManager.rem.getSpriteMesh(),
+        ParticleEngine.peng.render(defaultShader, ResourceManager.rem.getBillboardMesh(),
                 gameMaster.getActiveCamera());
 
         defaultShader.bind();
@@ -382,14 +382,15 @@ public class GameRenderer {
             float renderY = crop.getY() + (usesPlantMesh
                     ? 1.0f : K.World.SHORTER_BLOCK_HEIGHT);
             float renderZ = crop.getZ() + 0.5f;
-
-            modelMatrix.identity().translate(renderX, renderY, renderZ);
+            setBillboardModel(camera, renderX, renderY, renderZ,
+                    usesPlantMesh ? 1.0f : 0.8f,
+                    usesPlantMesh ? 1.0f : 0.8f, 1.0f);
             defaultShader.setUniform("uModel", modelMatrix);
             if (usesPlantMesh) glDisable(GL_CULL_FACE);
             if (usesPlantMesh) {
-                ResourceManager.rem.getFlowerMesh().render();
+                ResourceManager.rem.getBillboardMesh().render();
             } else {
-                ResourceManager.rem.getSpriteMesh().render();
+                ResourceManager.rem.getBillboardMesh().render();
             }
             if (usesPlantMesh) glEnable(GL_CULL_FACE);
             sheet.unbind();
@@ -425,8 +426,7 @@ public class GameRenderer {
             float renderX = plant.x() + 0.5f;
             float renderY = plant.y();
             float renderZ = plant.z() + 0.5f;
-
-            modelMatrix.identity().translate(renderX, renderY, renderZ);
+            setBillboardModel(camera, renderX, renderY, renderZ, 1.0f, 1.0f, 1.0f);
             defaultShader.setUniform("uModel", modelMatrix);
             defaultShader.setUniform("uTexture", K.Render.PRIMARY_TEXTURE_UNIT);
             defaultShader.setUniform("uUseTexture", true);
@@ -440,7 +440,7 @@ public class GameRenderer {
             glActiveTexture(GL_TEXTURE0 + K.Render.PRIMARY_TEXTURE_UNIT);
             ResourceManager.rem.getBlocksAtlas().bind();
             defaultShader.setUniform("uAmbientIntensity", 1.0f);
-            ResourceManager.rem.getFlowerMesh().render();
+            ResourceManager.rem.getBillboardMesh().render();
             defaultShader.setUniform("uAmbientIntensity", lighting.getAmbientIntensity());
             glEnable(GL_CULL_FACE);
         });
@@ -656,17 +656,24 @@ public class GameRenderer {
             BlockShape.Box bounds = getTorchBounds(torch);
             float centerX = torch.x() + center(bounds.minX(), bounds.maxX());
             float centerZ = torch.z() + center(bounds.minZ(), bounds.maxZ());
-            float angle = (float) Math.atan2(camera.getPosition().x - centerX,
-                    camera.getPosition().z - centerZ);
-            modelMatrix.identity().translate(centerX, torch.y() + bounds.minY(), centerZ)
-                    .rotateY(angle).scale(TORCH_SCALE_X, TORCH_SCALE_Y, TORCH_SCALE_Z);
+            setBillboardModel(camera, centerX, torch.y() + bounds.minY(), centerZ,
+                    TORCH_SCALE_X, TORCH_SCALE_Y, TORCH_SCALE_Z);
             shader.setUniform("uModel", modelMatrix);
-            ResourceManager.rem.getPlayerMesh().render();
+            ResourceManager.rem.getBillboardMesh().render();
         });
         glEnable(GL_CULL_FACE);
         torchFrames.unbind();
         shader.setUniform("uIsTorch", false);
         shader.setUniform("uIsSprite", false);
+    }
+
+    /** Builds a camera-facing model transform for every billboard sprite. */
+    private void setBillboardModel(CameraView camera, float x, float y, float z,
+                                   float scaleX, float scaleY, float scaleZ) {
+        float angle = (float) Math.atan2(camera.getPosition().x - x,
+                camera.getPosition().z - z);
+        modelMatrix.identity().translate(x, y, z).rotateY(angle)
+                .scale(scaleX, scaleY, scaleZ);
     }
 
     /** Uploads the common cutaway and fog-of-war volume to a world shader. */

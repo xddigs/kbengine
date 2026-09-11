@@ -238,15 +238,15 @@ public class Mesh {
                 Arrays.copyOf(uv, tex), Arrays.copyOf(indices, index));
     }
 
-    /**
-     * Creates and returns the cross mesh.
-     * @return the {@link Mesh} representing the created cross mesh
-     */
-    public static Mesh createCrossMesh() {
-        float[] positions = new float[]{-0.5f, 0.0f, -0.5f, 0.5f, 0.0f, 0.5f, 0.5f, 1.0f, 0.5f, -0.5f, 1.0f, -0.5f, 0.5f, 0.0f, -0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 1.0f, 0.5f, 0.5f, 1.0f, -0.5f};
-        float[] normals = new float[]{-0.707f, 0.0f, 0.707f, -0.707f, 0.0f, 0.707f, -0.707f, 0.0f, 0.707f, -0.707f, 0.0f, 0.707f, 0.707f, 0.0f, 0.707f, 0.707f, 0.0f, 0.707f, 0.707f, 0.0f, 0.707f, 0.707f, 0.0f, 0.707f};
-        float[] texCoords = new float[]{0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f};
-        int[] indices = new int[]{0, 1, 2, 2, 3, 0, 4, 5, 6, 6, 7, 4};
+    /** Creates a unit-height vertical quad used for camera-facing billboards. */
+    public static Mesh createBillboard() {
+        float[] positions = new float[]{-0.5f, 0.0f, 0.0f, 0.5f, 0.0f, 0.0f,
+                0.5f, 1.0f, 0.0f, -0.5f, 1.0f, 0.0f};
+        float[] normals = new float[]{0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+                0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f};
+        float[] texCoords = new float[]{0.0f, 0.0f, 1.0f, 0.0f,
+                1.0f, 1.0f, 0.0f, 1.0f};
+        int[] indices = new int[]{0, 1, 2, 2, 3, 0};
         return new Mesh(positions, normals, texCoords, indices);
     }
 

@@ -86,9 +86,7 @@ public class ResourceManager {
     private static final Mesh blockMesh = Mesh.createMesh(K.World.DEFAULT_BLOCK_DEPTH);
     private static final Mesh selectionMesh = Mesh.selection();
     private static final Map<BlockShape, Mesh> shapedSelectionMeshes = createShapedSelectionMeshes();
-    private static final Mesh spriteMesh = Mesh.createCrop();
-    private static final Mesh flowerMesh = Mesh.createCrossMesh();
-    private static final Mesh playerMesh = Mesh.quadVertical();
+    private static final Mesh billboardMesh = Mesh.createBillboard();
     private static final Mesh voxelMesh = Mesh.createCube();
     private static final Texture backgroundUI = new Texture(K.Paths.DEFAULT_BACKGROUND_UI);
     private static final Texture selectorUI = new Texture(K.Paths.DEFAULT_SELECTOR_UI);
@@ -265,12 +263,10 @@ public class ResourceManager {
      */
     public void dispose() {
         blockMesh.dispose();
-        flowerMesh.dispose();
+        billboardMesh.dispose();
         selectionMesh.dispose();
         shapedSelectionMeshes.values().forEach(Mesh::dispose);
-        spriteMesh.dispose();
         screenQuadMesh.dispose();
-        playerMesh.dispose();
         voxelMesh.dispose();
 
         backgroundUI.dispose();
@@ -407,12 +403,9 @@ public class ResourceManager {
         return blockMesh;
     }
 
-    /**
-     * Returns the flower mesh.
-     * @return the {@link Mesh} representing the flower mesh
-     */
-    public Mesh getFlowerMesh() {
-        return flowerMesh;
+    /** Returns the shared camera-facing billboard mesh. */
+    public Mesh getBillboardMesh() {
+        return billboardMesh;
     }
 
     /**
@@ -427,22 +420,6 @@ public class ResourceManager {
     public Mesh getSelectionMesh(BlockShape shape) {
         if (shape == null) return selectionMesh;
         return shapedSelectionMeshes.getOrDefault(shape, selectionMesh);
-    }
-
-    /**
-     * Returns the sprite mesh.
-     * @return the {@link Mesh} representing the sprite mesh
-     */
-    public Mesh getSpriteMesh() {
-        return spriteMesh;
-    }
-
-    /**
-     * Returns the player mesh.
-     * @return the {@link Mesh} representing the player mesh
-     */
-    public Mesh getPlayerMesh() {
-        return playerMesh;
     }
 
     public Mesh getVoxelMesh() {

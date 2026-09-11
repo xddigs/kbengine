@@ -131,9 +131,9 @@ public class ShadowSystem {
 
             shadowShader.setUniform("uModel", modelMatrix);
             if (usesPlantMesh) {
-                ResourceManager.rem.getFlowerMesh().render();
+                ResourceManager.rem.getBillboardMesh().render();
             } else {
-                ResourceManager.rem.getSpriteMesh().render();
+                ResourceManager.rem.getBillboardMesh().render();
             }
             sheet.unbind();
         });
@@ -164,7 +164,7 @@ public class ShadowSystem {
                     .translate(renderX, renderY, renderZ);
 
             shadowShader.setUniform("uModel", modelMatrix);
-            ResourceManager.rem.getFlowerMesh().render();
+            ResourceManager.rem.getBillboardMesh().render();
         });
 
         shadowShader.unbind();
