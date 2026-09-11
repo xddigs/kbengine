@@ -93,8 +93,6 @@ public class GameMaster {
         float totalSteps = 15.0f;
         int currentStep = 0;
 
-        BlockRegistry.init();
-
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_DEPTH_TEST);
@@ -135,6 +133,9 @@ public class GameMaster {
         notifyProgress(progressCallback, ++currentStep / totalSteps);
 
         AnimalService.anml.init();
+        notifyProgress(progressCallback, ++currentStep / totalSteps);
+
+        BlockRegistry.init();
         notifyProgress(progressCallback, ++currentStep / totalSteps);
 
         Library.initItems(itemRegistry);

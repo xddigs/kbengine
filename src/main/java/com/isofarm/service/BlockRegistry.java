@@ -12,11 +12,10 @@ public class BlockRegistry implements Service<BlockData> {
     private static final BlockData[] ID_TO_BLOCK = new BlockData[MAX_BLOCK_IDS];
     private static final Map<BlockData, Byte> BLOCK_TO_ID = new HashMap<>();
     private static final Map<String, BlockData> NAME_TO_BLOCK = new HashMap<>();
-    private static boolean initialized;
+    private static boolean isInitialized;
 
     public static synchronized void init() {
-        if (initialized) return;
-
+        if (isInitialized) return;
         int currentId = 0;
         for (BlockData block : BlockData.values()) {
             if (block == BlockData.AIR) {
@@ -27,9 +26,10 @@ public class BlockRegistry implements Service<BlockData> {
             if (++currentId >= MAX_BLOCK_IDS) {
                 throw new IllegalStateException("A byte can represent at most " + MAX_BLOCK_IDS + " block types");
             }
+
             register((byte) currentId, block);
         }
-        initialized = true;
+        isInitialized = true;
     }
 
     public static void register(byte id, BlockData block) {
@@ -45,23 +45,23 @@ public class BlockRegistry implements Service<BlockData> {
     }
 
     public static BlockData getBlock(byte id) {
-        ensureInitialized();
+        safeguard();
         return ID_TO_BLOCK[Byte.toUnsignedInt(id)];
     }
 
     public static byte getId(BlockData block) {
-        ensureInitialized();
+        safeguard();
         Byte id = BLOCK_TO_ID.get(block);
         if (id == null) throw new IllegalArgumentException("Unregistered block: " + block);
         return id;
     }
 
     public static BlockData getByName(String name) {
-        ensureInitialized();
+        safeguard();
         return NAME_TO_BLOCK.get(name);
     }
 
-    private static void ensureInitialized() {
-        if (!initialized) init();
+    private static void safeguard() {
+        if (!isInitialized) init();
     }
 }

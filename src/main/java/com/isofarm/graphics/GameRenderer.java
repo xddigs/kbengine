@@ -479,7 +479,7 @@ public class GameRenderer {
         if (blockAtlas != null) blockAtlas.unbind();
 
         Item selectedItem = Settings.selectedItem;
-        if (selectedItem instanceof Tool) {
+        if (selectedItem instanceof Tool || selectedItem instanceof Block) {
             if (hoveredCell != null) {
                 Vector3f outlineColor = getOutlineColor();
                 Shader outlineShader = ResourceManager.rem.getOutlineShader();

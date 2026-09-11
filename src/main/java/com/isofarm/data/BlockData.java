@@ -2,6 +2,7 @@ package com.isofarm.data;
 
 import com.isofarm.graphics.TextureAtlas;
 import com.isofarm.item.Block;
+import com.isofarm.service.BlockRegistry;
 import com.isofarm.item.Item;
 import com.isofarm.item.MiningComponent;
 import com.isofarm.item.Tool;
@@ -38,73 +39,73 @@ import java.util.function.Consumer;
  */
 @DataClass
 public enum BlockData implements Blockable {
-    AIR((byte) 0, (byte) 0, (byte) 0, false, false, 0, null, SoundGroup.SILENT, 0f, true, new Object[]{}, Tier.NONE),
-    DIRT((byte) 1, (byte) 1, (byte) 0, true, false, 100, "assets/textures/blocks/dirt.png", SoundGroup.SOIL, 0.9f, false, new Object[]{}, Tier.NONE),
-    GRASS((byte) 2, (byte) 2, (byte) 0, true, false, 120, "assets/textures/blocks/grass_top.png", "assets/textures/blocks/grass_bottom.png","assets/textures/blocks/grass.png",SoundGroup.SOIL, 1.0f, false, new Seed[]{new Seed()}, Tier.NONE),
-    TILLED_DIRT((byte) 3, (byte) 3, (byte) 0, true, false,  110, "assets/textures/blocks/dirt_tilled.png", "assets/textures/blocks/dirt.png", "assets/textures/blocks/dirt.png", SoundGroup.SOIL, 0.9f, false, new Object[]{}, Tier.NONE),
+    AIR((byte) 0, (byte) 0, false, false, 0, null, SoundGroup.SILENT, 0f, true, new Object[]{}, Tier.NONE),
+    DIRT((byte) 1, (byte) 0, true, false, 100, "assets/textures/blocks/dirt.png", SoundGroup.SOIL, 0.9f, false, new Object[]{}, Tier.NONE),
+    GRASS((byte) 2, (byte) 0, true, false, 120, "assets/textures/blocks/grass_top.png", "assets/textures/blocks/grass_bottom.png","assets/textures/blocks/grass.png",SoundGroup.SOIL, 1.0f, false, new Seed[]{new Seed()}, Tier.NONE),
+    TILLED_DIRT((byte) 3, (byte) 0, true, false,  110, "assets/textures/blocks/dirt_tilled.png", "assets/textures/blocks/dirt.png", "assets/textures/blocks/dirt.png", SoundGroup.SOIL, 0.9f, false, new Object[]{}, Tier.NONE),
 
-    STONE((byte) 4, (byte) 4, (byte) 0, false, false, 150, "assets/textures/blocks/stone.png", SoundGroup.STONE, 6.0f, false, new Object[]{}, Tier.NONE),
-    STONE_SLAB((byte) 5, (byte) 5, (byte) 0, false, false, 100, "assets/textures/blocks/stone.png", SoundGroup.STONE, 6.0f, false, new Object[]{}, Tier.NONE, true, false, false),
-    STONE_VERTICAL_SLAB((byte) 6, (byte) 6, (byte) 0, false, false, 100, "assets/textures/blocks/stone.png", SoundGroup.STONE, 6.0f, false, new Object[]{}, Tier.NONE, true, false, false),
-    STONE_STAIRCASE((byte) 7, (byte) 7, (byte) 0, false, false, 100, "assets/textures/blocks/stone.png", SoundGroup.STONE, 6.0f, false, new Object[]{}, Tier.NONE, false, true, false),
-    COBBLESTONE((byte) 8, (byte) 8, (byte) 0, false, false, 50, "assets/textures/blocks/cobblestone.png", SoundGroup.STONE, 4.0f, false, new Object[]{}, Tier.NONE),
-    SNOW((byte) 9, (byte) 9, (byte) 0, false, false, 120, "assets/textures/blocks/snow.png", SoundGroup.SNOW, 0.8f, false, new Object[]{}, Tier.NONE),
-    GLASS((byte) 10, (byte) 10, (byte) 0, false, false, 200, "assets/textures/blocks/glass.png", SoundGroup.GLASS, 1.2f, true, new Object[]{}, Tier.NONE),
+    STONE((byte) 4, (byte) 0, false, false, 150, "assets/textures/blocks/stone.png", SoundGroup.STONE, 6.0f, false, new Object[]{}, Tier.NONE),
+    STONE_SLAB((byte) 5, (byte) 0, false, false, 100, "assets/textures/blocks/stone.png", SoundGroup.STONE, 6.0f, false, new Object[]{}, Tier.NONE, true, false, false),
+    STONE_VERTICAL_SLAB((byte) 6, (byte) 0, false, false, 100, "assets/textures/blocks/stone.png", SoundGroup.STONE, 6.0f, false, new Object[]{}, Tier.NONE, true, false, false),
+    STONE_STAIRCASE((byte) 7, (byte) 0, false, false, 100, "assets/textures/blocks/stone.png", SoundGroup.STONE, 6.0f, false, new Object[]{}, Tier.NONE, false, true, false),
+    COBBLESTONE((byte) 8, (byte) 0, false, false, 50, "assets/textures/blocks/cobblestone.png", SoundGroup.STONE, 4.0f, false, new Object[]{}, Tier.NONE),
+    SNOW((byte) 9, (byte) 0, false, false, 120, "assets/textures/blocks/snow.png", SoundGroup.SNOW, 0.8f, false, new Object[]{}, Tier.NONE),
+    GLASS((byte) 10, (byte) 0, false, false, 200, "assets/textures/blocks/glass.png", SoundGroup.GLASS, 1.2f, true, new Object[]{}, Tier.NONE),
 
-    OAK_LEAVES((byte) 11, (byte) 1, (byte) 1, false, false, 50, "assets/textures/blocks/oak_leaves.png", SoundGroup.SOIL, 1.1f, false, new Object[]{MaterialID.STICK, "OAK_BONSAI"}, Tier.NONE),
-    OAK_LOG((byte) 12, (byte) 2, (byte) 1, false, false, 150, "assets/textures/blocks/oak_log_top.png", "assets/textures/blocks/oak_log_bottom.png", "assets/textures/blocks/oak_log_side.png", SoundGroup.WOOD, 2.2f, false, new Object[]{}, Tier.WOODEN),
-    OAK_PLANK((byte) 13, (byte) 3, (byte) 1, false, false, 100, "assets/textures/blocks/oak_plank.png", SoundGroup.WOOD, 4.0f, false, new Object[]{}, Tier.WOODEN),
-    OAK_PLANK_SLAB((byte) 14, (byte) 4, (byte) 1, false, false, 50, "assets/textures/blocks/oak_plank.png", SoundGroup.WOOD, 4.0f, false, new Object[]{}, Tier.WOODEN, true, false, false),
-    OAK_PLANK_VERTICAL_SLAB((byte) 15, (byte) 5, (byte) 1, false, false, 80, "assets/textures/blocks/oak_plank.png", SoundGroup.WOOD, 4.0f, false, new Object[]{}, Tier.WOODEN, true, false, false),
-    OAK_PLANK_STAIRCASE((byte) 16, (byte) 6, (byte) 1, false, false, 80, "assets/textures/blocks/oak_plank.png", SoundGroup.WOOD, 4.0f, false, new Object[]{}, Tier.WOODEN, false, true, false),
-    OAK_DOOR((byte) 17, (byte) 7, (byte) 1, 15, "assets/models/blocks/oak_door.gltf", SoundGroup.DOOR, 2.0f, 2),
-    OAK_PLANK_FENCE((byte) 18, (byte) 8, (byte) 1, false, false, 100, "assets/textures/blocks/oak_plank.png", SoundGroup.WOOD, 4.0f, false, new Object[]{}, Tier.WOODEN, false, false, true),
-    OAK_CHEST((byte) 19, (byte) 9, (byte) 1, 10, "assets/models/blocks/oak_chest.gltf", SoundGroup.CHEST, 2.5f, 1),
+    OAK_LEAVES((byte) 1, (byte) 1, false, false, 50, "assets/textures/blocks/oak_leaves.png", SoundGroup.SOIL, 1.1f, false, new Object[]{MaterialID.STICK, "OAK_BONSAI"}, Tier.NONE),
+    OAK_LOG((byte) 2, (byte) 1, false, false, 150, "assets/textures/blocks/oak_log_top.png", "assets/textures/blocks/oak_log_bottom.png", "assets/textures/blocks/oak_log_side.png", SoundGroup.WOOD, 2.2f, false, new Object[]{}, Tier.WOODEN),
+    OAK_PLANK((byte) 3, (byte) 1, false, false, 100, "assets/textures/blocks/oak_plank.png", SoundGroup.WOOD, 4.0f, false, new Object[]{}, Tier.WOODEN),
+    OAK_PLANK_SLAB((byte) 4, (byte) 1, false, false, 50, "assets/textures/blocks/oak_plank.png", SoundGroup.WOOD, 4.0f, false, new Object[]{}, Tier.WOODEN, true, false, false),
+    OAK_PLANK_VERTICAL_SLAB((byte) 5, (byte) 1, false, false, 80, "assets/textures/blocks/oak_plank.png", SoundGroup.WOOD, 4.0f, false, new Object[]{}, Tier.WOODEN, true, false, false),
+    OAK_PLANK_STAIRCASE((byte) 6, (byte) 1, false, false, 80, "assets/textures/blocks/oak_plank.png", SoundGroup.WOOD, 4.0f, false, new Object[]{}, Tier.WOODEN, false, true, false),
+    OAK_DOOR((byte) 7, (byte) 1, 15, "assets/models/blocks/oak_door.gltf", SoundGroup.DOOR, 2.0f, 2),
+    OAK_PLANK_FENCE((byte) 8, (byte) 1, false, false, 100, "assets/textures/blocks/oak_plank.png", SoundGroup.WOOD, 4.0f, false, new Object[]{}, Tier.WOODEN, false, false, true),
+    OAK_CHEST((byte) 9, (byte) 1, 10, "assets/models/blocks/oak_chest.gltf", SoundGroup.CHEST, 2.5f, 1),
 
-    SPRUCE_LEAVES((byte) 20, (byte) 1, (byte) 2, false, false, 50, "assets/textures/blocks/spruce_leaves.png", SoundGroup.SOIL, 1.1f, false, new Object[]{MaterialID.STICK, "SPRUCE_BONSAI"}, Tier.NONE),
-    SPRUCE_LOG((byte) 21, (byte) 2, (byte) 2, false, false, 150, "assets/textures/blocks/spruce_log_top.png", "assets/textures/blocks/spruce_log_bottom.png", "assets/textures/blocks/spruce_log_side.png", SoundGroup.WOOD, 2.2f, false, new Object[]{}, Tier.WOODEN),
-    SPRUCE_PLANK((byte) 22, (byte) 3, (byte) 2, false, false, 100, "assets/textures/blocks/spruce_plank.png", SoundGroup.WOOD, 4.0f, false, new Object[]{}, Tier.WOODEN),
-    SPRUCE_PLANK_SLAB((byte) 23, (byte) 4, (byte) 2, false, false, 50, "assets/textures/blocks/spruce_plank.png", SoundGroup.WOOD, 4.0f, false, new Object[]{}, Tier.WOODEN, true, false, false),
-    SPRUCE_PLANK_VERTICAL_SLAB((byte) 24, (byte) 5, (byte) 2, false, false, 80, "assets/textures/blocks/spruce_plank.png", SoundGroup.WOOD, 4.0f, false, new Object[]{}, Tier.WOODEN, true, false, false),
-    SPRUCE_PLANK_STAIRCASE((byte) 25, (byte) 6, (byte) 2, false, false, 80, "assets/textures/blocks/spruce_plank.png", SoundGroup.WOOD, 4.0f, false, new Object[]{}, Tier.WOODEN, false, true, false),
-    SPRUCE_DOOR((byte) 26, (byte) 7, (byte) 2, 15, "assets/models/blocks/spruce_door.gltf", SoundGroup.DOOR, 2.0f, 2),
-    SPRUCE_PLANK_FENCE((byte) 27, (byte) 8, (byte) 2, false, false, 100, "assets/textures/blocks/spruce_plank.png", SoundGroup.WOOD, 4.0f, false, new Object[]{}, Tier.WOODEN, false, false, true),
-    SPRUCE_CHEST((byte) 28, (byte) 9, (byte) 2, 10, "assets/models/blocks/spruce_chest.gltf", SoundGroup.CHEST, 2.5f, 1),
-    TORCH((byte) 28, (byte) 10, (byte) 2, false, false, 50, "assets/sprites/torch.png", SoundGroup.WOOD, 0.01f, false, new Object[]{}, Tier.WOODEN),
+    SPRUCE_LEAVES((byte) 1, (byte) 2, false, false, 50, "assets/textures/blocks/spruce_leaves.png", SoundGroup.SOIL, 1.1f, false, new Object[]{MaterialID.STICK, "SPRUCE_BONSAI"}, Tier.NONE),
+    SPRUCE_LOG((byte) 2, (byte) 2, false, false, 150, "assets/textures/blocks/spruce_log_top.png", "assets/textures/blocks/spruce_log_bottom.png", "assets/textures/blocks/spruce_log_side.png", SoundGroup.WOOD, 2.2f, false, new Object[]{}, Tier.WOODEN),
+    SPRUCE_PLANK((byte) 3, (byte) 2, false, false, 100, "assets/textures/blocks/spruce_plank.png", SoundGroup.WOOD, 4.0f, false, new Object[]{}, Tier.WOODEN),
+    SPRUCE_PLANK_SLAB((byte) 4, (byte) 2, false, false, 50, "assets/textures/blocks/spruce_plank.png", SoundGroup.WOOD, 4.0f, false, new Object[]{}, Tier.WOODEN, true, false, false),
+    SPRUCE_PLANK_VERTICAL_SLAB((byte) 5, (byte) 2, false, false, 80, "assets/textures/blocks/spruce_plank.png", SoundGroup.WOOD, 4.0f, false, new Object[]{}, Tier.WOODEN, true, false, false),
+    SPRUCE_PLANK_STAIRCASE((byte) 6, (byte) 2, false, false, 80, "assets/textures/blocks/spruce_plank.png", SoundGroup.WOOD, 4.0f, false, new Object[]{}, Tier.WOODEN, false, true, false),
+    SPRUCE_DOOR((byte) 7, (byte) 2, 15, "assets/models/blocks/spruce_door.gltf", SoundGroup.DOOR, 2.0f, 2),
+    SPRUCE_PLANK_FENCE((byte) 8, (byte) 2, false, false, 100, "assets/textures/blocks/spruce_plank.png", SoundGroup.WOOD, 4.0f, false, new Object[]{}, Tier.WOODEN, false, false, true),
+    SPRUCE_CHEST((byte) 9, (byte) 2, 10, "assets/models/blocks/spruce_chest.gltf", SoundGroup.CHEST, 2.5f, 1),
+    TORCH((byte) 10, (byte) 2, false, false, 50, "assets/sprites/torch.png", SoundGroup.WOOD, 0.01f, false, new Object[]{}, Tier.WOODEN),
 
-    COPPER_ORE((byte) 29, (byte) 1, (byte) 4, false, false, 150, "assets/textures/blocks/copper_ore.png", SoundGroup.STONE, 6.0f, false, new MiningComponent[]{new MiningComponent(Tier.COPPER, MaterialID.RAW_ORE)}, Tier.COPPER),
-    IRON_ORE((byte) 30, (byte) 2, (byte) 4, false, false, 150, "assets/textures/blocks/iron_ore.png", SoundGroup.STONE, 8.0f, false, new MiningComponent[]{new MiningComponent(Tier.IRON, MaterialID.RAW_ORE)}, Tier.IRON),
-    STEEL_ORE((byte) 31, (byte) 3, (byte) 4, false, false, 200, "assets/textures/blocks/steel_ore.png", SoundGroup.STONE, 10.0f, false,new MiningComponent[]{new MiningComponent(Tier.STEEL, MaterialID.RAW_ORE)}, Tier.STEEL),
-    GOLD_ORE((byte) 32, (byte) 4, (byte) 4, false, false, 500, "assets/textures/blocks/gold_ore.png", SoundGroup.STONE, 12.0f, false, new MiningComponent[]{new MiningComponent(Tier.GOLDEN, MaterialID.RAW_ORE)}, Tier.GOLDEN),
-    PLATINUM_ORE((byte) 33, (byte) 5, (byte) 4, false, false, 800, "assets/textures/blocks/platinum_ore.png", SoundGroup.STONE, 14.0f, false, new MiningComponent[]{new MiningComponent(Tier.PLATINUM, MaterialID.RAW_ORE)}, Tier.PLATINUM),
-    DIAMOND_ORE((byte) 34, (byte) 6, (byte) 4, false, false, 1000, "assets/textures/blocks/diamond_ore.png", SoundGroup.STONE, 16.0f, false, new MiningComponent[]{new MiningComponent(Tier.DIAMOND, MaterialID.RAW_ORE)}, Tier.DIAMOND),
-    SAND((byte) 35, (byte) 7, (byte) 4, false, false, 100, "assets/textures/blocks/sand.png", SoundGroup.SOIL, 0.7f, false, new Object[]{}, Tier.NONE),
-    GRAVEL((byte) 36, (byte) 8, (byte) 4, false, false, 100, "assets/textures/blocks/gravel.png", SoundGroup.SOIL, 0.9f, false, new Object[]{}, Tier.NONE),
-    FOSSIL((byte) 37, (byte) 9, (byte) 4, false, false, 100, "assets/textures/blocks/fossil.png", SoundGroup.STONE, 8.0f, false, new Object[]{}, Tier.NONE),
-    OBSIDIAN((byte) 38,(byte) 10,(byte) 4, false,  false, 100, "assets/textures/blocks/obsidian.png", SoundGroup.STONE, 48.0f, false, new Object[]{}, Tier.NONE),
+    COPPER_ORE((byte) 1, (byte) 4, false, false, 150, "assets/textures/blocks/copper_ore.png", SoundGroup.STONE, 6.0f, false, new MiningComponent[]{new MiningComponent(Tier.COPPER, MaterialID.RAW_ORE)}, Tier.COPPER),
+    IRON_ORE((byte) 2, (byte) 4, false, false, 150, "assets/textures/blocks/iron_ore.png", SoundGroup.STONE, 8.0f, false, new MiningComponent[]{new MiningComponent(Tier.IRON, MaterialID.RAW_ORE)}, Tier.IRON),
+    STEEL_ORE((byte) 3, (byte) 4, false, false, 200, "assets/textures/blocks/steel_ore.png", SoundGroup.STONE, 10.0f, false,new MiningComponent[]{new MiningComponent(Tier.STEEL, MaterialID.RAW_ORE)}, Tier.STEEL),
+    GOLD_ORE((byte) 4, (byte) 4, false, false, 500, "assets/textures/blocks/gold_ore.png", SoundGroup.STONE, 12.0f, false, new MiningComponent[]{new MiningComponent(Tier.GOLDEN, MaterialID.RAW_ORE)}, Tier.GOLDEN),
+    PLATINUM_ORE((byte) 5, (byte) 4, false, false, 800, "assets/textures/blocks/platinum_ore.png", SoundGroup.STONE, 14.0f, false, new MiningComponent[]{new MiningComponent(Tier.PLATINUM, MaterialID.RAW_ORE)}, Tier.PLATINUM),
+    DIAMOND_ORE((byte) 6, (byte) 4, false, false, 1000, "assets/textures/blocks/diamond_ore.png", SoundGroup.STONE, 16.0f, false, new MiningComponent[]{new MiningComponent(Tier.DIAMOND, MaterialID.RAW_ORE)}, Tier.DIAMOND),
+    SAND((byte) 7, (byte) 4, false, false, 100, "assets/textures/blocks/sand.png", SoundGroup.SOIL, 0.7f, false, new Object[]{}, Tier.NONE),
+    GRAVEL((byte) 8, (byte) 4, false, false, 100, "assets/textures/blocks/gravel.png", SoundGroup.SOIL, 0.9f, false, new Object[]{}, Tier.NONE),
+    FOSSIL((byte) 9, (byte) 4, false, false, 100, "assets/textures/blocks/fossil.png", SoundGroup.STONE, 8.0f, false, new Object[]{}, Tier.NONE),
+    OBSIDIAN((byte) 10,(byte) 4, false,  false, 100, "assets/textures/blocks/obsidian.png", SoundGroup.STONE, 48.0f, false, new Object[]{}, Tier.NONE),
 
-    VOIDSEAL((byte) 39, (byte) 1, (byte) 5, false, false, 100, "assets/textures/blocks/voidseal.png", SoundGroup.STONE, 0.0f, false, new Object[]{}, Tier.NONE),
+    VOIDSEAL((byte) 1, (byte) 5, false, false, 100, "assets/textures/blocks/voidseal.png", SoundGroup.STONE, 0.0f, false, new Object[]{}, Tier.NONE),
 
-    OAK_BONSAI((byte) 40, (byte) 1, (byte) (K.UI.ICON_BLOCK_ROWS - 2), false, true, 100, "assets/textures/blocks/oak_bonsai.png", SoundGroup.SOIL, 0.01f, true, new Object[]{}, Tier.NONE),
-    SPRUCE_BONSAI((byte) 41, (byte) 2, (byte) (K.UI.ICON_BLOCK_ROWS - 2), false, true, 100, "assets/textures/blocks/spruce_bonsai.png", SoundGroup.SOIL, 0.01f, true, new Object[]{}, Tier.NONE),
+    OAK_BONSAI((byte) 1, (byte) (K.UI.ICON_BLOCK_ROWS - 2), false, true, 100, "assets/textures/blocks/oak_bonsai.png", SoundGroup.SOIL, 0.01f, true, new Object[]{}, Tier.NONE),
+    SPRUCE_BONSAI((byte) 2, (byte) (K.UI.ICON_BLOCK_ROWS - 2), false, true, 100, "assets/textures/blocks/spruce_bonsai.png", SoundGroup.SOIL, 0.01f, true, new Object[]{}, Tier.NONE),
 
-    TALL_GRASS((byte) 50, (byte) 1, (byte) (K.UI.ICON_BLOCK_ROWS - 1), false, true, 5, "assets/textures/blocks/tall_grass.png", SoundGroup.SOIL, 0.01f, true, new Object[]{new Seed(CropType.WHEAT)}, Tier.NONE),
-    ROSE((byte) 51, (byte) 2, (byte) (K.UI.ICON_BLOCK_ROWS - 1), false, true, 10, "assets/textures/blocks/rose.png", SoundGroup.SOIL, 0.01f, true, new Object[]{}, Tier.NONE),
-    ROSEBUSH((byte) 52, (byte) 3, (byte) (K.UI.ICON_BLOCK_ROWS - 1), false, true, 20, "assets/textures/blocks/rosebush.png", SoundGroup.SOIL, 0.01f, true,  new Object[]{}, Tier.NONE),
-    LILY((byte) 53, (byte) 4, (byte) (K.UI.ICON_BLOCK_ROWS - 1), false, true, 10, "assets/textures/blocks/lily.png", SoundGroup.SOIL, 0.01f, true, new Object[]{}, Tier.NONE),
-    GHOSTFLOWER((byte) 54, (byte) 5, (byte) (K.UI.ICON_BLOCK_ROWS - 1), false, true, 15, "assets/textures/blocks/ghostflower.png", SoundGroup.SOIL, 0.01f, true,  new Object[]{}, Tier.NONE),
-    RED_MUSHROOM((byte) 55, (byte) 6, (byte) (K.UI.ICON_BLOCK_ROWS - 1), false, true, 15, "assets/textures/blocks/red_mushroom.png", SoundGroup.SOIL, 0.01f, true,  new Object[]{}, Tier.NONE),
-    BRIGHT_FLOWER((byte) 56, (byte) 7, (byte) (K.UI.ICON_BLOCK_ROWS - 1), false, true, 10, "assets/textures/blocks/bright_flower.png", SoundGroup.SOIL, 0.01f, true,  new Object[]{}, Tier.NONE),
-    BLUE_FLOWER((byte) 57, (byte) 8, (byte) (K.UI.ICON_BLOCK_ROWS - 1), false, true, 10, "assets/textures/blocks/blue_flower.png", SoundGroup.SOIL, 0.01f, true,  new Object[]{}, Tier.NONE),
-    ROSES((byte) 58, (byte) 9, (byte) (K.UI.ICON_BLOCK_ROWS - 1), false, true, 15, "assets/textures/blocks/roses.png", SoundGroup.SOIL, 0.01f, true,  new Object[]{}, Tier.NONE),
-    TULIP((byte) 59, (byte) 10, (byte) (K.UI.ICON_BLOCK_ROWS - 1), false, true, 10, "assets/textures/blocks/tulip.png", SoundGroup.SOIL, 0.01f, true, new Object[]{}, Tier.NONE),
+    TALL_GRASS((byte) 1, (byte) (K.UI.ICON_BLOCK_ROWS - 1), false, true, 5, "assets/textures/blocks/tall_grass.png", SoundGroup.SOIL, 0.01f, true, new Object[]{new Seed(CropType.WHEAT)}, Tier.NONE),
+    ROSE((byte) 2, (byte) (K.UI.ICON_BLOCK_ROWS - 1), false, true, 10, "assets/textures/blocks/rose.png", SoundGroup.SOIL, 0.01f, true, new Object[]{}, Tier.NONE),
+    ROSEBUSH((byte) 3, (byte) (K.UI.ICON_BLOCK_ROWS - 1), false, true, 20, "assets/textures/blocks/rosebush.png", SoundGroup.SOIL, 0.01f, true,  new Object[]{}, Tier.NONE),
+    LILY((byte) 4, (byte) (K.UI.ICON_BLOCK_ROWS - 1), false, true, 10, "assets/textures/blocks/lily.png", SoundGroup.SOIL, 0.01f, true, new Object[]{}, Tier.NONE),
+    GHOSTFLOWER((byte) 5, (byte) (K.UI.ICON_BLOCK_ROWS - 1), false, true, 15, "assets/textures/blocks/ghostflower.png", SoundGroup.SOIL, 0.01f, true,  new Object[]{}, Tier.NONE),
+    RED_MUSHROOM((byte) 6, (byte) (K.UI.ICON_BLOCK_ROWS - 1), false, true, 15, "assets/textures/blocks/red_mushroom.png", SoundGroup.SOIL, 0.01f, true,  new Object[]{}, Tier.NONE),
+    BRIGHT_FLOWER((byte) 7, (byte) (K.UI.ICON_BLOCK_ROWS - 1), false, true, 10, "assets/textures/blocks/bright_flower.png", SoundGroup.SOIL, 0.01f, true,  new Object[]{}, Tier.NONE),
+    BLUE_FLOWER((byte) 8, (byte) (K.UI.ICON_BLOCK_ROWS - 1), false, true, 10, "assets/textures/blocks/blue_flower.png", SoundGroup.SOIL, 0.01f, true,  new Object[]{}, Tier.NONE),
+    ROSES((byte) 9, (byte) (K.UI.ICON_BLOCK_ROWS - 1), false, true, 15, "assets/textures/blocks/roses.png", SoundGroup.SOIL, 0.01f, true,  new Object[]{}, Tier.NONE),
+    TULIP((byte) 10, (byte) (K.UI.ICON_BLOCK_ROWS - 1), false, true, 10, "assets/textures/blocks/tulip.png", SoundGroup.SOIL, 0.01f, true, new Object[]{}, Tier.NONE),
 
-    LAVA((byte) 126, (byte) -1, (byte) -1, false, false, 150, "assets/textures/blocks/lava.png", SoundGroup.LAVA, 0.0f, false, new Object[]{}, Tier.NONE),
-    WATER((byte) 127, (byte) -1, (byte) -1, false, false, 80, "assets/textures/blocks/water.png", SoundGroup.WATER, 0.0f, true, new Object[]{}, Tier.NONE);
+    LAVA((byte) -1, (byte) -1, false, false, 150, "assets/textures/blocks/lava.png", SoundGroup.LAVA, 0.0f, false, new Object[]{}, Tier.NONE),
+    WATER((byte) -1, (byte) -1, false, false, 80, "assets/textures/blocks/water.png", SoundGroup.WATER, 0.0f, true, new Object[]{}, Tier.NONE);
 
-    public static final BlockData[] ORES = {COPPER_ORE, IRON_ORE, STEEL_ORE, GOLD_ORE, PLATINUM_ORE, DIAMOND_ORE};
-    private static final BlockData[] BY_ID = createById();
-    private final byte id;
+    public static final BlockData[] ORES = {COPPER_ORE, IRON_ORE, STEEL_ORE, GOLD_ORE,
+            PLATINUM_ORE, DIAMOND_ORE};
+
     private final byte col;
     private final byte row;
     private final boolean isTillable;
@@ -132,7 +133,6 @@ public enum BlockData implements Blockable {
 
     /**
      * Creates a new {@code BlockData} instance.
-     * @param id the {@code byte} supplied as {@code id}
      * @param col the {@code byte} supplied as {@code col}
      * @param row the {@code byte} supplied as {@code row}
      * @param isTillable the {@code boolean} supplied as {@code isTillable}
@@ -147,10 +147,10 @@ public enum BlockData implements Blockable {
      * @param drops an array of {@link Object} values supplied as {@code drops}
      * @param tier the {@link Tier} supplied as {@code tier}
      */
-    BlockData(byte id, byte col, byte row, boolean isTillable, boolean isPlant, int value,
+    BlockData(byte col, byte row, boolean isTillable, boolean isPlant, int value,
               String topPath, String bottomPath, String sidePath, SoundGroup soundGroup,
               float destroyTime, boolean isTransparent, Object[] drops, Tier tier) {
-        this(id, col, row, isTillable, isPlant, value, topPath, bottomPath, sidePath,
+        this(col, row, isTillable, isPlant, value, topPath, bottomPath, sidePath,
                 soundGroup, destroyTime, isTransparent, drops, tier, false, false, false);
     }
 
@@ -160,11 +160,10 @@ public enum BlockData implements Blockable {
      * @param isStaircase whether the block uses an oriented staircase mesh
      * @param isFence whether the block uses a connected fence mesh
      */
-    BlockData(byte id, byte col, byte row, boolean isTillable, boolean isPlant, int value,
+    BlockData(byte col, byte row, boolean isTillable, boolean isPlant, int value,
               String topPath, String bottomPath, String sidePath, SoundGroup soundGroup,
               float destroyTime, boolean isTransparent, Object[] drops, Tier tier,
               boolean isSlab, boolean isStaircase, boolean isFence) {
-        this.id = id;
         this.col = col;
         this.row = row;
         this.isTillable = isTillable;
@@ -188,7 +187,6 @@ public enum BlockData implements Blockable {
 
     /**
      * Creates a new {@code BlockData} instance.
-     * @param id the {@code byte} supplied as {@code id}
      * @param col the {@code byte} supplied as {@code col}
      * @param row the {@code byte} supplied as {@code row}
      * @param isTillable the {@code boolean} supplied as {@code isTillable}
@@ -201,10 +199,10 @@ public enum BlockData implements Blockable {
      * @param drops an array of {@link Object} values supplied as {@code drops}
      * @param tier the {@link Tier} supplied as {@code tier}
      */
-    BlockData(byte id, byte col, byte row, boolean isTillable, boolean isPlant,
+    BlockData(byte col, byte row, boolean isTillable, boolean isPlant,
               int value, String texturePath, SoundGroup soundGroup, float destroyTime,
               boolean isTransparent, Object[] drops, Tier tier) {
-        this(id, col, row, isTillable, isPlant, value, texturePath, texturePath, texturePath, soundGroup, destroyTime, isTransparent, drops, tier);
+        this(col, row, isTillable, isPlant, value, texturePath, texturePath, texturePath, soundGroup, destroyTime, isTransparent, drops, tier);
     }
 
     /**
@@ -213,18 +211,17 @@ public enum BlockData implements Blockable {
      * @param isStaircase whether the block uses an oriented staircase mesh
      * @param isFence whether the block uses a connected fence mesh
      */
-    BlockData(byte id, byte col, byte row, boolean isTillable, boolean isPlant,
+    BlockData(byte col, byte row, boolean isTillable, boolean isPlant,
               int value, String texturePath, SoundGroup soundGroup, float destroyTime,
               boolean isTransparent, Object[] drops, Tier tier,
               boolean isSlab, boolean isStaircase, boolean isFence) {
-        this(id, col, row, isTillable, isPlant, value, texturePath, texturePath, texturePath,
+        this(col, row, isTillable, isPlant, value, texturePath, texturePath, texturePath,
                 soundGroup, destroyTime, isTransparent, drops, tier,
                 isSlab, isStaircase, isFence);
     }
 
     /**
      * Creates block data backed by an interactive GLTF model.
-     * @param id unique block identifier
      * @param col one-based sprite atlas column
      * @param row sprite atlas row
      * @param value item value
@@ -233,9 +230,8 @@ public enum BlockData implements Blockable {
      * @param destroyTime destruction time in seconds
      * @param height occupied vertical world cells
      */
-    BlockData(byte id, byte col, byte row, int value, String modelPath,
+    BlockData(byte col, byte row, int value, String modelPath,
               SoundGroup soundGroup, float destroyTime, int height) {
-        this.id = id;
         this.col = col;
         this.row = row;
         this.isTillable = false;
@@ -272,40 +268,12 @@ public enum BlockData implements Blockable {
     }
 
     /**
-     * Creates and returns the by id.
-     * @return an array of {@link BlockData} values; the created by id
-     */
-    private static BlockData[] createById() {
-        byte maxId = 0;
-        for (BlockData block : values()) {
-            if (block.id > maxId) {
-                maxId = block.id;
-            }
-        }
-
-        BlockData[] result = new BlockData[maxId + 1];
-        for (BlockData block : values()) {
-            if (result[block.id] != null) {
-                throw new IllegalStateException("Duplicate block id " + block.id
-                        + " for " + result[block.id].name() + " and " + block.name());
-            }
-            result[block.id] = block;
-        }
-
-        return result;
-    }
-
-    /**
      * Creates or returns from id from the supplied arguments.
      * @param id the {@code byte} supplied as {@code id}
      * @return the {@link BlockData} representing the from id result
      */
     public static BlockData fromId(byte id) {
-        int index = Byte.toUnsignedInt(id);
-        if (index < 0 || index >= BY_ID.length) {
-            return null;
-        }
-        return BY_ID[index];
+        return BlockRegistry.getBlock(id);
     }
 
     /**
@@ -484,7 +452,7 @@ public enum BlockData implements Blockable {
      * @return {@code byte}; the id
      */
     public byte getId() {
-        return id;
+        return BlockRegistry.getId(this);
     }
 
     /**
