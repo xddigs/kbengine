@@ -222,7 +222,7 @@ public class iBlock extends Block {
         if (GameMaster.game == null) return;
 
         switch (type) {
-            case CHEST -> {
+            case OAK_CHEST -> {
                 setActivated(true);
                 GameUIService.ui.getInventoryUI().openContainer(this);
             }
@@ -383,10 +383,10 @@ public class iBlock extends Block {
 
     /**
      * Applies the current animation progress to the block model. In this case,
-     * {@link BlockData#CHEST} blocks only.
+     * {@link BlockData#OAK_CHEST} blocks only.
      */
     private void applyAnimation() {
-        if (type != BlockData.CHEST) {
+        if (type != BlockData.OAK_CHEST) {
             return;
         }
 

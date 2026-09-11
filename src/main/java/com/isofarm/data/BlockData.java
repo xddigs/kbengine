@@ -59,7 +59,7 @@ public enum BlockData implements Blockable {
     OAK_PLANK_STAIRCASE((byte) 16, (byte) 6, (byte) 1, false, false, 80, "assets/textures/blocks/oak_plank.png", SoundGroup.WOOD, 4.0f, false, new Object[]{}, Tier.WOODEN, false, true, false),
     OAK_DOOR((byte) 17, (byte) 7, (byte) 1, 15, "assets/models/blocks/oak_door.gltf", SoundGroup.DOOR, 2.0f, 2),
     OAK_PLANK_FENCE((byte) 18, (byte) 8, (byte) 1, false, false, 100, "assets/textures/blocks/oak_plank.png", SoundGroup.WOOD, 4.0f, false, new Object[]{}, Tier.WOODEN, false, false, true),
-    CHEST((byte) 19, (byte) 9, (byte) 1, 10, "assets/models/blocks/chest.gltf", SoundGroup.CHEST, 2.5f, 1),
+    OAK_CHEST((byte) 19, (byte) 9, (byte) 1, 10, "assets/models/blocks/oak_chest.gltf", SoundGroup.CHEST, 2.5f, 1),
 
     SPRUCE_LEAVES((byte) 20, (byte) 1, (byte) 2, false, false, 50, "assets/textures/blocks/spruce_leaves.png", SoundGroup.SOIL, 1.1f, false, new Object[]{MaterialID.STICK, "SPRUCE_BONSAI"}, Tier.NONE),
     SPRUCE_LOG((byte) 21, (byte) 2, (byte) 2, false, false, 150, "assets/textures/blocks/spruce_log_top.png", "assets/textures/blocks/spruce_log_bottom.png", "assets/textures/blocks/spruce_log_side.png", SoundGroup.WOOD, 2.2f, false, new Object[]{}, Tier.WOODEN),
@@ -69,7 +69,8 @@ public enum BlockData implements Blockable {
     SPRUCE_PLANK_STAIRCASE((byte) 25, (byte) 6, (byte) 2, false, false, 80, "assets/textures/blocks/spruce_plank.png", SoundGroup.WOOD, 4.0f, false, new Object[]{}, Tier.WOODEN, false, true, false),
     SPRUCE_DOOR((byte) 26, (byte) 7, (byte) 2, 15, "assets/models/blocks/spruce_door.gltf", SoundGroup.DOOR, 2.0f, 2),
     SPRUCE_PLANK_FENCE((byte) 27, (byte) 8, (byte) 2, false, false, 100, "assets/textures/blocks/spruce_plank.png", SoundGroup.WOOD, 4.0f, false, new Object[]{}, Tier.WOODEN, false, false, true),
-    TORCH((byte) 28, (byte) 9, (byte) 2, false, false, 50, "assets/sprites/torch.png", SoundGroup.WOOD, 0.01f, false, new Object[]{}, Tier.WOODEN),
+    SPRUCE_CHEST((byte) 28, (byte) 9, (byte) 2, 10, "assets/models/blocks/spruce_chest.gltf", SoundGroup.CHEST, 2.5f, 1),
+    TORCH((byte) 28, (byte) 10, (byte) 2, false, false, 50, "assets/sprites/torch.png", SoundGroup.WOOD, 0.01f, false, new Object[]{}, Tier.WOODEN),
 
     COPPER_ORE((byte) 29, (byte) 1, (byte) 4, false, false, 150, "assets/textures/blocks/copper_ore.png", SoundGroup.STONE, 6.0f, false, new MiningComponent[]{new MiningComponent(Tier.COPPER, MaterialID.RAW_ORE)}, Tier.COPPER),
     IRON_ORE((byte) 30, (byte) 2, (byte) 4, false, false, 150, "assets/textures/blocks/iron_ore.png", SoundGroup.STONE, 8.0f, false, new MiningComponent[]{new MiningComponent(Tier.IRON, MaterialID.RAW_ORE)}, Tier.IRON),
@@ -437,6 +438,19 @@ public enum BlockData implements Blockable {
         return switch (primaryMat) {
             case OAK_PLANK -> OAK_PLANK_FENCE;
             case SPRUCE_PLANK -> SPRUCE_PLANK_FENCE;
+            default -> throw new IllegalStateException("Unknown BlockData " + primaryMat);
+        };
+    }
+
+    /**
+     * Returns the interactive chest made from the supplied plank block.
+     * @param primaryMat plank material used by the chest
+     * @return matching chest block data
+     */
+    public static BlockData toChest(BlockData primaryMat) {
+        return switch (primaryMat) {
+            case OAK_PLANK -> OAK_CHEST;
+            case SPRUCE_PLANK -> SPRUCE_CHEST;
             default -> throw new IllegalStateException("Unknown BlockData " + primaryMat);
         };
     }

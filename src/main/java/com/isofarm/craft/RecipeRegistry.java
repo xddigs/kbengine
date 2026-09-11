@@ -37,7 +37,6 @@ public class RecipeRegistry {
         registerSmeltingRecipes();
         registerMaterialRecipes();
 
-        create().result(new iBlock(BlockData.CHEST), 1).with(new Block(BlockData.OAK_PLANK), 8).add();
         create().result(new Material(MaterialID.STICK), 4)
                 .with(BlockData.fromIdTo(BlockData.OAK_PLANK.getId()), 2)
                 .or(BlockData.fromIdTo(BlockData.SPRUCE_PLANK.getId()), 2).add();
@@ -271,6 +270,9 @@ public class RecipeRegistry {
         if (!primaryMat.equals(BlockData.STONE)) {
             create().result(new iBlock(BlockData.toDoor(primaryMat)), 2)
                     .with(new Block(primaryMat), 6).add();
+
+            create().result(new iBlock(BlockData.toChest(primaryMat)), 1)
+                    .with(new Block(primaryMat), 8).add();
 
             create().result(new Block(BlockData.toFence(primaryMat)), 4)
                     .with(new Block(primaryMat), 6).add();
