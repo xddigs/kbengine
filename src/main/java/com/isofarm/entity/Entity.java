@@ -297,7 +297,7 @@ public abstract class Entity {
      * @return the {@link String} representing the position string
      */
     public String getPositionString() {
-        return String.format("X:%.2f // Y:%.2f // Z:%.2f",
+        return String.format("x=%.2f | y=%.2f | z=%.2f",
                 position.x, position.y, position.z);
     }
 
