@@ -33,7 +33,7 @@ import java.util.function.Supplier;
  */
 public class Library implements Service<GameMaster> {
     private static final Logger log = LoggerFactory.getLogger(Library.class);
-    private static final String NAMESPACE = "isofarm";
+    private static final String NAMESPACE = "kbengine";
     private static final String SEPARATOR = ":";
     public static final String NAMESPACE_ID = NAMESPACE + SEPARATOR;
 
