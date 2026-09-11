@@ -40,7 +40,7 @@ public class GameRenderer {
     private static final float TORCH_SCALE_X = 0.5625f;
     private static final float TORCH_SCALE_Y = 0.5f;
     private static final float TORCH_SCALE_Z = 0.5625f;
-    private static final float BLOCK_OUTLINE_WIDTH = 1.0f;
+    private static final float BLOCK_OUTLINE_WIDTH = 0.5f;
     private static final float[][] BLOCK_OUTLINE_DIRECTIONS = {
             {1.0f, 0.0f}, {0.9239f, 0.3827f}, {0.7071f, 0.7071f}, {0.3827f, 0.9239f},
             {0.0f, 1.0f}, {-0.3827f, 0.9239f}, {-0.7071f, 0.7071f}, {-0.9239f, 0.3827f},
