@@ -134,7 +134,7 @@ public class Intro {
         showSplashScreen();
 
         int r = Settings.getRenderDistance();
-        int totalChunks = (2 * r + 1) * (2 * r + 1);
+        int totalChunks = countVisibleChunks(r);
         int resourceSteps = 10;
         int postProcessingSteps = 2;
         int totalTasks = resourceSteps + (totalChunks * 2) + postProcessingSteps;
@@ -148,47 +148,51 @@ public class Intro {
             renderLoadingProgress(Local.lang.t("engine.loading"));
         });
 
-        int minZ = -r;
-        int currentChunkX = -r, currentChunkZ = minZ;
-        while (!glfwWindowShouldClose(window) && completedTasks[0] < (resourceSteps + totalChunks)) {
-            glfwPollEvents();
+        for (int currentChunkX = -r; currentChunkX <= r; currentChunkX++) {
+            for (int currentChunkZ = -r; currentChunkZ <= r; currentChunkZ++) {
+                if (!isChunkVisible(currentChunkX, currentChunkZ, r)) {
+                    continue;
+                }
 
-            GameMaster.game.getChunkManager().getGenerator()
-                    .generateChunk(currentChunkX, currentChunkZ);
+                glfwPollEvents();
+                if (glfwWindowShouldClose(window)) {
+                    return;
+                }
 
-            completedTasks[0]++;
-            currentChunkZ++;
-            if (currentChunkZ > r) {
-                currentChunkZ = minZ;
-                currentChunkX++;
+                GameMaster.game.getChunkManager().getGenerator()
+                        .generateChunk(currentChunkX, currentChunkZ);
+
+                completedTasks[0]++;
+                float overallProgress = ((float) completedTasks[0] / totalTasks) * 100.0f;
+                progressBar.setValue(overallProgress);
+
+                String stepText = String.format(Local.lang.f("engine.generating_terrain",
+                        currentChunkX, currentChunkZ));
+                renderLoadingProgress(stepText);
             }
-
-            float overallProgress = ((float) completedTasks[0] / totalTasks) * 100.0f;
-            progressBar.setValue(overallProgress);
-
-            String stepText = String.format(Local.lang.f("engine.generating_terrain", currentChunkX, currentChunkZ));
-            renderLoadingProgress(stepText);
         }
 
-        currentChunkX = -r;
-        currentChunkZ = minZ;
+        for (int currentChunkX = -r; currentChunkX <= r; currentChunkX++) {
+            for (int currentChunkZ = -r; currentChunkZ <= r; currentChunkZ++) {
+                if (!isChunkVisible(currentChunkX, currentChunkZ, r)) {
+                    continue;
+                }
 
-        while (!glfwWindowShouldClose(window) && currentChunkX <= r) {
-            glfwPollEvents();
-            GameMaster.game.getChunkManager()
-                    .buildSingleChunkMesh(currentChunkX, currentChunkZ);
-            completedTasks[0]++;
-            currentChunkZ++;
-            if (currentChunkZ > r) {
-                currentChunkZ = minZ;
-                currentChunkX++;
+                glfwPollEvents();
+                if (glfwWindowShouldClose(window)) {
+                    return;
+                }
+
+                GameMaster.game.getChunkManager()
+                        .buildSingleChunkMesh(currentChunkX, currentChunkZ);
+                completedTasks[0]++;
+                float overallProgress = ((float) completedTasks[0] / totalTasks) * 100.0f;
+                progressBar.setValue(overallProgress);
+
+                String stepText = String.format(Local.lang.f("engine.building_meshes",
+                        currentChunkX, currentChunkZ));
+                renderLoadingProgress(stepText);
             }
-
-            float overallProgress = ((float) completedTasks[0] / totalTasks) * 100.0f;
-            progressBar.setValue(overallProgress);
-
-            String stepText = String.format(Local.lang.f("engine.building_meshes", currentChunkX, currentChunkZ));
-            renderLoadingProgress(stepText);
         }
 
         GameMaster.game.getChunkManager().setLastPlayerChunkX(0);
@@ -208,6 +212,35 @@ public class Intro {
         progressBar.hide();
         requestPlayerName();
         loop();
+    }
+
+    /**
+     * Returns whether a chunk offset is inside the visible circular render range.
+     * @param chunkX the chunk x offset from spawn
+     * @param chunkZ the chunk z offset from spawn
+     * @param renderDistance the active render distance in chunks
+     * @return {@code true} when the chunk is visible; otherwise {@code false}
+     */
+    private boolean isChunkVisible(int chunkX, int chunkZ, int renderDistance) {
+        int radiusSquared = renderDistance * renderDistance;
+        return chunkX * chunkX + chunkZ * chunkZ <= radiusSquared;
+    }
+
+    /**
+     * Counts visible chunks in the circular render range centered at spawn.
+     * @param renderDistance the active render distance in chunks
+     * @return the number of chunks that will be generated and meshed at startup
+     */
+    private int countVisibleChunks(int renderDistance) {
+        int visibleChunks = 0;
+        for (int chunkX = -renderDistance; chunkX <= renderDistance; chunkX++) {
+            for (int chunkZ = -renderDistance; chunkZ <= renderDistance; chunkZ++) {
+                if (isChunkVisible(chunkX, chunkZ, renderDistance)) {
+                    visibleChunks++;
+                }
+            }
+        }
+        return visibleChunks;
     }
 
     /**
