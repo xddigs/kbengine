@@ -7,7 +7,7 @@ import java.util.*;
 import java.util.function.Function;
 
 /**
- * Represents the recipe registry component of the Isofarm runtime.
+ * Represents the recipe registry component of the kbengine runtime.
  *
  * <p>This type centralizes the state, lifecycle and behavior required by its callers,
  * keeping domain rules together with the data they operate on.
@@ -301,7 +301,7 @@ public class RecipeRegistry {
     }
 
     /**
- * Represents the recipe builder component of the Isofarm runtime.
+ * Represents the recipe builder component of the kbengine runtime.
  *
  * <p>This type centralizes the state, lifecycle and behavior required by its callers,
  * keeping domain rules together with the data they operate on.

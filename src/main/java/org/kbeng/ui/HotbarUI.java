@@ -18,7 +18,7 @@ import org.kbeng.wrld.GameMaster;
 import org.joml.Vector4f;
 
 /**
- * Represents the hotbar ui component of the Isofarm runtime.
+ * Represents the hotbar ui component of the kbengine runtime.
  *
  * <p>This type centralizes the state, lifecycle and behavior required by its callers,
  * keeping domain rules together with the data they operate on.

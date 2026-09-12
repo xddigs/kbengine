@@ -11,7 +11,7 @@ import org.kbeng.wrld.World;
 import java.util.Arrays;
 
 /**
- * Represents the chunk mesh builder component of the Isofarm runtime.
+ * Represents the chunk mesh builder component of the kbengine runtime.
  *
  * <p>This type centralizes the state, lifecycle and behavior required by its callers,
  * keeping domain rules together with the data they operate on.

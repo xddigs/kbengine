@@ -5,7 +5,7 @@ import org.kbeng.ui.GameUIService;
 import org.kbeng.utils.ToastFactory;
 
 /**
- * Represents the command service component of the Isofarm runtime.
+ * Represents the command service component of the kbengine runtime.
  *
  * <p>This type centralizes the state, lifecycle and behavior required by its callers,
  * keeping domain rules together with the data they operate on.

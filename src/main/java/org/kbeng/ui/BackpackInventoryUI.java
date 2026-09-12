@@ -7,7 +7,7 @@ import org.kbeng.utils.Settings;
 import org.kbeng.wrld.GameMaster;
 
 /**
- * Represents the backpack inventory ui component of the Isofarm runtime.
+ * Represents the backpack inventory ui component of the kbengine runtime.
  *
  * <p>This type centralizes the state, lifecycle and behavior required by its callers,
  * keeping domain rules together with the data they operate on.

@@ -16,7 +16,7 @@ import static org.lwjgl.opengl.GL30.glBindVertexArray;
 import static org.lwjgl.opengl.GL30.glDeleteVertexArrays;
 
 /**
- * Represents the gltfmodel component of the Isofarm runtime.
+ * Represents the gltfmodel component of the kbengine runtime.
  *
  * <p>This type centralizes the state, lifecycle and behavior required by its callers,
  * keeping domain rules together with the data they operate on.
@@ -258,7 +258,7 @@ public class GLTFModel {
     }
 
     /**
- * Represents the gltfmesh component of the Isofarm runtime.
+ * Represents the gltfmesh component of the kbengine runtime.
  *
  * <p>This type centralizes the state, lifecycle and behavior required by its callers,
  * keeping domain rules together with the data they operate on.

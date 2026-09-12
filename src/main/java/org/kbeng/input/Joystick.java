@@ -9,7 +9,7 @@ import java.nio.FloatBuffer;
 import static org.lwjgl.glfw.GLFW.*;
 
 /**
- * Represents the joystick component of the Isofarm runtime.
+ * Represents the joystick component of the kbengine runtime.
  *
  * <p>This type centralizes the state, lifecycle and behavior required by its callers,
  * keeping domain rules together with the data they operate on.

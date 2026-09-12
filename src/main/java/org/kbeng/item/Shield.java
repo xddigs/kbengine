@@ -6,7 +6,7 @@ import org.kbeng.data.ToolType;
 import org.kbeng.entity.Player;
 
 /**
- * Represents the Shield component of the Isofarm runtime.
+ * Represents the Shield component of the kbengine runtime.
  *
  * <p>This type centralizes the state, lifecycle and behavior required by its callers,
  * keeping domain rules together with the data they operate on.

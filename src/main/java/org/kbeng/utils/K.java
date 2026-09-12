@@ -4,7 +4,7 @@ import org.joml.Vector3f;
 import org.joml.Vector4f;
 
 /**
- * Represents the k component of the Isofarm runtime.
+ * Represents the k component of the kbengine runtime.
  *
  * <p>This type centralizes the state, lifecycle and behavior required by its callers,
  * keeping domain rules together with the data they operate on.
@@ -28,7 +28,7 @@ public final class K {
     private K() {}
 
     /**
- * Represents the camera component of the Isofarm runtime.
+ * Represents the camera component of the kbengine runtime.
  *
  * <p>This type centralizes the state, lifecycle and behavior required by its callers,
  * keeping domain rules together with the data they operate on.
@@ -49,7 +49,7 @@ public final class K {
     }
 
     /**
- * Represents the world component of the Isofarm runtime.
+ * Represents the world component of the kbengine runtime.
  *
  * <p>This type centralizes the state, lifecycle and behavior required by its callers,
  * keeping domain rules together with the data they operate on.
@@ -82,7 +82,7 @@ public final class K {
     }
 
     /**
- * Represents the window component of the Isofarm runtime.
+ * Represents the window component of the kbengine runtime.
  *
  * <p>This type centralizes the state, lifecycle and behavior required by its callers,
  * keeping domain rules together with the data they operate on.
@@ -103,7 +103,7 @@ public final class K {
     }
 
     /**
- * Represents the style component of the Isofarm runtime.
+ * Represents the style component of the kbengine runtime.
  *
  * <p>This type centralizes the state, lifecycle and behavior required by its callers,
  * keeping domain rules together with the data they operate on.
@@ -132,7 +132,7 @@ public final class K {
     }
 
     /**
- * Represents the ui component of the Isofarm runtime.
+ * Represents the ui component of the kbengine runtime.
  *
  * <p>This type centralizes the state, lifecycle and behavior required by its callers,
  * keeping domain rules together with the data they operate on.
@@ -212,7 +212,7 @@ public final class K {
     }
 
     /**
- * Represents the paths component of the Isofarm runtime.
+ * Represents the paths component of the kbengine runtime.
  *
  * <p>This type centralizes the state, lifecycle and behavior required by its callers,
  * keeping domain rules together with the data they operate on.
@@ -300,7 +300,7 @@ public final class K {
     }
 
     /**
- * Represents the render component of the Isofarm runtime.
+ * Represents the render component of the kbengine runtime.
  *
  * <p>This type centralizes the state, lifecycle and behavior required by its callers,
  * keeping domain rules together with the data they operate on.
@@ -322,7 +322,7 @@ public final class K {
     }
 
     /**
- * Represents the colors component of the Isofarm runtime.
+ * Represents the colors component of the kbengine runtime.
  *
  * <p>This type centralizes the state, lifecycle and behavior required by its callers,
  * keeping domain rules together with the data they operate on.
