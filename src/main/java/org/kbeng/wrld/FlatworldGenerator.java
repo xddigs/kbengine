@@ -18,15 +18,10 @@ public final class FlatworldGenerator implements Generator {
     private static final int TOTAL_DEPTH = 128;
     private static final int BOTTOM_Y = SURFACE_Y - TOTAL_DEPTH + 1;
 
-    private final World world;
-
     /**
      * Creates a flatworld generator bound to a world instance.
-     * @param world the {@link World} supplied as {@code world}
      */
-    public FlatworldGenerator(World world) {
-        this.world = world;
-    }
+    public FlatworldGenerator() {}
 
     /**
      * {@inheritDoc}
@@ -36,7 +31,7 @@ public final class FlatworldGenerator implements Generator {
      */
     @Override
     public void generateChunk(int chunkX, int chunkZ) {
-        Chunk chunk = world.getOrCreateChunk(chunkX, chunkZ);
+        Chunk chunk = World.wrld.getOrCreateChunk(chunkX, chunkZ);
         for (int localX = 0; localX < Chunk.SIZE_X; localX++) {
             for (int localZ = 0; localZ < Chunk.SIZE_Z; localZ++) {
                 generateColumn(chunk, localX, localZ);

@@ -1,6 +1,6 @@
 ![kbengine_logo](src/main/resources/assets/ui/logo.png)
 
-**KBEngine** is a 3D isometric engine built with Java, LWJGL, and OpenGL. 
+**kbengine** is a 3D isometric engine built with Java, LWJGL, and OpenGL. 
 Explore a voxel-based island generated through chunk management, cultivate 
 crops featuring real-time seasonal and weather cycles, manage your inventory, and trade items in a dynamic 
 environment driven by custom 3D mesh rendering, particle systems, and dynamic day-night lighting.

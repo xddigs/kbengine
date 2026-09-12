@@ -2,6 +2,7 @@ package org.kbeng.wrld;
 
 import org.kbeng.data.BlockData;
 import org.kbeng.data.SoilPosition;
+import org.kbeng.data.WorldData;
 import org.kbeng.graphics.ChunkMeshBuilder;
 import org.kbeng.utils.Settings;
 
@@ -33,11 +34,9 @@ import java.util.concurrent.atomic.AtomicLong;
  * <p>Callers should use the documented public operations and allow this type to preserve
  * its invariants rather than modifying implementation details directly.
  */
-@SuppressWarnings("all")
 public class ChunkManager {
     private static final float SOIL_GRASS_TIME = 10.0f;
     private static final int MAX_MESH_UPLOADS_PER_FRAME = 2;
-    private final World world;
     private final Generator generator;
     private final Map<Chunk, ChunkMeshBuilder.ChunkRenderMesh> chunkMeshes;
     private final Map<SoilPosition, Float> soilTimers;
@@ -53,12 +52,11 @@ public class ChunkManager {
 
     /**
      * Creates a new {@code ChunkManager} instance.
-     * @param world the {@link World} supplied as {@code world}
-     * @param fluidSimulation the {@link FluidSimulation} argument; the fluid simulation used by the world generator
+     * @param fluidSimulation the {@link FluidSimulation} argument;
+     *                        the fluid simulation used by the world generator
      */
-    public ChunkManager(World world, FluidSimulation fluidSimulation) {
-        this.world = world;
-        this.generator = new WorldGenerator(fluidSimulation);
+    public ChunkManager(FluidSimulation fluidSimulation) {
+        this.generator = WorldData.create(WorldData.OPEN_WORLD, fluidSimulation);
         this.chunkMeshes = new HashMap<>();
         this.soilTimers = new HashMap<>();
         int threads = Math.max(1, Runtime.getRuntime().availableProcessors() - 2);
@@ -92,11 +90,11 @@ public class ChunkManager {
      * @param chunkZ the {@code int} supplied as {@code chunkZ}
      */
     public void buildSingleChunkMesh(int chunkX, int chunkZ) {
-        Chunk chunk = world.getChunks().get(world.get2DKey(chunkX, chunkZ));
+        Chunk chunk = World.wrld.getChunks().get(World.wrld.get2DKey(chunkX, chunkZ));
         if (chunk == null) return;
 
         if (!chunkMeshes.containsKey(chunk)) {
-            ChunkMeshBuilder.ChunkMeshData data = ChunkMeshBuilder.buildMesh(world, chunk);
+            ChunkMeshBuilder.ChunkMeshData data = ChunkMeshBuilder.buildMesh(World.wrld, chunk);
             ChunkMeshBuilder.ChunkRenderMesh renderMesh = ChunkMeshBuilder.createMesh(data);
             if (renderMesh != null) {
                 chunkMeshes.put(chunk, renderMesh);
@@ -125,8 +123,8 @@ public class ChunkManager {
                     renderMesh.dispose();
                 }
 
-                long key = world.get2DKey(chunk.getChunkX(), chunk.getChunkZ());
-                world.getChunks().remove(key);
+                long key = World.wrld.get2DKey(chunk.getChunkX(), chunk.getChunkZ());
+                World.wrld.getChunks().remove(key);
                 buildingChunks.remove(key);
                 meshVersions.remove(key);
                 dirtyChunks.remove(key);
@@ -142,8 +140,8 @@ public class ChunkManager {
                     continue;
                 }
 
-                long key = world.get2DKey(cx, cz);
-                if (!world.getChunks().containsKey(key)) {
+                long key = World.wrld.get2DKey(cx, cz);
+                if (!World.wrld.getChunks().containsKey(key)) {
                     generator.generateChunk(cx, cz);
                     updateGrass(cx, cz);
                 }
@@ -156,7 +154,7 @@ public class ChunkManager {
                     continue;
                 }
 
-                Chunk chunk = world.getChunks().get(world.get2DKey(cx, cz));
+                Chunk chunk = World.wrld.getChunks().get(World.wrld.get2DKey(cx, cz));
                 if (chunk == null) continue;
 
                 if (!chunkMeshes.containsKey(chunk)) {
@@ -176,7 +174,7 @@ public class ChunkManager {
 
     /** Queues player-visible rebuilds ahead of background chunk generation. */
     private void queueMeshBuild(Chunk chunk, boolean prioritized) {
-        long key = world.get2DKey(chunk.getChunkX(), chunk.getChunkZ());
+        long key = World.wrld.get2DKey(chunk.getChunkX(), chunk.getChunkZ());
 
         if (meshExecutor.isShutdown()) {
             return;
@@ -202,9 +200,9 @@ public class ChunkManager {
                 && (result = completedMeshes.pollFirst()) != null) {
             processed++;
             Chunk chunk = result.chunk();
-            long key = world.get2DKey(chunk.getChunkX(), chunk.getChunkZ());
+            long key = World.wrld.get2DKey(chunk.getChunkX(), chunk.getChunkZ());
 
-            if (!world.getChunks().containsKey(key)) {
+            if (!World.wrld.getChunks().containsKey(key)) {
                 continue;
             }
 
@@ -271,8 +269,8 @@ public class ChunkManager {
      * @param cz the {@code int} supplied as {@code cz}
      */
     private void rebuildSingleChunk(int cx, int cz) {
-        long key = world.get2DKey(cx, cz);
-        Chunk chunk = world.getChunks().get(key);
+        long key = World.wrld.get2DKey(cx, cz);
+        Chunk chunk = World.wrld.getChunks().get(key);
         if (chunk != null) {
             meshVersions.merge(key, 1L, Long::sum);
             dirtyChunks.add(key);
@@ -286,15 +284,15 @@ public class ChunkManager {
      * @param cz the chunk z coordinate
      */
     private void rebuildSingleChunkImmediately(int cx, int cz) {
-        long key = world.get2DKey(cx, cz);
-        Chunk chunk = world.getChunks().get(key);
+        long key = World.wrld.get2DKey(cx, cz);
+        Chunk chunk = World.wrld.getChunks().get(key);
         if (chunk == null) return;
 
         meshVersions.merge(key, 1L, Long::sum);
         dirtyChunks.remove(key);
         ChunkMeshBuilder.ChunkRenderMesh oldMesh = chunkMeshes.get(chunk);
         ChunkMeshBuilder.ChunkRenderMesh renderMesh = ChunkMeshBuilder.createMesh(
-                ChunkMeshBuilder.buildMesh(world, chunk));
+                ChunkMeshBuilder.buildMesh(World.wrld, chunk));
         if (oldMesh != null) oldMesh.dispose();
         chunkMeshes.put(chunk, renderMesh);
     }
@@ -314,7 +312,7 @@ public class ChunkManager {
                 int worldZ = startZ + localZ;
 
                 for (int y = Chunk.SIZE_Y - 2; y >= 0; y--) {
-                    byte block = world.getBlockTypeAt(worldX, y, worldZ);
+                    byte block = World.wrld.getBlockTypeAt(worldX, y, worldZ);
 
                     if (isSoil(block)) {
                         if (isExposedToAir(worldX, y, worldZ)) {
@@ -329,10 +327,10 @@ public class ChunkManager {
     /** Updates soil exposure only in the column affected by a block change. */
     private void updateGrassColumn(int worldX, int worldZ) {
         for (int y = Chunk.SIZE_Y - 2; y >= 0; y--) {
-            byte block = world.getBlockTypeAt(worldX, y, worldZ);
+            byte block = World.wrld.getBlockTypeAt(worldX, y, worldZ);
             boolean exposedToAir = isExposedToAir(worldX, y, worldZ);
             if (block == BlockData.GRASS.getId() && !exposedToAir) {
-                world.setBlockTypeAt(worldX, y, worldZ, BlockData.DIRT.getId());
+                World.wrld.setBlockTypeAt(worldX, y, worldZ, BlockData.DIRT.getId());
                 soilTimers.remove(new SoilPosition(worldX, y, worldZ));
             } else if (isSoil(block) && exposedToAir) {
                 startSoilTimer(worldX, y, worldZ);
@@ -355,7 +353,7 @@ public class ChunkManager {
             int y = position.y();
             int z = position.z();
 
-            byte block = world.getBlockTypeAt(x, y, z);
+            byte block = World.wrld.getBlockTypeAt(x, y, z);
 
             if (!isSoil(block)) {
                 iterator.remove();
@@ -374,7 +372,7 @@ public class ChunkManager {
             float remaining = entry.getValue() - delta;
 
             if (remaining <= 0.0f) {
-                world.setBlockTypeAt(x, y, z, BlockData.GRASS.getId());
+                World.wrld.setBlockTypeAt(x, y, z, BlockData.GRASS.getId());
                 rebuildChunkMeshAt(x, z);
                 iterator.remove();
             } else {
@@ -411,7 +409,7 @@ public class ChunkManager {
      * @return {@code true} if exposed to air; otherwise {@code false}
      */
     private boolean isExposedToAir(int x, int y, int z) {
-        return world.getBlockTypeAt(x, y + 1, z) == BlockData.AIR.getId();
+        return World.wrld.getBlockTypeAt(x, y + 1, z) == BlockData.AIR.getId();
     }
 
     /**
@@ -425,7 +423,7 @@ public class ChunkManager {
         for (int dx = -1; dx <= 1; dx++) {
             for (int dz = -1; dz <= 1; dz++) {
                 if (dx == 0 && dz == 0) continue;
-                if (world.getBlockTypeAt(x + dx, y, z + dz) == BlockData.WATER.getId()) {
+                if (World.wrld.getBlockTypeAt(x + dx, y, z + dz) == BlockData.WATER.getId()) {
                     return true;
                 }
             }
@@ -536,7 +534,7 @@ public class ChunkManager {
         public void run() {
             ChunkMeshBuilder.ChunkMeshData data;
             try {
-                data = ChunkMeshBuilder.buildMesh(world, chunk);
+                data = ChunkMeshBuilder.buildMesh(World.wrld, chunk);
             } finally {
                 buildingChunks.remove(key);
             }

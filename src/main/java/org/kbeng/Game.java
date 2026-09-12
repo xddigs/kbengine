@@ -127,12 +127,10 @@ public class Game {
      * Sets the window icon.
      */
     public static void setWindowIcon(long windowHandle) {
-        int[] sizes = {16, 24, 32, 48, 64, 128, 256};
+        int[] sizes = {16, 32, 64, 128, 256};
         String[] resources = {
+                "/assets/ui/iconx16.png",
                 "/assets/ui/iconx32.png",
-                "/assets/ui/iconx32.png",
-                "/assets/ui/iconx32.png",
-                "/assets/ui/iconx64.png",
                 "/assets/ui/iconx64.png",
                 "/assets/ui/iconx128.png",
                 "/assets/ui/iconx256.png"
