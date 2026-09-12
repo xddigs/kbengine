@@ -19,7 +19,11 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * Loads logical control bindings and converts GLFW constant names to integer codes.
+ * ControlConfigParser provides control config parser capabilities within the input subsystem.
+ *
+ * It defines device mappings, control-state tracking, and interaction orchestration for player actions.
+ *
+ * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
  */
 @Singleton
 public final class ControlConfigParser {

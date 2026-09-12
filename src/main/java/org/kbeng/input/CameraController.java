@@ -19,7 +19,13 @@ import static org.joml.Math.lerp;
 import static org.lwjgl.glfw.GLFW.*;
 
 /**
- * Immutable value object containing camera controller.
+ * CameraController is an immutable carrier for camera controller state in the input subsystem.
+ *
+ * Record semantics make instances cheap to pass across systems while preserving value-based equality and snapshot safety.
+ *
+ * The controller translates user or system signals into deterministic runtime state transitions.
+ *
+ * It implements Service<Camera>, providing a concrete strategy for this subsystem contract.
  */
 @SuppressWarnings("all")
 public record CameraController(Camera camera) implements Service<Camera> {

@@ -1,7 +1,11 @@
 package org.kbeng.input;
 
 /**
- * Logical controls whose physical bindings are defined in {@code config.json}.
+ * ControlAction declares the canonical control action set for the input subsystem.
+ *
+ * Each constant provides a stable, type-safe branch token for runtime decisions and avoids string-based switches.
+ *
+ * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
  */
 public enum ControlAction {
     MOVE_FORWARD("move_forward"),

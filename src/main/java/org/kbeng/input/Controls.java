@@ -3,7 +3,11 @@ package org.kbeng.input;
 import java.util.EnumSet;
 
 /**
- * Queries a logical action across keyboard, mouse and the active gamepad.
+ * Controls provides controls capabilities within the input subsystem.
+ *
+ * It defines device mappings, control-state tracking, and interaction orchestration for player actions.
+ *
+ * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
  */
 public final class Controls {
     private static final EnumSet<ControlAction> toggledActions =
