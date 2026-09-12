@@ -82,6 +82,12 @@ public class GameInteraction {
         boolean isLeftPressed = Controls.isPressed(ControlAction.PRIMARY_ACTION);
         boolean isRightHeld = Controls.isDown(ControlAction.SECONDARY_ACTION);
         boolean isRightPressed = Controls.isPressed(ControlAction.SECONDARY_ACTION);
+        boolean isCameraRotateGesture = Controls.isDown(ControlAction.CAMERA_ROTATE_MODIFIER)
+                && Controls.isDown(ControlAction.CAMERA_ROTATE_DRAG);
+        if (isCameraRotateGesture) {
+            isRightHeld = false;
+            isRightPressed = false;
+        }
         boolean canInteract = player != null
                 && !player.getGamemode().isNoClip()
                 && !GameMaster.game.isInventoryOpen()

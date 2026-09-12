@@ -13,6 +13,7 @@
     "camera_rotate_left": "GLFW_KEY_LEFT",
     "camera_rotate_right": "GLFW_KEY_RIGHT",
     "camera_rotate_down": "GLFW_KEY_DOWN",
+    "camera_rotate_modifier": ["GLFW_KEY_LEFT_ALT", "GLFW_KEY_RIGHT_ALT"],
     "open_chat": "GLFW_KEY_ENTER",
     "toggle_hud": "GLFW_KEY_F1",
     "toggle_debug": "GLFW_KEY_F3",
@@ -33,7 +34,9 @@
   "mouse": {
     "primary_action": "GLFW_MOUSE_BUTTON_LEFT",
     "secondary_action": "GLFW_MOUSE_BUTTON_RIGHT",
-    "third_action": "GLFW_MOUSE_BUTTON_MIDDLE",
+    "third_action": "GLFW_MOUSE_BUTTON_4",
+    "camera_pan_drag": "GLFW_MOUSE_BUTTON_MIDDLE",
+    "camera_rotate_drag": "GLFW_MOUSE_BUTTON_RIGHT",
     "pathfind": "GLFW_MOUSE_BUTTON_RIGHT",
     "ui_select": "GLFW_MOUSE_BUTTON_LEFT",
     "ui_context": "GLFW_MOUSE_BUTTON_RIGHT"

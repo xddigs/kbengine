@@ -10,6 +10,7 @@ import org.kbeng.pathfinding.GridPos;
 import org.kbeng.pathfinding.PathFinder;
 import org.kbeng.service.BookService;
 import org.kbeng.service.Service;
+import org.kbeng.utils.Settings;
 import org.kbeng.wrld.GameMaster;
 import org.kbeng.wrld.World;
 import org.joml.Vector3f;
@@ -28,12 +29,24 @@ public record CameraController(Camera camera) implements Service<Camera> {
     private static final float VERTICAL_OFFSET = 0.0f;
     private static final float DISTANCE = 500.0f;
     private static final Vector3f currentOffset = new Vector3f(0, 0, 0);
+    private static final Vector3f panOffset = new Vector3f(0, 0, 0);
     private static final float NORMAL_CURSOR_WEIGHT = 0.35f;
     private static final float ZOOMED_CURSOR_WEIGHT = 0.50f;
     private static final float MAX_CURSOR_OFFSET_DISTANCE = 8.0f;
+    private static final float MAX_PAN_OFFSET_DISTANCE = 36.0f;
     private static final float ROTATION_STEP = 30.0f;
+    private static final float ROTATION_DRAG_STEP = 0.22f;
+    private static final float PAN_DRAG_STEP = 0.020f;
+    private static final float PAN_DRAG_DEADZONE = 0.5f;
+    private static final float PAN_RECENTER_SPEED = 2.8f;
+    private static final float ZOOM_SCROLL_STEP = 1.15f;
+    private static final float MIN_ZOOM = 6.0f;
+    private static final float MAX_ZOOM = 30.0f;
+    private static final float ZOOM_OFFSET_MIN = -10.0f;
+    private static final float ZOOM_OFFSET_MAX = 10.0f;
     private static boolean mouseCaptured = false;
     private static GridPos lastGoal = null;
+    private static float zoomOffset = 0.0f;
 
     /**
      * Updates the current state.
@@ -69,6 +82,8 @@ public record CameraController(Camera camera) implements Service<Camera> {
         }
 
         boolean isZoomed = Controls.isToggled(ControlAction.ZOOM);
+        boolean isMouseRotating = applyMouseCameraRotation(delta);
+        applyMousePan(delta, isMouseRotating);
         updateZoom(gameMaster, isZoomed);
         followPlayer(gameMaster, delta, isZoomed);
     }
@@ -92,9 +107,78 @@ public record CameraController(Camera camera) implements Service<Camera> {
         if (yawRotation != 0.0f) {
             camera.rotateYaw(yawRotation);
             currentOffset.rotateY((float) Math.toRadians(-yawRotation));
+            panOffset.rotateY((float) Math.toRadians(-yawRotation));
         }
         if (pitchRotation != 0.0f) camera.rotatePitch(pitchRotation);
-        positionCamera(player.getPosition(), currentOffset);
+        positionCamera(player.getPosition(), new Vector3f(currentOffset).add(panOffset));
+    }
+
+    /**
+     * Applies mouse drag camera rotation using Alt + right button.
+     * @param delta the {@code float} supplied as {@code delta}
+     * @return {@code true} when the rotate gesture is active
+     */
+    private boolean applyMouseCameraRotation(float delta) {
+        boolean rotateGesture = Controls.isDown(ControlAction.CAMERA_ROTATE_MODIFIER)
+                && Controls.isDown(ControlAction.CAMERA_ROTATE_DRAG);
+        if (!rotateGesture) return false;
+
+        float deltaX = Mouse.getDeltaX();
+        float deltaY = Mouse.getDeltaY();
+        if (Math.abs(deltaX) < PAN_DRAG_DEADZONE && Math.abs(deltaY) < PAN_DRAG_DEADZONE) {
+            return true;
+        }
+
+        float sensitivity = Math.max(0.1f, Settings.getMouseSensitivity());
+        float rotationScale = ROTATION_DRAG_STEP * sensitivity * Math.max(delta, 0.016f) * 60.0f;
+        float yawRotation = deltaX * rotationScale;
+        float pitchRotation = -deltaY * rotationScale;
+
+        if (yawRotation != 0.0f) {
+            camera.rotateYaw(yawRotation);
+            currentOffset.rotateY((float) Math.toRadians(-yawRotation));
+            panOffset.rotateY((float) Math.toRadians(-yawRotation));
+        }
+        if (pitchRotation != 0.0f) {
+            camera.rotatePitch(pitchRotation);
+        }
+
+        return true;
+    }
+
+    /**
+     * Applies tactical drag-pan while preserving follow + cursor lead behavior.
+     * @param delta the {@code float} supplied as {@code delta}
+     * @param isMouseRotating whether the rotate gesture is active
+     */
+    private void applyMousePan(float delta, boolean isMouseRotating) {
+        boolean isPanning = Controls.isDown(ControlAction.CAMERA_PAN_DRAG) && !isMouseRotating;
+        if (isPanning) {
+            float deltaX = Mouse.getDeltaX();
+            float deltaY = Mouse.getDeltaY();
+            if (Math.abs(deltaX) >= PAN_DRAG_DEADZONE || Math.abs(deltaY) >= PAN_DRAG_DEADZONE) {
+                Vector3f right = camera.getRightVector();
+                Vector3f forward = camera.getForwardVector();
+                right.y = 0.0f;
+                forward.y = 0.0f;
+                if (right.lengthSquared() > 0.0001f) right.normalize();
+                if (forward.lengthSquared() > 0.0001f) forward.normalize();
+
+                float panScale = PAN_DRAG_STEP * Math.max(0.2f,
+                        camera.getZoom() / NORMAL_ZOOM) * Math.max(delta, 0.016f) * 60.0f;
+                panOffset.add(new Vector3f(right).mul(-deltaX * panScale))
+                        .add(new Vector3f(forward).mul(deltaY * panScale));
+
+                if (panOffset.lengthSquared() > MAX_PAN_OFFSET_DISTANCE * MAX_PAN_OFFSET_DISTANCE) {
+                    panOffset.normalize().mul(MAX_PAN_OFFSET_DISTANCE);
+                }
+            }
+            return;
+        }
+
+        float recenter = Math.min(1.0f, PAN_RECENTER_SPEED * delta);
+        panOffset.x = lerp(panOffset.x, 0.0f, recenter);
+        panOffset.z = lerp(panOffset.z, 0.0f, recenter);
     }
 
     /**
@@ -104,7 +188,13 @@ public record CameraController(Camera camera) implements Service<Camera> {
     private void updateZoom(GameMaster gameMaster, boolean isZoomed) {
         View view = gameMaster.getViewService().getView();
         float defaultZoom = view == View.EXTERIOR ? NORMAL_ZOOM : INTERIOR_ZOOM;
-        float targetZoom = isZoomed ? ZOOMED_ZOOM : defaultZoom;
+        float scrollDelta = Mouse.getScrollY();
+        if (scrollDelta != 0.0f) {
+            zoomOffset = Math.clamp(zoomOffset - scrollDelta * ZOOM_SCROLL_STEP,
+                    ZOOM_OFFSET_MIN, ZOOM_OFFSET_MAX);
+        }
+        float targetZoom = Math.clamp((isZoomed ? ZOOMED_ZOOM : defaultZoom) + zoomOffset,
+                MIN_ZOOM, MAX_ZOOM);
         if (camera.getZoom() != targetZoom) {
             camera.setZoom(targetZoom);
         }
@@ -143,7 +233,7 @@ public record CameraController(Camera camera) implements Service<Camera> {
         currentOffset.x = lerp(currentOffset.x, targetOffset.x, lerpFactor);
         currentOffset.z = lerp(currentOffset.z, targetOffset.z, lerpFactor);
 
-        positionCamera(playerPos, currentOffset);
+        positionCamera(playerPos, new Vector3f(currentOffset).add(panOffset));
     }
 
     /** Positions the camera behind a focus offset relative to the player. */
