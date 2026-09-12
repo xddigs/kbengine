@@ -36,6 +36,8 @@ public record CameraController(Camera camera) implements Service<Camera> {
     private static final float MAX_PAN_OFFSET_DISTANCE = 36.0f;
     private static final float ROTATION_STEP = 45.0f;
     private static final float ROTATION_DRAG_STEP = 0.22f;
+    private static final float ROTATION_DRAG_SMOOTHING = 14.0f;
+    private static final float ROTATION_DRAG_DEADZONE = 0.01f;
     private static final float PAN_DRAG_STEP = 0.020f;
     private static final float PAN_DRAG_DEADZONE = 0.5f;
     private static final float PAN_RECENTER_SPEED = 2.8f;
@@ -47,6 +49,7 @@ public record CameraController(Camera camera) implements Service<Camera> {
     private static boolean mouseCaptured = false;
     private static GridPos lastGoal = null;
     private static float zoomOffset = 0.0f;
+    private static float smoothedMouseYawRotation = 0.0f;
 
     /**
      * Updates the current state.
@@ -82,10 +85,10 @@ public record CameraController(Camera camera) implements Service<Camera> {
         }
 
         boolean isZoomed = Controls.isToggled(ControlAction.ZOOM);
-        boolean isMouseRotating = applyMouseCameraRotation(delta);
+        boolean isMouseRotating = applyMouseCameraRotation(player, delta);
         applyMousePan(delta, isMouseRotating);
         updateZoom(gameMaster, isZoomed);
-        followPlayer(gameMaster, delta, isZoomed);
+        followPlayer(gameMaster, delta, isZoomed, isMouseRotating);
     }
 
     /**
@@ -105,9 +108,7 @@ public record CameraController(Camera camera) implements Service<Camera> {
         if (yawRotation == 0.0f && pitchRotation == 0.0f) return;
 
         if (yawRotation != 0.0f) {
-            camera.rotateYaw(yawRotation);
-            currentOffset.rotateY((float) Math.toRadians(-yawRotation));
-            panOffset.rotateY((float) Math.toRadians(-yawRotation));
+            rotateOrbitYaw(yawRotation);
         }
         if (pitchRotation != 0.0f) camera.rotatePitch(pitchRotation);
         positionCamera(player.getPosition(), new Vector3f(currentOffset).add(panOffset));
@@ -115,35 +116,45 @@ public record CameraController(Camera camera) implements Service<Camera> {
 
     /**
      * Applies mouse drag camera rotation using Alt + right button.
+     * @param player the player used as the orbit pivot
      * @param delta the {@code float} supplied as {@code delta}
      * @return {@code true} when the rotate gesture is active
      */
-    private boolean applyMouseCameraRotation(float delta) {
+    private boolean applyMouseCameraRotation(Player player, float delta) {
         boolean rotateGesture = Controls.isDown(ControlAction.CAMERA_ROTATE_MODIFIER)
                 && Controls.isDown(ControlAction.CAMERA_ROTATE_DRAG);
-        if (!rotateGesture) return false;
+        if (!rotateGesture) {
+            float smoothing = Math.min(1.0f, ROTATION_DRAG_SMOOTHING * delta);
+            smoothedMouseYawRotation = lerp(smoothedMouseYawRotation, 0.0f, smoothing);
+            return false;
+        }
 
         float deltaX = Mouse.getDeltaX();
-        float deltaY = Mouse.getDeltaY();
-        if (Math.abs(deltaX) < PAN_DRAG_DEADZONE && Math.abs(deltaY) < PAN_DRAG_DEADZONE) {
+        if (Math.abs(deltaX) < PAN_DRAG_DEADZONE) {
             return true;
         }
 
         float sensitivity = Math.max(0.1f, Settings.getMouseSensitivity());
-        float rotationScale = ROTATION_DRAG_STEP * sensitivity * Math.max(delta, 0.016f) * 60.0f;
-        float yawRotation = deltaX * rotationScale;
-        float pitchRotation = -deltaY * rotationScale;
+        float rawYawRotation = deltaX * ROTATION_DRAG_STEP * sensitivity;
+        float smoothing = Math.min(1.0f, ROTATION_DRAG_SMOOTHING * delta);
+        smoothedMouseYawRotation = lerp(smoothedMouseYawRotation, rawYawRotation, smoothing);
 
-        if (yawRotation != 0.0f) {
-            camera.rotateYaw(yawRotation);
-            currentOffset.rotateY((float) Math.toRadians(-yawRotation));
-            panOffset.rotateY((float) Math.toRadians(-yawRotation));
-        }
-        if (pitchRotation != 0.0f) {
-            camera.rotatePitch(pitchRotation);
+        if (Math.abs(smoothedMouseYawRotation) >= ROTATION_DRAG_DEADZONE) {
+            rotateOrbitYaw(smoothedMouseYawRotation);
+            positionCamera(player.getPosition(), new Vector3f(currentOffset).add(panOffset));
         }
 
         return true;
+    }
+
+    /**
+     * Rotates the camera orbit around the player by yaw, matching keyboard behavior.
+     * @param yawRotation the signed yaw rotation in degrees
+     */
+    private void rotateOrbitYaw(float yawRotation) {
+        camera.rotateYaw(yawRotation);
+        currentOffset.rotateY((float) Math.toRadians(-yawRotation));
+        panOffset.rotateY((float) Math.toRadians(-yawRotation));
     }
 
     /**
@@ -189,7 +200,8 @@ public record CameraController(Camera camera) implements Service<Camera> {
         View view = gameMaster.getViewService().getView();
         float defaultZoom = view == View.EXTERIOR ? NORMAL_ZOOM : INTERIOR_ZOOM;
         float scrollDelta = Mouse.getScrollY();
-        if (scrollDelta != 0.0f) {
+        if (scrollDelta != 0.0f
+                && Controls.isDown(ControlAction.CAMERA_ROTATE_MODIFIER)) {
             zoomOffset = Math.clamp(zoomOffset - scrollDelta * ZOOM_SCROLL_STEP,
                     ZOOM_OFFSET_MIN, ZOOM_OFFSET_MAX);
         }
@@ -205,33 +217,37 @@ public record CameraController(Camera camera) implements Service<Camera> {
      * @param gameMaster the {@link GameMaster} supplied as {@code gameMaster}
      * @param delta the {@code float} supplied as {@code delta}
      * @param isZoomed whether the zoom toggle is active
+     * @param isMouseRotating whether the mouse rotate gesture is active
      */
-    private void followPlayer(GameMaster gameMaster, float delta, boolean isZoomed) {
+    private void followPlayer(GameMaster gameMaster, float delta,
+                              boolean isZoomed, boolean isMouseRotating) {
         Player player = Player.plyr;
         Vector3f playerPos = player.getPosition();
 
-        float mouseX = Mouse.getX();
-        float mouseY = Mouse.getY();
-        float screenWidth = gameMaster.getWindowWidth();
-        float screenHeight = gameMaster.getWindowHeight();
+        if (!isMouseRotating) {
+            float mouseX = Mouse.getX();
+            float mouseY = Mouse.getY();
+            float screenWidth = gameMaster.getWindowWidth();
+            float screenHeight = gameMaster.getWindowHeight();
 
-        Vector3f mouseWorldPos = getMouseWorldPosition(
-                mouseX, mouseY, screenWidth, screenHeight, playerPos.y);
+            Vector3f mouseWorldPos = getMouseWorldPosition(
+                    mouseX, mouseY, screenWidth, screenHeight, playerPos.y);
 
-        Vector3f directionToMouse = new Vector3f(mouseWorldPos).sub(playerPos);
-        directionToMouse.y = 0.0f;
+            Vector3f directionToMouse = new Vector3f(mouseWorldPos).sub(playerPos);
+            directionToMouse.y = 0.0f;
 
-        float cursorWeight = isZoomed ? ZOOMED_CURSOR_WEIGHT : NORMAL_CURSOR_WEIGHT;
+            float cursorWeight = isZoomed ? ZOOMED_CURSOR_WEIGHT : NORMAL_CURSOR_WEIGHT;
 
-        Vector3f targetOffset = new Vector3f(directionToMouse).mul(cursorWeight);
+            Vector3f targetOffset = new Vector3f(directionToMouse).mul(cursorWeight);
 
-        if (targetOffset.length() > MAX_CURSOR_OFFSET_DISTANCE) {
-            targetOffset.normalize().mul(MAX_CURSOR_OFFSET_DISTANCE);
+            if (targetOffset.length() > MAX_CURSOR_OFFSET_DISTANCE) {
+                targetOffset.normalize().mul(MAX_CURSOR_OFFSET_DISTANCE);
+            }
+
+            float lerpFactor = Math.min(1.0f, 8.0f * delta);
+            currentOffset.x = lerp(currentOffset.x, targetOffset.x, lerpFactor);
+            currentOffset.z = lerp(currentOffset.z, targetOffset.z, lerpFactor);
         }
-
-        float lerpFactor = Math.min(1.0f, 8.0f * delta);
-        currentOffset.x = lerp(currentOffset.x, targetOffset.x, lerpFactor);
-        currentOffset.z = lerp(currentOffset.z, targetOffset.z, lerpFactor);
 
         positionCamera(playerPos, new Vector3f(currentOffset).add(panOffset));
     }
