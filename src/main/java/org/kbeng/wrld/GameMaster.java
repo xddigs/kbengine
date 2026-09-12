@@ -48,7 +48,7 @@ public final class GameMaster {
     private final EnvironmentSystem environmentSystem = new EnvironmentSystem();
     private final SoundListener soundListener = new SoundListener();
     private final GraphicsEngine renderEngine = new GraphicsEngine(this);
-    private List<Entity> entities = new LinkedList<>();
+    private final List<Entity> entities = new LinkedList<>();
     private ChunkManager chunkManager;
     private Camera camera;
     private CameraController cameraController;
@@ -61,6 +61,7 @@ public final class GameMaster {
     private boolean isHUDShown = true;
     private volatile boolean areEntitiesActive;
     private float genDelta;
+
     private GameMaster() { }
 
     /**
