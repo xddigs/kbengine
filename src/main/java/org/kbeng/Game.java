@@ -25,7 +25,7 @@ import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 /**
- * Represents the game component of the Isofarm runtime.
+ * Represents the game component of the kbengine runtime.
  *
  * <p>This type centralizes the state, lifecycle and behavior required by its callers,
  * keeping domain rules together with the data they operate on.
@@ -42,7 +42,7 @@ import static org.lwjgl.system.MemoryUtil.NULL;
  */
 public class Game {
     private static final Logger log = LoggerFactory.getLogger(Game.class);
-    private static final String WINDOW_TITLE = "Isofarm";
+    private static final String WINDOW_TITLE = "kbengine";
 
     private static final int OPENGL_MAJOR_VERSION = 3;
     private static final int OPENGL_MINOR_VERSION = 3;
@@ -127,12 +127,10 @@ public class Game {
      * Sets the window icon.
      */
     public static void setWindowIcon(long windowHandle) {
-        int[] sizes = {16, 24, 32, 48, 64, 128, 256};
+        int[] sizes = {16, 32, 64, 128, 256};
         String[] resources = {
+                "/assets/ui/iconx16.png",
                 "/assets/ui/iconx32.png",
-                "/assets/ui/iconx32.png",
-                "/assets/ui/iconx32.png",
-                "/assets/ui/iconx64.png",
                 "/assets/ui/iconx64.png",
                 "/assets/ui/iconx128.png",
                 "/assets/ui/iconx256.png"
