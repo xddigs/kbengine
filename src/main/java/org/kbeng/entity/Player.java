@@ -20,7 +20,6 @@ import java.util.List;
 
 /**
  * Local controllable {@link Character} implementation that binds input, combat, and interaction systems.
- *
  * The player coordinates movement and camera-driven orientation, auto-jump and collision traversal,
  * inventory/equipment actions, and attack execution through dedicated helper components
  * ({@link PlayerGameplay} and {@link PlayerManager}). A singleton instance ({@link #plyr}) is kept as

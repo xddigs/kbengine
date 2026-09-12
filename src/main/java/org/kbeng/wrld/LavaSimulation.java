@@ -5,11 +5,8 @@ import org.kbeng.data.Singleton;
 
 /**
  * LavaSimulation provides lava simulation capabilities within the wrld subsystem.
- *
  * It maintains world simulation concerns including terrain, chunks, fluids, and authoritative spatial state.
- *
  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
- *
  * It extends FluidSimulation, inheriting shared behavior while specializing subsystem-specific logic.
  */
 @Singleton

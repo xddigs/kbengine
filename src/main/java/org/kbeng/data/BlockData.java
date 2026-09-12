@@ -16,7 +16,6 @@ import java.util.function.Consumer;
 
 /**
  * Canonical block registry for world generation, rendering metadata, mining rules, and drops.
- *
  * Each enum constant stores the full runtime description of a block type: IDs, solidity, light behavior,
  * hardness, sound group, texture mapping, geometric shape flags, and optional drop configuration.
  * This keeps block behavior data-driven and allows systems such as terrain generation, collision,

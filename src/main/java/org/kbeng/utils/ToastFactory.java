@@ -10,11 +10,8 @@ import java.util.List;
 
 /**
  * ToastFactory provides toast factory capabilities within the utils subsystem.
- *
  * It centralizes reusable utilities such as constants, localization, settings, and small cross-cutting helpers.
- *
  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
- *
  * It implements Service<Toast>, providing a concrete strategy for this subsystem contract.
  */
 @SuppressWarnings("all")

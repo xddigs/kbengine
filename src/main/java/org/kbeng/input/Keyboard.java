@@ -4,9 +4,7 @@ import static org.lwjgl.glfw.GLFW.*;
 
 /**
  * Keyboard provides keyboard capabilities within the input subsystem.
- *
  * It defines device mappings, control-state tracking, and interaction orchestration for player actions.
- *
  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
  */
 public final class Keyboard {

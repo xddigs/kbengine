@@ -17,11 +17,8 @@ import static org.joml.Math.lerp;
 
 /**
  * Camera provides camera capabilities within the graphics subsystem.
- *
  * It contributes to OpenGL resource ownership, render-state setup, or frame-pipeline execution.
- *
  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
- *
  * It implements CameraView, providing a concrete strategy for this subsystem contract.
  */
 public class Camera implements CameraView {
@@ -53,7 +50,6 @@ public class Camera implements CameraView {
 
     /**
      * Creates a new {@code Camera} instance.
-     *
      * @param width                the {@code float} supplied as {@code width}
      * @param height               the {@code float} supplied as {@code height}
      * @param renderDistanceChunks the {@code int} supplied as {@code renderDistanceChunks}
@@ -66,7 +62,6 @@ public class Camera implements CameraView {
 
     /**
      * Updates the projection.
-     *
      * @param width                the {@code float} supplied as {@code width}
      * @param height               the {@code float} supplied as {@code height}
      * @param renderDistanceChunks the {@code int} supplied as {@code renderDistanceChunks}
@@ -81,7 +76,6 @@ public class Camera implements CameraView {
     /**
      * {@inheritDoc}
      * Returns the projection matrix.
-     *
      * @return the {@link Matrix4f} representing the projection matrix
      */
     @Override
@@ -92,7 +86,6 @@ public class Camera implements CameraView {
     /**
      * {@inheritDoc}
      * Returns the view matrix.
-     *
      * @return the {@link Matrix4f} representing the view matrix
      */
     @Override
@@ -108,7 +101,6 @@ public class Camera implements CameraView {
     /**
      * {@inheritDoc}
      * Returns the position.
-     *
      * @return the {@link Vector3f} representing the position
      */
     @Override
@@ -119,7 +111,6 @@ public class Camera implements CameraView {
     /**
      * {@inheritDoc}
      * Returns the pitch.
-     *
      * @return {@code float}; the pitch
      */
     @Override
@@ -130,7 +121,6 @@ public class Camera implements CameraView {
     /**
      * {@inheritDoc}
      * Returns the yaw.
-     *
      * @return {@code float}; the yaw
      */
     @Override
@@ -158,7 +148,6 @@ public class Camera implements CameraView {
     /**
      * Applies a small screen tilt in response to player damage.
      * Consecutive impacts alternate direction to avoid a permanent visual bias.
-     *
      * @param amount the {@code float} argument; the received damage
      */
     public void applyDamageTilt(float amount) {
@@ -172,7 +161,6 @@ public class Camera implements CameraView {
 
     /**
      * Smoothly restores the camera to its normal roll.
-     *
      * @param delta the {@code float} argument; frame time in seconds
      */
     public void updateDamageTilt(float delta) {
@@ -185,7 +173,6 @@ public class Camera implements CameraView {
 
     /**
      * Sets the position.
-     *
      * @param x the {@code float} supplied as {@code x}
      * @param y the {@code float} supplied as {@code y}
      * @param z the {@code float} supplied as {@code z}
@@ -196,7 +183,6 @@ public class Camera implements CameraView {
 
     /**
      * Returns the forward vector.
-     *
      * @return the {@link Vector3f} representing the forward vector
      */
     public Vector3f getForwardVector() {
@@ -211,7 +197,6 @@ public class Camera implements CameraView {
 
     /**
      * Returns the right vector.
-     *
      * @return the {@link Vector3f} representing the right vector
      */
     public Vector3f getRightVector() {
@@ -223,7 +208,6 @@ public class Camera implements CameraView {
 
     /**
      * Returns the zoom.
-     *
      * @return {@code float}; the zoom
      */
     public float getZoom() {
@@ -232,7 +216,6 @@ public class Camera implements CameraView {
 
     /**
      * Sets the zoom.
-     *
      * @param zoom the {@code float} supplied as {@code zoom}
      */
     public void setZoom(float zoom) {
@@ -242,7 +225,6 @@ public class Camera implements CameraView {
 
     /**
      * Returns the up vector.
-     *
      * @return the {@link Vector3f} representing the up vector
      */
     public Vector3f getUpVector() {
@@ -255,7 +237,6 @@ public class Camera implements CameraView {
 
     /**
      * Returns the mouse ray.
-     *
      * @param mouseX       the {@code float} supplied as {@code mouseX}
      * @param mouseY       the {@code float} supplied as {@code mouseY}
      * @param screenWidth  the {@code float} supplied as {@code screenWidth}
@@ -284,7 +265,6 @@ public class Camera implements CameraView {
 
     /**
      * Transforms this object according to the supplied values.
-     *
      * @param world        the {@link World} supplied as {@code world}
      * @param playerPos    the {@link Vector3f} supplied as {@code playerPos}
      * @param mouseX       the {@code float} supplied as {@code mouseX}
@@ -308,7 +288,6 @@ public class Camera implements CameraView {
 
     /**
      * Calculates the value represented by raycast from the current state.
-     *
      * @param world         the {@link World} supplied as {@code world}
      * @param playerPos     the {@link Vector3f} supplied as {@code playerPos}
      * @param origin        the {@link Vector3f} supplied as {@code origin}
@@ -445,7 +424,6 @@ public class Camera implements CameraView {
 
     /**
      * Returns the last hit normal x.
-     *
      * @return {@code int}; the last hit normal x
      */
     public int getLastHitNormalX() {
@@ -454,7 +432,6 @@ public class Camera implements CameraView {
 
     /**
      * Returns the last hit normal y.
-     *
      * @return {@code int}; the last hit normal y
      */
     public int getLastHitNormalY() {
@@ -463,7 +440,6 @@ public class Camera implements CameraView {
 
     /**
      * Returns the last hit normal z.
-     *
      * @return {@code int}; the last hit normal z
      */
     public int getLastHitNormalZ() {

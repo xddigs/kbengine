@@ -6,9 +6,7 @@ import org.kbeng.utils.ItemIds;
 
 /**
  * UIManager provides uimanager capabilities within the ui subsystem.
- *
  * It drives retained UI composition, user interaction handling, and rendering behavior for in-game screens.
- *
  * The manager coordinates lifecycle and ordering concerns across dependent runtime components.
  */
 public class UIManager {

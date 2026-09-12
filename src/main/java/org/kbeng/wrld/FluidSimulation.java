@@ -16,9 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * FluidSimulation provides fluid simulation capabilities within the wrld subsystem.
- *
  * It maintains world simulation concerns including terrain, chunks, fluids, and authoritative spatial state.
- *
  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
  */
 
@@ -166,7 +164,6 @@ public abstract class FluidSimulation {
      * Unlike collecting fluid in a bucket, placement must not rebuild the whole
      * connected fluid component: an ocean is one component and rebuilding it on
      * the render thread can freeze or exhaust the game.
-     *
      * @param x the world x value
      * @param y the world y value
      * @param z the world z value

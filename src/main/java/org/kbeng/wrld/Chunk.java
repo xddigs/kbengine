@@ -7,9 +7,7 @@ import java.util.BitSet;
 
 /**
  * Chunk provides chunk capabilities within the wrld subsystem.
- *
  * It maintains world simulation concerns including terrain, chunks, fluids, and authoritative spatial state.
- *
  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
  */
 @DataClass

@@ -18,9 +18,7 @@ import java.util.Map;
 
 /**
  * ResourceManager provides resource manager capabilities within the graphics subsystem.
- *
  * It contributes to OpenGL resource ownership, render-state setup, or frame-pipeline execution.
- *
  * The manager coordinates lifecycle and ordering concerns across dependent runtime components.
  */
 @Singleton
@@ -641,7 +639,6 @@ public class ResourceManager {
 
     /**
      * Returns the models associated with interactive block types.
-     *
      * @return the {@link Map} representing the interactive block model map
      */
     public Map<BlockData, GLTFModel> getBlockModels() {

@@ -7,9 +7,7 @@ import java.util.List;
 
 /**
  * BlockShape declares the canonical block shape set for the data subsystem.
- *
  * Each constant provides a stable, type-safe branch token for runtime decisions and avoids string-based switches.
- *
  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
  */
 @SuppressWarnings("all")
@@ -79,7 +77,6 @@ public enum BlockShape {
 
     /**
      * Helper method to attach upper and lower horizontal fence rails in a specific direction.
-     *
      * @param boxes Target list to append rail boxes to.
      * @param minX  Minimum X bound.
      * @param minZ  Minimum Z bound.
@@ -178,7 +175,6 @@ public enum BlockShape {
 
     /**
      * Determines which direction a vertical slab should face based on where a block was targeted.
-     *
      * @param pointX Target point X-coordinate in world space.
      * @param pointZ Target point Z-coordinate in world space.
      * @param blockX World grid position X of the targeted block.
@@ -197,7 +193,6 @@ public enum BlockShape {
 
     /**
      * Determines which direction a staircase should face based on where a block was targeted.
-     *
      * @param pointX Target point X-coordinate in world space.
      * @param pointZ Target point Z-coordinate in world space.
      * @param blockX World grid position X of the targeted block.
@@ -289,7 +284,6 @@ public enum BlockShape {
     /**
      * Casts a ray against all bounding boxes of this shape placed at a world position,
      * returning the nearest hit.
-     *
      * @param origin    Ray origin in world coordinates.
      * @param direction Normalized ray direction vector.
      * @param blockX    World position X of this block.
@@ -311,7 +305,6 @@ public enum BlockShape {
 
     /**
      * Helper ray-box slab intersection test for a single {@link Box} placed in world space.
-     *
      * @param origin    Ray origin vector.
      * @param direction Normalized ray direction vector.
      * @param box       Local target bounding box.

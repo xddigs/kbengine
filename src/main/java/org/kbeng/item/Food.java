@@ -6,11 +6,8 @@ import org.kbeng.data.FoodData;
 
 /**
  * Food is an immutable carrier for food state in the item subsystem.
- *
  * Record semantics make instances cheap to pass across systems while preserving value-based equality and snapshot safety.
- *
  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
- *
  * It implements Craftable, providing a concrete strategy for this subsystem contract.
  */
 @DataClass

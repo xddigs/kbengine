@@ -2,9 +2,7 @@ package org.kbeng.data;
 
 /**
  * SoundGroup declares the canonical sound group set for the data subsystem.
- *
  * Each constant provides a stable, type-safe branch token for runtime decisions and avoids string-based switches.
- *
  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
  */
 public enum SoundGroup {
@@ -39,7 +37,6 @@ public enum SoundGroup {
 
     /**
      * Creates a new {@code SoundGroup} instance.
-     *
      * @param stepSounds       an array of {@link String} values supplied as {@code stepSounds}
      * @param breakSounds      an array of {@link String} values supplied as {@code breakSounds}
      * @param breakingSounds   an array of {@link String} values supplied as {@code breakingSounds}
@@ -65,7 +62,6 @@ public enum SoundGroup {
 
     /**
      * Returns the step sounds.
-     *
      * @return an array of {@link String} values; the step sounds
      */
     public String[] getStepSounds() {
@@ -74,7 +70,6 @@ public enum SoundGroup {
 
     /**
      * Returns the break sounds.
-     *
      * @return an array of {@link String} values; the break sounds
      */
     public String[] getBreakSounds() {
@@ -91,7 +86,6 @@ public enum SoundGroup {
 
     /**
      * Returns the place sounds.
-     *
      * @return an array of {@link String} values; the place sounds
      */
     public String[] getPlaceSounds() {
@@ -100,7 +94,6 @@ public enum SoundGroup {
 
     /**
      * Returns the entity sounds.
-     *
      * @return an array of {@link String} values; the entity sounds
      */
     public String[] getEntitySounds() {
@@ -109,7 +102,6 @@ public enum SoundGroup {
 
     /**
      * Returns the background sounds.
-     *
      * @return an array of {@link String} values; the background sounds
      */
     public String[] getBackgroundSounds() {
@@ -118,7 +110,6 @@ public enum SoundGroup {
 
     /**
      * Returns the looping sounds.
-     *
      * @return an array of {@link String} values; the looping sounds
      */
     public String[] getLoopingSounds() {
@@ -127,7 +118,6 @@ public enum SoundGroup {
 
     /**
      * Returns the use sounds.
-     *
      * @return an array of {@link String} values; the use sounds
      */
     public String[] getUseSounds() {

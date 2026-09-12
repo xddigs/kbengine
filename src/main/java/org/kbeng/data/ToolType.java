@@ -7,11 +7,8 @@ import java.util.function.Consumer;
 
 /**
  * ToolType declares the canonical tool type set for the data subsystem.
- *
  * Each constant provides a stable, type-safe branch token for runtime decisions and avoids string-based switches.
- *
  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
- *
  * It implements Item, providing a concrete strategy for this subsystem contract.
  */
 public enum ToolType implements Item {

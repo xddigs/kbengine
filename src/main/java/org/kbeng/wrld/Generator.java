@@ -2,9 +2,7 @@ package org.kbeng.wrld;
 
 /**
  * Generator defines the generator contract within the wrld subsystem.
- *
  * Implementations are expected to preserve these behavioral guarantees while choosing their own storage and execution strategy.
- *
  * The generator produces deterministic content from seeds, rules, and runtime configuration.
  */
 public interface Generator {

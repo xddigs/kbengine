@@ -11,9 +11,7 @@ import java.util.*;
 
 /**
  * Inventory provides inventory capabilities within the data subsystem.
- *
  * It represents strongly typed domain data shared between simulation, rendering, input, and persistence boundaries.
- *
  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
  */
 @DataClass
@@ -264,7 +262,6 @@ public class Inventory {
     /**
      * Adds an item only within the supplied slot range, filling compatible
      * stacks before the first empty slot.
-     *
      * @param item the item to addEnemy
      * @param amount the amount to addEnemy
      * @param startInclusive first destination slot

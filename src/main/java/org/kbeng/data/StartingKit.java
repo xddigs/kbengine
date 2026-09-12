@@ -4,11 +4,8 @@ import org.kbeng.item.*;
 
 /**
  * StartingKit provides starting kit capabilities within the data subsystem.
- *
  * It represents strongly typed domain data shared between simulation, rendering, input, and persistence boundaries.
- *
  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
- *
  * It extends Kit, inheriting shared behavior while specializing subsystem-specific logic.
  */
 public class StartingKit extends Kit {

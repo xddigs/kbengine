@@ -4,9 +4,7 @@ import org.kbeng.wrld.GameMaster;
 
 /**
  * PlayerState defines the player state contract within the data subsystem.
- *
  * Implementations are expected to preserve these behavioral guarantees while choosing their own storage and execution strategy.
- *
  * The state object captures one branch in a larger state machine and enforces transition rules.
  */
 public interface PlayerState {

@@ -25,11 +25,8 @@ import static org.lwjgl.stb.STBVorbis.stb_vorbis_decode_memory;
 
 /**
  * SoundService provides sound service capabilities within the service subsystem.
- *
  * It provides shared runtime services, registries, and policy logic consumed by orchestrators and feature modules.
- *
  * The service acts as a shared policy and state access point for other runtime modules.
- *
  * It implements Service<SoundGroup>, providing a concrete strategy for this subsystem contract.
  */
 @SuppressWarnings("all")
@@ -237,7 +234,6 @@ public class SoundService implements Service<SoundGroup> {
     /**
      * Plays a specific use sound without randomizing either the selected effect
      * or its pitch.
-     *
      * @param group the {@link SoundGroup} argument; the sound group
      * @param soundIndex the {@code int} argument; the index within the group's use sounds
      */
@@ -249,7 +245,6 @@ public class SoundService implements Service<SoundGroup> {
     /**
      * Plays a gender specific sound without randomizing either the selected effect
      * or its pitch.
-     *
      * @param group the {@link SoundGroup} argument; the sound group
      * @param soundIndex the {@code int} argument; the index within the group's gender sounds
      */
@@ -324,7 +319,6 @@ public class SoundService implements Service<SoundGroup> {
 
     /**
      * Plays one concrete sound from an array without random selection or pitch.
-     *
      * @param source the {@code int} argument; the OpenAL source
      * @param sounds an array of {@link String} values argument; the available sound paths
      * @param pitch the {@code float} argument; the exact playback pitch
@@ -339,7 +333,6 @@ public class SoundService implements Service<SoundGroup> {
 
     /**
      * Plays a loaded sound buffer with the supplied source settings.
-     *
      * @param source the OpenAL source that will play the effect
      * @param soundPath the classpath path used to locate the loaded buffer
      * @param pitch the exact playback pitch

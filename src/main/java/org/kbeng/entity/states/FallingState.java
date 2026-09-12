@@ -10,11 +10,8 @@ import org.kbeng.wrld.World;
 
 /**
  * FallingState provides falling state capabilities within the entity subsystem.
- *
  * It participates in actor simulation, state transitions, and per-frame world interaction contracts.
- *
  * The state object captures one branch in a larger state machine and enforces transition rules.
- *
  * It implements PlayerState, providing a concrete strategy for this subsystem contract.
  */
 public class FallingState implements PlayerState {
@@ -95,7 +92,6 @@ public class FallingState implements PlayerState {
     /**
      * Applies increasingly severe damage after falling continuously into the
      * void for ten seconds.
-     *
      * @param delta the {@code float} argument; frame time in seconds
      */
     private void applyVoidDamage(float delta) {

@@ -17,11 +17,8 @@ import java.util.function.Supplier;
 
 /**
  * Library provides library capabilities within the service subsystem.
- *
  * It provides shared runtime services, registries, and policy logic consumed by orchestrators and feature modules.
- *
  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
- *
  * It implements Service<GameMaster>, providing a concrete strategy for this subsystem contract.
  */
 public class Library implements Service<GameMaster> {

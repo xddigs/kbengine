@@ -8,11 +8,8 @@ import org.kbeng.wrld.GameMaster;
 
 /**
  * BackpackInventoryUI provides backpack inventory ui capabilities within the ui subsystem.
- *
  * It drives retained UI composition, user interaction handling, and rendering behavior for in-game screens.
- *
  * The UI component owns presentation behavior and mediates interaction between input and visual state.
- *
  * It extends InventoryUI, inheriting shared behavior while specializing subsystem-specific logic.
  */
 public class BackpackInventoryUI extends InventoryUI {

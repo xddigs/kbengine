@@ -26,9 +26,7 @@ import java.util.List;
 
 /**
  * PlayerGameplay provides player gameplay capabilities within the entity subsystem.
- *
  * It participates in actor simulation, state transitions, and per-frame world interaction contracts.
- *
  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
  */
 public final class PlayerGameplay {
@@ -74,7 +72,6 @@ public final class PlayerGameplay {
 
     /**
      * Advances death and respawn handling.
-     *
      * @param delta the {@code float} argument; frame time
      * @return {@code true} if normal player updates should continue; otherwise {@code false}
      */
@@ -93,7 +90,6 @@ public final class PlayerGameplay {
 
     /**
      * Updates this object for the current simulation step.
-     *
      * @param delta the {@code float} argument; frame time
      */
     public void update(float delta) {
@@ -149,7 +145,6 @@ public final class PlayerGameplay {
 
     /**
      * Handles damage taken and updates the affected state.
-     *
      * @param amount the {@code float} argument; received damage
      */
     public void onDamageTaken(float amount) {
@@ -296,7 +291,6 @@ public final class PlayerGameplay {
 
     /**
      * Processes sell and updates the affected inventory or currency balances.
-     *
      * @param item   the {@link Item} supplied as {@code item}
      * @param amount the {@code int} argument; quantity
      */
@@ -316,7 +310,6 @@ public final class PlayerGameplay {
 
     /**
      * Adds the supplied element to the corresponding collection or processing queue.
-     *
      * @param item   the {@link Item} supplied as {@code item}
      * @param amount the {@code int} argument; quantity
      */
@@ -327,7 +320,6 @@ public final class PlayerGameplay {
 
     /**
      * Adds the supplied element to the corresponding collection or processing queue.
-     *
      * @param item the {@link Item} supplied as {@code item}
      */
     public void add(Item item) {
@@ -337,7 +329,6 @@ public final class PlayerGameplay {
 
     /**
      * Adds to backpack to the corresponding collection or processing queue.
-     *
      * @param item   the {@link Item} supplied as {@code item}
      * @param amount the {@code int} argument; quantity
      */
@@ -348,7 +339,6 @@ public final class PlayerGameplay {
 
     /**
      * Adds to backpack to the corresponding collection or processing queue.
-     *
      * @param item the {@link Item} supplied as {@code item}
      */
     public void addToBackpack(Item item) {
@@ -358,7 +348,6 @@ public final class PlayerGameplay {
 
     /**
      * Removes from backpack and updates any dependent state.
-     *
      * @param item   the {@link Item} supplied as {@code item}
      * @param amount the {@code int} argument; quantity
      */
@@ -369,7 +358,6 @@ public final class PlayerGameplay {
 
     /**
      * Removes from backpack and updates any dependent state.
-     *
      * @param item the {@link Item} supplied as {@code item}
      */
     public void removeFromBackpack(Item item) {
@@ -387,7 +375,6 @@ public final class PlayerGameplay {
 
     /**
      * Removes the supplied element and updates any dependent state.
-     *
      * @param item   the {@link Item} supplied as {@code item}
      * @param amount the {@code int} argument; quantity
      */
@@ -400,7 +387,6 @@ public final class PlayerGameplay {
 
     /**
      * Removes the supplied element and updates any dependent state.
-     *
      * @param item the {@link Item} supplied as {@code item}
      */
     public void remove(Item item) {
@@ -423,7 +409,6 @@ public final class PlayerGameplay {
 
     /**
      * Determines whether this object contains no elements or active content.
-     *
      * @return {@code true} if inventory is empty; otherwise {@code false}
      */
     public boolean isEmpty() {
@@ -432,7 +417,6 @@ public final class PlayerGameplay {
 
     /**
      * Returns the number or extent represented by size.
-     *
      * @return {@code int}; inventory size
      */
     public int size() {
@@ -441,7 +425,6 @@ public final class PlayerGameplay {
 
     /**
      * Returns the value identified by the supplied key, index, or current object state.
-     *
      * @param index the {@code int} supplied as {@code index}
      * @return the {@link Item} result; indexed item
      */
@@ -451,7 +434,6 @@ public final class PlayerGameplay {
 
     /**
      * Returns the value identified by the supplied key, index, or current object state.
-     *
      * @param item the {@link Item} argument; key
      * @return the {@link Item} result; matching item
      */
@@ -461,7 +443,6 @@ public final class PlayerGameplay {
 
     /**
      * Returns amount according to the current object state.
-     *
      * @param item the {@link Item} supplied as {@code item}
      * @return {@code int}; quantity
      */
@@ -471,7 +452,6 @@ public final class PlayerGameplay {
 
     /**
      * Processes earn and updates the affected inventory or currency balances.
-     *
      * @param amount the {@code int} argument; currency amount
      */
     public void earn(int amount) {
@@ -482,7 +462,6 @@ public final class PlayerGameplay {
 
     /**
      * Processes spend and updates the affected inventory or currency balances.
-     *
      * @param amount the {@code int} argument; currency amount
      */
     public void spend(int amount) {
@@ -494,7 +473,6 @@ public final class PlayerGameplay {
 
     /**
      * Determines whether space is satisfied by the current state.
-     *
      * @return {@code true} if storage has space; otherwise {@code false}
      */
     public boolean hasSpace() {
@@ -503,7 +481,6 @@ public final class PlayerGameplay {
 
     /**
      * Determines whether seeds is satisfied by the current state.
-     *
      * @return {@code true} if seeds are present; otherwise {@code false}
      */
     public boolean hasSeeds() {
@@ -512,7 +489,6 @@ public final class PlayerGameplay {
 
     /**
      * Returns damage sequence according to the current object state.
-     *
      * @return {@code int}; damage event sequence
      */
     public int getDamageSequence() {
@@ -521,7 +497,6 @@ public final class PlayerGameplay {
 
     /**
      * Returns respawn timer according to the current object state.
-     *
      * @return {@code float}; respawn timer
      */
     public float getRespawnTimer() {
@@ -530,7 +505,6 @@ public final class PlayerGameplay {
 
     /**
      * Sets respawn timer and updates the associated state.
-     *
      * @param value the {@code float} argument; respawn timer
      */
     public void setRespawnTimer(float value) {
@@ -539,7 +513,6 @@ public final class PlayerGameplay {
 
     /**
      * Returns difficulty regen according to the current object state.
-     *
      * @return {@code float}; regeneration multiplier
      */
     public float getDifficultyRegen() {

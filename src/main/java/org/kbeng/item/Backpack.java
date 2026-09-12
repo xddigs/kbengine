@@ -8,11 +8,8 @@ import org.kbeng.wrld.GameMaster;
 
 /**
  * Backpack provides backpack capabilities within the item subsystem.
- *
  * It models inventory-facing objects, equipables, consumables, and item behavior surfaced to gameplay and UI.
- *
  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
- *
  * It extends Usable and implements Equippable, combining inherited behavior with explicit runtime contracts.
  */
 public class Backpack extends Usable implements Equippable,

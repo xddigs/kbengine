@@ -14,9 +14,7 @@ import java.util.Properties;
 
 /**
  * Local provides local capabilities within the utils subsystem.
- *
  * It centralizes reusable utilities such as constants, localization, settings, and small cross-cutting helpers.
- *
  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
  */
 @Utils
@@ -118,7 +116,6 @@ public class Local {
     /**
      * Formats an enchanted item name according to the active language's
      * grammatical ordering.
-     *
      * @param itemKey the {@link String} argument; localization key of the base item
      * @param enchantmentKey the {@link String} argument; common enchantment key without the
      *                       {@code .adjective} suffix

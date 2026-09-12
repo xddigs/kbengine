@@ -18,9 +18,7 @@ import java.util.*;
 
 /**
  * TreeService provides tree service capabilities within the service subsystem.
- *
  * It provides shared runtime services, registries, and policy logic consumed by orchestrators and feature modules.
- *
  * The service acts as a shared policy and state access point for other runtime modules.
  */
 @Singleton

@@ -20,11 +20,8 @@ import java.util.List;
 
 /**
  * NPCService provides npcservice capabilities within the service subsystem.
- *
  * It provides shared runtime services, registries, and policy logic consumed by orchestrators and feature modules.
- *
  * The service acts as a shared policy and state access point for other runtime modules.
- *
  * It implements Service<NPC>, providing a concrete strategy for this subsystem contract.
  */
 @SuppressWarnings("all")
@@ -64,7 +61,6 @@ public class NPCService implements Service<NPC> {
     /**
      * Interacts with the closest NPC under the pointer when it lies within the
      * same reach used for block placement and breaking.
-     *
      * @param gameMaster the active game and camera owner
      * @return {@code true} when an NPC consumed the click
      */

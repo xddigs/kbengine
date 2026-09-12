@@ -4,11 +4,8 @@ import org.kbeng.data.BlockData;
 
 /**
  * FlatworldGenerator provides flatworld generator capabilities within the wrld subsystem.
- *
  * It maintains world simulation concerns including terrain, chunks, fluids, and authoritative spatial state.
- *
  * The generator produces deterministic content from seeds, rules, and runtime configuration.
- *
  * It implements Generator, providing a concrete strategy for this subsystem contract.
  */
 public final class FlatworldGenerator implements Generator {

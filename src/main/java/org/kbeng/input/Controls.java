@@ -4,9 +4,7 @@ import java.util.EnumSet;
 
 /**
  * Controls provides controls capabilities within the input subsystem.
- *
  * It defines device mappings, control-state tracking, and interaction orchestration for player actions.
- *
  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
  */
 public final class Controls {

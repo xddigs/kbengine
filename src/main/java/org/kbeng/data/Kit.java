@@ -4,9 +4,7 @@ import org.kbeng.item.Item;
 
 /**
  * Kit provides kit capabilities within the data subsystem.
- *
  * It represents strongly typed domain data shared between simulation, rendering, input, and persistence boundaries.
- *
  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
  */
 public abstract class Kit {

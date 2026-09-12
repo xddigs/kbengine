@@ -10,11 +10,8 @@ import java.util.List;
 
 /**
  * CommandCompletionProvider provides command completion provider capabilities within the input subsystem.
- *
  * It defines device mappings, control-state tracking, and interaction orchestration for player actions.
- *
  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
- *
  * It implements CompletionProvider, providing a concrete strategy for this subsystem contract.
  */
 public class CommandCompletionProvider implements CompletionProvider {

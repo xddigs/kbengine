@@ -9,9 +9,7 @@ import java.util.Map;
 
 /**
  * Recipe provides recipe capabilities within the craft subsystem.
- *
  * It supports recipe composition, ingredient alternatives, and deterministic crafting resolution used by gameplay systems.
- *
  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
  */
 public final class Recipe {

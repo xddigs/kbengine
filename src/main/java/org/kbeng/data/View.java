@@ -2,9 +2,7 @@ package org.kbeng.data;
 
 /**
  * View declares the canonical view set for the data subsystem.
- *
  * Each constant provides a stable, type-safe branch token for runtime decisions and avoids string-based switches.
- *
  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
  */
 @DataClass

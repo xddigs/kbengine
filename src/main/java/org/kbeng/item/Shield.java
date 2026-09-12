@@ -7,11 +7,8 @@ import org.kbeng.entity.Player;
 
 /**
  * Shield provides shield capabilities within the item subsystem.
- *
  * It models inventory-facing objects, equipables, consumables, and item behavior surfaced to gameplay and UI.
- *
  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
- *
  * It extends Tool and implements Equippable, combining inherited behavior with explicit runtime contracts.
  */
 public class Shield extends Tool implements Equippable {

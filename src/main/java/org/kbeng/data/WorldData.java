@@ -4,9 +4,7 @@ import org.kbeng.wrld.*;
 
 /**
  * WorldData declares the canonical world data set for the data subsystem.
- *
  * Each constant provides a stable, type-safe branch token for runtime decisions and avoids string-based switches.
- *
  * The data type is used as a normalized schema for transport, persistence, and runtime inspection.
  */
 public enum WorldData {

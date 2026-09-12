@@ -12,9 +12,7 @@ import java.util.List;
 
 /**
  * GLTFNode provides gltfnode capabilities within the graphics subsystem.
- *
  * It contributes to OpenGL resource ownership, render-state setup, or frame-pipeline execution.
- *
  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
  */
 public class GLTFNode {
@@ -302,10 +300,8 @@ public class GLTFNode {
 
     /**
      * Creates an independent copy of this node and its complete child hierarchy.
-     *
      * <p>The copy preserves mesh indices, transforms and rendering overrides,
      * while keeping all mutable node state independent from the source node.</p>
-     *
      * @return independent copy of this node hierarchy
      */
     public GLTFNode copy() {

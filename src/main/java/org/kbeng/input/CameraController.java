@@ -20,14 +20,10 @@ import static org.lwjgl.glfw.GLFW.*;
 
 /**
  * CameraController is an immutable carrier for camera controller state in the input subsystem.
- *
  * Record semantics make instances cheap to pass across systems while preserving value-based equality and snapshot safety.
- *
  * The controller translates user or system signals into deterministic runtime state transitions.
- *
  * It implements Service<Camera>, providing a concrete strategy for this subsystem contract.
  */
-@SuppressWarnings("all")
 public record CameraController(Camera camera) implements Service<Camera> {
     private static final float NORMAL_ZOOM = 18.0f;
     private static final float ZOOMED_ZOOM = NORMAL_ZOOM / 2.5f;
@@ -100,7 +96,6 @@ public record CameraController(Camera camera) implements Service<Camera> {
     /**
      * Rotates the camera in quarter turns around the player. The cursor offset
      * rotates with the camera so it does not displace the orbit's pivot.
-     *
      * @param player the player used as the orbit pivot
      * @param delta the time since the last frame
      */

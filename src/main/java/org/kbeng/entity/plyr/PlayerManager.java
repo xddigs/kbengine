@@ -20,9 +20,7 @@ import static org.joml.Math.lerp;
 
 /**
  * PlayerManager provides player manager capabilities within the entity subsystem.
- *
  * It participates in actor simulation, state transitions, and per-frame world interaction contracts.
- *
  * The manager coordinates lifecycle and ordering concerns across dependent runtime components.
  */
 public final class PlayerManager {

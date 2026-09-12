@@ -11,9 +11,7 @@ import org.joml.Vector3f;
 
 /**
  * StepController provides step controller capabilities within the input subsystem.
- *
  * It defines device mappings, control-state tracking, and interaction orchestration for player actions.
- *
  * The controller translates user or system signals into deterministic runtime state transitions.
  */
 @Singleton

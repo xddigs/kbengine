@@ -6,11 +6,8 @@ import org.kbeng.data.ToolType;
 
 /**
  * Shovel provides shovel capabilities within the item subsystem.
- *
  * It models inventory-facing objects, equipables, consumables, and item behavior surfaced to gameplay and UI.
- *
  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
- *
  * It extends Tool, inheriting shared behavior while specializing subsystem-specific logic.
  */
 public class Shovel extends Tool {

@@ -9,7 +9,6 @@ import org.joml.Vector3f;
 
 /**
  * Base runtime type for every physical actor simulated in the world.
- *
  * {@code Entity} owns spatial state (position, velocity, dimensions), collision checks against voxel blocks,
  * environmental hazard handling (lava and void), and combat durability primitives (HP, defense, invulnerability
  * windows). Concrete subclasses provide visual output in {@link #render(GameMaster, RenderPass)} and can hook
@@ -174,7 +173,6 @@ public abstract class Entity {
 
     /**
      * Returns the {@code maxDefense} value
-     *
      * @return {@link float} value of maxDefense
      */
     public float getMaxDefense() {
@@ -183,7 +181,6 @@ public abstract class Entity {
 
     /**
      * Sets the maxDefense value
-     *
      * @return {@link Entity} value of maxDefense
      */
     public Entity setMaxDefense(float maxDefense) {

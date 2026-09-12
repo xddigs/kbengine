@@ -5,9 +5,7 @@ import java.util.function.Consumer;
 
 /**
  * Tier declares the canonical tier set for the data subsystem.
- *
  * Each constant provides a stable, type-safe branch token for runtime decisions and avoids string-based switches.
- *
  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
  */
 public enum Tier {
@@ -28,7 +26,6 @@ public enum Tier {
 
     /**
      * Creates a new {@code Tier} instance.
-     *
      * @param id         the {@code byte} supplied as {@code id}
      * @param defense    the {@code float} supplied as {@code defense}
      * @param durability the {@code int} supplied as {@code durability}

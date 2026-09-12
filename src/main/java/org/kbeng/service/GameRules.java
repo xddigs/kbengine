@@ -10,9 +10,7 @@ import java.util.Map;
 
 /**
  * GameRules provides game rules capabilities within the service subsystem.
- *
  * It provides shared runtime services, registries, and policy logic consumed by orchestrators and feature modules.
- *
  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
  */
 @SuppressWarnings("all")

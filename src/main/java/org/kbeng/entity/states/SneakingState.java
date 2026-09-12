@@ -8,11 +8,8 @@ import org.kbeng.wrld.GameMaster;
 
 /**
  * SneakingState provides sneaking state capabilities within the entity subsystem.
- *
  * It participates in actor simulation, state transitions, and per-frame world interaction contracts.
- *
  * The state object captures one branch in a larger state machine and enforces transition rules.
- *
  * It implements PlayerState, providing a concrete strategy for this subsystem contract.
  */
 public class SneakingState implements PlayerState {

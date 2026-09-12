@@ -26,9 +26,7 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 
 /**
  * Game provides game capabilities within the core subsystem.
- *
  * It belongs to the application bootstrap layer and integrates top-level runtime wiring.
- *
  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
  */
 public class Game {

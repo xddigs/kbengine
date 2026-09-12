@@ -32,11 +32,8 @@ import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * NPC provides npc capabilities within the entity subsystem.
- *
  * It participates in actor simulation, state transitions, and per-frame world interaction contracts.
- *
  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
- *
  * It extends Character, inheriting shared behavior while specializing subsystem-specific logic.
  */
 @DataClass

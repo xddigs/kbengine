@@ -17,9 +17,7 @@ import java.util.function.Consumer;
 
 /**
  * World provides world capabilities within the wrld subsystem.
- *
  * It maintains world simulation concerns including terrain, chunks, fluids, and authoritative spatial state.
- *
  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
  */
 @SuppressWarnings("all")
@@ -177,7 +175,6 @@ public class World {
 
     /**
      * Adds an interactive block to the world.
-     *
      * @param block the {@link iBlock} argument; the interactive block
      */
     public void addInteractiveBlock(iBlock block) {
@@ -190,7 +187,6 @@ public class World {
 
     /**
      * Returns the interactive block at a world position.
-     *
      * @param x the {@code int} argument; the x coordinate
      * @param y the {@code int} argument; the y coordinate
      * @param z the {@code int} argument; the z coordinate
@@ -202,7 +198,6 @@ public class World {
 
     /**
      * Removes and returns the interactive block at a world position.
-     *
      * @param x the {@code int} argument; the x coordinate
      * @param y the {@code int} argument; the y coordinate
      * @param z the {@code int} argument; the z coordinate
@@ -223,7 +218,6 @@ public class World {
 
     /**
      * Visits every placed interactive block.
-     *
      * @param consumer the {@link Consumer} argument; the block consumer
      */
     public void forEachInteractiveBlock(Consumer<iBlock> consumer) {

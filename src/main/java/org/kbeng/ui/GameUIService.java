@@ -34,11 +34,8 @@ import static org.lwjgl.opengl.GL13.glActiveTexture;
 
 /**
  * GameUIService provides game uiservice capabilities within the ui subsystem.
- *
  * It drives retained UI composition, user interaction handling, and rendering behavior for in-game screens.
- *
  * The service acts as a shared policy and state access point for other runtime modules.
- *
  * It implements Service<GameMaster>, providing a concrete strategy for this subsystem contract.
  */
 @SuppressWarnings("all")
@@ -95,7 +92,6 @@ public final class GameUIService implements Service<GameMaster> {
 
     /**
      * Creates a new {@code GameUIService} instance.
-     *
      * @param gameMaster     the {@link GameMaster} supplied as {@code gameMaster}
      * @param uiManager      the {@link UIManager} supplied as {@code uiManager}
      * @param seedIcons      the {@link SpriteSheet} supplied as {@code seedIcons}
@@ -243,7 +239,6 @@ public final class GameUIService implements Service<GameMaster> {
 
     /**
      * Returns the inventory ui.
-     *
      * @return the {@link InventoryUI} representing the inventory ui
      */
     public InventoryUI getInventoryUI() {
@@ -252,7 +247,6 @@ public final class GameUIService implements Service<GameMaster> {
 
     /**
      * Returns the hotbar ui.
-     *
      * @return the {@link HotbarUI} representing the hotbar ui
      */
     public HotbarUI getHotbarUI() {
@@ -261,7 +255,6 @@ public final class GameUIService implements Service<GameMaster> {
 
     /**
      * Returns the backpack inventory ui.
-     *
      * @return the {@link BackpackInventoryUI} representing the backpack inventory ui
      */
     public BackpackInventoryUI getBackpackInventoryUI() {
@@ -275,7 +268,6 @@ public final class GameUIService implements Service<GameMaster> {
 
     /**
      * Updates the current state.
-     *
      * @param delta the {@code float} supplied as {@code delta}
      */
     public void update(float delta) {
@@ -382,7 +374,6 @@ public final class GameUIService implements Service<GameMaster> {
 
     /**
      * Renders this object in the requested render pass.
-     *
      * @param isHUDShown the {@code boolean} supplied as {@code isHUDShown}
      * @param gameMaster the {@link GameMaster} supplied as {@code gameMaster}
      */
@@ -581,7 +572,6 @@ public final class GameUIService implements Service<GameMaster> {
 
     /**
      * Adds the chat message.
-     *
      * @param message the {@link String} supplied as {@code message}
      */
     public void addChatMessage(String message) {
@@ -649,7 +639,6 @@ public final class GameUIService implements Service<GameMaster> {
 
     /**
      * Updates or derives runtime state for select item according to the supplied arguments.
-     *
      * @param direction the {@code int} supplied as {@code direction}
      */
     public void selectItem(int direction) {
@@ -674,7 +663,6 @@ public final class GameUIService implements Service<GameMaster> {
 
     /**
      * Activates hotbar label and prepares any state it requires.
-     *
      * @param item the {@link Item} supplied as {@code item}
      */
     private void showHotbarLabel(Item item) {
@@ -690,7 +678,6 @@ public final class GameUIService implements Service<GameMaster> {
 
     /**
      * Renders the toast.
-     *
      * @param toast the {@link Toast} supplied as {@code toast}
      */
     private void renderToast(Toast toast) {
@@ -753,7 +740,6 @@ public final class GameUIService implements Service<GameMaster> {
 
     /**
      * Returns the toast accent.
-     *
      * @param type the {@link ToastData} supplied as {@code type}
      * @return an array of {@code float} values; the toast accent
      */
@@ -771,7 +757,6 @@ public final class GameUIService implements Service<GameMaster> {
 
     /**
      * Returns the toast background.
-     *
      * @param type the {@link ToastData} supplied as {@code type}
      * @return an array of {@code float} values; the toast background
      */
@@ -789,7 +774,6 @@ public final class GameUIService implements Service<GameMaster> {
 
     /**
      * Returns the toast prefix.
-     *
      * @param type the {@link ToastData} supplied as {@code type}
      * @return the {@link String} representing the toast prefix
      */
@@ -806,7 +790,6 @@ public final class GameUIService implements Service<GameMaster> {
 
     /**
      * Publishes the notification represented by log action.
-     *
      * @param cell the {@link BlockPos} supplied as {@code cell}
      */
     public void logAction(BlockPos cell) {
@@ -815,7 +798,6 @@ public final class GameUIService implements Service<GameMaster> {
 
     /**
      * Handles resize and updates the affected state.
-     *
      * @param width  the {@code int} supplied as {@code width}
      * @param height the {@code int} supplied as {@code height}
      */
@@ -862,7 +844,6 @@ public final class GameUIService implements Service<GameMaster> {
 
     /**
      * Returns the chat text.
-     *
      * @return the {@link String} representing the chat text
      */
     public String getChatText() {
@@ -871,7 +852,6 @@ public final class GameUIService implements Service<GameMaster> {
 
     /**
      * Processes sell item and updates the affected inventory or currency balances.
-     *
      * @param inv  the {@link Inventory} supplied as {@code inv}
      * @param item the {@link Item} supplied as {@code item}
      */
@@ -896,7 +876,6 @@ public final class GameUIService implements Service<GameMaster> {
 
     /**
      * Processes buy item and updates the affected inventory or currency balances.
-     *
      * @param stock  the {@link Inventory} supplied as {@code stock}
      * @param item   the {@link Item} supplied as {@code item}
      * @param amount the {@code int} supplied as {@code amount}

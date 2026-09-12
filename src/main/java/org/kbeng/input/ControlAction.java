@@ -2,9 +2,7 @@ package org.kbeng.input;
 
 /**
  * ControlAction declares the canonical control action set for the input subsystem.
- *
  * Each constant provides a stable, type-safe branch token for runtime decisions and avoids string-based switches.
- *
  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
  */
 public enum ControlAction {

@@ -7,9 +7,7 @@ import java.util.List;
 
 /**
  * PathFinder provides path finder capabilities within the pathfinding subsystem.
- *
  * It encapsulates graph traversal primitives and navigation logic used by path following and movement AI.
- *
  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
  */
 public final class PathFinder {

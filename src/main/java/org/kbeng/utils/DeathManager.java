@@ -8,9 +8,7 @@ import java.util.Map;
 
 /**
  * DeathManager provides death manager capabilities within the utils subsystem.
- *
  * It centralizes reusable utilities such as constants, localization, settings, and small cross-cutting helpers.
- *
  * The manager coordinates lifecycle and ordering concerns across dependent runtime components.
  */
 @Singleton

@@ -26,9 +26,7 @@ import static org.lwjgl.opengl.GL13.glActiveTexture;
 
 /**
  * Frontend provides frontend capabilities within the ui subsystem.
- *
  * It drives retained UI composition, user interaction handling, and rendering behavior for in-game screens.
- *
  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
  */
 @Utils

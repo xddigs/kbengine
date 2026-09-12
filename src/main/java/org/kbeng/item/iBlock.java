@@ -16,11 +16,8 @@ import org.joml.Vector3f;
 
 /**
  * iBlock provides i block capabilities within the item subsystem.
- *
  * It models inventory-facing objects, equipables, consumables, and item behavior surfaced to gameplay and UI.
- *
  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
- *
  * It extends Block, inheriting shared behavior while specializing subsystem-specific logic.
  */
 @SuppressWarnings("all")
@@ -58,7 +55,6 @@ public class iBlock extends Block {
 
     /**
      * Creates an interactive block at the supplied position and orientation.
-     *
      * @param type the {@link BlockData} argument; the interactive block type
      * @param x the {@code int} argument; the x coordinate
      * @param y the {@code int} argument; the y coordinate
@@ -103,7 +99,6 @@ public class iBlock extends Block {
     /**
      * {@inheritDoc}
      * Returns the id of the block
-     *
      * @return {@link Byte} the id of the block
      */
     @Override
@@ -114,7 +109,6 @@ public class iBlock extends Block {
     /**
      * {@inheritDoc}
      * Returns the name of the block
-     *
      * @return {@link String} the name of the block
      */
     @Override
@@ -125,7 +119,6 @@ public class iBlock extends Block {
     /**
      * {@inheritDoc}
      * Returns the display name of the block
-     *
      * @return {@link String} the display name of the block
      */
     @Override
@@ -136,7 +129,6 @@ public class iBlock extends Block {
     /**
      * {@inheritDoc}
      * Returns the value of the block
-     *
      * @return {@link Integer} the value of the block
      */
     @Override
@@ -147,7 +139,6 @@ public class iBlock extends Block {
     /**
      * {@inheritDoc}
      * Creates an independent copy that preserves the relevant state of this object.
-     *
      * @return the {@link Item} result; {@code this} the copy result
      */
     @Override
@@ -157,7 +148,6 @@ public class iBlock extends Block {
 
     /**
      * Returns the type of block
-     *
      * @return {@link BlockData} the type of block
      */
     public BlockData getType() {
@@ -174,7 +164,6 @@ public class iBlock extends Block {
 
     /**
      * Returns this block's persistent inventory.
-     *
      * @return the {@link Inventory} representing the block inventory
      */
     public Inventory getInventory() {
@@ -183,7 +172,6 @@ public class iBlock extends Block {
 
     /**
      * Returns if the block is activated
-     *
      * @return {@link Boolean} if the block is activated
      */
     public boolean isActivated() {
@@ -192,7 +180,6 @@ public class iBlock extends Block {
 
     /**
      * Sets the activated value
-     *
      * @param isActivated the {@code boolean} argument; the activated value
      */
     public void setActivated(boolean isActivated) {
@@ -269,7 +256,6 @@ public class iBlock extends Block {
      * Builds the world transform for this block's model. Door models use their
      * corner origin as a hinge and are kept inside the occupied cell for every
      * cardinal orientation.
-     *
      * @param destination matrix to populate
      * @return the populated matrix
      */
@@ -409,7 +395,6 @@ public class iBlock extends Block {
 
     /**
      * Returns the position of the block (x)
-     *
      * @return {@link Integer} the position of the block (x)
      */
     public int getX() {
@@ -418,7 +403,6 @@ public class iBlock extends Block {
 
     /**
      * Returns the position of the block (y)
-     *
      * @return {@link Integer} the position of the block (y)
      */
     public int getY() {
@@ -427,7 +411,6 @@ public class iBlock extends Block {
 
     /**
      * Returns the position of the block (z)
-     *
      * @return {@link Integer} the position of the block (z)
      */
     public int getZ() {
@@ -436,7 +419,6 @@ public class iBlock extends Block {
 
     /**
      * Sets the position of the block
-     *
      * @param x the {@code int} argument; the position of the block (x)
      * @param y the {@code int} argument; the position of the block (y)
      * @param z the {@code int} argument; the position of the block (z)

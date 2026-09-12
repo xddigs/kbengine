@@ -24,11 +24,8 @@ import static org.joml.Math.lerp;
 
 /**
  * InventoryUI provides inventory ui capabilities within the ui subsystem.
- *
  * It drives retained UI composition, user interaction handling, and rendering behavior for in-game screens.
- *
  * The UI component owns presentation behavior and mediates interaction between input and visual state.
- *
  * It extends UIElement, inheriting shared behavior while specializing subsystem-specific logic.
  */
 @SuppressWarnings("all")
@@ -1069,7 +1066,6 @@ public class InventoryUI extends UIElement {
     /**
      * Moves a complete stack directly between the storage areas currently
      * exposed by the inventory screen.
-     *
      * @param sourceUI slot selected with control-left-click
      */
     private void quickMove(InventorySlotUI sourceUI) {
@@ -1932,7 +1928,6 @@ public class InventoryUI extends UIElement {
     /**
      * Opens a non-block inventory, such as the stock carried by a trader NPC,
      * beside the player's inventory.
-     *
      * @param externalInventory the inventory to expose in the storage panel
      */
     public void openExternalInventory(Inventory externalInventory) {

@@ -5,9 +5,7 @@ import org.kbeng.item.Item;
 
 /**
  * Settings provides settings capabilities within the utils subsystem.
- *
  * It centralizes reusable utilities such as constants, localization, settings, and small cross-cutting helpers.
- *
  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
  */
 @Singleton

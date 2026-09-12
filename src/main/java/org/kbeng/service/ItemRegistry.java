@@ -10,9 +10,7 @@ import java.util.function.Supplier;
 
 /**
  * ItemRegistry provides item registry capabilities within the service subsystem.
- *
  * It provides shared runtime services, registries, and policy logic consumed by orchestrators and feature modules.
- *
  * The registry maintains canonical lookup structures and resolves identifiers to runtime instances.
  */
 public class ItemRegistry {

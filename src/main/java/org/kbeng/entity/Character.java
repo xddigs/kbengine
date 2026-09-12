@@ -8,7 +8,6 @@ import org.kbeng.utils.ToastFactory;
 
 /**
  * RPG-oriented extension of {@link Entity} for living actors with progression and inventory state.
- *
  * Beyond base physics and damage handling, this class adds character attributes, level progression,
  * hunger and survival stats, faction reputation, and dual inventory containers (main inventory + backpack).
  * It is the common behavioral layer for player and AI-controlled humanoid entities.

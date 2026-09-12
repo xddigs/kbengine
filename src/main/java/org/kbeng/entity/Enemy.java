@@ -10,7 +10,6 @@ import org.joml.Vector3f;
 
 /**
  * Hostile {@link Character} archetype used for combat-focused non-player entities.
- *
  * Enemies are initialized from a {@link GLTFModel}, scale core stats from the current player progression,
  * and default to {@link Reputation#HOSTILE}. The class centralizes enemy-side combat expectations while
  * letting concrete enemy variants customize attack logic, AI movement, and rendering details.

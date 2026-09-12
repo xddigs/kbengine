@@ -7,9 +7,7 @@ import java.util.function.Consumer;
 
 /**
  * ArmorData declares the canonical armor data set for the data subsystem.
- *
  * Each constant provides a stable, type-safe branch token for runtime decisions and avoids string-based switches.
- *
  * The data type is used as a normalized schema for transport, persistence, and runtime inspection.
  */
 @DataClass

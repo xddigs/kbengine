@@ -14,11 +14,8 @@ import java.util.stream.Collectors;
 
 /**
  * CraftingBook provides crafting book capabilities within the item subsystem.
- *
  * It models inventory-facing objects, equipables, consumables, and item behavior surfaced to gameplay and UI.
- *
  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
- *
  * It extends Book and implements Undroppable, combining inherited behavior with explicit runtime contracts.
  */
 public class CraftingBook extends Book implements Undroppable {

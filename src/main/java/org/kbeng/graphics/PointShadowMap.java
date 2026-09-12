@@ -8,9 +8,7 @@ import static org.lwjgl.opengl.GL30.*;
 
 /**
  * PointShadowMap provides point shadow map capabilities within the graphics subsystem.
- *
  * It contributes to OpenGL resource ownership, render-state setup, or frame-pipeline execution.
- *
  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
  */
 public final class PointShadowMap {

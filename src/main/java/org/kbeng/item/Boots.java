@@ -6,11 +6,8 @@ import org.kbeng.entity.Player;
 
 /**
  * Boots provides boots capabilities within the item subsystem.
- *
  * It models inventory-facing objects, equipables, consumables, and item behavior surfaced to gameplay and UI.
- *
  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
- *
  * It extends Armor, inheriting shared behavior while specializing subsystem-specific logic.
  */
 public class Boots extends Armor {

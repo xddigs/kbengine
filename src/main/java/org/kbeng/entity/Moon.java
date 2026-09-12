@@ -7,11 +7,8 @@ import org.joml.Vector3f;
 
 /**
  * Moon provides moon capabilities within the entity subsystem.
- *
  * It participates in actor simulation, state transitions, and per-frame world interaction contracts.
- *
  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
- *
  * It extends Entity, inheriting shared behavior while specializing subsystem-specific logic.
  */
 public class Moon extends Entity {

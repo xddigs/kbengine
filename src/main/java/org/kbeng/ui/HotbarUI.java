@@ -19,11 +19,8 @@ import org.joml.Vector4f;
 
 /**
  * HotbarUI provides hotbar ui capabilities within the ui subsystem.
- *
  * It drives retained UI composition, user interaction handling, and rendering behavior for in-game screens.
- *
  * The UI component owns presentation behavior and mediates interaction between input and visual state.
- *
  * It extends UIElement, inheriting shared behavior while specializing subsystem-specific logic.
  */
 public class HotbarUI extends UIElement {

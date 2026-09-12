@@ -24,7 +24,6 @@ import static org.lwjgl.opengl.GL13.GL_MULTISAMPLE;
 
 /**
  * Central runtime orchestrator for the local game session.
- *
  * <p>This class keeps the frame loop cohesive while delegating specialized work
  * to focused subsystems:
  * <ul>
@@ -32,7 +31,6 @@ import static org.lwjgl.opengl.GL13.GL_MULTISAMPLE;
  *   <li>{@link SoundListener} applies weather-aware ambient audio decisions.</li>
  *   <li>{@link GraphicsEngine} owns framebuffers, shadow resources, and rendering lifecycle.</li>
  * </ul>
- *
  * <p>The orchestrator remains responsible for simulation ordering, entity updates,
  * input flushing, and high-level world coordination.
  */
@@ -67,11 +65,9 @@ public class GameMaster {
 
     /**
      * Initializes shared runtime services and GPU resources for gameplay.
-     *
      * <p>Initialization order is intentional: OpenGL state and render resources
      * are prepared first, then chunk/camera systems, then registries/services,
      * and finally core entities.
-     *
      * @param progressCallback optional loading progress sink in range {@code [0, 1]}
      */
     public void loadResources(Consumer<Float> progressCallback) {
@@ -109,7 +105,6 @@ public class GameMaster {
 
     /**
      * Spawns player and AI actors at world start.
-     *
      * <p>Entity updates are paused during spawn to avoid transient collisions
      * while positions are being assigned.
      */
@@ -124,13 +119,14 @@ public class GameMaster {
         camera.setPosition(0.5f, spawnY + 10.0f, 0.5f);
         areEntitiesActive = true;
     }
+
+    public long getWindowHandle() { return windowHandle; }
+    public float getWindowWidth() { return windowWidth; }
+    public float getWindowHeight() { return windowHeight; }
     public World getWorld() { return world; }
     public ChunkManager getChunkManager() { return chunkManager; }
     public Camera getCamera() { return camera; }
     public CameraView getActiveCamera() { return camera; }
-    public long getWindowHandle() { return windowHandle; }
-    public float getWindowWidth() { return windowWidth; }
-    public float getWindowHeight() { return windowHeight; }
     public CommandRegistry getCommandRegistry() { return commandRegistry; }
     public ItemRegistry getItemRegistry() { return itemRegistry; }
     public CommandService getCommandService() { return commandService; }
@@ -168,11 +164,9 @@ public class GameMaster {
 
     /**
      * Advances one full simulation frame.
-     *
      * <p>Execution order is stable by design: audio/weather, UI systems, environment,
      * entity/world simulation, camera/input interaction, then physics/chunk refresh and
      * input edge-state rollover.
-     *
      * @param delta elapsed frame time in seconds
      */
     public void update(float delta) {
@@ -217,7 +211,6 @@ public class GameMaster {
 
     /**
      * Propagates a window resize through camera, render targets, and UI layout.
-     *
      * @param newWidth  framebuffer width in pixels
      * @param newHeight framebuffer height in pixels
      */
@@ -233,10 +226,8 @@ public class GameMaster {
 
     /**
      * Rebuilds the mesh for the target chunk and any affected neighbors.
-     *
      * <p>Neighbor rebuilds are required when a changed block touches a chunk border,
      * ensuring face visibility and lighting stay consistent across chunk seams.
-     *
      * @param worldX world-space X coordinate of the changed block/cell
      * @param worldZ world-space Z coordinate of the changed block/cell
      */

@@ -7,11 +7,8 @@ import java.util.Objects;
 
 /**
  * Produce provides produce capabilities within the data subsystem.
- *
  * It represents strongly typed domain data shared between simulation, rendering, input, and persistence boundaries.
- *
  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
- *
  * It implements Craftable, Consumable, providing a concrete strategy for this subsystem contract.
  */
 @DataClass

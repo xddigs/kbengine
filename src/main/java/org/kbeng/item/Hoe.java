@@ -10,11 +10,8 @@ import org.kbeng.wrld.World;
 
 /**
  * Hoe provides hoe capabilities within the item subsystem.
- *
  * It models inventory-facing objects, equipables, consumables, and item behavior surfaced to gameplay and UI.
- *
  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
- *
  * It extends Tool, inheriting shared behavior while specializing subsystem-specific logic.
  */
 public class Hoe extends Tool {

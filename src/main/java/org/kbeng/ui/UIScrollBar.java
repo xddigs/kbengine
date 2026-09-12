@@ -10,11 +10,8 @@ import java.util.function.IntConsumer;
 
 /**
  * UIScrollBar provides uiscroll bar capabilities within the ui subsystem.
- *
  * It drives retained UI composition, user interaction handling, and rendering behavior for in-game screens.
- *
  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
- *
  * It extends UIElement, inheriting shared behavior while specializing subsystem-specific logic.
  */
 public class UIScrollBar extends UIElement {

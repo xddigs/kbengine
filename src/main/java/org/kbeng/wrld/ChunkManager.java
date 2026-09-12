@@ -20,9 +20,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * ChunkManager provides chunk manager capabilities within the wrld subsystem.
- *
  * It maintains world simulation concerns including terrain, chunks, fluids, and authoritative spatial state.
- *
  * The manager coordinates lifecycle and ordering concerns across dependent runtime components.
  */
 public class ChunkManager {
