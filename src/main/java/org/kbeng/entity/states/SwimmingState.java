@@ -8,20 +8,13 @@ import org.kbeng.wrld.GameMaster;
 import org.kbeng.wrld.World;
 
 /**
- * Represents the swimming state component of the kbengine runtime.
+ * SwimmingState provides swimming state capabilities within the entity subsystem.
  *
- * <p>This type centralizes the state, lifecycle and behavior required by its callers,
- * keeping domain rules together with the data they operate on.
+ * It participates in actor simulation, state transitions, and per-frame world interaction contracts.
  *
- * <p><b>Responsibilities:</b>
- * <ul>
- *   <li><b>State:</b> Owns the data needed to represent the component consistently.</li>
- *   <li><b>Lifecycle:</b> Exposes the operations used to create, update and release its state.</li>
- *   <li><b>Integration:</b> Coordinates with the surrounding game, rendering or UI systems through its public API.</li>
- * </ul>
+ * The state object captures one branch in a larger state machine and enforces transition rules.
  *
- * <p>Callers should use the documented public operations and allow this type to preserve
- * its invariants rather than modifying implementation details directly.
+ * It implements PlayerState, providing a concrete strategy for this subsystem contract.
  */
 public class SwimmingState implements PlayerState {
     private final Player player = Player.plyr;

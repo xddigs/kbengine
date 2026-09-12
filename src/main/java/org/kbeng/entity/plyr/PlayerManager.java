@@ -19,7 +19,11 @@ import java.util.List;
 import static org.joml.Math.lerp;
 
 /**
- * Manages player state, input-driven movement, paths and edge-safe sneaking.
+ * PlayerManager provides player manager capabilities within the entity subsystem.
+ *
+ * It participates in actor simulation, state transitions, and per-frame world interaction contracts.
+ *
+ * The manager coordinates lifecycle and ordering concerns across dependent runtime components.
  */
 public final class PlayerManager {
     private static final float ZERO = 0.0f;

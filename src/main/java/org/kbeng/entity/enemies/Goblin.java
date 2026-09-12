@@ -8,7 +8,15 @@ import org.kbeng.graphics.ResourceManager;
 import org.kbeng.graphics.gltf.GLTFModel;
 import org.kbeng.wrld.GameMaster;
 
-/** {@inheritDoc} */
+/**
+ * Goblin provides goblin capabilities within the entity subsystem.
+ *
+ * It participates in actor simulation, state transitions, and per-frame world interaction contracts.
+ *
+ * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
+ *
+ * It extends Enemy, inheriting shared behavior while specializing subsystem-specific logic.
+ */
 public class Goblin extends Enemy {
     private final CharacterAnimator animator = new CharacterAnimator(this);
     private static final GLTFModel model = ResourceManager.rem.getModel(Goblin.class);
