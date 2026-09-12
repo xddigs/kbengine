@@ -11,10 +11,7 @@ import org.kbeng.graphics.SpriteSheet;
 import org.kbeng.item.*;
 import org.kbeng.service.*;
 import org.kbeng.ui.GameUIService;
-import org.kbeng.utils.HoveredCell;
-import org.kbeng.utils.K;
-import org.kbeng.utils.Settings;
-import org.kbeng.utils.ToastFactory;
+import org.kbeng.utils.*;
 import org.kbeng.wrld.Chunk;
 import org.kbeng.wrld.FluidSimulation;
 import org.kbeng.wrld.GameMaster;
@@ -215,8 +212,9 @@ public class GameInteraction {
                         isRightPressed = false;
                     }
                 }
-                default -> throw new IllegalStateException(
-                        "Unexpected value: " + usable);
+
+                default -> ToastFactory.error
+                        (Local.lang.f("toast.unknown_item", usable));
             }
         }
 
