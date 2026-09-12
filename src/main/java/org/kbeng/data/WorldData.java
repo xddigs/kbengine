@@ -35,8 +35,9 @@ public enum WorldData {
      */
     public static Generator create(WorldData world, FluidSimulation fluidSimulation) {
         return switch (world) {
-            case ISLAND -> new IslandGenerator(World.wrld, fluidSimulation);
-            case FLAT -> new FlatworldGenerator(World.wrld);
+            case FLAT -> new FlatworldGenerator();
+            case ISLAND -> new IslandGenerator(fluidSimulation);
+            case OPEN_WORLD -> new WorldGenerator(fluidSimulation);
             default -> throw new IllegalArgumentException("Unknown world type: " + world);
         };
     }

@@ -35,7 +35,6 @@ public final class IslandGenerator implements Generator {
     private static final int TALL_GRASS_CLUSTER_SIZE = 8;
     private static final BlockData[] DECORATIVE_PLANTS = createDecorativePlants();
 
-    private final World world;
     private final FluidSimulation waterSimulation;
     private final long seed;
     private final Lake lake;
@@ -44,23 +43,20 @@ public final class IslandGenerator implements Generator {
 
     /**
      * Creates a generator with a random world seed.
-     * @param world the {@link World} supplied as {@code world}
      * @param waterSimulation the {@link FluidSimulation} argument; the fluid simulation
      *                        used for generated ocean and lakes
      */
-    public IslandGenerator(World world, FluidSimulation waterSimulation) {
-        this(world, waterSimulation, new Random().nextLong());
+    public IslandGenerator(FluidSimulation waterSimulation) {
+        this(waterSimulation, new Random().nextLong());
     }
 
     /**
      * Creates a deterministic generator for the supplied seed.
-     * @param world the {@link World} supplied as {@code world}
      * @param waterSimulation the {@link FluidSimulation} argument; the fluid simulation
      *                        used for generated ocean and lakes
      * @param seed the {@code long} supplied as {@code seed}
      */
-    public IslandGenerator(World world, FluidSimulation waterSimulation, long seed) {
-        this.world = world;
+    public IslandGenerator(FluidSimulation waterSimulation, long seed) {
         this.waterSimulation = waterSimulation;
         this.seed = seed;
 
@@ -78,7 +74,7 @@ public final class IslandGenerator implements Generator {
      */
     @Override
     public void generateChunk(int chunkX, int chunkZ) {
-        Chunk chunk = world.getOrCreateChunk(chunkX, chunkZ);
+        Chunk chunk = World.wrld.getOrCreateChunk(chunkX, chunkZ);
         for (int localX = 0; localX < Chunk.SIZE_X; localX++) {
             for (int localZ = 0; localZ < Chunk.SIZE_Z; localZ++) {
                 int worldX = chunkX * Chunk.SIZE_X + localX;
@@ -430,7 +426,7 @@ public final class IslandGenerator implements Generator {
     private void generateTree(Tree tree) {
         Random random = new Random(tree.seed);
         for (int y = 1; y <= tree.height; y++) {
-            world.setBlockTypeAt(tree.x, tree.surfaceY + y, tree.z, BlockData.OAK_LOG.getId());
+            World.wrld.setBlockTypeAt(tree.x, tree.surfaceY + y, tree.z, BlockData.OAK_LOG.getId());
         }
 
         int topY = tree.surfaceY + tree.height;
@@ -440,8 +436,8 @@ public final class IslandGenerator implements Generator {
                 for (int dz = -radius; dz <= radius; dz++) {
                     if (Math.abs(dx) == radius && Math.abs(dz) == radius
                             && random.nextFloat() < 0.4f) continue;
-                    if (world.getBlockTypeAt(tree.x + dx, y, tree.z + dz) == BlockData.AIR.getId()) {
-                        world.setBlockTypeAt(tree.x + dx, y, tree.z + dz,
+                    if (World.wrld.getBlockTypeAt(tree.x + dx, y, tree.z + dz) == BlockData.AIR.getId()) {
+                        World.wrld.setBlockTypeAt(tree.x + dx, y, tree.z + dz,
                                 BlockData.OAK_LEAVES.getId());
                     }
                 }
