@@ -16,20 +16,11 @@ import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
 import static org.lwjgl.opengl.GL13.glActiveTexture;
 
 /**
- * Represents the item renderer component of the kbengine runtime.
+ * ItemRenderer provides item renderer capabilities within the graphics subsystem.
  *
- * <p>This type centralizes the state, lifecycle and behavior required by its callers,
- * keeping domain rules together with the data they operate on.
+ * It contributes to OpenGL resource ownership, render-state setup, or frame-pipeline execution.
  *
- * <p><b>Responsibilities:</b>
- * <ul>
- *   <li><b>State:</b> Owns the data needed to represent the component consistently.</li>
- *   <li><b>Lifecycle:</b> Exposes the operations used to create, update and release its state.</li>
- *   <li><b>Integration:</b> Coordinates with the surrounding game, rendering or UI systems through its public API.</li>
- * </ul>
- *
- * <p>Callers should use the documented public operations and allow this type to preserve
- * its invariants rather than modifying implementation details directly.
+ * The renderer focuses on draw ordering, shader inputs, and frame-consistent visual output.
  */
 public class ItemRenderer {
     private static final int THICKNESS_LAYERS = 24;

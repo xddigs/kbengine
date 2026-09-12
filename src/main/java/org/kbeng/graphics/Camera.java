@@ -16,20 +16,13 @@ import org.joml.Vector4f;
 import static org.joml.Math.lerp;
 
 /**
- * Represents the camera component of the kbengine runtime.
+ * Camera provides camera capabilities within the graphics subsystem.
  *
- * <p>This type centralizes the state, lifecycle and behavior required by its callers,
- * keeping domain rules together with the data they operate on.
+ * It contributes to OpenGL resource ownership, render-state setup, or frame-pipeline execution.
  *
- * <p><b>Responsibilities:</b>
- * <ul>
- *   <li><b>State:</b> Owns the data needed to represent the component consistently.</li>
- *   <li><b>Lifecycle:</b> Exposes the operations used to create, update and release its state.</li>
- *   <li><b>Integration:</b> Coordinates with the surrounding game, rendering or UI systems through its public API.</li>
- * </ul>
+ * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
  *
- * <p>Callers should use the documented public operations and allow this type to preserve
- * its invariants rather than modifying implementation details directly.
+ * It implements CameraView, providing a concrete strategy for this subsystem contract.
  */
 public class Camera implements CameraView {
     private static final float MIN_ZOOM = 1.0f;

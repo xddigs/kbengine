@@ -19,7 +19,11 @@ import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.*;
 
 /**
- * Manages player equipment attachment and mesh generation for item rendering.
+ * EquipmentController provides equipment controller capabilities within the graphics subsystem.
+ *
+ * It contributes to OpenGL resource ownership, render-state setup, or frame-pipeline execution.
+ *
+ * The controller translates user or system signals into deterministic runtime state transitions.
  */
 public class EquipmentController {
     public static final EquipmentController eq = new EquipmentController();

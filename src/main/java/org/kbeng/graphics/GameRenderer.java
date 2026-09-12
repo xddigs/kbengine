@@ -29,8 +29,11 @@ import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.*;
 
 /**
- * Encapsulates the state and operations required by game renderer within the game runtime.
- * It is the main output for the graphics of the game
+ * GameRenderer provides game renderer capabilities within the graphics subsystem.
+ *
+ * It contributes to OpenGL resource ownership, render-state setup, or frame-pipeline execution.
+ *
+ * The renderer focuses on draw ordering, shader inputs, and frame-consistent visual output.
  */
 @Singleton
 @GodObject
