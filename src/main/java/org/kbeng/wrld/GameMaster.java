@@ -58,7 +58,7 @@ public class GameMaster {
     private final ItemRegistry itemRegistry = new ItemRegistry();
     private final RainEngine rainEngine = new RainEngine();
     private final ViewService viewService = new ViewService();
-    private final List<Entity> entities = new LinkedList<>();
+    private List<Entity> entities = new LinkedList<>();
     private List<Recipe> recipes;
     private ShadowMap shadowMap;
     private ChunkManager chunkManager;
@@ -470,12 +470,14 @@ public class GameMaster {
     }
 
     /**
-     * Removes the entity.
+     * Removes the entity from a copy from the list, then removes it from the original list.
      * @param entity the {@link Entity} supplied as {@code entity}
      */
     public void removeEntity(Entity entity) {
         if (entity == null) return;
-        entities.remove(entity);
+        List<Entity> copy = List.copyOf(entities);
+        copy.remove(entity);
+        entities = copy;
     }
 
     /**
