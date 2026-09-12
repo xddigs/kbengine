@@ -3,7 +3,11 @@ package org.kbeng.data;
 import org.kbeng.utils.Local;
 
 /**
- * Enumerates the supported season values.
+ * Season declares the canonical season set for the data subsystem.
+ *
+ * Each constant provides a stable, type-safe branch token for runtime decisions and avoids string-based switches.
+ *
+ * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
  */
 public enum Season {
     WINTER((byte) 0, "Winter", 0.5),

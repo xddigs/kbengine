@@ -1,7 +1,11 @@
 package org.kbeng.data;
 
 /**
- * Enumerates the supported sound group values.
+ * SoundGroup declares the canonical sound group set for the data subsystem.
+ *
+ * Each constant provides a stable, type-safe branch token for runtime decisions and avoids string-based switches.
+ *
+ * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
  */
 public enum SoundGroup {
     SOIL(new String[]{"fx/steps/steps_grass_01.ogg", "fx/steps/steps_grass_02.ogg", "fx/steps/steps_grass_03.ogg", "fx/steps/steps_grass_04.ogg"}, new String[]{"fx/blocks/dig.ogg", "fx/blocks/dirt.ogg"}, new String[]{"fx/blocks/digging.ogg"}, new String[]{"fx/blocks/dirt.ogg"}, new String[]{}, new String[]{}, new String[]{"fx/blocks/dirt.ogg"}, new String[]{}, new String[]{}),

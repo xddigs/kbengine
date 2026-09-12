@@ -6,7 +6,13 @@ import java.util.Locale;
 import java.util.function.Consumer;
 
 /**
- * Enumerates the supported tool type values.
+ * ToolType declares the canonical tool type set for the data subsystem.
+ *
+ * Each constant provides a stable, type-safe branch token for runtime decisions and avoids string-based switches.
+ *
+ * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
+ *
+ * It implements Item, providing a concrete strategy for this subsystem contract.
  */
 public enum ToolType implements Item {
     SWORD((byte) 0, 7.0f, new BlockData[]{BlockData.OAK_LEAVES, BlockData.TALL_GRASS, BlockData.ROSE, BlockData.ROSEBUSH, BlockData.LILY, BlockData.GHOSTFLOWER, BlockData.RED_MUSHROOM, BlockData.BRIGHT_FLOWER, BlockData.BLUE_FLOWER, BlockData.ROSES, BlockData.TULIP, BlockData.OAK_BONSAI, BlockData.SPRUCE_LEAVES, BlockData.SPRUCE_BONSAI}, 10, 1.5f),

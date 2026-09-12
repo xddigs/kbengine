@@ -5,7 +5,11 @@ import org.kbeng.utils.Local;
 import java.util.Locale;
 
 /**
- * Enumerates the supported weather type values.
+ * WeatherType declares the canonical weather type set for the data subsystem.
+ *
+ * Each constant provides a stable, type-safe branch token for runtime decisions and avoids string-based switches.
+ *
+ * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
  */
 public enum WeatherType {
     CLEAR(1.0f, 0, 0.0f),

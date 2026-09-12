@@ -1,7 +1,11 @@
 package org.kbeng.data;
 
 /**
- * Enumerates the supported toast data values.
+ * ToastData declares the canonical toast data set for the data subsystem.
+ *
+ * Each constant provides a stable, type-safe branch token for runtime decisions and avoids string-based switches.
+ *
+ * The data type is used as a normalized schema for transport, persistence, and runtime inspection.
  */
 @DataClass
 public enum ToastData {
