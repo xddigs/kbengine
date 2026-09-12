@@ -8,31 +8,12 @@ import org.kbeng.wrld.World;
 import org.joml.Vector3f;
 
 /**
- /**
-  * for provides for capabilities within the entity subsystem.
-  *
-  * It participates in actor simulation, state transitions, and per-frame world interaction contracts.
-  *
-  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
-  */
- * Abstract base class for all physical entities within the 3D world space.
+ * Base runtime type for every physical actor simulated in the world.
  *
- * <p>This class serves as the core foundation for actors (players, mobs, NPCs) and provides
- * built-in systems for:
- * <ul>
- *   <li><b>Transform & Bounds:</b> Axis-Aligned Bounding Box (AABB) spatial positioning,
- *       dimensions, and movement velocities via JOML {@link Vector3f}.</li>
- *   <li><b>Physics & Collision:</b> Voxel-based grid collision detection, step resolution,
- *       fluid submersion logic, and gravity integration.</li>
- *   <li><b>Combat & Vitality:</b> Hitpoints, defensive attributes, knockback calculations,
- *       and invulnerability timers.</li>
- *   <li><b>Environmental Hazards:</b> Real-time environmental triggers such as progressive
- *       lava burn damage and out-of-bounds void elimination.</li>
- * </ul>
- *
- * <p>Subclasses must implement {@link #render(GameMaster, RenderPass)} to define visual representation
- * and optionally override {@link #adjustVelocity(float)}, {@link #onDamageTaken(float)}, or
- * {@link #onDeath(Cause)} to hook custom entity behaviors.
+ * {@code Entity} owns spatial state (position, velocity, dimensions), collision checks against voxel blocks,
+ * environmental hazard handling (lava and void), and combat durability primitives (HP, defense, invulnerability
+ * windows). Concrete subclasses provide visual output in {@link #render(GameMaster, RenderPass)} and can hook
+ * custom behavior through lifecycle callbacks such as damage, death, and per-tick velocity adjustment.
  */
 
 @DataClass

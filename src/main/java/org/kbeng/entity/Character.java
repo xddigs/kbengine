@@ -7,25 +7,11 @@ import org.kbeng.utils.Local;
 import org.kbeng.utils.ToastFactory;
 
 /**
- * Abstract extension of {@link Entity} representing sentient or actor-based entities within the game.
- /**
-  * introduces provides introduces capabilities within the entity subsystem.
-  *
-  * It participates in actor simulation, state transitions, and per-frame world interaction contracts.
-  *
-  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
-  */
- * <p>This class introduces core RPG mechanics, progression systems, and inventory management
- * to the physical entity base, including:
- * <ul>
- *   <li><b>Progression & Statistics:</b> Leveling system implementing {@link Levelable}, experience
- *       scaling, and core attributes (strength, intelligence, dexterity, constitution, wisdom, charisma, luck).</li>
- *   <li><b>Inventory & Storage:</b> Dual-inventory handling with primary {@link Inventory} support
- *       (with optional hotbar slots) and secondary {@link Inventory} backpack storage.</li>
- *   <li><b>Vitality & Survival:</b> Enhanced damage mitigation based on defense values, fall damage resolution,
- *       healing, and hunger management.</li>
- *   <li><b>State & Alignment:</b> Social alignment via {@link Reputation} and runtime play styles via {@link Gamemode}.</li>
- * </ul>
+ * RPG-oriented extension of {@link Entity} for living actors with progression and inventory state.
+ *
+ * Beyond base physics and damage handling, this class adds character attributes, level progression,
+ * hunger and survival stats, faction reputation, and dual inventory containers (main inventory + backpack).
+ * It is the common behavioral layer for player and AI-controlled humanoid entities.
  */
 @DataClass
 public abstract class Character extends

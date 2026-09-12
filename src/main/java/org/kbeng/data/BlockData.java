@@ -15,34 +15,12 @@ import java.util.Locale;
 import java.util.function.Consumer;
 
 /**
- * Represents the central registry and specification data for all block types within the engine.
- * <p>
- /**
-  * defines declares the canonical defines set for the data subsystem.
-  *
-  * Each constant provides a stable, type-safe branch token for runtime decisions and avoids string-based switches.
-  *
-  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
-  */
- * This enum defines the core physical attributes, collision boundaries, breaking speeds,
- * rendering shapes, and drop tables associated with each block state. It serves as a static
- * data source for world generation, physics calculation, and player interaction mechanics.
- * </p>
+ * Canonical block registry for world generation, rendering metadata, mining rules, and drops.
  *
- * <h2>Key Features & Functionality</h2>
- * <ul>
- *   <li><b>Physical Properties:</b> Holds metadata such as blast resistance, hardness,
- *       solidity, and light emission/opacity levels.</li>
- *   <li><b>Geometry & Collision:</b> Associates blocks with specific {@code BlockShape} profile
- *       types (e.g., full cubes, slabs, staircases, fences, or customized bounding boxes).</li>
- *   <li><b>Loot & Mining Tables:</b> Manages block drop logic, linking appropriate tool prerequisites,
- *       mining speeds, and item drop pools upon destruction.</li>
- *   <li><b>Material Conversions:</b> Provides static lookup utilities to convert base materials
- *       into variant block forms (e.g., transforming primary log types to planks, slabs, or fences).</li>
- * </ul>
- *
- * @see Blockable
- * @see BlockShape
+ * Each enum constant stores the full runtime description of a block type: IDs, solidity, light behavior,
+ * hardness, sound group, texture mapping, geometric shape flags, and optional drop configuration.
+ * This keeps block behavior data-driven and allows systems such as terrain generation, collision,
+ * harvesting, and inventory conversion to resolve block semantics from one source of truth.
  */
 @DataClass
 public enum BlockData implements Blockable {

@@ -3,15 +3,10 @@ package org.kbeng.data;
 import org.kbeng.item.Item;
 
 /**
- * Defines plantable behavior.
- /**
-  * can defines the can contract within the data subsystem.
-  *
-  * Implementations are expected to preserve these behavioral guarantees while choosing their own storage and execution strategy.
-  *
-  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
-  */
- * Extensions of this interface can be planted
+ * Contract for inventory items that can be planted into farmable terrain.
+ *
+ * A {@code Plantable} item exposes the resulting {@link CropType} so placement logic, growth systems,
+ * and harvesting behavior can map a held item to its world crop representation.
  */
 public interface Plantable extends Item {
     /**

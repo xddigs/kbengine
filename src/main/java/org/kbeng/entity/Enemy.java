@@ -9,24 +9,11 @@ import org.kbeng.wrld.GameMaster;
 import org.joml.Vector3f;
 
 /**
- /**
-  * for provides for capabilities within the entity subsystem.
-  *
-  * It participates in actor simulation, state transitions, and per-frame world interaction contracts.
-  *
-  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
-  */
- * Abstract base class for all hostile AI-driven characters in the game.
+ * Hostile {@link Character} archetype used for combat-focused non-player entities.
  *
- * <p>Extends {@link Character} by anchoring entity behavior to a 3D {@link GLTFModel}.
- * Unlike neutral or passive {@link NPC}s, enemies are hardcoded with a {@link Reputation#HOSTILE}
- * alignment and actively engage in combat calculations against the player.
- *
- * <p><b>Key Lifecycle & Characteristics:</b>
- * <ul>
- *   <li><b>Visual Representation:</b> Animated via external 3D {@link GLTFModel} assets.</li>
- *   <li><b>Non-Interactive:</b> Cannot be conversed with or traded with; interaction is strictly combat.</li>
- * </ul>
+ * Enemies are initialized from a {@link GLTFModel}, scale core stats from the current player progression,
+ * and default to {@link Reputation#HOSTILE}. The class centralizes enemy-side combat expectations while
+ * letting concrete enemy variants customize attack logic, AI movement, and rendering details.
  */
 @DataClass
 public abstract class Enemy extends Character {

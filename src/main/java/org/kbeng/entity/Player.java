@@ -19,22 +19,12 @@ import org.joml.Vector3f;
 import java.util.List;
 
 /**
- /**
-  * representing provides representing capabilities within the entity subsystem.
-  *
-  * It participates in actor simulation, state transitions, and per-frame world interaction contracts.
-  *
-  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
-  */
- * Controller class representing the local user-driven player entity.
+ * Local controllable {@link Character} implementation that binds input, combat, and interaction systems.
  *
- * <p>Key Responsibilities:</p>
- * <ul>
- *   <li>Processes raw user input to drive physics-based locomotion, jumping, crouching, and camera control.</li>
- *   <li>Coordinates the combat system, executing melee/ranged attacks, hit registration, and damage calculation.</li>
- *   <li>Manages player-centric subsystems including vital statistics (health, stamina, mana),
- *       inventory management, equipment slots, and world object interactions.</li>
- * </ul>
+ * The player coordinates movement and camera-driven orientation, auto-jump and collision traversal,
+ * inventory/equipment actions, and attack execution through dedicated helper components
+ * ({@link PlayerGameplay} and {@link PlayerManager}). A singleton instance ({@link #plyr}) is kept as
+ * the authoritative runtime avatar accessed by gameplay and rendering subsystems.
  */
 @Singleton
 public class Player extends Character {

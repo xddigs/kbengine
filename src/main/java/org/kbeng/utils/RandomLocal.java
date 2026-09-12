@@ -3,15 +3,10 @@ package org.kbeng.utils;
 import java.util.Random;
 
 /**
- /**
-  * serves provides serves capabilities within the utils subsystem.
-  *
-  * It centralizes reusable utilities such as constants, localization, settings, and small cross-cutting helpers.
-  *
-  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
-  */
- * This class serves as a bridge between {@link Random}
- * and static instantiation.
+ * Shared pseudo-random source used by gameplay systems that do not require deterministic seeds.
+ *
+ * The class exposes one process-wide {@link Random} instance through {@link #get()} and {@link #rand},
+ * avoiding repeated object allocation and keeping random calls centralized for utility and data layers.
  */
 @Utils
 public class RandomLocal extends Random {
