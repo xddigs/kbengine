@@ -1,88 +1,73 @@
 ![kbengine_logo](src/main/resources/assets/ui/logo.png)
 
-**kbengine** es un motor/juego isométrico 3D voxel en Java con LWJGL/OpenGL.  
-Actualmente el proyecto está enfocado en gameplay sandbox con simulación del mundo, combate, inventario/crafteo y render isométrico moderno (sombras, clima, partículas y postproceso), con controles configurables por archivo.
+**kbengine** is a 3D isometric voxel engine/game built in Java with LWJGL/OpenGL.  
+Currently, the project focuses on sandbox gameplay featuring world simulation, combat, inventory/crafting, and modern isometric rendering (shadows, weather, particles, and post-processing), with file-configurable controls.
 
-## Base técnica actual
+## Current Technical Stack
 
-- **Lenguaje y build:** Java **21** + Maven.
-- **Render y runtime:** LWJGL **3.3.4** (GLFW, OpenGL, STB, OpenAL) + JOML.
-- **Audio y utilidades:** OpenAL, SLF4J/Logback, Gson, OSHI.
-- **Entrada unificada:** teclado, ratón y gamepad vía `config.json`.
-- **Arquitectura principal:** servicios de mundo (`World`, `ChunkManager`, `FluidSimulation`, `TimeService`, `WeatherService`, `ViewService`), entidades (`Player`, NPC, enemigos, animales), UI y pipeline gráfico (`GameRenderer`, sombras y post-FX).
+- **Language & Build:** Java **21** + Maven.
+- **Rendering & Runtime:** LWJGL **3.3.4** (GLFW, OpenGL, STB, OpenAL) + JOML.
+- **Audio & Utilities:** OpenAL, SLF4J/Logback, Gson, OSHI.
+- **Unified Input:** Keyboard, mouse, and gamepad via `config.json`.
+- **Core Architecture:** World services (`World`, `ChunkManager`, `FluidSimulation`, `TimeService`, `WeatherService`, `ViewService`), entities (`Player`, NPCs, enemies, animals), UI, and graphics pipeline (`GameRenderer`, shadows, and post-FX).
 
-## Dirección actual del proyecto
+## Current Project Roadmap
 
-La dirección del proyecto está claramente orientada a:
+The development focus is clearly set on:
+1. **Consolidating the sandbox base** (chunk-based procedural generation, day/night cycle, seasons, rain, farming, and NPC economy).
+2. **Polishing core gameplay systems** (combat/interaction, inventories, crafting, navigation, and visual feedback).
+3. **Enhancing rendering quality** (fog-of-war, interior/underground visibility, shadows, and frame stability).
+4. **Improving overall robustness** (fewer runtime errors, better code maintainability, and broader control configurability).
 
-1. **Consolidar la base sandbox** (mundo procedural por chunks, ciclo día/noche, estaciones, lluvia, cultivo y economía NPC).
-2. **Pulir sistemas core de jugabilidad** (combate/interacción, inventarios, crafteo, navegación y feedback visual).
-3. **Fortalecer calidad técnica del render** (fog-of-war, visibilidad interior/subterránea, sombras y estabilidad de frame).
-4. **Mejorar robustez general** (menos errores en runtime, mejor mantenimiento del código y mayor configurabilidad de controles).
+## Controls (Default & Expanded)
 
-## Controles (default, expandido)
+> Keybindings can be remapped in `src/main/resources/config.json`.
 
-> Los bindings se pueden cambiar en `src/main/resources/config.json`.
-
-| Acción | Teclado | Ratón | Gamepad | Notas |
+| Action | Keyboard | Mouse | Gamepad | Notes |
 |---|---|---|---|---|
-| Moverse | `W A S D` | — | `D-Pad` o `Stick Izquierdo` | Movimiento relativo a cámara |
-| Saltar | `Space` | — | `A` | En tierra |
-| Nadar arriba | `Space` | — | `A` | En agua |
-| Nadar abajo | `Left Ctrl` | — | `RB` | En agua |
-| Agacharse (sneak) | `Left Ctrl` | — | `RB` | También se usa para descenso en agua |
-| Ataque / picar bloque | — | `Click Izquierdo` | `X` | Acción primaria |
-| Interactuar / colocar | — | `Click Derecho` | `B` | Acción secundaria |
-| Pathfinding hacia celda | — | `Click Derecho` (mantener) | — | Click sobre terreno para fijar destino |
-| Foco a NPC objetivo | — | `Mouse Button 4` | — | Alterna lock del NPC más cercano |
-| Zoom (toggle) | `C` | — | — | Acerca/aleja cámara |
-| Ajuste fino de zoom | `Alt` + rueda | Rueda | — | Cambia offset de zoom |
-| Rotar cámara (teclas) | `Flechas` | — | — | Rotación continua |
-| Rotar cámara (drag) | `Alt` + `Click Derecho` + mover | Drag RMB | — | Gesto de rotación |
-| Pan de cámara | — | `Click Medio` + arrastrar | — | Pan táctico temporal |
-| Abrir/cerrar chat consola | `Enter` | — | `Start` | Ejecuta comando al cerrar |
-| Abrir/cerrar inventario | `E` | — | `Y` | Si mochila abierta, la cierra |
-| Selección UI / inventario | `Ctrl` (modificador) | `Click Izquierdo` | — | `Ctrl + click` hace quick-move de stacks |
-| Menú contextual UI | — | `Click Derecho` | — | Divide/usa stacks según panel |
-| Abrir/cerrar libro crafteo | `Tab` | — | `Back` | Requiere libro de crafteo |
-| Página anterior del libro | `Left Arrow` | — | `LB` | Navegación de libros |
-| Página siguiente del libro | `Right Arrow` | — | `RB` | Navegación de libros |
-| Soltar item | `Q` | — | — | `Ctrl + Q` suelta stack |
-| Toggle escudo | `F` | — | — | Si hay escudo equipado |
-| Smart Shift (modificador) | `Left Shift` | — | — | Atajos contextuales (ej. tala inteligente) |
-| Toggle HUD | `F1` | — | — | Muestra/oculta HUD |
-| Toggle debug | `F3` | — | — | Info de depuración |
-| Cambiar idioma | `F5` | — | — | Cicla idioma activo |
-| Mostrar idioma actual | `F6` | — | — | Toast informativo |
-| Toggle fullscreen | `F11` | — | — | Pantalla completa |
-| Música on/off | `M` | — | — | Alterna música/ambiente |
-| Salida forzada | `Shift + Escape` | — | — | Cierre inmediato del juego |
+| Movement | `W A S D` | — | `D-Pad` or `Left Stick` | Camera-relative movement |
+| Jump | `Space` | — | `A` | On land |
+| Swim up | `Space` | — | `A` | In water |
+| Swim down | `Left Ctrl` | — | `RB` | In water |
+| Sneak / Crouch | `Left Ctrl` | — | `RB` | Also used to descend in water |
+| Attack / Mine block | — | `Left Click` | `X` | Primary action |
+| Interact / Place block | — | `Right Click` | `B` | Secondary action |
+| Pathfinding to tile | — | `Right Click` (hold) | — | Click on terrain to set target destination |
+| Lock-on target NPC | — | `Mouse Button 4` | — | Toggles target lock on the nearest NPC |
+| Toggle zoom | `C` | — | — | Zooms camera in/out |
+| Fine zoom adjustment | `Alt` + wheel | Scroll Wheel | — | Adjusts zoom offset |
+| Rotate camera (keys) | `Arrow keys` | — | — | Continuous rotation |
+| Rotate camera (drag) | `Alt` + `Right Click` + move | RMB Drag | — | Rotation gesture |
+| Camera pan | — | `Middle Click` + drag | — | Temporary tactical pan |
+| Open/close chat console | `Enter` | — | `Start` | Executes command on close |
+| Open/close inventory | `E` | — | `Y` | Closes backpack if open |
+| UI / Inventory selection | `Ctrl` (modifier) | `Left Click` | — | `Ctrl + Click` quick-moves stacks |
+| UI context menu | — | `Right Click` | — | Splits/uses stacks depending on panel |
+| Open/close crafting book | `Tab` | — | `Back` | Requires crafting book in inventory |
+| Previous book page | `Left Arrow` | — | `LB` | Book navigation |
+| Next book page | `Right Arrow` | — | `RB` | Book navigation |
+| Drop item | `Q` | — | — | `Ctrl + Q` drops full stack |
+| Toggle shield | `F` | — | — | If shield is equipped |
+| Smart Shift (modifier) | `Left Shift` | — | — | Contextual shortcuts (e.g., smart woodcutting) |
+| Toggle HUD | `F1` | — | — | Shows/hides HUD |
+| Toggle debug | `F3` | — | — | Debug information overlay |
+| Switch language | `F5` | — | — | Cycles through active languages |
+| Show current language | `F6` | — | — | Informational toast |
+| Toggle fullscreen | `F11` | — | — | Fullscreen mode |
+| Mute/Unmute audio | `M` | — | — | Toggles music/ambient sounds |
+| Force quit | `Shift + Escape` | — | — | Immediate game shutdown |
 
-## Cómo ejecutar
+## How to Run
 
-### Requisitos
+### Prerequisites
 - JDK **21**
 - Maven **3.9+**
 
-### Desde IDE
-Ejecuta la clase principal:
+### From IDE
+Run the main class:
 - `org.kbeng.Game`
 
-### Desde terminal
+### From Terminal
 ```bash
 mvn clean package
 java -jar target/kbengine-1.0-SNAPSHOT.jar
-```
-
-## Estructura rápida
-
-- `src/main/java/org/kbeng/wrld` → mundo, chunks, fluidos, game loop
-- `src/main/java/org/kbeng/graphics` → render, shaders, cámaras, sombras, postprocesado
-- `src/main/java/org/kbeng/entity` → player, NPCs, enemigos, animales, items en mundo
-- `src/main/java/org/kbeng/service` → reglas/sistemas (tiempo, clima, vista, audio, etc.)
-- `src/main/java/org/kbeng/input` → capa de input y mapping de acciones lógicas
-- `src/main/resources/shaders` → shaders GLSL
-
-## Licencia
-
-Este repositorio incluye archivo `LICENSE`; revisa ese archivo para términos de uso y distribución.
