@@ -15,20 +15,13 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * Represents the particle engine component of the kbengine runtime.
+ * ParticleEngine provides particle engine capabilities within the graphics subsystem.
  *
- * <p>This type centralizes the state, lifecycle and behavior required by its callers,
- * keeping domain rules together with the data they operate on.
+ * It contributes to OpenGL resource ownership, render-state setup, or frame-pipeline execution.
  *
- * <p><b>Responsibilities:</b>
- * <ul>
- *   <li><b>State:</b> Owns the data needed to represent the component consistently.</li>
- *   <li><b>Lifecycle:</b> Exposes the operations used to create, update and release its state.</li>
- *   <li><b>Integration:</b> Coordinates with the surrounding game, rendering or UI systems through its public API.</li>
- * </ul>
+ * The engine encapsulates a dedicated execution pipeline with its own stateful update lifecycle.
  *
- * <p>Callers should use the documented public operations and allow this type to preserve
- * its invariants rather than modifying implementation details directly.
+ * It implements Service<Particle>, providing a concrete strategy for this subsystem contract.
  */
 @Singleton
 public class ParticleEngine implements Service<Particle> {

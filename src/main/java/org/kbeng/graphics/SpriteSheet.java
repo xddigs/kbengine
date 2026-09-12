@@ -11,20 +11,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Represents the sprite sheet component of the kbengine runtime.
+ * SpriteSheet provides sprite sheet capabilities within the graphics subsystem.
  *
- * <p>This type centralizes the state, lifecycle and behavior required by its callers,
- * keeping domain rules together with the data they operate on.
+ * It contributes to OpenGL resource ownership, render-state setup, or frame-pipeline execution.
  *
- * <p><b>Responsibilities:</b>
- * <ul>
- *   <li><b>State:</b> Owns the data needed to represent the component consistently.</li>
- *   <li><b>Lifecycle:</b> Exposes the operations used to create, update and release its state.</li>
- *   <li><b>Integration:</b> Coordinates with the surrounding game, rendering or UI systems through its public API.</li>
- * </ul>
- *
- * <p>Callers should use the documented public operations and allow this type to preserve
- * its invariants rather than modifying implementation details directly.
+ * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
  */
 public class SpriteSheet {
     private final Texture texture;

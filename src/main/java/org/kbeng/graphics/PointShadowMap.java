@@ -6,7 +6,13 @@ import static org.lwjgl.opengl.GL13.GL_TEXTURE_CUBE_MAP;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE_CUBE_MAP_POSITIVE_X;
 import static org.lwjgl.opengl.GL30.*;
 
-/** Depth cubemap used by one shadow-casting point light. */
+/**
+ * PointShadowMap provides point shadow map capabilities within the graphics subsystem.
+ *
+ * It contributes to OpenGL resource ownership, render-state setup, or frame-pipeline execution.
+ *
+ * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
+ */
 public final class PointShadowMap {
     public static final int SIZE = 256;
     private final int framebuffer = glGenFramebuffers();

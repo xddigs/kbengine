@@ -14,7 +14,13 @@ import static org.lwjgl.opengl.GL13.*;
 import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
 import static org.lwjgl.opengl.GL30.glBindFramebuffer;
 
-/** Renders cubemap shadows for the four nearest artificial lights. */
+/**
+ * PointShadowSystem provides point shadow system capabilities within the graphics subsystem.
+ *
+ * It contributes to OpenGL resource ownership, render-state setup, or frame-pipeline execution.
+ *
+ * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
+ */
 public final class PointShadowSystem {
     public static final PointShadowSystem sys = new PointShadowSystem();
     public static final int MAX_SHADOWED_LIGHTS = 4;
