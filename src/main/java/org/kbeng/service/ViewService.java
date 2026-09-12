@@ -14,7 +14,6 @@ import org.joml.Vector4f;
  * Classifies the space occupied by the player and exposes the clipping volume
  * used by the isometric fog-of-war shaders.
  */
-@SuppressWarnings("all")
 public final class ViewService implements Service<View> {
     private static final int MIN_ROOM_HEIGHT = 2;
     private static final int MAX_ROOM_HEIGHT = 8;
@@ -28,7 +27,11 @@ public final class ViewService implements Service<View> {
     private float floorY;
     private float ceilingY;
 
-    /** Re-evaluates the view volume around the player's current voxel. */
+    /**
+     * Re-evaluates the view volume around the player's current voxel.
+     * @param world the {@link World} argument; the world to search for the player.
+     * @param player the {@link Player} argument; the player to classify.
+     */
     public void update(World world, Player player) {
         if (world == null || player == null) {
             view = View.EXTERIOR;
@@ -68,6 +71,14 @@ public final class ViewService implements Service<View> {
         ceilingY = Chunk.SIZE_Y;
     }
 
+    /**
+     * Finds the room that the player is in.
+     * @param world the {@link World} argument; the world to search
+     * @param playerX the {@code int} argument; the player's x position
+     * @param playerY the {@code int} argument; the player's y position
+     * @param playerZ the {@code int} argument; the player's z position
+     * @return the {@link Room} representing the room, or {@code null} if none
+     */
     private Room findRoom(World world, int playerX, int playerY, int playerZ) {
         int radius = Settings.getInteriorDetectionRadius();
         int minX = findBoundary(world, playerX, playerY, playerZ, -1, 0, radius);
@@ -97,6 +108,17 @@ public final class ViewService implements Service<View> {
         return new Room(minX, maxX, minZ, maxZ, ceiling);
     }
 
+    /**
+     * Finds the first solid boundary of the given radius from the given voxel.
+     * @param world the {@link World} argument; the world to search
+     * @param x the {@code int} argument; the voxel to search from
+     * @param y the {@code int} argument; the voxel to search from
+     * @param z the {@code int} argument; the voxel to search from
+     * @param stepX the {@code int} argument; the direction to search in
+     * @param stepZ the {@code int} argument; the direction to search in
+     * @param radius the {@code int} argument; the radius of the search
+     * @return the {@code int} value of the boundary voxel, or {@code Integer.MIN_VALUE} if none
+     */
     private int findBoundary(World world, int x, int y, int z,
                              int stepX, int stepZ, int radius) {
         for (int distance = 1; distance <= radius; distance++) {
@@ -107,6 +129,16 @@ public final class ViewService implements Service<View> {
         return Integer.MIN_VALUE;
     }
 
+    /**
+     * Returns true if the given wall is closed.
+     * @param world the {@link World} argument; the world to search
+     * @param fixed the {@code int} argument; the fixed voxel to search from
+     * @param y the {@code int} argument; the voxel to search from
+     * @param start the {@code int} argument; the voxel to search from
+     * @param end the {@code int} argument; the voxel to search from
+     * @param fixedX the {@code boolean} argument; whether the fixed voxel is the x or z axis
+     * @return {@code true} if the wall is closed; otherwise {@code false}
+     */
     private boolean wallIsClosed(World world, int fixed, int y, int start, int end,
                                  boolean fixedX) {
         int covered = 0;
@@ -119,12 +151,28 @@ public final class ViewService implements Service<View> {
         return covered >= Math.ceil(length * MIN_WALL_COVERAGE);
     }
 
+    /**
+     * Returns true if the given voxel is a solid wall.
+     * @param world the {@link World} argument; the world to search
+     * @param x the {@code int} argument; the voxel to search from
+     * @param y the {@code int} argument; the voxel to search from
+     * @param z the {@code int} argument; the voxel to search from
+     * @return {@code true} if the voxel is a solid wall; otherwise {@code false}
+     */
     private boolean isWall(World world, int x, int y, int z) {
         return isDoor(world, x, y, z)
                 || world.isBlockSolid(x, y, z)
                 || world.isBlockSolid(x, y + 1, z);
     }
 
+    /**
+     * Returns true if the given voxel is a door.
+     * @param world the {@link World} argument; the world to search
+     * @param x the {@code int} argument; the voxel to search from
+     * @param y the {@code int} argument; the voxel to search from
+     * @param z the {@code int} argument; the voxel to search from
+     * @return {@code true} if the voxel is a door; otherwise {@code false}
+     */
     private boolean isDoor(World world, int x, int y, int z) {
         iBlock interactive = world.getInteractiveBlockAt(x, y, z);
         if (interactive != null && interactive.getType().isDoor()) return true;
@@ -132,6 +180,14 @@ public final class ViewService implements Service<View> {
         return data != null && data.isDoor();
     }
 
+    /**
+     * Finds the highest solid voxel above the player's y position.
+     * @param world the {@link World} argument; the world to search
+     * @param x the {@code int} argument; the voxel to search from
+     * @param playerY the {@code int} argument; the player's y position
+     * @param z the {@code int} argument; the voxel to search from
+     * @return the {@code int} value of the highest solid voxel, or {@code -1} if none
+     */
     private int findOverhead(World world, int x, int playerY, int z) {
         for (int y = playerY + MIN_ROOM_HEIGHT;
              y <= Math.min(Chunk.SIZE_Y - 1, playerY + MAX_ROOM_HEIGHT); y++) {
@@ -140,6 +196,15 @@ public final class ViewService implements Service<View> {
         return -1;
     }
 
+    /**
+     * Returns true if the given voxel is a solid column of roof.
+     * @param world the {@link World} argument; the world to search
+     * @param x the {@code int} argument; the voxel to search from
+     * @param playerY the {@code int} argument; the player's y position
+     * @param z the {@code int} argument; the voxel to search from
+     * @param expectedY the {@code int} argument; the expected ceiling of the room
+     * @return {@code true} if the voxel is a solid column of roof; otherwise {@code false}
+     */
     private boolean hasRoofColumn(World world, int x, int playerY, int z, int expectedY) {
         int minY = Math.max(playerY + MIN_ROOM_HEIGHT, expectedY - 1);
         int maxY = Math.min(Chunk.SIZE_Y - 1, expectedY + 1);
@@ -149,6 +214,14 @@ public final class ViewService implements Service<View> {
         return false;
     }
 
+    /**
+     * Returns true if the given voxel is a solid column of overburden.
+     * @param world the {@link World} argument; the world to search
+     * @param x the {@code int} argument; the voxel to search from
+     * @param ceiling the {@code int} argument; the ceiling of the room
+     * @param z the {@code int} argument; the voxel to search from
+     * @return {@code true} if the voxel is a solid column of overburden; otherwise {@code false}
+     */
     private boolean hasSolidOverburden(World world, int x, int ceiling, int z) {
         for (int y = ceiling + 1; y < Chunk.SIZE_Y; y++) {
             if (world.isBlockSolid(x, y, z)) return true;

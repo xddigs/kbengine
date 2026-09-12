@@ -388,11 +388,7 @@ public class GameRenderer {
                     usesPlantMesh ? 1.0f : 0.8f, 1.0f);
             defaultShader.setUniform("uModel", modelMatrix);
             if (usesPlantMesh) glDisable(GL_CULL_FACE);
-            if (usesPlantMesh) {
-                ResourceManager.rem.getBillboardMesh().render();
-            } else {
-                ResourceManager.rem.getBillboardMesh().render();
-            }
+            ResourceManager.rem.getBillboardMesh().render();
             if (usesPlantMesh) glEnable(GL_CULL_FACE);
             sheet.unbind();
         });
@@ -721,7 +717,6 @@ public class GameRenderer {
         shader.setUniform("uViewCameraPosition", camera.getPosition());
         shader.setUniform("uViewBounds", fog.bounds());
         shader.setUniform("uViewRadius", fog.radius());
-        // Disable directional cutaway bands in shader logic; keep only volumetric fog.
         shader.setUniform("uViewFloorY", fog.ceilingY());
         shader.setUniform("uViewCeilingY", fog.ceilingY());
         shader.setUniform("uViewFogStrength", getViewFogStrength());
@@ -755,15 +750,28 @@ public class GameRenderer {
         }
     }
 
+    /**
+     * Returns the current view fog state.
+     * @return the {@link ViewFogState} representing the current view fog state
+     */
     private ViewFogState getRenderedViewFog() {
         return targetViewFog != null ? targetViewFog : displayedViewFog;
     }
 
+    /**
+     * Returns the current view fog strength.
+     * @return the view fog strength
+     */
     private float getViewFogStrength() {
         if (targetViewFog == null || targetViewFog.view() == View.EXTERIOR) return 0.0f;
-        return Math.min(VIEW_FOG_MAX_STRENGTH, Math.max(0.0f, viewFogTransition));
+        return Math.clamp(viewFogTransition, 0.0f, VIEW_FOG_MAX_STRENGTH);
     }
 
+    /**
+     * Returns the current view fog state.
+     * @param service the current view service
+     * @return the current view fog state
+     */
     private static ViewFogState captureViewFog(ViewService service) {
         return new ViewFogState(service.getView(), service.getBounds(),
                 Settings.getUndergroundViewRadius(), service.getFloorY(), service.getCeilingY());
@@ -790,6 +798,12 @@ public class GameRenderer {
                 : boxes[0];
     }
 
+    /**
+     * Returns the center of the given bounds.
+     * @param minimum the minimum X coordinate
+     * @param maximum the maximum X coordinate
+     * @return the center of the given bounds
+     */
     private static float center(float minimum, float maximum) {
         return (minimum + maximum) * 0.5f;
     }
