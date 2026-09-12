@@ -109,7 +109,7 @@ public class GameMaster {
 
         notifyProgress(progressCallback, ++currentStep / totalSteps);
 
-        this.chunkManager = new ChunkManager(world, FluidSimulation.forBlock(BlockData.WATER));
+        this.chunkManager = new ChunkManager(FluidSimulation.forBlock(BlockData.WATER));
         this.itemRenderer = new ItemRenderer();
         notifyProgress(progressCallback, ++currentStep / totalSteps);
 
