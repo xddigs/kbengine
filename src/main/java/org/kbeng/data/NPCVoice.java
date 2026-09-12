@@ -1,7 +1,11 @@
 package org.kbeng.data;
 
 /**
- * Identifies the recorded voice responses available to NPCs.
+ * NPCVoice declares the canonical npcvoice set for the data subsystem.
+ *
+ * Each constant provides a stable, type-safe branch token for runtime decisions and avoids string-based switches.
+ *
+ * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
  */
 @DataClass
 public enum NPCVoice {

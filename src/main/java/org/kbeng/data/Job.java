@@ -6,7 +6,11 @@ import org.kbeng.utils.Local;
 import java.util.Locale;
 
 /**
- * Enumerates the available {@link NPC} jobs, such as Farmer, Miner, etc.
+ * Job declares the canonical job set for the data subsystem.
+ *
+ * Each constant provides a stable, type-safe branch token for runtime decisions and avoids string-based switches.
+ *
+ * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
  */
 @DataClass
 public enum Job {
