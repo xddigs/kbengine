@@ -65,7 +65,7 @@ The development focus is clearly set on:
 
 ### From IDE
 Run the main class:
-- `org.kbeng.Game`
+- `org.kbeng.Main`
 
 ### From Terminal
 ```bash

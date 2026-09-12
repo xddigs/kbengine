@@ -1,13 +1,13 @@
-package org.kbeng;
+package org.kbeng.engine.graphics;
 
-import org.kbeng.engine.graphics.Intro;
 import org.kbeng.engine.input.Joystick;
 import org.kbeng.engine.input.Keyboard;
 import org.kbeng.engine.input.Mouse;
-import org.kbeng.engine.utils.K;
+import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWImage;
 import org.lwjgl.opengl.GL;
+import org.lwjgl.opengl.GL11;
 import org.lwjgl.stb.STBImage;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
@@ -20,8 +20,6 @@ import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
-import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 /**
@@ -29,30 +27,48 @@ import static org.lwjgl.system.MemoryUtil.NULL;
  * It belongs to the application bootstrap layer and integrates top-level runtime wiring.
  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
  */
-public class Game {
+public final class Game {
     private static final Logger log = LoggerFactory.getLogger(Game.class);
-    private static final String WINDOW_TITLE = "kbengine";
-
     private static final int OPENGL_MAJOR_VERSION = 3;
     private static final int OPENGL_MINOR_VERSION = 3;
     private static final int VSYNC_INTERVAL = 1;
 
     private long window;
+    private final Application application;
+    private final Application.Configuration configuration;
+
+    public Game(Application application) {
+        this.application = java.util.Objects.requireNonNull(application, "application");
+        this.configuration = java.util.Objects.requireNonNull(
+                application.configuration(), "application configuration");
+    }
 
     /**
      * Executes run as part of the application lifecycle.
      */
     public void run() {
         log.info("Starting LWJGL 3 application...");
-        init();
-
-        log.debug("Closing window and releasing native resources...");
-        Mouse.dispose();
-        glfwFreeCallbacks(window);
-        glfwDestroyWindow(window);
-        glfwTerminate();
-        glfwSetErrorCallback(null).free();
-        log.info("Application terminated successfully.");
+        boolean applicationInitialized = false;
+        try {
+            init();
+            applicationInitialized = true;
+            new Intro(window, application, configuration).show();
+        } finally {
+            log.debug("Closing window and releasing native resources...");
+            try {
+                if (applicationInitialized) application.dispose();
+            } finally {
+                Mouse.dispose();
+                if (window != NULL) {
+                    glfwFreeCallbacks(window);
+                    GLFW.glfwDestroyWindow(window);
+                }
+                GLFW.glfwTerminate();
+                GLFWErrorCallback callback = GLFW.glfwSetErrorCallback(null);
+                if (callback != null) callback.free();
+                log.info("Application terminated successfully.");
+            }
+        }
     }
 
     /**
@@ -61,78 +77,75 @@ public class Game {
     private void init() {
         GLFWErrorCallback.create((error, description) ->
                 log.error("GLFW Error [0x{}]: {}", Integer.toHexString(error),
-                        GLFWErrorCallback.getDescription(description))
-        ).set();
+                        GLFWErrorCallback.getDescription(description))).set();
 
-        if (!glfwInit()) {
+        if (!GLFW.glfwInit()) {
             throw new IllegalStateException("Failed to initialize GLFW");
         }
 
-        glfwDefaultWindowHints();
-        glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
-        glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
-        glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, OPENGL_MAJOR_VERSION);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, OPENGL_MINOR_VERSION);
-        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
+        GLFW.glfwDefaultWindowHints();
+        GLFW.glfwWindowHint(GLFW.GLFW_VISIBLE, GLFW.GLFW_FALSE);
+        GLFW.glfwWindowHint(GLFW.GLFW_RESIZABLE, GLFW.GLFW_TRUE);
+        GLFW.glfwWindowHint(GLFW.GLFW_MAXIMIZED, GLFW.GLFW_TRUE);
+        GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MAJOR, OPENGL_MAJOR_VERSION);
+        GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MINOR, OPENGL_MINOR_VERSION);
+        GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_PROFILE, GLFW.GLFW_OPENGL_CORE_PROFILE);
+        GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_FORWARD_COMPAT, GLFW.GLFW_TRUE);
 
-        window = glfwCreateWindow(
-                (int) K.Window.DEFAULT_WIDTH,
-                (int) K.Window.DEFAULT_HEIGHT,
-                WINDOW_TITLE, NULL, NULL);
+        window = GLFW.glfwCreateWindow(
+                configuration.initialWidth(),
+                configuration.initialHeight(),
+                configuration.windowTitle(), NULL, NULL);
         if (window == NULL) {
             throw new RuntimeException("Failed to create GLFW window");
         }
 
-        setWindowIcon(window);
+        setWindowIcon(window, configuration.windowIcons());
 
-        glfwWindowHint(GLFW_SAMPLES, 16);
+        GLFW.glfwWindowHint(GLFW.GLFW_SAMPLES, 16);
         Keyboard.init(window);
         Mouse.init(window);
-        Mouse.setCursorImage(K.Paths.CURSOR_POINTER);
+        if (configuration.cursorImagePath() != null
+                && !configuration.cursorImagePath().isBlank()) {
+            Mouse.setCursorImage(configuration.cursorImagePath());
+        }
         Joystick.init();
 
-        glfwMakeContextCurrent(window);
+        GLFW.glfwMakeContextCurrent(window);
         GL.createCapabilities();
 
         log.info("OpenGL context loaded successfully.");
-        log.info("GPU Renderer: {}", glGetString(GL_RENDERER));
-        log.info("OpenGL Version: {}", glGetString(GL_VERSION));
+        log.info("GPU Renderer: {}", GL11.glGetString(GL11.GL_RENDERER));
+        log.info("OpenGL Version: {}", GL11.glGetString(GL11.GL_VERSION));
 
-        glfwSwapInterval(VSYNC_INTERVAL);
-        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        GLFW.glfwSwapInterval(VSYNC_INTERVAL);
+        GL11.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+        GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 
-        glfwSwapBuffers(window);
-        glfwShowWindow(window);
-        Intro screen = new Intro(window);
-        screen.show();
-        glfwSetCursorPos(window, K.Window.DEFAULT_WIDTH / 2, K.Window.DEFAULT_HEIGHT / 2);
+        GLFW.glfwSwapBuffers(window);
+        GLFW.glfwShowWindow(window);
+
+        GLFW.glfwSetCursorPos(window, configuration.initialWidth() / 2.0,
+                configuration.initialHeight() / 2.0);
         log.info("GLFW window successfully initialized.");
     }
 
     /**
      * Sets the window icon.
      */
-    public static void setWindowIcon(long windowHandle) {
-        int[] sizes = {16, 32, 64, 128, 256};
-        String[] resources = {
-                "/assets/ui/iconx16.png",
-                "/assets/ui/iconx32.png",
-                "/assets/ui/iconx64.png",
-                "/assets/ui/iconx128.png",
-                "/assets/ui/iconx256.png"
-        };
-        ByteBuffer[] pixels = new ByteBuffer[sizes.length];
+    public static void setWindowIcon(long windowHandle,
+                                     java.util.List<Application.WindowIcon> windowIcons) {
+        if (windowIcons == null || windowIcons.isEmpty()) return;
+        ByteBuffer[] pixels = new ByteBuffer[windowIcons.size()];
         try (MemoryStack stack = MemoryStack.stackPush()) {
-            GLFWImage.Buffer icons = GLFWImage.malloc(sizes.length, stack);
-            for (int i = 0; i < sizes.length; i++) {
-                pixels[i] = loadIcon(icons, i, resources[i], sizes[i], stack);
+            GLFWImage.Buffer icons = GLFWImage.malloc(windowIcons.size(), stack);
+            for (int i = 0; i < windowIcons.size(); i++) {
+                Application.WindowIcon icon = windowIcons.get(i);
+                pixels[i] = loadIcon(icons, i, icon.resourcePath(), icon.size(), stack);
             }
             icons.position(0);
-            icons.limit(sizes.length);
-            glfwSetWindowIcon(windowHandle, icons);
+            icons.limit(windowIcons.size());
+            GLFW.glfwSetWindowIcon(windowHandle, icons);
         } finally {
             for (ByteBuffer pixelBuffer : pixels) {
                 if (pixelBuffer != null) MemoryUtil.memFree(pixelBuffer);
@@ -215,13 +228,5 @@ public class Game {
             }
         }
         return result;
-    }
-
-    /**
-     * Executes main as part of the application lifecycle.
-     * @param ignoredArgs an array of {@link String} values supplied as {@code ignoredArgs}
-     */
-    public static void main(String[] ignoredArgs) {
-        new Game().run();
     }
 }

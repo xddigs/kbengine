@@ -2,11 +2,10 @@ package org.kbeng.rpg.wrld;
 
 import org.kbeng.engine.graphics.*;
 import org.kbeng.engine.input.*;
-import org.kbeng.engine.ui.Frontend;
-import org.kbeng.engine.ui.GameUIService;
-import org.kbeng.engine.ui.UIManager;
+import org.kbeng.engine.ui.*;
 import org.kbeng.engine.utils.HoveredCell;
 import org.kbeng.engine.utils.K;
+import org.kbeng.engine.utils.Local;
 import org.kbeng.engine.utils.Settings;
 import org.kbeng.engine.utils.ToastFactory;
 import org.kbeng.rpg.craft.RecipeRegistry;
@@ -17,6 +16,7 @@ import org.kbeng.rpg.entity.Player;
 import org.kbeng.rpg.entity.pathfinding.GridPos;
 import org.kbeng.rpg.item.iBlock;
 import org.kbeng.rpg.service.*;
+import org.joml.Vector3f;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +24,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.GL_MULTISAMPLE;
 
@@ -40,12 +41,12 @@ import static org.lwjgl.opengl.GL13.GL_MULTISAMPLE;
  * input flushing, and high-level world coordination.
  */
 @Singleton
-public final class GameMaster {
-    public static final GameMaster game = new GameMaster();
+public final class GameMaster implements Application {
+    public static GameMaster game;
     private static final Logger log = LoggerFactory.getLogger(GameMaster.class);
-    private final long windowHandle = Intro.getWindow();
+    private long windowHandle;
     private final World world = World.wrld;
-    private final UIManager uiManager = Intro.getUiManager();
+    private UIManager uiManager;
     private final CommandRegistry commandRegistry = new CommandRegistry();
     private final CommandService commandService = new CommandService(commandRegistry);
     private final ItemRegistry itemRegistry = new ItemRegistry();
@@ -66,8 +67,99 @@ public final class GameMaster {
     private boolean isHUDShown = true;
     private volatile boolean areEntitiesActive;
     private float genDelta;
+    private UILabel namePrompt;
+    private UITextField nameField;
 
-    private GameMaster() { }
+    public GameMaster() {
+        if (game != null) throw new IllegalStateException("Only one GameMaster may be active");
+        game = this;
+    }
+
+    @Override
+    public Configuration configuration() {
+        return new Configuration("kbengine", (int) K.Window.DEFAULT_WIDTH,
+                (int) K.Window.DEFAULT_HEIGHT, true, K.Paths.LOGO,
+                K.Paths.CURSOR_POINTER, List.of(
+                new WindowIcon(16, "/assets/ui/iconx16.png"),
+                new WindowIcon(32, "/assets/ui/iconx32.png"),
+                new WindowIcon(64, "/assets/ui/iconx64.png"),
+                new WindowIcon(128, "/assets/ui/iconx128.png"),
+                new WindowIcon(256, "/assets/ui/iconx256.png")));
+    }
+
+    /**
+     * Loads the RPG and reports game-specific startup work to the generic intro.
+     */
+    @Override
+    public void initialize(Context context, Consumer<LoadingProgress> progressCallback) {
+        windowHandle = context.windowHandle();
+        uiManager = context.uiManager();
+        windowWidth = context.framebufferWidth();
+        windowHeight = context.framebufferHeight();
+        int renderDistance = Settings.getRenderDistance();
+        int visibleChunks = countVisibleChunks(renderDistance);
+        int totalTasks = 10 + visibleChunks * 2 + 2;
+        int[] completedTasks = {0};
+        Consumer<String> report = status -> {
+            completedTasks[0]++;
+            if (progressCallback != null) {
+                progressCallback.accept(new LoadingProgress(
+                        (float) completedTasks[0] / totalTasks, status));
+            }
+        };
+
+        loadResources(ignored -> report.accept(Local.lang.t("engine.loading")));
+        for (int chunkX = -renderDistance; chunkX <= renderDistance; chunkX++) {
+            for (int chunkZ = -renderDistance; chunkZ <= renderDistance; chunkZ++) {
+                if (!isChunkVisible(chunkX, chunkZ, renderDistance)) continue;
+                glfwPollEvents();
+                if (glfwWindowShouldClose(windowHandle)) return;
+                chunkManager.getGenerator().generateChunk(chunkX, chunkZ);
+                report.accept(String.format(Local.lang.f("engine.generating_terrain",
+                        chunkX, chunkZ)));
+            }
+        }
+
+        for (int chunkX = -renderDistance; chunkX <= renderDistance; chunkX++) {
+            for (int chunkZ = -renderDistance; chunkZ <= renderDistance; chunkZ++) {
+                if (!isChunkVisible(chunkX, chunkZ, renderDistance)) continue;
+                glfwPollEvents();
+                if (glfwWindowShouldClose(windowHandle)) return;
+                chunkManager.buildSingleChunkMesh(chunkX, chunkZ);
+                report.accept(String.format(Local.lang.f("engine.building_meshes",
+                        chunkX, chunkZ)));
+            }
+        }
+
+        chunkManager.setLastPlayerChunkX(0);
+        chunkManager.setLastPlayerChunkZ(0);
+        spawn();
+        report.accept(Local.lang.t("engine.spawning_player"));
+        initUI();
+        GameUIService.ui.getHotbarUI().hide();
+        report.accept(Local.lang.t("engine.post_processing"));
+    }
+
+    @Override
+    public void start() {
+        requestPlayerName();
+        if (!glfwWindowShouldClose(windowHandle)) GameUIService.ui.getHotbarUI().show();
+    }
+
+    private boolean isChunkVisible(int chunkX, int chunkZ, int renderDistance) {
+        int radiusSquared = renderDistance * renderDistance;
+        return chunkX * chunkX + chunkZ * chunkZ <= radiusSquared;
+    }
+
+    private int countVisibleChunks(int renderDistance) {
+        int visibleChunks = 0;
+        for (int chunkX = -renderDistance; chunkX <= renderDistance; chunkX++) {
+            for (int chunkZ = -renderDistance; chunkZ <= renderDistance; chunkZ++) {
+                if (isChunkVisible(chunkX, chunkZ, renderDistance)) visibleChunks++;
+            }
+        }
+        return visibleChunks;
+    }
 
     /**
      * Initializes shared runtime services and GPU resources for gameplay.
@@ -76,7 +168,7 @@ public final class GameMaster {
      * and finally core entities.
      * @param progressCallback optional loading progress sink in range {@code [0, 1]}
      */
-    public void loadResources(Consumer<Float> progressCallback) {
+    private void loadResources(Consumer<Float> progressCallback) {
         float totalSteps = 10.0f, step = 0.0f;
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -175,7 +267,21 @@ public final class GameMaster {
      * input edge-state rollover.
      * @param delta elapsed frame time in seconds
      */
+    @Override
     public void update(float delta) {
+        if (Controls.isPressed(ControlAction.CHANGE_LANGUAGE)) {
+            Local.lang.nextLanguage();
+            if (BookService.bs.isOpen() && BookService.bs.getOpenedBook() != null) {
+                BookUI.bui.reload(BookService.bs.getOpenedBook());
+            }
+            ToastFactory.reload();
+            ToastFactory.success(Local.lang.f("engine.language_changed",
+                    Local.lang.getCurrentLanguage().getName()));
+        }
+        if (Controls.isPressed(ControlAction.SHOW_LANGUAGE)) {
+            ToastFactory.info(Local.lang.f("engine.current_language",
+                    Local.lang.getCurrentLanguage().getName()));
+        }
         soundListener.update(delta, renderEngine);
         BookService.bs.update();
         GameUIService.ui.update(delta);
@@ -201,17 +307,26 @@ public final class GameMaster {
     /**
      * Renders the complete frame through the delegated graphics engine.
      */
-    public void render() { renderEngine.render(world, camera); }
+    @Override
+    public void render() {
+        Vector3f skyColor = TimeService.getSkyColor();
+        glClearColor(skyColor.x, skyColor.y, skyColor.z, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glEnable(GL_DEPTH_TEST);
+        renderEngine.render(world, camera);
+    }
 
     /**
      * Releases runtime resources in a safe teardown sequence.
      */
+    @Override
     public void dispose() {
-        chunkManager.dispose();
+        if (chunkManager != null) chunkManager.dispose();
         Frontend.dispose();
         renderEngine.dispose();
-        cameraController.release(this);
+        if (cameraController != null) cameraController.release(this);
         SoundService.fx.cleanup();
+        game = null;
         log.info("GameMaster resources successfully cleaned up");
     }
 
@@ -220,6 +335,7 @@ public final class GameMaster {
      * @param newWidth  framebuffer width in pixels
      * @param newHeight framebuffer height in pixels
      */
+    @Override
     public void onResize(int newWidth, int newHeight) {
         windowWidth = newWidth;
         windowHeight = newHeight;
@@ -228,6 +344,68 @@ public final class GameMaster {
         if (uiManager != null) { uiManager.resize(newWidth, newHeight); Frontend.resize(newWidth, newHeight); }
         if (GameUIService.ui != null) GameUIService.ui.onResize(newWidth, newHeight);
         ToastFactory.onResize(newWidth);
+        repositionNamePrompt();
+    }
+
+    private void requestPlayerName() {
+        namePrompt = new UILabel(0.0f, 0.0f, 360.0f, 30.0f,
+                Local.lang.t("intro.who_are_you"));
+        namePrompt.setHorizontalAlignment(UILabel.HorizontalAlignment.CENTER);
+        nameField = new UITextField(0.0f, 0.0f, 360.0f, 40.0f);
+        nameField.setMaxLength(24);
+        uiManager.getRoot().addChild(namePrompt);
+        uiManager.getRoot().addChild(nameField);
+        repositionNamePrompt();
+        uiManager.setFocusedElement(nameField);
+        Keyboard.update();
+
+        while (!glfwWindowShouldClose(windowHandle)) {
+            glfwPollEvents();
+            renderNamePromptFrame();
+            boolean submitted = Keyboard.isKeyPressed(Keyboard.KEY_ENTER)
+                    || Keyboard.isKeyPressed(Keyboard.KEY_KP_ENTER);
+            String playerName = nameField.getText().trim();
+            if (submitted && !playerName.isEmpty()) {
+                Player.plyr.setName(playerName);
+                ToastFactory.info(Local.lang.f("toast.open_inventory", playerName));
+                Mouse.update();
+                Keyboard.update();
+                break;
+            }
+            Mouse.update();
+            Keyboard.update();
+        }
+
+        uiManager.clearFocus();
+        uiManager.getRoot().removeChild(namePrompt);
+        uiManager.getRoot().removeChild(nameField);
+        namePrompt.dispose();
+        nameField.dispose();
+        namePrompt = null;
+        nameField = null;
+    }
+
+    private void renderNamePromptFrame() {
+        glViewport(0, 0, (int) windowWidth, (int) windowHeight);
+        glDisable(GL_DEPTH_TEST);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glClearColor(0.15f, 0.15f, 0.15f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        uiManager.update(0.016f);
+        Frontend.begin((int) windowWidth, (int) windowHeight);
+        uiManager.render();
+        Frontend.end();
+        glfwSwapBuffers(windowHandle);
+        glFlush();
+    }
+
+    private void repositionNamePrompt() {
+        if (namePrompt == null || nameField == null) return;
+        float centerX = (windowWidth - nameField.getWidth()) / 2.0f;
+        float centerY = (windowHeight - nameField.getHeight()) / 2.0f;
+        namePrompt.setPosition(centerX, centerY - namePrompt.getHeight() - 12.0f);
+        nameField.setPosition(centerX, centerY);
     }
 
     /**

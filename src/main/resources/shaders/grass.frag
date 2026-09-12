@@ -91,7 +91,6 @@ float applyViewFog(vec3 worldPosition) {
 float calculateShadow(vec4 lightSpacePosition, vec3 normal) {
     vec3 coordinates = lightSpacePosition.xyz / lightSpacePosition.w;
     coordinates = coordinates * 0.5 + 0.5;
-    // Match the receiver-plane correction used by solid terrain.
     vec3 dx = dFdx(coordinates);
     vec3 dy = dFdy(coordinates);
     float determinant = dx.x * dy.y - dx.y * dy.x;
@@ -105,7 +104,6 @@ float calculateShadow(vec4 lightSpacePosition, vec3 normal) {
 
     float normalDotLight = dot(normal, normalize(-uLightDirection));
     if (normalDotLight <= 0.0) return 1.0;
-    // Match solid terrain: a large depth bias detaches shadows from feet.
     float bias = max(0.00015 * (1.0 - normalDotLight), 0.00005);
     vec2 texelSize = 1.0 / vec2(textureSize(uShadowMap, 0));
     float shadow = 0.0;

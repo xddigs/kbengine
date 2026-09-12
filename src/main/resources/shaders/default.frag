@@ -118,8 +118,6 @@ float applyViewFog(vec3 worldPosition) {
 float calculateShadow(vec4 lightSpacePosition, vec3 normal) {
     vec3 projectionCoordinates = lightSpacePosition.xyz / lightSpacePosition.w;
     projectionCoordinates = projectionCoordinates * 0.5 + 0.5;
-    // Compare each PCF tap at the receiver's depth at that texel, avoiding
-    // self-shadowing on slopes without pushing the whole shadow away.
     vec3 dx = dFdx(projectionCoordinates);
     vec3 dy = dFdy(projectionCoordinates);
     float determinant = dx.x * dy.y - dx.y * dy.x;
@@ -142,8 +140,6 @@ float calculateShadow(vec4 lightSpacePosition, vec3 normal) {
         return 1.0;
     }
 
-    // Keep the contact offset small (about 1-3 cm over the 219-unit depth
-    // range). Use the same bias on grass so shadows meet the feet there too.
     float bias = max(0.00015 * (1.0 - normalDotLight), 0.00005);
     float currentDepth = projectionCoordinates.z;
     vec2 texelSize = 1.0 / vec2(textureSize(uShadowMap, 0));

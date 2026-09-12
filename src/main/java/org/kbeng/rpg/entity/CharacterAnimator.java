@@ -487,8 +487,6 @@ public final class CharacterAnimator {
         float deathDrop = 0.35f * ANIMATION_SCALE * deathWeight;
         float bob = (float) Math.sin(idleTime) * .025f
                 * ANIMATION_SCALE * idleWeight;
-        // Use this character's exact animated transform in every pass so its
-        // shadow stays attached to the same feet as the visible model.
         modelMatrix.identity().translate(character.getPosition().x, character.getPosition().y + bob - deathDrop,
                 character.getPosition().z).rotateY((float) Math.toRadians(modelYaw)).rotateZ(deathRoll).scale(scale);
         if (pass == RenderPass.SHADOW) {
@@ -501,8 +499,6 @@ public final class CharacterAnimator {
             glEnable(GL_DEPTH_TEST);
             glDepthFunc(GL_LESS);
             glDepthMask(true);
-            // Store the surface facing the light; back surfaces move the
-            // occluder behind the feet and leave a gap at ground contact.
             glEnable(GL_CULL_FACE);
             glCullFace(GL_BACK);
             model.render(shader, modelMatrix);

@@ -93,7 +93,6 @@ public class ShadowSystem {
             entity.render(gameMaster, RenderPass.SHADOW);
         }
 
-        // Character renderers unbind their shader when their pass finishes.
         shadowShader.bind();
         gameMaster.getWorld().forEach(block -> {
             if (!(block instanceof Crop crop)) return;
