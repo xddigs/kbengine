@@ -5,6 +5,15 @@ import org.kbeng.utils.Utils;
 
 import java.util.HashMap;
 import java.util.Map;
+/**
+ * BlockRegistry provides block registry capabilities within the service subsystem.
+ *
+ * It provides shared runtime services, registries, and policy logic consumed by orchestrators and feature modules.
+ *
+ * The registry maintains canonical lookup structures and resolves identifiers to runtime instances.
+ *
+ * It implements Service<BlockData>, providing a concrete strategy for this subsystem contract.
+ */
 
 @Utils
 public class BlockRegistry implements Service<BlockData> {

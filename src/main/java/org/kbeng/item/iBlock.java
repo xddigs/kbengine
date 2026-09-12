@@ -15,7 +15,13 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 /**
- * A craftable block with a model and interactive state.
+ * iBlock provides i block capabilities within the item subsystem.
+ *
+ * It models inventory-facing objects, equipables, consumables, and item behavior surfaced to gameplay and UI.
+ *
+ * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
+ *
+ * It extends Block, inheriting shared behavior while specializing subsystem-specific logic.
  */
 @SuppressWarnings("all")
 @DataClass

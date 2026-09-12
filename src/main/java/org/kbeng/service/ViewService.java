@@ -11,8 +11,13 @@ import org.joml.Vector3f;
 import org.joml.Vector4f;
 
 /**
- * Classifies the space occupied by the player and exposes the clipping volume
- * used by the isometric fog-of-war shaders.
+ * ViewService provides view service capabilities within the service subsystem.
+ *
+ * It provides shared runtime services, registries, and policy logic consumed by orchestrators and feature modules.
+ *
+ * The service acts as a shared policy and state access point for other runtime modules.
+ *
+ * It implements Service<View>, providing a concrete strategy for this subsystem contract.
  */
 public final class ViewService implements Service<View> {
     private static final int MIN_ROOM_HEIGHT = 2;

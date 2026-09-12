@@ -24,20 +24,13 @@ import static org.lwjgl.openal.ALC10.*;
 import static org.lwjgl.stb.STBVorbis.stb_vorbis_decode_memory;
 
 /**
- * Represents the sound service component of the kbengine runtime.
+ * SoundService provides sound service capabilities within the service subsystem.
  *
- * <p>This type centralizes the state, lifecycle and behavior required by its callers,
- * keeping domain rules together with the data they operate on.
+ * It provides shared runtime services, registries, and policy logic consumed by orchestrators and feature modules.
  *
- * <p><b>Responsibilities:</b>
- * <ul>
- *   <li><b>State:</b> Owns the data needed to represent the component consistently.</li>
- *   <li><b>Lifecycle:</b> Exposes the operations used to create, update and release its state.</li>
- *   <li><b>Integration:</b> Coordinates with the surrounding game, rendering or UI systems through its public API.</li>
- * </ul>
+ * The service acts as a shared policy and state access point for other runtime modules.
  *
- * <p>Callers should use the documented public operations and allow this type to preserve
- * its invariants rather than modifying implementation details directly.
+ * It implements Service<SoundGroup>, providing a concrete strategy for this subsystem contract.
  */
 @SuppressWarnings("all")
 @Singleton

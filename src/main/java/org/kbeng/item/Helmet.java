@@ -5,7 +5,13 @@ import org.kbeng.data.Tier;
 import org.kbeng.entity.Player;
 
 /**
- * Represents a helmet item for the {@link Player} to equip
+ * Helmet provides helmet capabilities within the item subsystem.
+ *
+ * It models inventory-facing objects, equipables, consumables, and item behavior surfaced to gameplay and UI.
+ *
+ * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
+ *
+ * It extends Armor, inheriting shared behavior while specializing subsystem-specific logic.
  */
 public class Helmet extends Armor {
 

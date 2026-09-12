@@ -7,20 +7,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Represents the command registry component of the kbengine runtime.
+ * CommandRegistry provides command registry capabilities within the service subsystem.
  *
- * <p>This type centralizes the state, lifecycle and behavior required by its callers,
- * keeping domain rules together with the data they operate on.
+ * It provides shared runtime services, registries, and policy logic consumed by orchestrators and feature modules.
  *
- * <p><b>Responsibilities:</b>
- * <ul>
- *   <li><b>State:</b> Owns the data needed to represent the component consistently.</li>
- *   <li><b>Lifecycle:</b> Exposes the operations used to create, update and release its state.</li>
- *   <li><b>Integration:</b> Coordinates with the surrounding game, rendering or UI systems through its public API.</li>
- * </ul>
+ * The registry maintains canonical lookup structures and resolves identifiers to runtime instances.
  *
- * <p>Callers should use the documented public operations and allow this type to preserve
- * its invariants rather than modifying implementation details directly.
+ * It implements Service<Command>, providing a concrete strategy for this subsystem contract.
  */
 public class CommandRegistry implements Service<Command> {
     private final Map<String, Command> commands = new HashMap<>();
