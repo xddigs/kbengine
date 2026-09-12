@@ -475,9 +475,7 @@ public class GameMaster {
      */
     public void removeEntity(Entity entity) {
         if (entity == null) return;
-        List<Entity> copy = List.copyOf(entities);
-        copy.remove(entity);
-        entities = copy;
+        entities.remove(entity);
     }
 
     /**
@@ -487,10 +485,14 @@ public class GameMaster {
     private void updateEntities(float delta) {
         if (!areEntitiesActive) return;
         entities.removeIf(entity -> entity != Player.plyr && !entity.isAlive());
-        for (Entity entity : entities) {
+        // Player death can spawn WorldItem entities during update; iterate a snapshot
+        // so list mutations never invalidate this frame's traversal.
+        List<Entity> updateSnapshot = List.copyOf(entities);
+        for (Entity entity : updateSnapshot) {
             entity.update(HoveredCell.get(this), delta);
             entity.updateEnvironmentalDamage(world, delta);
         }
+        entities.removeIf(entity -> entity != Player.plyr && !entity.isAlive());
 
         if (!Player.plyr.isAlive() && Player.plyr.getRespawnTimer() == 0.0f) {
             Player.plyr.respawn();
