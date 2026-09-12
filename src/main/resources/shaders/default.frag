@@ -118,6 +118,16 @@ float applyViewFog(vec3 worldPosition) {
 float calculateShadow(vec4 lightSpacePosition, vec3 normal) {
     vec3 projectionCoordinates = lightSpacePosition.xyz / lightSpacePosition.w;
     projectionCoordinates = projectionCoordinates * 0.5 + 0.5;
+    // Compare each PCF tap at the receiver's depth at that texel, avoiding
+    // self-shadowing on slopes without pushing the whole shadow away.
+    vec3 dx = dFdx(projectionCoordinates);
+    vec3 dy = dFdy(projectionCoordinates);
+    float determinant = dx.x * dy.y - dx.y * dy.x;
+    vec2 depthGradient = vec2(0.0);
+    if (abs(determinant) > 1e-10) {
+        depthGradient = vec2(dy.y * dx.z - dx.y * dy.z,
+                             dx.x * dy.z - dy.x * dx.z) / determinant;
+    }
 
     if (projectionCoordinates.x < 0.0 || projectionCoordinates.x > 1.0 ||
         projectionCoordinates.y < 0.0 || projectionCoordinates.y > 1.0 ||
@@ -132,15 +142,21 @@ float calculateShadow(vec4 lightSpacePosition, vec3 normal) {
         return 1.0;
     }
 
-    float bias = max(0.0015 * (1.0 - normalDotLight), 0.0005);
+    // Keep the contact offset small (about 1-3 cm over the 219-unit depth
+    // range). Use the same bias on grass so shadows meet the feet there too.
+    float bias = max(0.00015 * (1.0 - normalDotLight), 0.00005);
     float currentDepth = projectionCoordinates.z;
     vec2 texelSize = 1.0 / vec2(textureSize(uShadowMap, 0));
 
     float shadow = 0.0;
     for (int x = -1; x <= 1; x++) {
         for (int y = -1; y <= 1; y++) {
-            float closestDepth = texture(uShadowMap, projectionCoordinates.xy + vec2(x, y) * texelSize).r;
-            shadow += (currentDepth - bias > closestDepth) ? 1.0 : 0.0;
+            vec2 sampleUV = projectionCoordinates.xy + vec2(x, y) * texelSize;
+            vec2 texelCenter = (floor(sampleUV / texelSize) + 0.5) * texelSize;
+            float receiverDepth = currentDepth
+                    + dot(depthGradient, texelCenter - projectionCoordinates.xy);
+            float closestDepth = texture(uShadowMap, sampleUV).r;
+            shadow += (receiverDepth - bias > closestDepth) ? 1.0 : 0.0;
         }
     }
     return shadow / 9.0;

@@ -91,16 +91,31 @@ float applyViewFog(vec3 worldPosition) {
 float calculateShadow(vec4 lightSpacePosition, vec3 normal) {
     vec3 coordinates = lightSpacePosition.xyz / lightSpacePosition.w;
     coordinates = coordinates * 0.5 + 0.5;
+    // Match the receiver-plane correction used by solid terrain.
+    vec3 dx = dFdx(coordinates);
+    vec3 dy = dFdy(coordinates);
+    float determinant = dx.x * dy.y - dx.y * dy.x;
+    vec2 depthGradient = vec2(0.0);
+    if (abs(determinant) > 1e-10) {
+        depthGradient = vec2(dy.y * dx.z - dx.y * dy.z,
+                             dx.x * dy.z - dy.x * dx.z) / determinant;
+    }
     if (coordinates.x < 0.0 || coordinates.x > 1.0 || coordinates.y < 0.0
             || coordinates.y > 1.0 || coordinates.z < 0.0 || coordinates.z > 1.0) return 0.0;
 
-    float bias = max(0.002, 0.008 * (1.0 - max(dot(normal, normalize(-uLightDirection)), 0.0)));
+    float normalDotLight = dot(normal, normalize(-uLightDirection));
+    if (normalDotLight <= 0.0) return 1.0;
+    // Match solid terrain: a large depth bias detaches shadows from feet.
+    float bias = max(0.00015 * (1.0 - normalDotLight), 0.00005);
     vec2 texelSize = 1.0 / vec2(textureSize(uShadowMap, 0));
     float shadow = 0.0;
     for (int x = -1; x <= 1; x++) {
         for (int y = -1; y <= 1; y++) {
-            float closest = texture(uShadowMap, coordinates.xy + vec2(x, y) * texelSize).r;
-            shadow += coordinates.z - bias > closest ? 1.0 : 0.0;
+            vec2 sampleUV = coordinates.xy + vec2(x, y) * texelSize;
+            vec2 texelCenter = (floor(sampleUV / texelSize) + 0.5) * texelSize;
+            float receiverDepth = coordinates.z + dot(depthGradient, texelCenter - coordinates.xy);
+            float closest = texture(uShadowMap, sampleUV).r;
+            shadow += receiverDepth - bias > closest ? 1.0 : 0.0;
         }
     }
     return shadow / 9.0;

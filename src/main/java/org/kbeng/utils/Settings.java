@@ -22,16 +22,17 @@ public class Settings {
     private static int guiScaleIndex = 2;
     private static boolean doKeepInventory = true;
     private static boolean doEnableMotions = false;
-    private static float maxInteractionDistance = 4.0f;
-    private static int interiorDetectionRadius = 6;
-    private static float undergroundViewRadius = 6.0f;
-    private static float undergroundCutHeight = 2.25f;
     private static boolean doEnableMusic = true;
     private static boolean doEnableDebugInfo = true;
     private static boolean doEnableShadows = true;
     private static boolean doBookAnimation = false;
     private static boolean doEnableIds = true;
     private static boolean doEnablePaper = false;
+
+    private static float maxInteractionDistance = 4.0f;
+    private static int interiorDetectionRadius = 6;
+    private static float undergroundViewRadius = 6.0f;
+    private static float undergroundCutHeight = 2.25f;
 
     /**
      * Creates a new {@code Settings} instance.
