@@ -371,7 +371,6 @@ public final class GameUIService implements Service<GameMaster> {
 
         if (!gameMaster.isInventoryOpen() && !gameMaster.isBackpackOpen()) {
             float scroll = Mouse.getScrollY();
-
             if (scroll != 0 && !Controls.isDown(ControlAction.CAMERA_ROTATE_MODIFIER)) {
                 selectItem(scroll > 0 ? -1 : 1);
             }

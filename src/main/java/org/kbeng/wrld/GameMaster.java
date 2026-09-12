@@ -43,7 +43,6 @@ import static org.lwjgl.opengl.GL13.GL_MULTISAMPLE;
  * <p>Callers should use the documented public operations and allow this type to preserve
  * its invariants rather than modifying implementation details directly.
  */
-@SuppressWarnings("all")
 @Singleton
 public class GameMaster {
     public static final GameMaster game = new GameMaster();
@@ -59,7 +58,7 @@ public class GameMaster {
     private final ItemRegistry itemRegistry = new ItemRegistry();
     private final RainEngine rainEngine = new RainEngine();
     private final ViewService viewService = new ViewService();
-    private List<Entity> entities = new LinkedList<>();
+    private final List<Entity> entities = new LinkedList<>();
     private List<Recipe> recipes;
     private ShadowMap shadowMap;
     private ChunkManager chunkManager;
