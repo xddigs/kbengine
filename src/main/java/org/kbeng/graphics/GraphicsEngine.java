@@ -4,10 +4,12 @@ import org.kbeng.wrld.GameMaster;
 import org.kbeng.wrld.World;
 
 /**
- * Encapsula los recursos y el pipeline gráfico de runtime.
+ * Runtime graphics coordinator and GPU resource owner.
  *
- * <p>Agrupa los objetos gráficos de alto nivel movidos fuera de
- * {@code GameMaster}: framebuffers, sombras, render de items y lluvia.
+ * <p>This component centralizes render-target lifecycle and high-level render
+ * execution that used to live in {@code GameMaster}. It owns:
+ * scene/blur framebuffers, directional shadow map, world-item renderer,
+ * and rain simulation/render resources.
  */
 public final class GraphicsEngine {
     private final GameMaster gameMaster;
@@ -19,19 +21,19 @@ public final class GraphicsEngine {
     private RainEngine rainEngine;
 
     /**
-     * Crea un motor gráfico ligado a un orquestador de juego.
+     * Creates a graphics engine bound to one game orchestrator instance.
      *
-     * @param gameMaster orquestador principal
+     * @param gameMaster runtime coordinator providing world/camera/context access
      */
     public GraphicsEngine(GameMaster gameMaster) {
         this.gameMaster = gameMaster;
     }
 
     /**
-     * Inicializa recursos gráficos persistentes del runtime.
+     * Allocates long-lived GPU resources for rendering.
      *
-     * @param width  ancho inicial del viewport
-     * @param height alto inicial del viewport
+     * @param width initial viewport width in pixels
+     * @param height initial viewport height in pixels
      */
     public void initialize(int width, int height) {
         shadowMap = new ShadowMap((int) org.kbeng.utils.Settings.getShadowMapSize(),
@@ -43,19 +45,23 @@ public final class GraphicsEngine {
     }
 
     /**
-     * Avanza el estado temporal del sistema de lluvia.
+     * Advances rain simulation timing.
      *
-     * @param delta tiempo de frame en segundos
+     * @param delta elapsed frame time in seconds
      */
     public void updateRain(float delta) {
         if (rainEngine != null) rainEngine.update(delta);
     }
 
     /**
-     * Ejecuta el pipeline completo de render del frame.
+     * Executes the full frame render pipeline.
      *
-     * @param world  mundo actual
-     * @param camera cámara activa
+     * <p>The world and camera parameters are part of the explicit contract of
+     * the orchestrator call site. Current internals still route through
+     * {@link GameRenderer}, HUD render, and paper pass.
+     *
+     * @param world current world instance
+     * @param camera active camera view
      */
     public void render(World world, CameraView camera) {
         if (world == null || camera == null || gameMaster.getChunkManager() == null) return;
@@ -65,10 +71,10 @@ public final class GraphicsEngine {
     }
 
     /**
-     * Recrea framebuffers cuando cambia el tamaño de ventana.
+     * Recreates render targets after a framebuffer-size change.
      *
-     * @param width  nuevo ancho
-     * @param height nuevo alto
+     * @param width new framebuffer width in pixels
+     * @param height new framebuffer height in pixels
      */
     public void onResize(int width, int height) {
         if (sceneFbo == null || blurFbo == null) return;
@@ -79,7 +85,7 @@ public final class GraphicsEngine {
     }
 
     /**
-     * Libera todos los recursos gráficos administrados.
+     * Releases all owned GPU/native graphics resources.
      */
     public void dispose() {
         if (itemRenderer != null) itemRenderer.dispose();
@@ -92,48 +98,47 @@ public final class GraphicsEngine {
     }
 
     /**
-     * Devuelve el framebuffer principal de escena.
+     * Returns the primary scene framebuffer used by the world pass.
      *
-     * @return FBO de escena
+     * @return scene framebuffer
      */
     public Framebuffer getSceneFbo() {
         return sceneFbo;
     }
 
     /**
-     * Devuelve el framebuffer auxiliar de blur/postproceso.
+     * Returns the auxiliary framebuffer used by blur/post-processing passes.
      *
-     * @return FBO de blur
+     * @return blur framebuffer
      */
     public Framebuffer getBlurFbo() {
         return blurFbo;
     }
 
     /**
-     * Devuelve el shadow map direccional activo.
+     * Returns the active directional shadow map.
      *
-     * @return shadow map
+     * @return shadow depth target
      */
     public ShadowMap getShadowMap() {
         return shadowMap;
     }
 
     /**
-     * Devuelve el renderer de ítems del mundo.
+     * Returns the dedicated renderer for world-item entities.
      *
-     * @return renderer de ítems
+     * @return world-item renderer
      */
     public ItemRenderer getItemRenderer() {
         return itemRenderer;
     }
 
     /**
-     * Devuelve el motor de lluvia.
+     * Returns the rain subsystem used by weather rendering.
      *
-     * @return rain engine
+     * @return rain engine instance
      */
     public RainEngine getRainEngine() {
         return rainEngine;
     }
 }
-

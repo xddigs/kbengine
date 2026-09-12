@@ -5,19 +5,20 @@ import org.kbeng.graphics.GraphicsEngine;
 import org.kbeng.utils.Settings;
 
 /**
- * Sincroniza lluvia y paisaje sonoro ambiental por frame.
+ * Applies weather-driven ambient audio policy once per frame.
  *
- * <p>Esta clase encapsula el bloque de decisión basado en
- * {@link WeatherService#isRaining()} para que la orquestación de
- * {@code GameMaster} permanezca limpia.
+ * <p>When rain is active, this component advances rain visuals and switches the
+ * background loop to the rain ambience. When rain is not active, it restores
+ * the nature ambience. If music is disabled in settings, it explicitly clears
+ * any background loop.
  */
 public final class SoundListener {
 
     /**
-     * Aplica lluvia visual y audio ambiental según el clima actual.
+     * Updates weather ambience and rain simulation side effects for the frame.
      *
-     * @param delta          tiempo de frame en segundos
-     * @param graphicsEngine motor gráfico usado para avanzar partículas de lluvia
+     * @param delta elapsed frame time in seconds
+     * @param graphicsEngine graphics owner used to tick the rain system
      */
     public void update(float delta, GraphicsEngine graphicsEngine) {
         if (WeatherService.isRaining()) {
@@ -37,4 +38,3 @@ public final class SoundListener {
         }
     }
 }
-

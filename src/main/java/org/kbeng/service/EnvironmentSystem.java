@@ -7,12 +7,11 @@ import org.kbeng.entity.Sun;
 import org.kbeng.graphics.CelestialLighting;
 
 /**
- * Centraliza el estado ambiental del mundo.
+ * Owns environment simulation that affects time, weather, and global lighting.
  *
- * <p>Este sistema agrupa el ciclo temporal, clima y luz celeste para que el
- * orquestador del juego no tenga que gestionar por separado {@link Sun},
- * {@link Moon}, {@link CelestialLighting}, {@link TimeService} y
- * {@link WeatherService}.
+ * <p>This system keeps celestial state local to one place and bridges
+ * {@link TimeService} + {@link WeatherService} with {@link CelestialLighting},
+ * so callers consume one coherent "environment tick" per frame.
  */
 public final class EnvironmentSystem {
     private final Sun sun = new Sun("Sun");
@@ -20,10 +19,14 @@ public final class EnvironmentSystem {
     private final CelestialLighting celestialLighting = new CelestialLighting(sun, moon);
 
     /**
-     * Avanza tiempo, clima y luz global del mundo.
+     * Advances the environment simulation by one frame.
      *
-     * @param hoveredCell celda bajo cursor usada por los cuerpos celestes
-     * @param delta       tiempo de frame en segundos
+     * <p>Time progression may trigger weather changes through
+     * {@link TimeService#update(float, WeatherService)}; lighting is then
+     * recalculated from the resulting time-of-day.
+     *
+     * @param hoveredCell currently hovered world cell used by sun/moon update code
+     * @param delta elapsed frame time in seconds
      */
     public void update(BlockPos hoveredCell, float delta) {
         TimeService.ts.update(delta, WeatherService.wes);
@@ -32,39 +35,38 @@ public final class EnvironmentSystem {
     }
 
     /**
-     * Devuelve la estación actual del calendario del juego.
+     * Returns the current in-game season from the shared calendar.
      *
-     * @return estación activa
+     * @return active season value
      */
     public Season getSeason() {
         return TimeService.ts.getCurrentSeason();
     }
 
     /**
-     * Expone la fuente de luz celeste consolidada (sol/luna).
+     * Returns the blended celestial lighting state used by world shaders.
      *
-     * @return estado de iluminación celeste
+     * @return directional light source and intensity envelope
      */
     public CelestialLighting getCelestialLighting() {
         return celestialLighting;
     }
 
     /**
-     * Devuelve la entidad de sol gestionada por este sistema.
+     * Returns the managed sun entity instance.
      *
-     * @return sol
+     * @return sun object
      */
     public Sun getSun() {
         return sun;
     }
 
     /**
-     * Devuelve la entidad de luna gestionada por este sistema.
+     * Returns the managed moon entity instance.
      *
-     * @return luna
+     * @return moon object
      */
     public Moon getMoon() {
         return moon;
     }
 }
-

@@ -23,7 +23,18 @@ import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.GL_MULTISAMPLE;
 
 /**
- * Orquestador principal del runtime del juego.
+ * Central runtime orchestrator for the local game session.
+ *
+ * <p>This class keeps the frame loop cohesive while delegating specialized work
+ * to focused subsystems:
+ * <ul>
+ *   <li>{@link EnvironmentSystem} drives time, weather transitions, and celestial light.</li>
+ *   <li>{@link SoundListener} applies weather-aware ambient audio decisions.</li>
+ *   <li>{@link GraphicsEngine} owns framebuffers, shadow resources, and rendering lifecycle.</li>
+ * </ul>
+ *
+ * <p>The orchestrator remains responsible for simulation ordering, entity updates,
+ * input flushing, and high-level world coordination.
  */
 @Singleton
 public class GameMaster {
@@ -54,7 +65,15 @@ public class GameMaster {
     private float genDelta;
     private GameMaster() { }
 
-    /** Inicializa recursos, servicios base y entidades globales. */
+    /**
+     * Initializes shared runtime services and GPU resources for gameplay.
+     *
+     * <p>Initialization order is intentional: OpenGL state and render resources
+     * are prepared first, then chunk/camera systems, then registries/services,
+     * and finally core entities.
+     *
+     * @param progressCallback optional loading progress sink in range {@code [0, 1]}
+     */
     public void loadResources(Consumer<Float> progressCallback) {
         float totalSteps = 10.0f, step = 0.0f;
         glEnable(GL_BLEND);
@@ -87,6 +106,13 @@ public class GameMaster {
                 ResourceManager.rem.getMaterialIcons(), ResourceManager.rem.getInventoryIcons());
         if (NPCService.npcs.getTrader() != null) GameUIService.ui.setTrader(NPCService.npcs.getTrader());
     }
+
+    /**
+     * Spawns player and AI actors at world start.
+     *
+     * <p>Entity updates are paused during spawn to avoid transient collisions
+     * while positions are being assigned.
+     */
     public synchronized void spawn() {
         areEntitiesActive = false;
         chunkManager.updateLoadedChunks(0, 0);
@@ -140,7 +166,15 @@ public class GameMaster {
         if (!Player.plyr.isAlive() && Player.plyr.getRespawnTimer() == 0.0f) Player.plyr.respawn();
     }
 
-    /** Avanza un frame de simulación y coordina todos los sistemas. */
+    /**
+     * Advances one full simulation frame.
+     *
+     * <p>Execution order is stable by design: audio/weather, UI systems, environment,
+     * entity/world simulation, camera/input interaction, then physics/chunk refresh and
+     * input edge-state rollover.
+     *
+     * @param delta elapsed frame time in seconds
+     */
     public void update(float delta) {
         soundListener.update(delta, renderEngine);
         BookService.bs.update();
@@ -164,8 +198,14 @@ public class GameMaster {
         Joystick.update();
     }
 
-    /** Renderiza el frame completo mediante el motor gráfico delegado. */
+    /**
+     * Renders the complete frame through the delegated graphics engine.
+     */
     public void render() { renderEngine.render(world, camera); }
+
+    /**
+     * Releases runtime resources in a safe teardown sequence.
+     */
     public void dispose() {
         chunkManager.dispose();
         Frontend.dispose();
@@ -174,6 +214,13 @@ public class GameMaster {
         SoundService.fx.cleanup();
         log.info("GameMaster resources successfully cleaned up");
     }
+
+    /**
+     * Propagates a window resize through camera, render targets, and UI layout.
+     *
+     * @param newWidth  framebuffer width in pixels
+     * @param newHeight framebuffer height in pixels
+     */
     public void onResize(int newWidth, int newHeight) {
         windowWidth = newWidth;
         windowHeight = newHeight;
@@ -183,6 +230,16 @@ public class GameMaster {
         if (GameUIService.ui != null) GameUIService.ui.onResize(newWidth, newHeight);
         ToastFactory.onResize(newWidth);
     }
+
+    /**
+     * Rebuilds the mesh for the target chunk and any affected neighbors.
+     *
+     * <p>Neighbor rebuilds are required when a changed block touches a chunk border,
+     * ensuring face visibility and lighting stay consistent across chunk seams.
+     *
+     * @param worldX world-space X coordinate of the changed block/cell
+     * @param worldZ world-space Z coordinate of the changed block/cell
+     */
     public void rebuildChunkMeshAt(int worldX, int worldZ) {
         chunkManager.rebuildChunkMeshAt(worldX, worldZ);
         int localX = Math.floorMod(worldX, Chunk.SIZE_X);
