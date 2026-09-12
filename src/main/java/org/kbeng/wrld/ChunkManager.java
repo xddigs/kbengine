@@ -58,7 +58,7 @@ public class ChunkManager {
      */
     public ChunkManager(World world, FluidSimulation fluidSimulation) {
         this.world = world;
-        this.generator = new FlatworldGenerator(world);
+        this.generator = new WorldGenerator(fluidSimulation);
         this.chunkMeshes = new HashMap<>();
         this.soilTimers = new HashMap<>();
         int threads = Math.max(1, Runtime.getRuntime().availableProcessors() - 2);
