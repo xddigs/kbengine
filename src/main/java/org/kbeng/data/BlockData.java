@@ -17,6 +17,13 @@ import java.util.function.Consumer;
 /**
  * Represents the central registry and specification data for all block types within the engine.
  * <p>
+ /**
+  * defines declares the canonical defines set for the data subsystem.
+  *
+  * Each constant provides a stable, type-safe branch token for runtime decisions and avoids string-based switches.
+  *
+  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
+  */
  * This enum defines the core physical attributes, collision boundaries, breaking speeds,
  * rendering shapes, and drop tables associated with each block state. It serves as a static
  * data source for world generation, physics calculation, and player interaction mechanics.

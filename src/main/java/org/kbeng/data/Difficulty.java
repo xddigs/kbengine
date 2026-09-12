@@ -3,7 +3,11 @@ package org.kbeng.data;
 import org.kbeng.utils.Local;
 
 /**
- * Enumerates the supported difficulty values.
+ * Difficulty declares the canonical difficulty set for the data subsystem.
+ *
+ * Each constant provides a stable, type-safe branch token for runtime decisions and avoids string-based switches.
+ *
+ * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
  */
 public enum Difficulty {
     EASY((byte) 0, "difficulty.easy", 0.5f),

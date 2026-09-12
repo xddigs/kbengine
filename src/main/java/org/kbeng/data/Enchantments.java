@@ -5,7 +5,11 @@ import org.kbeng.utils.Local;
 import java.util.Locale;
 
 /**
- * Enumerates the supported enchantments values.
+ * Enchantments declares the canonical enchantments set for the data subsystem.
+ *
+ * Each constant provides a stable, type-safe branch token for runtime decisions and avoids string-based switches.
+ *
+ * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
  */
 public enum Enchantments {
     EFFICIENCY(0, new ToolType[]{ToolType.HOE, ToolType.AXE, ToolType.PICKAXE, ToolType.SHOVEL}, 3, false),

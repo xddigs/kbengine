@@ -6,7 +6,11 @@ import java.util.Locale;
 import java.util.function.Consumer;
 
 /**
- * Enumerates the supported crop type values.
+ * CropType declares the canonical crop type set for the data subsystem.
+ *
+ * Each constant provides a stable, type-safe branch token for runtime decisions and avoids string-based switches.
+ *
+ * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
  */
 public enum CropType {
     WHEAT((byte) 0, "crop.wheat", 4, 5, 4),

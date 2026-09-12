@@ -5,7 +5,13 @@ import org.kbeng.utils.Local;
 import java.util.Locale;
 import java.util.function.Consumer;
 
-/** Enumerates the available armor data values. */
+/**
+ * ArmorData declares the canonical armor data set for the data subsystem.
+ *
+ * Each constant provides a stable, type-safe branch token for runtime decisions and avoids string-based switches.
+ *
+ * The data type is used as a normalized schema for transport, persistence, and runtime inspection.
+ */
 @DataClass
 public enum ArmorData {
     HELMET((byte) 0, (byte) 0, 2.0f, 10),

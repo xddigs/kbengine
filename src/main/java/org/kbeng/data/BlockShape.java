@@ -6,9 +6,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Geometry and collision bounds for voxel blocks that are not full cubes.
- * Defines Axis-Aligned Bounding Boxes (AABB) for slabs, staircases, and fence
- * combinations, alongside utilities for collision detection, height evaluation, and raycasting.
+ * BlockShape declares the canonical block shape set for the data subsystem.
+ *
+ * Each constant provides a stable, type-safe branch token for runtime decisions and avoids string-based switches.
+ *
+ * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
  */
 @SuppressWarnings("all")
 @DataClass

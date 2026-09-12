@@ -7,7 +7,11 @@ import org.kbeng.utils.Local;
 import java.util.Locale;
 
 /**
- * Enumerates the supported animal data values.
+ * AnimalData declares the canonical animal data set for the data subsystem.
+ *
+ * Each constant provides a stable, type-safe branch token for runtime decisions and avoids string-based switches.
+ *
+ * The data type is used as a normalized schema for transport, persistence, and runtime inspection.
  */
 @DataClass
 @Task(reason="Models, lack there of, are not complete")

@@ -1,7 +1,11 @@
 package org.kbeng.data;
 
 /**
- * Enumerates the available armor slots.
+ * ArmorSlot declares the canonical armor slot set for the data subsystem.
+ *
+ * Each constant provides a stable, type-safe branch token for runtime decisions and avoids string-based switches.
+ *
+ * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
  */
 @DataClass
 public enum ArmorSlot {
