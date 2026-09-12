@@ -8,6 +8,13 @@ import org.kbeng.utils.ToastFactory;
 
 /**
  * Abstract extension of {@link Entity} representing sentient or actor-based entities within the game.
+ /**
+  * introduces provides introduces capabilities within the entity subsystem.
+  *
+  * It participates in actor simulation, state transitions, and per-frame world interaction contracts.
+  *
+  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
+  */
  * <p>This class introduces core RPG mechanics, progression systems, and inventory management
  * to the physical entity base, including:
  * <ul>

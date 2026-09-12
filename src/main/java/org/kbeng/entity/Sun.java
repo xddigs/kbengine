@@ -6,20 +6,13 @@ import org.kbeng.wrld.GameMaster;
 import org.joml.Vector3f;
 
 /**
- * Represents the sun component of the kbengine runtime.
+ * Sun provides sun capabilities within the entity subsystem.
  *
- * <p>This type centralizes the state, lifecycle and behavior required by its callers,
- * keeping domain rules together with the data they operate on.
+ * It participates in actor simulation, state transitions, and per-frame world interaction contracts.
  *
- * <p><b>Responsibilities:</b>
- * <ul>
- *   <li><b>State:</b> Owns the data needed to represent the component consistently.</li>
- *   <li><b>Lifecycle:</b> Exposes the operations used to create, update and release its state.</li>
- *   <li><b>Integration:</b> Coordinates with the surrounding game, rendering or UI systems through its public API.</li>
- * </ul>
+ * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
  *
- * <p>Callers should use the documented public operations and allow this type to preserve
- * its invariants rather than modifying implementation details directly.
+ * It extends Entity, inheriting shared behavior while specializing subsystem-specific logic.
  */
 public class Sun extends Entity {
     private final Vector3f direction;

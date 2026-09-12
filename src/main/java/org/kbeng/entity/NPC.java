@@ -31,16 +31,13 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
- * Represents a non-player character (NPC) driven by artificial intelligence.
+ * NPC provides npc capabilities within the entity subsystem.
  *
- * <p>Key Responsibilities:</p>
- * <ul>
- *   <li>Executes AI behavior logic, including field-of-view target detection, threat evaluation,
- *       and autonomous pathfinding/wandering within specified bounds.</li>
- *   <li>Manages interactive dialogue state trees, branching narrative triggers, and quest assignment.</li>
- *   <li>Handles merchant trade mechanics, inventory exchange, and currency transactions
- *       with the player.</li>
- * </ul>
+ * It participates in actor simulation, state transitions, and per-frame world interaction contracts.
+ *
+ * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
+ *
+ * It extends Character, inheriting shared behavior while specializing subsystem-specific logic.
  */
 @DataClass
 public class NPC extends Character {

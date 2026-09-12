@@ -23,16 +23,11 @@ import static org.joml.Math.lerp;
 import static org.lwjgl.opengl.GL13.*;
 
 /**
- * Manages the 3D visual representation, transform hierarchy, and procedural animation state
- * for character entities.
+ * CharacterAnimator provides character animator capabilities within the entity subsystem.
  *
- * <p>Key Responsibilities:</p>
- * <ul>
- *   <li>Loads and renders the 3D character mesh and associated materials.</li>
- *   <li>Calculates head, eyes, and torso look-at orientations based on target positions.</li>
- *   <li>Executes procedural skeletal and blend-shape animations, including locomotion
- *       (walking, running, sneaking), combat attacks, damage reactions, and death states.</li>
- * </ul>
+ * It participates in actor simulation, state transitions, and per-frame world interaction contracts.
+ *
+ * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
  */
 public final class CharacterAnimator {
     private static final float ZERO = 0.0f, MOVE_THRESHOLD = 0.05f;

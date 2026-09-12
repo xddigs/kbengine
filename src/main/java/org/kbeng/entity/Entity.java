@@ -8,6 +8,13 @@ import org.kbeng.wrld.World;
 import org.joml.Vector3f;
 
 /**
+ /**
+  * for provides for capabilities within the entity subsystem.
+  *
+  * It participates in actor simulation, state transitions, and per-frame world interaction contracts.
+  *
+  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
+  */
  * Abstract base class for all physical entities within the 3D world space.
  *
  * <p>This class serves as the core foundation for actors (players, mobs, NPCs) and provides

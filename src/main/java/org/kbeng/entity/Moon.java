@@ -6,16 +6,13 @@ import org.kbeng.wrld.GameMaster;
 import org.joml.Vector3f;
 
 /**
- * Represents the lunar celestial body and its corresponding directional lighting system.
+ * Moon provides moon capabilities within the entity subsystem.
  *
- * <p>Key Responsibilities:</p>
- * <ul>
- *   <li>Calculates orbital position, elevation, and azimuth relative to the world origin
- *       based on the global day-night time controller.</li>
- *   <li>Updates directional light properties, including ambient color, light intensity,
- *       and shadow parameters for nighttime scenes.</li>
- *   <li>Renders the visual moon quad and manages lunar phase transitions across game days.</li>
- * </ul>
+ * It participates in actor simulation, state transitions, and per-frame world interaction contracts.
+ *
+ * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
+ *
+ * It extends Entity, inheriting shared behavior while specializing subsystem-specific logic.
  */
 public class Moon extends Entity {
     private final Vector3f direction;

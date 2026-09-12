@@ -9,6 +9,13 @@ import org.kbeng.wrld.GameMaster;
 import org.joml.Vector3f;
 
 /**
+ /**
+  * for provides for capabilities within the entity subsystem.
+  *
+  * It participates in actor simulation, state transitions, and per-frame world interaction contracts.
+  *
+  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
+  */
  * Abstract base class for all hostile AI-driven characters in the game.
  *
  * <p>Extends {@link Character} by anchoring entity behavior to a 3D {@link GLTFModel}.
