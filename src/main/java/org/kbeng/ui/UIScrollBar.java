@@ -9,7 +9,13 @@ import org.joml.Vector4f;
 import java.util.function.IntConsumer;
 
 /**
- * Vertical integer scroll bar with a nine-sliced track and draggable textured knob.
+ * UIScrollBar provides uiscroll bar capabilities within the ui subsystem.
+ *
+ * It drives retained UI composition, user interaction handling, and rendering behavior for in-game screens.
+ *
+ * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
+ *
+ * It extends UIElement, inheriting shared behavior while specializing subsystem-specific logic.
  */
 public class UIScrollBar extends UIElement {
     private static final int TRACK_SLICE_SIZE = 3;

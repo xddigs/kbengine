@@ -7,20 +7,13 @@ import org.kbeng.utils.Settings;
 import org.kbeng.wrld.GameMaster;
 
 /**
- * Represents the backpack inventory ui component of the kbengine runtime.
+ * BackpackInventoryUI provides backpack inventory ui capabilities within the ui subsystem.
  *
- * <p>This type centralizes the state, lifecycle and behavior required by its callers,
- * keeping domain rules together with the data they operate on.
+ * It drives retained UI composition, user interaction handling, and rendering behavior for in-game screens.
  *
- * <p><b>Responsibilities:</b>
- * <ul>
- *   <li><b>State:</b> Owns the data needed to represent the component consistently.</li>
- *   <li><b>Lifecycle:</b> Exposes the operations used to create, update and release its state.</li>
- *   <li><b>Integration:</b> Coordinates with the surrounding game, rendering or UI systems through its public API.</li>
- * </ul>
+ * The UI component owns presentation behavior and mediates interaction between input and visual state.
  *
- * <p>Callers should use the documented public operations and allow this type to preserve
- * its invariants rather than modifying implementation details directly.
+ * It extends InventoryUI, inheriting shared behavior while specializing subsystem-specific logic.
  */
 public class BackpackInventoryUI extends InventoryUI {
     private static final int BACKPACK_SLOTS = 16;

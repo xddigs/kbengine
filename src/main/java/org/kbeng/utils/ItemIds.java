@@ -10,7 +10,13 @@ import org.kbeng.item.Tool;
 import org.kbeng.item.Usable;
 import org.kbeng.service.Library;
 
-/** Provides the stable, non-localized identifier shown in item tooltips. */
+/**
+ * ItemIds provides item ids capabilities within the utils subsystem.
+ *
+ * It centralizes reusable utilities such as constants, localization, settings, and small cross-cutting helpers.
+ *
+ * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
+ */
 @Utils
 public final class ItemIds {
     private ItemIds() {}

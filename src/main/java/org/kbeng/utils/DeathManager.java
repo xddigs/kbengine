@@ -7,8 +7,11 @@ import org.kbeng.entity.Player;
 import java.util.Map;
 
 /**
- * Provides death manager behavior, such as
- * death messages.
+ * DeathManager provides death manager capabilities within the utils subsystem.
+ *
+ * It centralizes reusable utilities such as constants, localization, settings, and small cross-cutting helpers.
+ *
+ * The manager coordinates lifecycle and ordering concerns across dependent runtime components.
  */
 @Singleton
 @Utils
