@@ -35,7 +35,7 @@ import static org.lwjgl.opengl.GL13.GL_MULTISAMPLE;
  * input flushing, and high-level world coordination.
  */
 @Singleton
-public class GameMaster {
+public final class GameMaster {
     public static final GameMaster game = new GameMaster();
     private static final Logger log = LoggerFactory.getLogger(GameMaster.class);
     private final long windowHandle = Intro.getWindow();
