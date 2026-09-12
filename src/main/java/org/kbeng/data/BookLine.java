@@ -5,7 +5,7 @@ import org.kbeng.item.Item;
 import java.util.function.Consumer;
 
 /**
- * Represents the book line component of the Isofarm runtime.
+ * Represents the book line component of the kbengine runtime.
  *
  * <p>This type centralizes the state, lifecycle and behavior required by its callers,
  * keeping domain rules together with the data they operate on.

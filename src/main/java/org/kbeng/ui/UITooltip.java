@@ -8,7 +8,7 @@ import org.joml.Vector4f;
 import java.util.Arrays;
 
 /**
- * Represents the uitooltip component of the Isofarm runtime.
+ * Represents the uitooltip component of the kbengine runtime.
  *
  * <p>This type centralizes the state, lifecycle and behavior required by its callers,
  * keeping domain rules together with the data they operate on.

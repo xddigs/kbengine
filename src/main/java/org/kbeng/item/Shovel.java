@@ -5,7 +5,7 @@ import org.kbeng.data.Tier;
 import org.kbeng.data.ToolType;
 
 /**
- * Represents the shovel component of the Isofarm runtime.
+ * Represents the shovel component of the kbengine runtime.
  *
  * <p>This type centralizes the state, lifecycle and behavior required by its callers,
  * keeping domain rules together with the data they operate on.

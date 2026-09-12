@@ -4,7 +4,7 @@ import org.kbeng.graphics.SpriteSheet;
 import org.joml.Vector2f;
 
 /**
- * Represents the particle component of the Isofarm runtime.
+ * Represents the particle component of the kbengine runtime.
  *
  * <p>This type centralizes the state, lifecycle and behavior required by its callers,
  * keeping domain rules together with the data they operate on.

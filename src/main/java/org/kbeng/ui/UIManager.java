@@ -5,7 +5,7 @@ import org.kbeng.input.Mouse;
 import org.kbeng.utils.ItemIds;
 
 /**
- * Represents the uimanager component of the Isofarm runtime.
+ * Represents the uimanager component of the kbengine runtime.
  *
  * <p>This type centralizes the state, lifecycle and behavior required by its callers,
  * keeping domain rules together with the data they operate on.
