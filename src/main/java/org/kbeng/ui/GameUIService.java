@@ -8,6 +8,8 @@ import org.kbeng.graphics.ResourceManager;
 import org.kbeng.graphics.Shader;
 import org.kbeng.graphics.SpriteSheet;
 import org.kbeng.input.CommandCompletionProvider;
+import org.kbeng.input.ControlAction;
+import org.kbeng.input.Controls;
 import org.kbeng.input.Mouse;
 import org.kbeng.item.Item;
 import org.kbeng.service.BookService;
@@ -369,8 +371,12 @@ public final class GameUIService implements Service<GameMaster> {
 
         if (!gameMaster.isInventoryOpen() && !gameMaster.isBackpackOpen()) {
             float scroll = Mouse.getScrollY();
+            boolean isRotating = Controls.isDown(ControlAction.CAMERA_ROTATE_MODIFIER) ||
+                    (Controls.isDown(ControlAction.CAMERA_ROTATE_MODIFIER)
+                    && Controls.isDown(ControlAction.CAMERA_ROTATE_DRAG));
 
-            if (scroll != 0) {
+            if (scroll != 0 && !isRotating) {
+                if (isRotating) return;
                 selectItem(scroll > 0 ? -1 : 1);
             }
         }

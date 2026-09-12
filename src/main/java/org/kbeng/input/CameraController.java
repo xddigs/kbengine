@@ -34,7 +34,7 @@ public record CameraController(Camera camera) implements Service<Camera> {
     private static final float ZOOMED_CURSOR_WEIGHT = 0.50f;
     private static final float MAX_CURSOR_OFFSET_DISTANCE = 8.0f;
     private static final float MAX_PAN_OFFSET_DISTANCE = 36.0f;
-    private static final float ROTATION_STEP = 30.0f;
+    private static final float ROTATION_STEP = 45.0f;
     private static final float ROTATION_DRAG_STEP = 0.22f;
     private static final float PAN_DRAG_STEP = 0.020f;
     private static final float PAN_DRAG_DEADZONE = 0.5f;
