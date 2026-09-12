@@ -1,10 +1,10 @@
 package org.kbeng;
 
-import org.kbeng.graphics.Intro;
-import org.kbeng.input.Joystick;
-import org.kbeng.input.Keyboard;
-import org.kbeng.input.Mouse;
-import org.kbeng.utils.K;
+import org.kbeng.engine.graphics.Intro;
+import org.kbeng.engine.input.Joystick;
+import org.kbeng.engine.input.Keyboard;
+import org.kbeng.engine.input.Mouse;
+import org.kbeng.engine.utils.K;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWImage;
 import org.lwjgl.opengl.GL;
