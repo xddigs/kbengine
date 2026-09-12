@@ -3,6 +3,7 @@ package org.kbeng.engine.graphics;
 import org.kbeng.engine.input.Joystick;
 import org.kbeng.engine.input.Keyboard;
 import org.kbeng.engine.input.Mouse;
+import org.lwjgl.glfw.Callbacks;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWImage;
@@ -18,9 +19,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
-
-import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
-import static org.lwjgl.system.MemoryUtil.NULL;
 
 /**
  * Game provides game capabilities within the core subsystem.
@@ -59,8 +57,8 @@ public final class Game {
                 if (applicationInitialized) application.dispose();
             } finally {
                 Mouse.dispose();
-                if (window != NULL) {
-                    glfwFreeCallbacks(window);
+                if (window != MemoryUtil.NULL) {
+                    Callbacks.glfwFreeCallbacks(window);
                     GLFW.glfwDestroyWindow(window);
                 }
                 GLFW.glfwTerminate();
@@ -95,8 +93,8 @@ public final class Game {
         window = GLFW.glfwCreateWindow(
                 configuration.initialWidth(),
                 configuration.initialHeight(),
-                configuration.windowTitle(), NULL, NULL);
-        if (window == NULL) {
+                configuration.windowTitle(), MemoryUtil.NULL, MemoryUtil.NULL);
+        if (window == MemoryUtil.NULL) {
             throw new RuntimeException("Failed to create GLFW window");
         }
 
