@@ -19,20 +19,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * Represents the chunk manager component of the kbengine runtime.
+ * ChunkManager provides chunk manager capabilities within the wrld subsystem.
  *
- * <p>This type centralizes the state, lifecycle and behavior required by its callers,
- * keeping domain rules together with the data they operate on.
+ * It maintains world simulation concerns including terrain, chunks, fluids, and authoritative spatial state.
  *
- * <p><b>Responsibilities:</b>
- * <ul>
- *   <li><b>State:</b> Owns the data needed to represent the component consistently.</li>
- *   <li><b>Lifecycle:</b> Exposes the operations used to create, update and release its state.</li>
- *   <li><b>Integration:</b> Coordinates with the surrounding game, rendering or UI systems through its public API.</li>
- * </ul>
- *
- * <p>Callers should use the documented public operations and allow this type to preserve
- * its invariants rather than modifying implementation details directly.
+ * The manager coordinates lifecycle and ordering concerns across dependent runtime components.
  */
 public class ChunkManager {
     private static final float SOIL_GRASS_TIME = 10.0f;

@@ -8,12 +8,13 @@ import java.util.Objects;
 import java.util.Random;
 
 /**
- * Generates an infinite open world with deterministic terrain features.
- * <p>
- * The terrain keeps the same layering contract as {@link FlatworldGenerator}:
- * top surface, two dirt layers, stone below, and a void-seal bottom layer.
- * Mountains, lakes, rivers, forests and plants are then derived from noise
- * fields on top of that base.
+ * WorldGenerator provides world generator capabilities within the wrld subsystem.
+ *
+ * It maintains world simulation concerns including terrain, chunks, fluids, and authoritative spatial state.
+ *
+ * The generator produces deterministic content from seeds, rules, and runtime configuration.
+ *
+ * It implements Generator, providing a concrete strategy for this subsystem contract.
  */
 public class WorldGenerator implements Generator {
     private static final int BASE_SURFACE_Y = 128;

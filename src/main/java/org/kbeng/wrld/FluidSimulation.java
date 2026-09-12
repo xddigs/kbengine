@@ -15,9 +15,11 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Defines the shared source, flow and chunk-rebuild behavior used by fluid
- * simulations. Concrete simulations provide their block type, update speed and
- * source-renewal policy.
+ * FluidSimulation provides fluid simulation capabilities within the wrld subsystem.
+ *
+ * It maintains world simulation concerns including terrain, chunks, fluids, and authoritative spatial state.
+ *
+ * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
  */
 
 @SuppressWarnings("all")

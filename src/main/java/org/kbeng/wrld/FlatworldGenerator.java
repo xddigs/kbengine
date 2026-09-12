@@ -3,15 +3,13 @@ package org.kbeng.wrld;
 import org.kbeng.data.BlockData;
 
 /**
- * Generates an infinite flat world with fixed vertical layers.
- * <p>
- * Layer order by depth:
- * <ul>
- *   <li>1: grass</li>
- *   <li>2-3: dirt</li>
- *   <li>4-127: stone</li>
- *   <li>128: void seal</li>
- * </ul>
+ * FlatworldGenerator provides flatworld generator capabilities within the wrld subsystem.
+ *
+ * It maintains world simulation concerns including terrain, chunks, fluids, and authoritative spatial state.
+ *
+ * The generator produces deterministic content from seeds, rules, and runtime configuration.
+ *
+ * It implements Generator, providing a concrete strategy for this subsystem contract.
  */
 public final class FlatworldGenerator implements Generator {
     private static final int SURFACE_Y = 128;

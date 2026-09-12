@@ -4,8 +4,13 @@ import org.kbeng.data.BlockData;
 import org.kbeng.data.Singleton;
 
 /**
- * Simulates water using the shared fluid flow implementation. Water updates
- * quickly and supports renewable sources created by adjacent source blocks.
+ * WaterSimulation provides water simulation capabilities within the wrld subsystem.
+ *
+ * It maintains world simulation concerns including terrain, chunks, fluids, and authoritative spatial state.
+ *
+ * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
+ *
+ * It extends FluidSimulation, inheriting shared behavior while specializing subsystem-specific logic.
  */
 @Singleton
 public final class WaterSimulation extends FluidSimulation {

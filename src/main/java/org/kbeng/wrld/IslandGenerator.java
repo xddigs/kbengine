@@ -7,8 +7,13 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * Generates the starting island and the ocean that surrounds it. The island is
- * a continuous land mass rooted in the seabed rather than a floating volume.
+ * IslandGenerator provides island generator capabilities within the wrld subsystem.
+ *
+ * It maintains world simulation concerns including terrain, chunks, fluids, and authoritative spatial state.
+ *
+ * The generator produces deterministic content from seeds, rules, and runtime configuration.
+ *
+ * It implements Generator, providing a concrete strategy for this subsystem contract.
  */
 public final class IslandGenerator implements Generator {
     public static final int OCEAN_DEPTH = 36;
