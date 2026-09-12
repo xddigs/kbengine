@@ -57,8 +57,8 @@ public class GameRenderer {
     private float blurY;
     private float waterTime;
     private static final float VIEW_FOG_TRANSITION_DURATION = 0.15f;
+    private static final float VIEW_FOG_MAX_STRENGTH = 0.985f;
     private ViewFogState displayedViewFog;
-    private ViewFogState previousViewFog;
     private ViewFogState targetViewFog;
     private float viewFogTransition = 1.0f;
 
@@ -721,7 +721,8 @@ public class GameRenderer {
         shader.setUniform("uViewCameraPosition", camera.getPosition());
         shader.setUniform("uViewBounds", fog.bounds());
         shader.setUniform("uViewRadius", fog.radius());
-        shader.setUniform("uViewFloorY", fog.floorY());
+        // Disable directional cutaway bands in shader logic; keep only volumetric fog.
+        shader.setUniform("uViewFloorY", fog.ceilingY());
         shader.setUniform("uViewCeilingY", fog.ceilingY());
         shader.setUniform("uViewFogStrength", getViewFogStrength());
         shader.setUniform("uIgnoreViewFog", false);
@@ -735,30 +736,32 @@ public class GameRenderer {
             return;
         }
         if (current.view() != targetViewFog.view()) {
-            previousViewFog = getRenderedViewFog();
-            targetViewFog = current;
-            viewFogTransition = 0.0f;
-        } else if (viewFogTransition >= 1.0f) {
-            displayedViewFog = current;
-            targetViewFog = current;
+            boolean crossesExterior = current.view() == View.EXTERIOR
+                    || targetViewFog.view() == View.EXTERIOR;
+            viewFogTransition = crossesExterior && current.view() != View.EXTERIOR
+                    ? 0.0f : 1.0f;
         }
+        displayedViewFog = current;
+        targetViewFog = current;
+
+        if (targetViewFog.view() == View.EXTERIOR) {
+            viewFogTransition = 1.0f;
+            return;
+        }
+
         if (viewFogTransition < 1.0f) {
             viewFogTransition = Math.min(1.0f, viewFogTransition
                     + gameMaster.getGenDelta() / VIEW_FOG_TRANSITION_DURATION);
-            if (viewFogTransition >= 1.0f) displayedViewFog = targetViewFog;
         }
     }
 
     private ViewFogState getRenderedViewFog() {
-        if (viewFogTransition >= 1.0f || targetViewFog.view() != View.EXTERIOR) {
-            return targetViewFog;
-        }
-        return previousViewFog;
+        return targetViewFog != null ? targetViewFog : displayedViewFog;
     }
 
     private float getViewFogStrength() {
-        if (viewFogTransition >= 1.0f) return targetViewFog.view() == View.EXTERIOR ? 0.0f : 1.0f;
-        return targetViewFog.view() == View.EXTERIOR ? 1.0f - viewFogTransition : viewFogTransition;
+        if (targetViewFog == null || targetViewFog.view() == View.EXTERIOR) return 0.0f;
+        return Math.min(VIEW_FOG_MAX_STRENGTH, Math.max(0.0f, viewFogTransition));
     }
 
     private static ViewFogState captureViewFog(ViewService service) {

@@ -20,6 +20,7 @@ public final class ViewService implements Service<View> {
     private static final int MAX_ROOM_HEIGHT = 8;
     private static final float MIN_WALL_COVERAGE = 0.90f;
     private static final float MIN_ROOF_COVERAGE = 0.80f;
+    private static final float VIEW_BOUNDS_PADDING = 0.06f;
 
     private View view = View.EXTERIOR;
     private final Vector4f bounds = new Vector4f();
@@ -44,7 +45,8 @@ public final class ViewService implements Service<View> {
         Room room = overheadY < 0 ? null : findRoom(world, playerX, playerY, playerZ);
         if (room != null) {
             view = View.INTERIOR;
-            bounds.set(room.minX, room.minZ, room.maxX + 1.0f, room.maxZ + 1.0f);
+            bounds.set(room.minX - VIEW_BOUNDS_PADDING, room.minZ - VIEW_BOUNDS_PADDING,
+                    room.maxX + 1.0f + VIEW_BOUNDS_PADDING, room.maxZ + 1.0f + VIEW_BOUNDS_PADDING);
             ceilingY = room.ceilingY;
             return;
         }
@@ -55,8 +57,9 @@ public final class ViewService implements Service<View> {
                 && hasSolidOverburden(world, playerX, overheadY, playerZ)) {
             view = View.UNDERGROUND;
             float radius = Settings.getUndergroundViewRadius();
-            bounds.set(player.getPosition().x - radius, player.getPosition().z - radius,
-                    player.getPosition().x + radius, player.getPosition().z + radius);
+            float paddedRadius = radius + VIEW_BOUNDS_PADDING;
+            bounds.set(player.getPosition().x - paddedRadius, player.getPosition().z - paddedRadius,
+                    player.getPosition().x + paddedRadius, player.getPosition().z + paddedRadius);
             ceilingY = Math.min(overheadY, player.getPosition().y + Settings.getUndergroundCutHeight());
             return;
         }
@@ -197,7 +200,7 @@ public final class ViewService implements Service<View> {
 
     /**
      * Returns whether a cell belongs to the visible, interactable volume.
-     * This mirrors the directional cutaway rules used by the world shaders.
+     * This mirrors the volumetric fog shape used by the world shaders.
      */
     public boolean isVisible(Vector3f position, Vector3f cameraPosition) {
         if (view == View.EXTERIOR || position == null) return true;
@@ -205,42 +208,12 @@ public final class ViewService implements Service<View> {
         if (view == View.INTERIOR) {
             if (position.x < bounds.x || position.x > bounds.z
                     || position.z < bounds.y || position.z > bounds.w) return false;
-            return cameraPosition == null || !isFrontCutaway(position, cameraPosition);
+            return true;
         }
         float offsetX = position.x - playerPosition.x;
         float offsetZ = position.z - playerPosition.z;
         float radius = Settings.getUndergroundViewRadius();
-        if (offsetX * offsetX + offsetZ * offsetZ > radius * radius) return false;
-        return cameraPosition == null || !isUndergroundCutaway(
-                position, cameraPosition, offsetX, offsetZ, radius);
-    }
-
-    private boolean isFrontCutaway(Vector3f position, Vector3f cameraPosition) {
-        float cameraOffsetX = cameraPosition.x - playerPosition.x;
-        float cameraOffsetZ = cameraPosition.z - playerPosition.z;
-        float length = (float) Math.sqrt(cameraOffsetX * cameraOffsetX
-                + cameraOffsetZ * cameraOffsetZ);
-        float toCameraX = length > 0.001f ? cameraOffsetX / length : 0.7071f;
-        float toCameraZ = length > 0.001f ? cameraOffsetZ / length : 0.7071f;
-        boolean frontWall = (toCameraX > 0.15f && position.x > bounds.z - 1.01f)
-                || (toCameraX < -0.15f && position.x < bounds.x + 1.01f)
-                || (toCameraZ > 0.15f && position.z > bounds.w - 1.01f)
-                || (toCameraZ < -0.15f && position.z < bounds.y + 1.01f);
-        return frontWall && position.y > floorY + 0.08f;
-    }
-
-    private boolean isUndergroundCutaway(Vector3f position, Vector3f cameraPosition,
-                                         float offsetX, float offsetZ, float radius) {
-        float cameraOffsetX = cameraPosition.x - playerPosition.x;
-        float cameraOffsetZ = cameraPosition.z - playerPosition.z;
-        float length = (float) Math.sqrt(cameraOffsetX * cameraOffsetX
-                + cameraOffsetZ * cameraOffsetZ);
-        float toCameraX = length > 0.001f ? cameraOffsetX / length : 0.7071f;
-        float toCameraZ = length > 0.001f ? cameraOffsetZ / length : 0.7071f;
-        float frontDepth = offsetX * toCameraX + offsetZ * toCameraZ;
-        float sideDistance = Math.abs(offsetX * -toCameraZ + offsetZ * toCameraX);
-        return frontDepth > 0.20f && sideDistance < Math.max(1.5f, radius * 0.32f)
-                && position.y > floorY + 0.08f;
+        return offsetX * offsetX + offsetZ * offsetZ <= radius * radius;
     }
 
     /** Describes the rectangular bounds and ceiling of a visible room. */
