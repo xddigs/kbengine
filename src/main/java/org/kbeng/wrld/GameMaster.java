@@ -485,8 +485,6 @@ public class GameMaster {
     private void updateEntities(float delta) {
         if (!areEntitiesActive) return;
         entities.removeIf(entity -> entity != Player.plyr && !entity.isAlive());
-        // Player death can spawn WorldItem entities during update; iterate a snapshot
-        // so list mutations never invalidate this frame's traversal.
         List<Entity> updateSnapshot = List.copyOf(entities);
         for (Entity entity : updateSnapshot) {
             entity.update(HoveredCell.get(this), delta);
