@@ -22,7 +22,7 @@ import org.kbeng.rpg.data.*;
 import org.kbeng.rpg.service.SoundService;
 import org.kbeng.rpg.service.TimeService;
 import org.kbeng.engine.utils.K;
-import org.kbeng.engine.utils.Naming;
+import org.kbeng.rpg.utils.Naming;
 import org.kbeng.rpg.wrld.GameMaster;
 import org.joml.Vector3f;
 import org.slf4j.Logger;

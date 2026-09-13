@@ -3,7 +3,7 @@ package org.kbeng.rpg.item;
 import org.kbeng.rpg.data.Enchantment;
 import org.kbeng.rpg.data.Usables;
 import org.kbeng.rpg.entity.Player;
-import org.kbeng.engine.ui.GameUIService;
+import org.kbeng.rpg.ui.GameUIService;
 import org.kbeng.rpg.wrld.GameMaster;
 
 /**

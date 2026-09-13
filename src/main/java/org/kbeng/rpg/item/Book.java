@@ -3,7 +3,7 @@ package org.kbeng.rpg.item;
 import org.kbeng.rpg.data.Enchantment;
 import org.kbeng.rpg.data.SoundGroup;
 import org.kbeng.rpg.data.Usables;
-import org.kbeng.engine.ui.BookUI;
+import org.kbeng.rpg.ui.BookUI;
 import org.kbeng.engine.input.ControlAction;
 import org.kbeng.engine.input.Controls;
 import org.kbeng.rpg.service.BookService;

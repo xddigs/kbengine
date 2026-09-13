@@ -4,7 +4,7 @@ import org.kbeng.rpg.data.BlockPos;
 import org.kbeng.rpg.data.Season;
 import org.kbeng.rpg.entity.Moon;
 import org.kbeng.rpg.entity.Sun;
-import org.kbeng.engine.graphics.CelestialLighting;
+import org.kbeng.rpg.graphics.CelestialLighting;
 
 /**
  * Owns environment simulation that affects time, weather, and global lighting.

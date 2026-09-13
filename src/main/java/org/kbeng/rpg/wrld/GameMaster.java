@@ -3,20 +3,26 @@ package org.kbeng.rpg.wrld;
 import org.kbeng.engine.graphics.*;
 import org.kbeng.engine.input.*;
 import org.kbeng.engine.ui.*;
-import org.kbeng.engine.utils.HoveredCell;
+import org.kbeng.rpg.graphics.*;
+import org.kbeng.rpg.input.CameraController;
+import org.kbeng.rpg.input.StepController;
+import org.kbeng.rpg.utils.HoveredCell;
 import org.kbeng.engine.utils.K;
 import org.kbeng.engine.utils.Local;
 import org.kbeng.engine.utils.Settings;
-import org.kbeng.engine.utils.ToastFactory;
+import org.kbeng.rpg.utils.ToastFactory;
 import org.kbeng.rpg.craft.RecipeRegistry;
 import org.kbeng.rpg.data.*;
 import org.kbeng.rpg.entity.Entity;
 import org.kbeng.rpg.entity.NPC;
 import org.kbeng.rpg.entity.Player;
 import org.kbeng.rpg.entity.pathfinding.GridPos;
+import org.kbeng.rpg.input.GameInteraction;
 import org.kbeng.rpg.item.iBlock;
 import org.kbeng.rpg.service.*;
 import org.joml.Vector3f;
+import org.kbeng.rpg.ui.BookUI;
+import org.kbeng.rpg.ui.GameUIService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,6 +102,8 @@ public final class GameMaster implements Application {
         uiManager = context.uiManager();
         windowWidth = context.framebufferWidth();
         windowHeight = context.framebufferHeight();
+        UIButton.setDefaultClickFeedback(() ->
+                SoundService.fx.playUseSound(SoundGroup.BUTTON));
         int renderDistance = Settings.getRenderDistance();
         int visibleChunks = countVisibleChunks(renderDistance);
         int totalTasks = 10 + visibleChunks * 2 + 2;
@@ -296,7 +304,7 @@ public final class GameMaster implements Application {
         cameraController.update(this, delta);
         ParticleEngine.peng.update(delta);
         StepController.step.update(this, SoundService.fx, delta);
-        GameInteraction.gami.update(this, Settings.selectedItem);
+        GameInteraction.gami.update(this, ItemSelection.selectedItem);
         FluidSimulation.updateAll(delta);
         chunkManager.update(Player.plyr.getPosition().x(), Player.plyr.getPosition().z(), delta);
         Mouse.update();

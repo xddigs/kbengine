@@ -4,7 +4,7 @@ import org.kbeng.rpg.data.BlockPos;
 import org.kbeng.rpg.data.RenderPass;
 import org.kbeng.rpg.entity.CharacterAnimator;
 import org.kbeng.rpg.entity.Enemy;
-import org.kbeng.engine.graphics.ResourceManager;
+import org.kbeng.rpg.graphics.ResourceManager;
 import org.kbeng.engine.graphics.gltf.GLTFModel;
 import org.kbeng.rpg.wrld.GameMaster;
 

@@ -1,7 +1,5 @@
 package org.kbeng.engine.ui;
 
-import org.kbeng.rpg.data.DataClass;
-import org.kbeng.rpg.data.GodObject;
 import org.kbeng.engine.graphics.SpriteSheet;
 import org.kbeng.engine.graphics.Texture;
 import org.joml.Vector2f;
@@ -18,8 +16,6 @@ import java.util.function.Consumer;
  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
  */
 @SuppressWarnings("all")
-@DataClass
-@GodObject
 public abstract class UIElement {
     private final List<UIElement> children = new ArrayList<>();
     private final Vector4f tint = new Vector4f(1.0f, 1.0f, 1.0f, 1.0f);

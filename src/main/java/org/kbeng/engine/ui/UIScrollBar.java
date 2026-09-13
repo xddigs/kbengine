@@ -1,8 +1,8 @@
 package org.kbeng.engine.ui;
 
-import org.kbeng.engine.graphics.ResourceManager;
 import org.kbeng.engine.graphics.Texture;
 import org.kbeng.engine.input.Mouse;
+import org.kbeng.engine.utils.K;
 import org.kbeng.engine.utils.Settings;
 import org.joml.Vector4f;
 
@@ -16,12 +16,19 @@ import java.util.function.IntConsumer;
  */
 public class UIScrollBar extends UIElement {
     private static final int TRACK_SLICE_SIZE = 3;
+    private static final Texture TRACK_TEXTURE = new Texture(K.Paths.SCROLL_BAR);
+    private static final Texture KNOB_TEXTURE = new Texture(K.Paths.SCROLL_KNOB);
 
     private int value;
     private int maximum;
     private boolean dragging;
     private float dragOffset;
     private IntConsumer valueChangedListener;
+
+    static void disposeResources() {
+        TRACK_TEXTURE.dispose();
+        KNOB_TEXTURE.dispose();
+    }
 
     /**
      * Creates a vertical scroll bar.
@@ -161,12 +168,12 @@ public class UIScrollBar extends UIElement {
         int textureHeight = Math.max(TRACK_SLICE_SIZE * 2,
                 Math.round(getAbsoluteHeight() / Settings.getScale()));
         Texture track = Frontend.createNineSliceTexture(
-                ResourceManager.rem.getScrollBar(), textureWidth,
+                TRACK_TEXTURE, textureWidth,
                 textureHeight, TRACK_SLICE_SIZE);
         Vector4f color = new Vector4f(1.0f);
         Frontend.drawTexture(track, getAbsoluteX(), getAbsoluteY(),
                 getAbsoluteWidth(), getAbsoluteHeight(), color);
-        Frontend.drawTexture(ResourceManager.rem.getScrollKnob(),
+        Frontend.drawTexture(KNOB_TEXTURE,
                 getAbsoluteX(), getKnobY(), getAbsoluteWidth(),
                 getKnobHeight(), color);
     }

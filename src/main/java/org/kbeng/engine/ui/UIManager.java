@@ -2,7 +2,6 @@ package org.kbeng.engine.ui;
 
 import org.kbeng.engine.input.Keyboard;
 import org.kbeng.engine.input.Mouse;
-import org.kbeng.engine.utils.ItemIds;
 
 /**
  * UIManager provides uimanager capabilities within the ui subsystem.
@@ -42,9 +41,10 @@ public class UIManager {
         if (hovered != null && hovered != tooltip
                 && hovered.getTooltipText() != null
                 && !hovered.getTooltipText().isBlank()) {
-            String cornerText = hovered instanceof InventorySlotUI slot ? slot.getTooltipCornerText() : null;
-            String tooltipText = hovered instanceof InventorySlotUI slot ?
-                    ItemIds.appendToTooltip(hovered.getTooltipText(), slot.getItem()) : hovered.getTooltipText();
+            String cornerText = hovered instanceof UIWidget widget
+                    ? widget.getTooltipCornerText() : null;
+            String tooltipText = hovered instanceof UIWidget widget
+                    ? widget.formatTooltip(hovered.getTooltipText()) : hovered.getTooltipText();
             tooltip.cornerText(cornerText).text(tooltipText);
             float cursorX = Mouse.getX() + MOUSE_OFFSET + MOUSE_OFFSET / 2;
             float cursorY = Mouse.getY() - MOUSE_OFFSET / 2;

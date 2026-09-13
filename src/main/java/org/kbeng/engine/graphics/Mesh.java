@@ -1,7 +1,5 @@
 package org.kbeng.engine.graphics;
 
-import org.kbeng.rpg.data.BlockShape;
-import org.kbeng.rpg.item.Block;
 import org.kbeng.engine.utils.K;
 import org.lwjgl.system.MemoryUtil;
 import org.slf4j.Logger;
@@ -159,7 +157,7 @@ public class Mesh {
      * @param neighborSolid whether each outer face is blocked by a solid neighbouring block
      * @return the {@link Mesh} representing the created mesh
      */
-    public static Mesh createVoxelBlockMesh(Block block,
+    public static Mesh createVoxelBlockMesh(VoxelVolume voxels,
                                             TextureAtlas.TextureRegion top,
                                             TextureAtlas.TextureRegion bottom,
                                             TextureAtlas.TextureRegion side,
@@ -177,43 +175,43 @@ public class Mesh {
         for (int x = 0; x < subdivisions; x++) {
             for (int y = 0; y < subdivisions; y++) {
                 for (int z = 0; z < subdivisions; z++) {
-                    if (!block.isVoxelSolid(x, y, z)) continue;
+                    if (!voxels.isSolid(x, y, z)) continue;
 
                     float x0 = x * size, x1 = x0 + size;
                     float y0 = y * size, y1 = y0 + size;
                     float z0 = z * size, z1 = z0 + size;
 
-                    boolean topOccluded = (y < subdivisions - 1) ? block.isVoxelSolid(x, y + 1, z) : neighborSolid[0];
+                    boolean topOccluded = (y < subdivisions - 1) ? voxels.isSolid(x, y + 1, z) : neighborSolid[0];
                     if (!topOccluded) {
                         int[] next = addVoxelFace(positions, normals, uv, indices, pos, normal, tex, index, vertex, x0,y1,z0, x0,y1,z1, x1,y1,z1, x1,y1,z0, 0,1,0, top,bottom,side);
                         pos=next[0]; normal=next[1]; tex=next[2]; index=next[3]; vertex=next[4];
                     }
 
-                    boolean bottomOccluded = (y > 0) ? block.isVoxelSolid(x, y - 1, z) : neighborSolid[1];
+                    boolean bottomOccluded = (y > 0) ? voxels.isSolid(x, y - 1, z) : neighborSolid[1];
                     if (!bottomOccluded) {
                         int[] next = addVoxelFace(positions, normals, uv, indices, pos, normal, tex, index, vertex, x0,y0,z1, x0,y0,z0, x1,y0,z0, x1,y0,z1, 0,-1,0, top,bottom,side);
                         pos=next[0]; normal=next[1]; tex=next[2]; index=next[3]; vertex=next[4];
                     }
 
-                    boolean northOccluded = (z < subdivisions - 1) ? block.isVoxelSolid(x, y, z + 1) : neighborSolid[2];
+                    boolean northOccluded = (z < subdivisions - 1) ? voxels.isSolid(x, y, z + 1) : neighborSolid[2];
                     if (!northOccluded) {
                         int[] next = addVoxelFace(positions, normals, uv, indices, pos, normal, tex, index, vertex, x1,y0,z1, x1,y1,z1, x0,y1,z1, x0,y0,z1, 0,0,1, top,bottom,side);
                         pos=next[0]; normal=next[1]; tex=next[2]; index=next[3]; vertex=next[4];
                     }
 
-                    boolean southOccluded = (z > 0) ? block.isVoxelSolid(x, y, z - 1) : neighborSolid[3];
+                    boolean southOccluded = (z > 0) ? voxels.isSolid(x, y, z - 1) : neighborSolid[3];
                     if (!southOccluded) {
                         int[] next = addVoxelFace(positions, normals, uv, indices, pos, normal, tex, index, vertex, x0,y0,z0, x0,y1,z0, x1,y1,z0, x1,y0,z0, 0,0,-1, top,bottom,side);
                         pos=next[0]; normal=next[1]; tex=next[2]; index=next[3]; vertex=next[4];
                     }
 
-                    boolean eastOccluded = (x < subdivisions - 1) ? block.isVoxelSolid(x + 1, y, z) : neighborSolid[4];
+                    boolean eastOccluded = (x < subdivisions - 1) ? voxels.isSolid(x + 1, y, z) : neighborSolid[4];
                     if (!eastOccluded) {
                         int[] next = addVoxelFace(positions, normals, uv, indices, pos, normal, tex, index, vertex, x1,y0,z1, x1,y0,z0, x1,y1,z0, x1,y1,z1, 1,0,0, top,bottom,side);
                         pos=next[0]; normal=next[1]; tex=next[2]; index=next[3]; vertex=next[4];
                     }
 
-                    boolean westOccluded = (x > 0) ? block.isVoxelSolid(x - 1, y, z) : neighborSolid[5];
+                    boolean westOccluded = (x > 0) ? voxels.isSolid(x - 1, y, z) : neighborSolid[5];
                     if (!westOccluded) {
                         int[] next = addVoxelFace(positions, normals, uv, indices, pos, normal, tex, index, vertex, x0,y0,z0, x0,y0,z1, x0,y1,z1, x0,y1,z0, -1,0,0, top,bottom,side);
                         pos=next[0]; normal=next[1]; tex=next[2]; index=next[3]; vertex=next[4];
@@ -296,15 +294,14 @@ public class Mesh {
      * @return the {@link Mesh} representing the selection result
      */
     public static Mesh selection() {
-        return selection(BlockShape.FULL_CUBE);
+        return selection(new float[][]{{0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f}});
     }
 
     /**
      * Creates an outline matching every cuboid in a block shape.
      */
-    public static Mesh selection(BlockShape shape) {
+    public static Mesh selection(float[][] boxes) {
         float epsilon = 0.002f;
-        BlockShape.Box[] boxes = shape.getBoxes();
         float[] positions = new float[boxes.length * 24];
         float[] normals = new float[positions.length];
         float[] textCoords = new float[boxes.length * 16];
@@ -313,13 +310,16 @@ public class Mesh {
         int index = 0;
         int vertexOffset = 0;
 
-        for (BlockShape.Box box : boxes) {
-            float minX = box.minX() - epsilon;
-            float minY = box.minY() - epsilon;
-            float minZ = box.minZ() - epsilon;
-            float maxX = box.maxX() + epsilon;
-            float maxY = box.maxY() + epsilon;
-            float maxZ = box.maxZ() + epsilon;
+        for (float[] box : boxes) {
+            if (box == null || box.length != 6) {
+                throw new IllegalArgumentException("Each outline box must contain 6 bounds");
+            }
+            float minX = box[0] - epsilon;
+            float minY = box[1] - epsilon;
+            float minZ = box[2] - epsilon;
+            float maxX = box[3] + epsilon;
+            float maxY = box[4] + epsilon;
+            float maxZ = box[5] + epsilon;
             float[] boxPositions = {
                     minX, maxY, minZ, maxX, maxY, minZ,
                     maxX, maxY, maxZ, minX, maxY, maxZ,
@@ -458,5 +458,10 @@ public class Mesh {
         indices[index++] = vertex; indices[index++] = vertex + 1; indices[index++] = vertex + 3;
         indices[index++] = vertex + 3; indices[index++] = vertex + 1; indices[index++] = vertex + 2;
         return new int[]{pos + 12, normal, tex + 8, index, vertex + 4};
+    }
+
+    @FunctionalInterface
+    public interface VoxelVolume {
+        boolean isSolid(int x, int y, int z);
     }
 }

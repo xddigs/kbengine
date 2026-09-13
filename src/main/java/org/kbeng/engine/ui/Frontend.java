@@ -1,16 +1,12 @@
 package org.kbeng.engine.ui;
 
+import org.joml.Matrix4f;
+import org.joml.Vector4f;
 import org.kbeng.engine.graphics.*;
-import org.kbeng.rpg.data.GodObject;
 import org.kbeng.engine.input.Mouse;
-import org.kbeng.rpg.item.Item;
-import org.kbeng.rpg.item.Tool;
 import org.kbeng.engine.utils.K;
 import org.kbeng.engine.utils.Settings;
 import org.kbeng.engine.utils.Utils;
-import org.kbeng.rpg.wrld.GameMaster;
-import org.joml.Matrix4f;
-import org.joml.Vector4f;
 import org.lwjgl.stb.STBTTBakedChar;
 import org.lwjgl.system.MemoryUtil;
 
@@ -30,7 +26,6 @@ import static org.lwjgl.opengl.GL13.glActiveTexture;
  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
  */
 @Utils
-@GodObject
 public class Frontend {
     private static final Shader shader = new Shader(K.Paths.UI_VERTEX_SHADER, K.Paths.UI_FRAG_SHADER);
     private static final Mesh mesh = Mesh.createQuad();
@@ -839,30 +834,16 @@ public class Frontend {
         );
     }
 
-    /**
-     * Draws the cursor.
-     * @param gameMaster the {@link GameMaster} supplied as {@code gameMaster}
-     */
-    public static void drawCursor(GameMaster gameMaster) {
-        if (gameMaster == null) return;
+    /** Draws an application-provided sprite beside the native cursor once per frame. */
+    public static void drawCursorIcon(SpriteSheet spriteSheet, int frameIndex,
+                                      boolean flipHorizontally) {
         if (wasCursorIconDrawn) return;
-
-        var hotbarUI = GameUIService.ui.getHotbarUI();
-        if (hotbarUI == null) return;
-
-        Item selectedItem = Settings.selectedItem;
-        if (selectedItem == null) return;
-
-        SpriteSheet spriteSheet = ResourceManager.getItemSpriteSheet(selectedItem);
         if (spriteSheet == null) return;
-
-        int frameIndex = ResourceManager.getItemFrame(selectedItem);
         float iconSize = 32.0f;
-
         float renderX = Mouse.getX() + CURSOR_ICON_OFFSET;
         float renderY = Mouse.getY() + CURSOR_ICON_OFFSET;
         drawSprite(spriteSheet, frameIndex, renderX, renderY, iconSize, iconSize,
-                new Vector4f(1.0f), (selectedItem instanceof Tool));
+                new Vector4f(1.0f), flipHorizontally);
         wasCursorIconDrawn = true;
     }
 
@@ -952,6 +933,8 @@ public class Frontend {
     public static void dispose() {
         nineSliceTextures.values().forEach(Texture::dispose);
         nineSliceTextures.clear();
+        UIButton.disposeResources();
+        UIScrollBar.disposeResources();
         mesh.dispose();
         shader.dispose();
     }

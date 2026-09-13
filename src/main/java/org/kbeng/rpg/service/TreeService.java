@@ -6,7 +6,7 @@ import org.kbeng.rpg.item.Block;
 import org.kbeng.rpg.item.Item;
 import org.kbeng.rpg.item.Material;
 import org.kbeng.rpg.data.*;
-import org.kbeng.engine.ui.GameUIService;
+import org.kbeng.rpg.ui.GameUIService;
 import org.kbeng.engine.utils.Settings;
 import org.kbeng.rpg.wrld.Chunk;
 import org.kbeng.rpg.wrld.GameMaster;

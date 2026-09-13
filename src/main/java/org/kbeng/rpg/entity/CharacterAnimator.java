@@ -1,6 +1,7 @@
 package org.kbeng.rpg.entity;
 
 import org.kbeng.engine.graphics.*;
+import org.kbeng.rpg.graphics.*;
 import org.kbeng.rpg.data.Direction;
 import org.kbeng.rpg.data.ArmorFinish;
 import org.kbeng.rpg.data.ArmorSlot;
@@ -310,7 +311,8 @@ public final class CharacterAnimator {
     private static void applyArmorMaterialNodes(GLTFNode node, Vector3f tint,
                                                 ArmorFinish finish) {
         node.setColorTint(tint);
-        node.setArmorFinish(finish);
+        node.setMaterialFinish(finish == null ? ArmorFinish.NONE.getShaderValue()
+                : finish.getShaderValue());
         for (GLTFNode child : node.getChildren()) {
             applyArmorMaterialNodes(child, tint, finish);
         }

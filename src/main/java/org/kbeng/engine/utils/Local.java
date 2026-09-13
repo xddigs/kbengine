@@ -1,8 +1,5 @@
 package org.kbeng.engine.utils;
 
-import org.kbeng.rpg.data.Languages;
-import org.kbeng.rpg.data.Singleton;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,7 +15,6 @@ import java.util.Properties;
  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
  */
 @Utils
-@Singleton
 public class Local {
     private static final Languages[] LANGS = Languages.values();
     public static final Local lang = new Local();

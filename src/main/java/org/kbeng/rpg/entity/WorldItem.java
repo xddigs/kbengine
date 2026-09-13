@@ -3,7 +3,7 @@ package org.kbeng.rpg.entity;
 import org.kbeng.rpg.data.BlockPos;
 import org.kbeng.rpg.data.DataClass;
 import org.kbeng.rpg.data.RenderPass;
-import org.kbeng.engine.graphics.ResourceManager;
+import org.kbeng.rpg.graphics.ResourceManager;
 import org.kbeng.engine.graphics.SpriteSheet;
 import org.kbeng.rpg.item.Item;
 import org.kbeng.rpg.wrld.GameMaster;

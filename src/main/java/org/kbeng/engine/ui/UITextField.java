@@ -1,7 +1,5 @@
 package org.kbeng.engine.ui;
 
-import org.kbeng.rpg.data.CompletionProvider;
-import org.kbeng.rpg.data.GodObject;
 import org.kbeng.engine.input.Keyboard;
 import org.joml.Vector4f;
 import org.lwjgl.glfw.GLFW;
@@ -15,7 +13,6 @@ import java.util.List;
  * It extends UIElement, inheriting shared behavior while specializing subsystem-specific logic.
  */
 @SuppressWarnings("all")
-@GodObject
 public class UITextField extends UIElement {
     private final Vector4f backgroundColor = new Vector4f(0.08f, 0.08f, 0.08f, 1.0f);
     private final Vector4f focusedColor = new Vector4f(0.12f, 0.12f, 0.12f, 1.0f);

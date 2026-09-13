@@ -1,7 +1,7 @@
 package org.kbeng.rpg.service;
 
 import org.kbeng.rpg.data.SoundGroup;
-import org.kbeng.engine.graphics.GraphicsEngine;
+import org.kbeng.rpg.graphics.GraphicsEngine;
 import org.kbeng.engine.utils.Settings;
 
 /**

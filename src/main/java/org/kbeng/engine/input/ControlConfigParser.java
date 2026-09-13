@@ -3,7 +3,6 @@ package org.kbeng.engine.input;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import org.kbeng.rpg.data.Singleton;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +22,6 @@ import java.util.Map;
  * It defines device mappings, control-state tracking, and interaction orchestration for player actions.
  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
  */
-@Singleton
 public final class ControlConfigParser {
     private static final Logger log = LoggerFactory.getLogger(ControlConfigParser.class);
     private static final String RESOURCE = "/config.json";

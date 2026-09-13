@@ -10,7 +10,7 @@ import org.kbeng.rpg.entity.NPC;
 import org.kbeng.rpg.entity.Player;
 import org.kbeng.engine.input.Mouse;
 import org.kbeng.rpg.item.iBlock;
-import org.kbeng.engine.ui.GameUIService;
+import org.kbeng.rpg.ui.GameUIService;
 import org.kbeng.engine.utils.Settings;
 import org.kbeng.rpg.wrld.GameMaster;
 import org.joml.Vector3f;

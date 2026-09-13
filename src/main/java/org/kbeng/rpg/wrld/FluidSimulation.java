@@ -4,8 +4,8 @@ import org.kbeng.rpg.data.BlockData;
 import org.kbeng.rpg.data.BlockPos;
 import org.kbeng.rpg.data.Crop;
 import org.kbeng.rpg.data.FluidPos;
-import org.kbeng.engine.graphics.ParticleEngine;
-import org.kbeng.engine.graphics.ResourceManager;
+import org.kbeng.rpg.graphics.ParticleEngine;
+import org.kbeng.rpg.graphics.ResourceManager;
 
 import java.util.ArrayDeque;
 import java.util.HashSet;

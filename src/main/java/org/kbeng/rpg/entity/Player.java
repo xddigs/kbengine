@@ -2,7 +2,7 @@ package org.kbeng.rpg.entity;
 
 import org.kbeng.rpg.entity.plyr.PlayerGameplay;
 import org.kbeng.rpg.entity.plyr.PlayerManager;
-import org.kbeng.engine.graphics.ResourceManager;
+import org.kbeng.rpg.graphics.ResourceManager;
 import org.kbeng.engine.graphics.gltf.GLTFModel;
 import org.kbeng.rpg.item.Item;
 import org.kbeng.rpg.item.Shield;
@@ -10,7 +10,7 @@ import org.kbeng.rpg.entity.pathfinding.GridPos;
 import org.kbeng.rpg.data.*;
 import org.kbeng.rpg.service.SoundService;
 import org.kbeng.rpg.service.NPCService;
-import org.kbeng.engine.utils.DeathManager;
+import org.kbeng.rpg.utils.DeathManager;
 import org.kbeng.engine.utils.Settings;
 import org.kbeng.rpg.wrld.GameMaster;
 import org.kbeng.rpg.wrld.World;
@@ -206,7 +206,7 @@ public class Player extends Character {
      * @return {@code true} if aiming has damage; otherwise {@code false}
      */
     public float getAttack() {
-        Item selectedItem = Settings.selectedItem;
+        Item selectedItem = ItemSelection.selectedItem;
         if (selectedItem == null) return 0.0f;
         if (!(selectedItem instanceof ToolType toolType)) return 1.0f;
         if (toolType.getBaseDamage() <= 0) return 1.0f;

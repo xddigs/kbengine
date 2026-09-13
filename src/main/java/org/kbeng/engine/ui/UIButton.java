@@ -1,10 +1,8 @@
 package org.kbeng.engine.ui;
 
-import org.kbeng.rpg.data.SoundGroup;
-import org.kbeng.engine.graphics.ResourceManager;
 import org.kbeng.engine.graphics.SpriteSheet;
 import org.kbeng.engine.graphics.Texture;
-import org.kbeng.rpg.service.SoundService;
+import org.kbeng.engine.utils.K;
 import org.joml.Vector4f;
 
 /**
@@ -17,8 +15,8 @@ import org.joml.Vector4f;
 public class UIButton extends UIElement {
     private static final float ICON_SCALE = 0.65f;
     private static final float BACKGROUNDLESS_ICON_SCALE = 5.0f / 6.0f;
-    private static final Texture BUTTON_TEXTURE = ResourceManager
-            .rem.getBackgroundUI();
+    private static final Texture BUTTON_TEXTURE = new Texture(K.Paths.DEFAULT_BACKGROUND_UI);
+    private static Runnable defaultClickFeedback = () -> { };
 
     private SpriteSheet spriteSheet;
     private int spriteFrame;
@@ -58,7 +56,7 @@ public class UIButton extends UIElement {
         }
         if (onClick != null) {
             onClick.run();
-            SoundService.fx.playUseSound(SoundGroup.BUTTON);
+            defaultClickFeedback.run();
         }
         return false;
     }
@@ -151,6 +149,15 @@ public class UIButton extends UIElement {
     public UIButton setOnClick(Runnable onClick) {
         this.onClick = onClick;
         return this;
+    }
+
+    /** Installs application-specific feedback (for example a click sound). */
+    public static void setDefaultClickFeedback(Runnable feedback) {
+        defaultClickFeedback = feedback == null ? () -> { } : feedback;
+    }
+
+    static void disposeResources() {
+        BUTTON_TEXTURE.dispose();
     }
 
     /**

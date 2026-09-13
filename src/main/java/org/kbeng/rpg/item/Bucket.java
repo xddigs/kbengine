@@ -5,7 +5,7 @@ import org.kbeng.rpg.data.BlockPos;
 import org.kbeng.rpg.data.Enchantment;
 import org.kbeng.rpg.data.Usables;
 import org.kbeng.rpg.entity.Player;
-import org.kbeng.engine.utils.HoveredCell;
+import org.kbeng.rpg.utils.HoveredCell;
 import org.kbeng.engine.utils.Local;
 import org.kbeng.rpg.wrld.GameMaster;
 import org.kbeng.rpg.wrld.FluidSimulation;

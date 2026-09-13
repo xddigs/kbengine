@@ -3,7 +3,7 @@ package org.kbeng.rpg.wrld;
 import org.kbeng.rpg.data.BlockData;
 import org.kbeng.rpg.data.SoilPosition;
 import org.kbeng.rpg.data.WorldData;
-import org.kbeng.engine.graphics.ChunkMeshBuilder;
+import org.kbeng.rpg.graphics.ChunkMeshBuilder;
 import org.kbeng.engine.utils.Settings;
 
 import java.util.HashMap;

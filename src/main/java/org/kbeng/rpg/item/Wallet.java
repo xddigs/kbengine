@@ -4,7 +4,7 @@ import org.kbeng.rpg.data.DataClass;
 import org.kbeng.rpg.data.Enchantment;
 import org.kbeng.rpg.data.Usables;
 import org.kbeng.rpg.entity.Player;
-import org.kbeng.engine.utils.ToastFactory;
+import org.kbeng.rpg.utils.ToastFactory;
 import org.kbeng.rpg.wrld.GameMaster;
 
 /**

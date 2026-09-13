@@ -1,19 +1,14 @@
 package org.kbeng.engine.utils;
 
-import org.kbeng.rpg.data.Singleton;
-import org.kbeng.rpg.item.Item;
-
 /**
  * Settings provides settings capabilities within the utils subsystem.
  * It centralizes reusable utilities such as constants, localization, settings, and small cross-cutting helpers.
  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
  */
-@Singleton
 public class Settings {
     private static final float BASE_ICON_SIZE = 16.0f;
     private static final float[] GUI_SCALES = {1.0f, 2.0f, 3.0f};
     private static final float SHADOW_MAP_SIZE = 8192.0f;
-    public static Item selectedItem = null;
     private static float fov = 80f;
     private static int ticks = 1200;
     private static float mouseSensitivity = 0.4f;
@@ -38,11 +33,6 @@ public class Settings {
      * Creates a new {@code Settings} instance.
      */
     private Settings() {}
-
-    /** Returns the item currently selected in the hotbar. */
-    public static Item getSelectedItem() {
-        return selectedItem;
-    }
 
     /**
      * Returns the shadow map size.

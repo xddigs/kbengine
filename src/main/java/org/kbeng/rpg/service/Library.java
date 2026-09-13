@@ -4,7 +4,7 @@ import org.kbeng.rpg.entity.Player;
 import org.kbeng.rpg.data.*;
 import org.kbeng.rpg.item.*;
 import org.kbeng.engine.utils.Local;
-import org.kbeng.engine.utils.ToastFactory;
+import org.kbeng.rpg.utils.ToastFactory;
 import org.kbeng.rpg.wrld.GameMaster;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
