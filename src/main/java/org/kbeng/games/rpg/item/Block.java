@@ -7,12 +7,15 @@ import org.kbeng.games.rpg.data.DataClass;
 import org.kbeng.engine.utils.K;
 
 /**
- * Block provides block capabilities within the item subsystem.
- * It models inventory-facing objects, equipables, consumables, and item behavior surfaced to gameplay and UI.
- * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
- * It implements Craftable, providing a concrete strategy for this subsystem contract.
+ * Compatibility item for the retired one-metre terrain representation.
+ * <p>Active RPG terrain stores one material id per 0.25-unit cell in
+ * {@link Voxel}; it never creates this coordinate/shape/fragment object. Block
+ * remains loadable for old inventories, recipes and migration tooling, with its
+ * former APIs deliberately preserved but outside the active voxel renderer,
+ * raycaster and interaction loop.</p>
  */
 @DataClass
+@Deprecated(since = "voxel-terrain", forRemoval = false)
 public class Block implements Craftable {
     private static final int VOXEL_SIZE = 4;
     private final byte[][][] voxels = new byte[VOXEL_SIZE][VOXEL_SIZE][VOXEL_SIZE];
@@ -124,6 +127,7 @@ public class Block implements Craftable {
     /**
      * Initializes the voxels for breaking.
      */
+    @Deprecated(since = "voxel-terrain", forRemoval = false)
     public void initVoxels() {
         for (int x = 0; x < VOXEL_SIZE; x++) {
             for (int y = 0; y < VOXEL_SIZE; y++) {
@@ -138,6 +142,7 @@ public class Block implements Craftable {
      * Updates the breaking progress.
      * @param progress the {@code float} supplied as {@code progress}
      */
+    @Deprecated(since = "voxel-terrain", forRemoval = false)
     public void updateBreakingProgress(float progress) {
         int totalVoxels = VOXEL_SIZE * VOXEL_SIZE * VOXEL_SIZE;
         int voxelsToRemove = Math.min(totalVoxels, (int) (progress * totalVoxels));

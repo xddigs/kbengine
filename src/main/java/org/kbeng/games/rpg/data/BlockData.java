@@ -265,8 +265,8 @@ public enum BlockData implements Blockable {
      * @param id the {@code byte} supplied as {@code id}
      * @return the {@link Block} representing the from id to result
      */
-    public static Block fromIdTo(byte id) {
-        return new Block(fromId(id));
+    public static org.kbeng.games.rpg.item.Voxel fromIdTo(byte id) {
+        return new org.kbeng.games.rpg.item.Voxel(fromId(id));
     }
 
     /**

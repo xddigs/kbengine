@@ -15,13 +15,15 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 /**
- * iBlock provides i block capabilities within the item subsystem.
- * It models inventory-facing objects, equipables, consumables, and item behavior surfaced to gameplay and UI.
- * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
- * It extends Block, inheriting shared behavior while specializing subsystem-specific logic.
+ * Compatibility wrapper for former interactive metre-block models.
+ * <p>Doors and chests are not spawned by the active RPG loop. This class stays
+ * available for old saves and opt-in archive code; model, inventory and
+ * animation APIs are unchanged. New terrain uses {@link Voxel}, which has no
+ * interaction or animation state and represents one coloured quarter-unit cell.</p>
  */
 @SuppressWarnings("all")
 @DataClass
+@Deprecated(since = "voxel-terrain", forRemoval = false)
 public class iBlock extends Block {
     private static final float ANIMATION_DURATION = 0.10f;
     private static final float CHEST_OPEN_ANGLE = (float) Math.toRadians(35.0);
@@ -195,6 +197,7 @@ public class iBlock extends Block {
      * Advances this block's activation animation by one update step.
      * Blocks without an animated model safely ignore the call.
      */
+    @Deprecated(since = "voxel-terrain", forRemoval = false)
     public void animate() {
         if (!isAnimating || blockModel == null) {
             return;
