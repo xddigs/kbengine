@@ -1,4 +1,6 @@
-package org.kbeng.rpg.data;
+package org.kbeng.engine.data;
+
+import org.kbeng.rpg.data.DataClass;
 
 /**
  * ToastData declares the canonical toast data set for the data subsystem.

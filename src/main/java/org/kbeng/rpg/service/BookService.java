@@ -1,5 +1,6 @@
 package org.kbeng.rpg.service;
 
+import org.kbeng.engine.service.Service;
 import org.kbeng.rpg.data.Singleton;
 import org.kbeng.rpg.ui.BookUI;
 import org.kbeng.rpg.item.Book;

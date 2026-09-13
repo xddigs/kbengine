@@ -1,12 +1,8 @@
-package org.kbeng.rpg.utils;
+package org.kbeng.engine.utils;
 
-import org.kbeng.engine.utils.Local;
-import org.kbeng.engine.utils.K;
-import org.kbeng.engine.utils.Utils;
-
-import org.kbeng.rpg.data.Toast;
-import org.kbeng.rpg.data.ToastData;
-import org.kbeng.rpg.service.Service;
+import org.kbeng.engine.service.Service;
+import org.kbeng.engine.data.Toast;
+import org.kbeng.engine.data.ToastData;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -18,7 +14,6 @@ import java.util.List;
  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
  * It implements Service<Toast>, providing a concrete strategy for this subsystem contract.
  */
-@SuppressWarnings("all")
 @Utils
 public class ToastFactory implements Service<Toast> {
     private static final List<Toast> toasts = new ArrayList<>();

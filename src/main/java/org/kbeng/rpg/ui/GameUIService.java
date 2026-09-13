@@ -1,5 +1,7 @@
 package org.kbeng.rpg.ui;
 
+import org.kbeng.engine.data.Toast;
+import org.kbeng.engine.data.ToastData;
 import org.kbeng.engine.ui.*;
 import org.kbeng.engine.utils.*;
 import org.kbeng.rpg.entity.NPC;
@@ -16,11 +18,11 @@ import org.kbeng.rpg.item.Item;
 import org.kbeng.rpg.item.Tool;
 import org.kbeng.rpg.data.*;
 import org.kbeng.rpg.service.BookService;
-import org.kbeng.rpg.service.Service;
+import org.kbeng.engine.service.Service;
 import org.kbeng.rpg.service.TimeService;
 import org.kbeng.rpg.wrld.GameMaster;
 import org.kbeng.rpg.utils.DeathManager;
-import org.kbeng.rpg.utils.ToastFactory;
+import org.kbeng.engine.utils.ToastFactory;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 import org.joml.Vector4f;

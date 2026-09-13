@@ -5,7 +5,7 @@ import org.kbeng.rpg.craft.Recipe;
 import org.kbeng.rpg.entity.Player;
 import org.kbeng.rpg.data.*;
 import org.kbeng.rpg.item.*;
-import org.kbeng.rpg.utils.ToastFactory;
+import org.kbeng.engine.utils.ToastFactory;
 
 /**
  * CraftingService provides crafting service capabilities within the service subsystem.

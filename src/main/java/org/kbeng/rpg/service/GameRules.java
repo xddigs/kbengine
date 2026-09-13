@@ -1,7 +1,7 @@
 package org.kbeng.rpg.service;
 
 import org.kbeng.engine.utils.Settings;
-import org.kbeng.rpg.utils.ToastFactory;
+import org.kbeng.engine.utils.ToastFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

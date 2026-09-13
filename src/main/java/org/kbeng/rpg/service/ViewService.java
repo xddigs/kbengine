@@ -1,5 +1,6 @@
 package org.kbeng.rpg.service;
 
+import org.kbeng.engine.service.Service;
 import org.kbeng.rpg.data.BlockData;
 import org.kbeng.rpg.data.View;
 import org.kbeng.rpg.entity.Player;

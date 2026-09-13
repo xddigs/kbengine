@@ -4,7 +4,7 @@ import org.kbeng.rpg.item.Item;
 import org.kbeng.rpg.item.Wallet;
 import org.kbeng.rpg.data.*;
 import org.kbeng.engine.utils.Local;
-import org.kbeng.rpg.utils.ToastFactory;
+import org.kbeng.engine.utils.ToastFactory;
 
 /**
  * RPG-oriented extension of {@link Entity} for living actors with progression and inventory state.

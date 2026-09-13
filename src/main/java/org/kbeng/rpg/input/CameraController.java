@@ -11,7 +11,7 @@ import org.kbeng.rpg.entity.states.SwimmingState;
 import org.kbeng.rpg.entity.pathfinding.GridPos;
 import org.kbeng.rpg.entity.pathfinding.PathFinder;
 import org.kbeng.rpg.service.BookService;
-import org.kbeng.rpg.service.Service;
+import org.kbeng.engine.service.Service;
 import org.kbeng.engine.utils.Settings;
 import org.kbeng.rpg.wrld.GameMaster;
 import org.kbeng.rpg.wrld.World;

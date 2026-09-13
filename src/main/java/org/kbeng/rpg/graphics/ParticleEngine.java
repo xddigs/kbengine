@@ -6,7 +6,7 @@ import org.kbeng.rpg.data.BlockData;
 import org.kbeng.rpg.data.BlockPos;
 import org.kbeng.rpg.data.Particle;
 import org.kbeng.rpg.data.Singleton;
-import org.kbeng.rpg.service.Service;
+import org.kbeng.engine.service.Service;
 import org.kbeng.engine.utils.K;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;

@@ -1,4 +1,4 @@
-package org.kbeng.rpg.service;
+package org.kbeng.engine.service;
 
 /**
  * Service defines the service contract within the service subsystem.

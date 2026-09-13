@@ -1,8 +1,9 @@
 package org.kbeng.rpg.service;
 
+import org.kbeng.engine.service.Service;
 import org.kbeng.rpg.data.Command;
 import org.kbeng.rpg.ui.GameUIService;
-import org.kbeng.rpg.utils.ToastFactory;
+import org.kbeng.engine.utils.ToastFactory;
 
 /**
  * CommandService provides command service capabilities within the service subsystem.

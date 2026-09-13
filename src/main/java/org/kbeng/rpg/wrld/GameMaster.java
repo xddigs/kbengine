@@ -10,7 +10,7 @@ import org.kbeng.rpg.utils.HoveredCell;
 import org.kbeng.engine.utils.K;
 import org.kbeng.engine.utils.Local;
 import org.kbeng.engine.utils.Settings;
-import org.kbeng.rpg.utils.ToastFactory;
+import org.kbeng.engine.utils.ToastFactory;
 import org.kbeng.rpg.craft.RecipeRegistry;
 import org.kbeng.rpg.data.*;
 import org.kbeng.rpg.entity.Entity;

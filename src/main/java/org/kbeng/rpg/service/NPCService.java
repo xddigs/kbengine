@@ -1,5 +1,6 @@
 package org.kbeng.rpg.service;
 
+import org.kbeng.engine.service.Service;
 import org.kbeng.rpg.data.Job;
 import org.kbeng.rpg.data.BlockPos;
 import org.kbeng.rpg.data.BlockShape;
