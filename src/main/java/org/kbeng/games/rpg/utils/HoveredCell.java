@@ -15,13 +15,6 @@ import org.kbeng.games.rpg.wrld.GameMaster;
 @Utils
 public class HoveredCell {
 
-    /** Exact edit/selection target. The older get overload provides a whole-unit
-     * location only to non-editing legacy environment/UI consumers. */
-    public static org.kbeng.games.rpg.voxel.VoxelRaycast.Hit voxel(GameMaster game) {
-        return game.getCamera().highlightVoxel(game.getWorld(), Mouse.getX(), Mouse.getY(),
-                game.getWindowWidth(), game.getWindowHeight());
-    }
-
     /**
      * Returns get.
      * @param gameMaster the {@link GameMaster} supplied as {@code gameMaster}
