@@ -2,7 +2,7 @@ package org.kbeng;
 
 import org.kbeng.engine.graphics.Application;
 import org.kbeng.engine.graphics.Game;
-import org.kbeng.rpg.wrld.GameMaster;
+import org.kbeng.games.rpg.wrld.GameMaster;
 
 /**
  * Main is the entry point for the app.

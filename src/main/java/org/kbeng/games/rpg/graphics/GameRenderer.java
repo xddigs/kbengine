@@ -1,0 +1,829 @@
+package org.kbeng.games.rpg.graphics;
+
+import org.kbeng.engine.graphics.*;
+
+import org.kbeng.games.rpg.data.*;
+import org.kbeng.games.rpg.entity.Player;
+import org.kbeng.games.rpg.input.GameInteraction;
+import org.kbeng.games.rpg.item.Block;
+import org.kbeng.games.rpg.item.Item;
+import org.kbeng.games.rpg.item.Tool;
+import org.kbeng.games.rpg.item.iBlock;
+import org.kbeng.rpg.data.*;
+import org.kbeng.games.rpg.service.BookService;
+import org.kbeng.games.rpg.service.TimeService;
+import org.kbeng.games.rpg.service.ViewService;
+import org.kbeng.games.rpg.service.WeatherService;
+import org.kbeng.games.rpg.utils.HoveredCell;
+import org.kbeng.engine.utils.K;
+import org.kbeng.engine.utils.Settings;
+import org.kbeng.games.rpg.wrld.Chunk;
+import org.kbeng.games.rpg.wrld.GameMaster;
+import org.kbeng.games.rpg.wrld.World;
+import org.joml.*;
+
+import java.lang.Math;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL13.*;
+
+/**
+ * GameRenderer provides game renderer capabilities within the graphics subsystem.
+ * It contributes to OpenGL resource ownership, render-state setup, or frame-pipeline execution.
+ * The renderer focuses on draw ordering, shader inputs, and frame-consistent visual output.
+ */
+@Singleton
+@GodObject
+public class GameRenderer {
+    private static final int MAX_TORCH_LIGHTS = 32;
+    public static final GameRenderer gamr = new GameRenderer();
+    private static final float TORCH_SCALE_X = 0.5625f;
+    private static final float TORCH_SCALE_Y = 0.5f;
+    private static final float TORCH_SCALE_Z = 0.5625f;
+    private static final float BLOCK_OUTLINE_WIDTH = 0.5f;
+    private static final float[][] BLOCK_OUTLINE_DIRECTIONS = {
+            {1.0f, 0.0f}, {0.9239f, 0.3827f}, {0.7071f, 0.7071f}, {0.3827f, 0.9239f},
+            {0.0f, 1.0f}, {-0.3827f, 0.9239f}, {-0.7071f, 0.7071f}, {-0.9239f, 0.3827f},
+            {-1.0f, 0.0f}, {-0.9239f, -0.3827f}, {-0.7071f, -0.7071f}, {-0.3827f, -0.9239f},
+            {0.0f, -1.0f}, {0.3827f, -0.9239f}, {0.7071f, -0.7071f}, {0.9239f, -0.3827f}
+    };
+    private final List<Vector3f> torchLights = new ArrayList<>();
+    private final Matrix4f modelMatrix = new Matrix4f();
+    private final Matrix4f viewProjMatrix = new Matrix4f();
+    private final FrustumIntersection frustum = new FrustumIntersection();
+    private float previousCameraYaw;
+    private float previousCameraPitch;
+    private float blurX;
+    private float blurY;
+    private float waterTime;
+    private static final float VIEW_FOG_TRANSITION_DURATION = 0.15f;
+    private static final float VIEW_FOG_MAX_STRENGTH = 0.985f;
+    private ViewFogState displayedViewFog;
+    private ViewFogState targetViewFog;
+    private float viewFogTransition = 1.0f;
+
+    /**
+     * Renders this object in the requested render pass.
+     * @param gameMaster the {@link GameMaster} supplied as {@code gameMaster}
+     * @param chunkMeshes the {@link Map} supplied as {@code chunkMeshes}
+     */
+    public void render(GameMaster gameMaster, Map<Chunk, ChunkMeshBuilder.ChunkRenderMesh> chunkMeshes) {
+        ShadowSystem.sys.render(gameMaster, chunkMeshes);
+        waterTime += gameMaster.getGenDelta();
+        CameraView camera = gameMaster.getActiveCamera();
+        updateViewFogTransition(gameMaster);
+        collectTorchLights(gameMaster, camera);
+        PointShadowSystem.sys.render(gameMaster, chunkMeshes, torchLights);
+        float windowWidth = gameMaster.getWindowWidth();
+        float windowHeight = gameMaster.getWindowHeight();
+        Framebuffer sceneFbo = gameMaster.getSceneFbo();
+
+        sceneFbo.bind();
+        glViewport(0, 0, (int) windowWidth, (int) windowHeight);
+
+        ViewService viewService = gameMaster.getViewService();
+        Vector3f skyColor = viewService.getView() == View.EXTERIOR
+                ? TimeService.getSkyColor() : new Vector3f(0.0f);
+        glClearColor(skyColor.x, skyColor.y, skyColor.z, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        glActiveTexture(GL_TEXTURE0);
+        Shader defaultShader = ResourceManager.rem.getDefaultShader();
+        defaultShader.bind();
+        defaultShader.setUniform("uIsWater", false);
+        defaultShader.setUniform("uIsSubmergedEntity", false);
+
+        int textureUnit = K.Render.PRIMARY_TEXTURE_UNIT;
+        int shadowUnit = 1;
+
+        defaultShader.setUniform("uTexture", textureUnit);
+        defaultShader.setUniform("uShadowMap", shadowUnit);
+
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, gameMaster.getShadowMap().getDepthTexture());
+
+        defaultShader.setUniform("uParticleAlpha", 1.0f);
+        defaultShader.setUniform("uEnableShadows", Settings.doEnableShadows());
+        defaultShader.setUniform("uIsMaskPass", false);
+        defaultShader.setUniform("uPaperTool", false);
+
+        defaultShader.setUniform("uProjection", camera.getProjectionMatrix());
+        defaultShader.setUniform("uView", camera.getViewMatrix());
+        uploadView(defaultShader, camera);
+
+        CelestialLighting lighting = gameMaster.getCelestialLighting();
+        defaultShader.setUniform("uSunColor", lighting.getColor());
+        defaultShader.setUniform("uLightIntensity", lighting.getIntensity());
+        defaultShader.setUniform("uLightDirection", lighting.getDirection());
+        defaultShader.setUniform("uAmbientIntensity", lighting.getAmbientIntensity());
+        defaultShader.setUniform("uSkyColor", TimeService.getSkyColor());
+        defaultShader.setUniform("uLightSpaceMatrix", ShadowSystem.sys.getLightSpaceMatrix());
+        defaultShader.setUniform("uUVBounds", new Vector4f(0.0f, 0.0f, 1.0f, 1.0f));
+        defaultShader.setUniform("uAtlasScale", new Vector2f(1.0f, 1.0f));
+        defaultShader.setUniform("uAtlasOffset", new Vector2f(0.0f, 0.0f));
+        defaultShader.setUniform("uIsSprite", false);
+        defaultShader.setUniform("uIsTorch", false);
+        uploadTorchLights(defaultShader);
+        PointShadowSystem.sys.bind(defaultShader, 2);
+
+        TextureAtlas blockAtlas = ResourceManager.rem.getBlocksAtlas();
+        if (blockAtlas != null) {
+            glActiveTexture(GL_TEXTURE0 + textureUnit);
+            blockAtlas.bind();
+            defaultShader.setUniform("uUseTexture", true);
+            defaultShader.setUniform("uUseFaceAtlas", false);
+            defaultShader.setUniform("uUVBounds", new Vector4f(0.0f, 0.0f, 1.0f, 1.0f));
+            TextureAtlas.TextureRegion lavaRegion = BlockData.LAVA.getTopRegion();
+            if (lavaRegion != null) {
+                defaultShader.setUniform("uLavaUVBounds", new Vector4f(
+                        lavaRegion.uvMin().x, lavaRegion.uvMin().y,
+                        lavaRegion.uvMax().x, lavaRegion.uvMax().y));
+            }
+            TextureAtlas.TextureRegion waterRegion = BlockData.WATER.getTopRegion();
+            if (waterRegion != null) {
+                defaultShader.setUniform("uWaterUVBounds", new Vector4f(
+                        waterRegion.uvMin().x, waterRegion.uvMin().y,
+                        waterRegion.uvMax().x, waterRegion.uvMax().y));
+            }
+        }
+
+        viewProjMatrix.set(camera.getProjectionMatrix()).mul(camera.getViewMatrix());
+        frustum.set(viewProjMatrix);
+
+        updateBlur(camera);
+
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        defaultShader.setUniform("uIsWater", false);
+        defaultShader.setUniform("uIsSubmergedEntity", false);
+        boolean breakingBlock = GameInteraction.gami.isBreakingBlock();
+        Vector3i breakingPosition = GameInteraction.gami.getBreakingBlockPos();
+        defaultShader.setUniform("uVoxelBreakActive", breakingBlock);
+        if (breakingBlock) {
+            defaultShader.setUniform("uVoxelBreakPosition", new Vector3f(
+                    breakingPosition.x(), breakingPosition.y(), breakingPosition.z()));
+        }
+        Player player = Player.plyr;
+        chunkMeshes.forEach((chunk, chunkMesh) -> {
+            if (chunkMesh != null && chunkMesh.solidMesh() != null && chunkMesh.solidMesh().getIndicesCount() > 0) {
+                float minX = chunk.getChunkX() * Chunk.SIZE_X;
+                float minY = 0;
+                float minZ = chunk.getChunkZ() * Chunk.SIZE_Z;
+                float maxX = minX + Chunk.SIZE_X;
+                float maxY = Chunk.SIZE_Y;
+                float maxZ = minZ + Chunk.SIZE_Z;
+                if (frustum.testAab(minX, minY, minZ, maxX, maxY, maxZ)) {
+                    modelMatrix.identity().translate(minX, 0, minZ);
+                    defaultShader.setUniform("uModel", modelMatrix);
+                    chunkMesh.solidMesh().render();
+                }
+            }
+        });
+
+        Shader grassShader = ResourceManager.rem.getGrassShader();
+        grassShader.bind();
+        grassShader.setUniform("uTexture", textureUnit);
+        grassShader.setUniform("uShadowMap", shadowUnit);
+        grassShader.setUniform("uProjection", camera.getProjectionMatrix());
+        grassShader.setUniform("uView", camera.getViewMatrix());
+        uploadView(grassShader, camera);
+        grassShader.setUniform("uSunColor", lighting.getColor());
+        grassShader.setUniform("uLightIntensity", lighting.getIntensity());
+        grassShader.setUniform("uLightDirection", lighting.getDirection());
+        grassShader.setUniform("uAmbientIntensity", lighting.getAmbientIntensity());
+        grassShader.setUniform("uSkyColor", TimeService.getSkyColor());
+        grassShader.setUniform("uLightSpaceMatrix", ShadowSystem.sys.getLightSpaceMatrix());
+        grassShader.setUniform("uEnableShadows", Settings.doEnableShadows());
+        grassShader.setUniform("uGrassTint", ResourceManager.rem.getGrassTint());
+        grassShader.setUniform("uVoxelBreakActive", breakingBlock);
+        if (breakingBlock) {
+            grassShader.setUniform("uVoxelBreakPosition", new Vector3f(
+                    breakingPosition.x(), breakingPosition.y(), breakingPosition.z()));
+        }
+        uploadTorchLights(grassShader);
+        PointShadowSystem.sys.bind(grassShader, 2);
+        TextureAtlas.TextureRegion grassTopRegion = BlockData.GRASS.getTopRegion();
+        TextureAtlas.TextureRegion grassSideRegion = BlockData.GRASS.getSideRegion();
+        if (grassTopRegion != null && grassSideRegion != null) {
+            grassShader.setUniform("uGrassTopUVBounds", new Vector4f(
+                    grassTopRegion.uvMin().x, grassTopRegion.uvMin().y,
+                    grassTopRegion.uvMax().x, grassTopRegion.uvMax().y));
+            grassShader.setUniform("uGrassSideUVBounds", new Vector4f(
+                    grassSideRegion.uvMin().x, grassSideRegion.uvMin().y,
+                    grassSideRegion.uvMax().x, grassSideRegion.uvMax().y));
+            glDepthFunc(GL_LEQUAL);
+            chunkMeshes.forEach((chunk, chunkMesh) -> {
+                if (chunkMesh == null || chunkMesh.solidMesh() == null
+                        || chunkMesh.solidMesh().getIndicesCount() <= 0) return;
+                float minX = chunk.getChunkX() * Chunk.SIZE_X;
+                float minZ = chunk.getChunkZ() * Chunk.SIZE_Z;
+                if (frustum.testAab(minX, 0, minZ, minX + Chunk.SIZE_X,
+                        Chunk.SIZE_Y, minZ + Chunk.SIZE_Z)) {
+                    modelMatrix.identity().translate(minX, 0, minZ);
+                    grassShader.setUniform("uModel", modelMatrix);
+                    chunkMesh.solidMesh().render();
+                }
+            });
+            glDepthFunc(GL_LESS);
+        }
+        grassShader.setUniform("uVoxelBreakActive", false);
+
+        if (breakingBlock) {
+            iBlock interactiveBlock = gameMaster.getWorld().getInteractiveBlockAt(breakingPosition.x(),
+                    breakingPosition.y(), breakingPosition.z());
+            Block targetBlock = interactiveBlock != null ? interactiveBlock : gameMaster.getWorld().getBlockAt(
+                    breakingPosition.x(), breakingPosition.y(), breakingPosition.z());
+
+            if (targetBlock != null) {
+                float breakProgress = GameInteraction.gami.getBreakProgress();
+                if (interactiveBlock != null && interactiveBlock.getBlockModel() != null) {
+                    defaultShader.bind();
+                    defaultShader.setUniform("uVoxelBreakActive", false);
+                    defaultShader.setUniform("uModelBreakActive", true);
+                    defaultShader.setUniform("uModelBreakProgress", breakProgress);
+                    interactiveBlock.getModelTransform(modelMatrix);
+                    interactiveBlock.getBlockModel().render(defaultShader, modelMatrix);
+                    defaultShader.setUniform("uModelBreakActive", false);
+                } else if (interactiveBlock == null) {
+                    targetBlock.initVoxels();
+                    targetBlock.updateBreakingProgress(breakProgress);
+
+                    BlockData data = targetBlock.getType();
+                    int[][] offsets = {
+                        {0, 1, 0}, {0, -1, 0},
+                        {0, 0, 1}, {0, 0, -1},
+                        {1, 0, 0}, {-1, 0, 0}
+                    };
+
+                    int sides = 6;
+                    boolean[] neighbourSolid = new boolean[sides];
+                    for (int i = 0; i < sides; i++) {
+                        int nx = breakingPosition.x() + offsets[i][0];
+                        int ny = breakingPosition.y() + offsets[i][1];
+                        int nz = breakingPosition.z() + offsets[i][2];
+                        Block neighbour = World.wrld.getBlockAt(nx, ny, nz);
+                        neighbourSolid[i] = (neighbour != null && neighbour.getType().isSolid());
+                    }
+
+                    Mesh voxelMesh = Mesh.createVoxelBlockMesh(
+                            targetBlock::isVoxelSolid,
+                            data.getTopRegion(),
+                            data.getBottomRegion(),
+                            data.getSideRegion(),
+                            neighbourSolid
+                    );
+
+                    defaultShader.bind();
+                    defaultShader.setUniform("uVoxelBreakActive", false);
+
+                    if (blockAtlas != null) {
+                        glActiveTexture(GL_TEXTURE0 + textureUnit);
+                        blockAtlas.bind();
+                        defaultShader.setUniform("uTexture", textureUnit);
+                        defaultShader.setUniform("uUseTexture", true);
+                        defaultShader.setUniform("uUseFaceAtlas", false);
+                        defaultShader.setUniform("uUVBounds", new Vector4f(0.0f, 0.0f, 1.0f, 1.0f));
+                    }
+
+                    modelMatrix.identity().translate(breakingPosition.x(), breakingPosition.y(), breakingPosition.z());
+                    defaultShader.setUniform("uModel", modelMatrix);
+                    voxelMesh.render();
+                    voxelMesh.dispose();
+                }
+            }
+        }
+
+        if (player != null) {
+            defaultShader.bind();
+            defaultShader.setUniform("uIgnoreViewFog", true);
+            player.render(gameMaster, RenderPass.NORMAL);
+            defaultShader.bind();
+            defaultShader.setUniform("uIgnoreViewFog", false);
+            if (blockAtlas != null) {
+                glActiveTexture(GL_TEXTURE0 + textureUnit);
+                blockAtlas.bind();
+                defaultShader.setUniform("uTexture", textureUnit);
+                defaultShader.setUniform("uUseTexture", true);
+                defaultShader.setUniform("uUseFaceAtlas", false);
+                defaultShader.setUniform("uUVBounds", new Vector4f(0.0f, 0.0f, 1.0f, 1.0f));
+            }
+        }
+
+        defaultShader.bind();
+        defaultShader.setUniform("uIsWater", false);
+        defaultShader.setUniform("uIsSubmergedEntity", false);
+        defaultShader.setUniform("uParticleAlpha", 1.0f);
+        ParticleEngine.peng.render(defaultShader, ResourceManager.rem.getBillboardMesh(),
+                gameMaster.getActiveCamera());
+
+        defaultShader.bind();
+        defaultShader.setUniform("uIsWater", true);
+        defaultShader.setUniform("uUVBounds", new Vector4f(0.0f, 0.0f, 1.0f, 1.0f));
+        defaultShader.setUniform("uParticleAlpha", 1.0f);
+
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LEQUAL);
+        glDepthMask(false);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        chunkMeshes.forEach((chunk, chunkMesh) -> {
+            if (chunkMesh == null || chunkMesh.waterMesh() == null ||
+                    chunkMesh.waterMesh().getIndicesCount() <= 0) {
+                return;
+            }
+
+            float minX = chunk.getChunkX() * Chunk.SIZE_X;
+            float minZ = chunk.getChunkZ() * Chunk.SIZE_Z;
+
+            float maxX = minX + Chunk.SIZE_X;
+            float maxY = Chunk.SIZE_Y;
+            float maxZ = minZ + Chunk.SIZE_Z;
+
+            if (frustum.testAab(minX, 0.0f, minZ, maxX, maxY, maxZ)) {
+                modelMatrix.identity().translate(minX, 0.0f, minZ);
+                defaultShader.setUniform("uModel", modelMatrix);
+                defaultShader.setUniform("uTime", waterTime);
+                chunkMesh.waterMesh().render();
+            }
+        });
+
+        glDepthMask(true);
+
+        BlockPos hoveredCell = HoveredCell.get(gameMaster);
+        renderTorches(camera, defaultShader);
+
+        defaultShader.bind();
+        defaultShader.setUniform("uIsWater", false);
+        defaultShader.setUniform("uIsSubmergedEntity", false);
+
+        World.wrld.forEach(block -> {
+            if (!(block instanceof Crop crop)) return;
+            SpriteSheet sheet = ResourceManager.rem.getCropSpritesheets().get(crop.getCropType());
+            if (sheet == null) return;
+
+            glActiveTexture(GL_TEXTURE0 + K.Render.PRIMARY_TEXTURE_UNIT);
+            sheet.bind();
+            defaultShader.setUniform("uTexture", K.Render.PRIMARY_TEXTURE_UNIT);
+            defaultShader.setUniform("uUseTexture", true);
+            defaultShader.setUniform("uUseFaceAtlas", false);
+
+            int frame = crop.getStage().getFrameIndex();
+            defaultShader.setUniform("uUVBounds", sheet.getUVBounds(frame));
+            defaultShader.setUniform("uSunColor", lighting.getColor());
+            defaultShader.setUniform("uSkyColor", TimeService.getSkyColor());
+            defaultShader.setUniform("uLightDirection", lighting.getDirection());
+            defaultShader.setUniform("uLightIntensity", lighting.getIntensity());
+            defaultShader.setUniform("uAmbientIntensity", lighting.getAmbientIntensity());
+            defaultShader.setUniform("uLightSpaceMatrix", ShadowSystem.sys.getLightSpaceMatrix());
+
+            float renderX = crop.getX() + 0.5f;
+            boolean usesPlantMesh = crop.getCropType().usesPlantMesh();
+            float renderY = crop.getY() + (usesPlantMesh
+                    ? 1.0f : K.World.SHORTER_BLOCK_HEIGHT);
+            float renderZ = crop.getZ() + 0.5f;
+            setBillboardModel(camera, renderX, renderY, renderZ,
+                    usesPlantMesh ? 1.0f : 0.8f,
+                    usesPlantMesh ? 1.0f : 0.8f, 1.0f);
+            defaultShader.setUniform("uModel", modelMatrix);
+            if (usesPlantMesh) glDisable(GL_CULL_FACE);
+            ResourceManager.rem.getBillboardMesh().render();
+            if (usesPlantMesh) glEnable(GL_CULL_FACE);
+            sheet.unbind();
+        });
+
+        World.wrld.forEachInteractiveBlock(block -> {
+            if (block.getBlockModel() == null) return;
+            if (breakingBlock && block.getX() == breakingPosition.x()
+                    && block.getY() == breakingPosition.y()
+                    && block.getZ() == breakingPosition.z()) return;
+
+            defaultShader.setUniform("uUseFaceAtlas", false);
+            defaultShader.setUniform("uIsSprite", false);
+            defaultShader.setUniform("uUseTexture", true);
+            defaultShader.setUniform("uSunColor", lighting.getColor());
+            defaultShader.setUniform("uSkyColor", TimeService.getSkyColor());
+            defaultShader.setUniform("uLightDirection", lighting.getDirection());
+            defaultShader.setUniform("uLightIntensity", lighting.getIntensity());
+            defaultShader.setUniform("uAmbientIntensity", lighting.getAmbientIntensity());
+
+            block.getModelTransform(modelMatrix);
+            block.getBlockModel().render(defaultShader, modelMatrix);
+        });
+
+        defaultShader.setUniform("uIsWater", false);
+        defaultShader.setUniform("uIsSubmergedEntity", false);
+
+        World.wrld.forEachPlant(plant -> {
+            BlockData data = plant.data();
+            TextureAtlas.TextureRegion region = data.getTopRegion();
+            if (region == null) return;
+
+            float renderX = plant.x() + 0.5f;
+            float renderY = plant.y();
+            float renderZ = plant.z() + 0.5f;
+            setBillboardModel(camera, renderX, renderY, renderZ, 1.0f, 1.0f, 1.0f);
+            defaultShader.setUniform("uModel", modelMatrix);
+            defaultShader.setUniform("uTexture", K.Render.PRIMARY_TEXTURE_UNIT);
+            defaultShader.setUniform("uUseTexture", true);
+            defaultShader.setUniform("uUseFaceAtlas", false);
+
+            defaultShader.setUniform("uUVBounds", new Vector4f(
+                    region.uvMin().x, region.uvMax().y,
+                    region.uvMax().x, region.uvMin().y));
+
+            glDisable(GL_CULL_FACE);
+            glActiveTexture(GL_TEXTURE0 + K.Render.PRIMARY_TEXTURE_UNIT);
+            ResourceManager.rem.getBlocksAtlas().bind();
+            defaultShader.setUniform("uAmbientIntensity", 1.0f);
+            ResourceManager.rem.getBillboardMesh().render();
+            defaultShader.setUniform("uAmbientIntensity", lighting.getAmbientIntensity());
+            glEnable(GL_CULL_FACE);
+        });
+
+        if (blockAtlas != null) {
+            glActiveTexture(GL_TEXTURE0 + textureUnit);
+            blockAtlas.bind();
+            defaultShader.setUniform("uUseTexture", true);
+            defaultShader.setUniform("uUseFaceAtlas", false);
+            defaultShader.setUniform("uUVBounds", new Vector4f(0.0f, 0.0f, 1.0f, 1.0f));
+            defaultShader.setUniform("uAtlasScale", new Vector2f(1.0f, 1.0f));
+            defaultShader.setUniform("uAtlasOffset", new Vector2f(0.0f, 0.0f));
+        }
+
+        defaultShader.setUniform("uIsWater", false);
+        defaultShader.setUniform("uIsSubmergedEntity", false);
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LESS);
+        glDepthMask(true);
+
+        gameMaster.getEntities().stream()
+                .filter(entity -> entity != player)
+                .forEach(entity -> entity.render(gameMaster, RenderPass.NORMAL));
+
+        if (WeatherService.isRaining() && viewService.getView() == View.EXTERIOR) {
+            Vector3f rainTargetPos = (player != null)
+                    ? new Vector3f(player.getPosition().x(), player.getPosition().y() + 10.0f,
+                    player.getPosition().z())
+                    : camera.getPosition();
+
+            gameMaster.getRainEngine().render(ResourceManager.rem.getRainShader(),
+                    camera.getViewMatrix(), camera.getProjectionMatrix(),
+                    rainTargetPos, World.wrld);
+        }
+
+        if (blockAtlas != null) blockAtlas.unbind();
+
+        Item selectedItem = ItemSelection.selectedItem;
+        if (selectedItem instanceof Tool || selectedItem instanceof Block) {
+            if (hoveredCell != null) {
+                Vector3f outlineColor = getOutlineColor();
+                Shader outlineShader = ResourceManager.rem.getOutlineShader();
+                glEnable(GL_DEPTH_TEST);
+                glDepthFunc(GL_LESS);
+                glDepthMask(false);
+                outlineShader.bind();
+                outlineShader.setUniform("uProjection", camera.getProjectionMatrix());
+                outlineShader.setUniform("uView", camera.getViewMatrix());
+                outlineShader.setUniform("uViewportSize", windowWidth, windowHeight);
+                outlineShader.setUniform("uOutlineColor", new Vector4f(outlineColor, 1.0f));
+
+                var selectedInteractiveBlock = World.wrld.getInteractiveBlockAt(
+                        hoveredCell.x(), hoveredCell.y(), hoveredCell.z());
+                if (selectedInteractiveBlock != null
+                        && selectedInteractiveBlock.getType().isDoor()) {
+                    selectedInteractiveBlock.getSelectionTransform(modelMatrix);
+                } else {
+                    modelMatrix.identity().translate(
+                            hoveredCell.x(), hoveredCell.y(), hoveredCell.z());
+                }
+
+                outlineShader.setUniform("uModel", modelMatrix);
+                BlockShape selectedShape = hoveredCell.data() instanceof BlockData ?
+                        World.wrld.getBlockShapeAt(hoveredCell.x(), hoveredCell.y(), hoveredCell.z()) : null;
+                Mesh selectionMesh = ResourceManager.rem.getSelectionMesh(selectedShape);
+                for (float[] direction : BLOCK_OUTLINE_DIRECTIONS) {
+                    outlineShader.setUniform("uOutlineOffset",
+                            direction[0] * BLOCK_OUTLINE_WIDTH,
+                            direction[1] * BLOCK_OUTLINE_WIDTH);
+                    selectionMesh.renderLines();
+                }
+
+                glDepthMask(true);
+                glEnable(GL_DEPTH_TEST);
+                outlineShader.unbind();
+            }
+        }
+
+        defaultShader.unbind();
+        sceneFbo.unbind((int) windowWidth, (int) windowHeight);
+
+        if (gameMaster.isInventoryOpen() || gameMaster.isBackpackOpen() || BookService.bs.isOpen()) {
+            glDisable(GL_DEPTH_TEST);
+            Shader blurShader = ResourceManager.rem.getBlurShader();
+            Vector2f resolution = new Vector2f(windowWidth, windowHeight);
+
+            Framebuffer blurFbo = gameMaster.getBlurFbo();
+            blurFbo.bind();
+            glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT);
+
+            blurShader.bind();
+            blurShader.setUniform("uResolution", resolution);
+            blurShader.setUniform("uDirection", new Vector2f(1.0f, 0.0f));
+            blurShader.setUniform("uBlurRadius", 5.0f);
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, sceneFbo.getTextureId());
+            blurShader.setUniform("screenTexture", 0);
+            ResourceManager.rem.getScreenQuadMesh().render();
+            blurShader.unbind();
+            blurFbo.unbind((int) windowWidth, (int) windowHeight);
+
+            glClear(GL_COLOR_BUFFER_BIT);
+            blurShader.bind();
+            blurShader.setUniform("uResolution", resolution);
+            blurShader.setUniform("uDirection", new Vector2f(0.0f, 1.0f));
+            blurShader.setUniform("uBlurRadius", 3.0f);
+
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, blurFbo.getTextureId());
+            blurShader.setUniform("screenTexture", 0);
+
+            ResourceManager.rem.getScreenQuadMesh().render();
+            blurShader.unbind();
+            glEnable(GL_DEPTH_TEST);
+
+        } else {
+            glDisable(GL_DEPTH_TEST);
+            Shader motionBlurShader = ResourceManager.rem.getMotionBlurShader();
+            motionBlurShader.bind();
+            motionBlurShader.setUniform("uScene", 0);
+            motionBlurShader.setUniform("uVelocity", new Vector2f(blurX, blurY));
+            motionBlurShader.setUniform("uStrength", Settings.doEnableMotions());
+
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, sceneFbo.getTextureId());
+
+            ResourceManager.rem.getScreenQuadMesh().render();
+
+            motionBlurShader.unbind();
+            glEnable(GL_DEPTH_TEST);
+        }
+
+        if (player.isNoClip()) {
+            glDisable(GL_CULL_FACE);
+        } else {
+            glEnable(GL_CULL_FACE);
+            glCullFace(GL_BACK);
+            glEnable(GL_DEPTH_TEST);
+        }
+    }
+
+    /**
+     * Applies the paper palette to the complete frame, including the UI.
+     * The UI is rendered by {@code GameMaster} after the world pass, so this
+     * method must run after that UI pass to remain the top-most render layer.
+     * @param gameMaster the current game runtime
+     */
+    public void renderPaper(GameMaster gameMaster) {
+        if (!Settings.doEnablePaper()) return;
+
+        int windowWidth = (int) gameMaster.getWindowWidth();
+        int windowHeight = (int) gameMaster.getWindowHeight();
+        Framebuffer paperSource = gameMaster.getBlurFbo();
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, paperSource.getTextureId());
+        glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, windowWidth, windowHeight);
+
+        glDisable(GL_DEPTH_TEST);
+        glDisable(GL_CULL_FACE);
+        glDisable(GL_BLEND);
+        glDisable(GL_SCISSOR_TEST);
+
+        Shader paperShader = ResourceManager.rem.getPaperShader();
+        paperShader.bind();
+        paperShader.setUniform("uScene", 0);
+        ResourceManager.rem.getScreenQuadMesh().render();
+        paperShader.unbind();
+
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_CULL_FACE);
+    }
+
+    /**
+     * Returns the outline color.
+     * @return the {@link Vector3f} representing the outline color
+     */
+    private Vector3f getOutlineColor() {
+        boolean isSmartShift = GameInteraction.gami != null && GameInteraction.gami.isSmartShiftActive();
+        return isSmartShift ? new Vector3f(1.0f, 1.0f, 0.0f) : K.Colors.OUTLINE_DEFAULT;
+    }
+
+    /** Uploads nearby emissive blocks so the world shader can light them. */
+    private void collectTorchLights(GameMaster gameMaster, CameraView camera) {
+        torchLights.clear();
+        ViewService viewService = gameMaster.getViewService();
+        Player player = Player.plyr;
+        Vector3f centerPosition = (player != null) ? player.getPosition() : camera.getPosition();
+        float searchDistance = 24.0f;
+        float searchDistanceSq = searchDistance * searchDistance;
+
+        World.wrld.forEachTorch(torch -> {
+            BlockShape.Box bounds = getTorchBounds(torch);
+            Vector3f position = new Vector3f(
+                    torch.x() + center(bounds.minX(), bounds.maxX()),
+                    torch.y() + bounds.maxY() - 0.15f,
+                    torch.z() + center(bounds.minZ(), bounds.maxZ()));
+            if (viewService.isVisible(position)
+                    && position.distanceSquared(centerPosition) <= searchDistanceSq) {
+                torchLights.add(position);
+            }
+        });
+
+        World.wrld.forEachLava(lava -> {
+            Vector3f position = new Vector3f(lava.x() + 0.5f, lava.y() + 0.5f, lava.z() + 0.5f);
+            if (viewService.isVisible(position)
+                    && position.distanceSquared(centerPosition) <= searchDistanceSq) {
+                torchLights.add(position);
+            }
+        });
+
+        torchLights.sort(Comparator.comparingDouble(position ->
+                position.distanceSquared(centerPosition)));
+    }
+
+    /** Uploads the collected artificial lights to the material shader. */
+    private void uploadTorchLights(Shader shader) {
+        int lightCount = Math.min(torchLights.size(), MAX_TORCH_LIGHTS);
+        shader.setUniform("uTorchCount", lightCount);
+        for (int index = 0; index < lightCount; index++) {
+            shader.setUniform("uTorchPositions[" + index + "]", torchLights.get(index));
+        }
+    }
+
+    /** Renders every torch as an animated, camera-facing billboard. */
+    private void renderTorches(CameraView camera, Shader shader) {
+        SpriteSheet torchFrames = ResourceManager.rem.getTorchIcons();
+        if (torchFrames == null) return;
+
+        shader.bind();
+        shader.setUniform("uIsWater", false);
+        shader.setUniform("uIsSubmergedEntity", false);
+        shader.setUniform("uIsSprite", true);
+        shader.setUniform("uIsTorch", true);
+        shader.setUniform("uUseTexture", true);
+        shader.setUniform("uUseFaceAtlas", false);
+        shader.setUniform("uUVBounds", torchFrames.getUVBounds(
+                (int) ((System.nanoTime() / 125_000_000L) % torchFrames.getTotalFrames())));
+
+        glActiveTexture(GL_TEXTURE0 + K.Render.PRIMARY_TEXTURE_UNIT);
+        torchFrames.bind();
+        glDisable(GL_CULL_FACE);
+        World.wrld.forEachTorch(torch -> {
+            BlockShape.Box bounds = getTorchBounds(torch);
+            float centerX = torch.x() + center(bounds.minX(), bounds.maxX());
+            float centerZ = torch.z() + center(bounds.minZ(), bounds.maxZ());
+            setBillboardModel(camera, centerX, torch.y() + bounds.minY(), centerZ,
+                    TORCH_SCALE_X, TORCH_SCALE_Y, TORCH_SCALE_Z);
+            shader.setUniform("uModel", modelMatrix);
+            ResourceManager.rem.getBillboardMesh().render();
+        });
+        glEnable(GL_CULL_FACE);
+        torchFrames.unbind();
+        shader.setUniform("uIsTorch", false);
+        shader.setUniform("uIsSprite", false);
+    }
+
+    /** Builds a camera-facing model transform for every billboard sprite. */
+    private void setBillboardModel(CameraView camera, float x, float y, float z,
+                                   float scaleX, float scaleY, float scaleZ) {
+        float angle = (float) Math.atan2(camera.getPosition().x - x,
+                camera.getPosition().z - z);
+        modelMatrix.identity().translate(x, y, z).rotateY(angle)
+                .scale(scaleX, scaleY, scaleZ);
+    }
+
+    /** Uploads the common cutaway and fog-of-war volume to a world shader. */
+    private void uploadView(Shader shader, CameraView camera) {
+        ViewFogState fog = getRenderedViewFog();
+        Player player = Player.plyr;
+        shader.setUniform("uViewMode", fog.view().getShaderId());
+        shader.setUniform("uViewPlayerPosition", player == null
+                ? new Vector3f() : player.getPosition());
+        shader.setUniform("uViewCameraPosition", camera.getPosition());
+        shader.setUniform("uViewBounds", fog.bounds());
+        shader.setUniform("uViewRadius", fog.radius());
+        shader.setUniform("uViewFloorY", fog.ceilingY());
+        shader.setUniform("uViewCeilingY", fog.ceilingY());
+        shader.setUniform("uViewFogStrength", getViewFogStrength());
+        shader.setUniform("uIgnoreViewFog", false);
+    }
+
+    private void updateViewFogTransition(GameMaster gameMaster) {
+        ViewFogState current = captureViewFog(gameMaster.getViewService());
+        if (displayedViewFog == null) {
+            displayedViewFog = current;
+            targetViewFog = current;
+            return;
+        }
+        if (current.view() != targetViewFog.view()) {
+            boolean crossesExterior = current.view() == View.EXTERIOR
+                    || targetViewFog.view() == View.EXTERIOR;
+            viewFogTransition = crossesExterior && current.view() != View.EXTERIOR
+                    ? 0.0f : 1.0f;
+        }
+        displayedViewFog = current;
+        targetViewFog = current;
+
+        if (targetViewFog.view() == View.EXTERIOR) {
+            viewFogTransition = 1.0f;
+            return;
+        }
+
+        if (viewFogTransition < 1.0f) {
+            viewFogTransition = Math.min(1.0f, viewFogTransition
+                    + gameMaster.getGenDelta() / VIEW_FOG_TRANSITION_DURATION);
+        }
+    }
+
+    /**
+     * Returns the current view fog state.
+     * @return the {@link ViewFogState} representing the current view fog state
+     */
+    private ViewFogState getRenderedViewFog() {
+        return targetViewFog != null ? targetViewFog : displayedViewFog;
+    }
+
+    /**
+     * Returns the current view fog strength.
+     * @return the view fog strength
+     */
+    private float getViewFogStrength() {
+        if (targetViewFog == null || targetViewFog.view() == View.EXTERIOR) return 0.0f;
+        return Math.clamp(viewFogTransition, 0.0f, VIEW_FOG_MAX_STRENGTH);
+    }
+
+    /**
+     * Returns the current view fog state.
+     * @param service the current view service
+     * @return the current view fog state
+     */
+    private static ViewFogState captureViewFog(ViewService service) {
+        return new ViewFogState(service.getView(), service.getBounds(),
+                Settings.getUndergroundViewRadius(), service.getFloorY(), service.getCeilingY());
+    }
+
+    /**
+     * Represents the state of the view fog.
+     * @param view the current view
+     * @param bounds the bounds of the view
+     * @param radius the radius of the view
+     * @param floorY the floor Y of the view
+     * @param ceilingY the ceiling Y of the view
+     */
+    private record ViewFogState(View view, Vector4f bounds, float radius,
+                                float floorY, float ceilingY) { }
+
+    /** Returns the physical bounds that also anchor a placed torch sprite. */
+    private static BlockShape.Box getTorchBounds(BlockPos torch) {
+        BlockShape shape = World.wrld.getBlockShapeAt(
+                torch.x(), torch.y(), torch.z());
+        BlockShape.Box[] boxes = shape.getBoxes();
+        return boxes.length == 0
+                ? BlockShape.TORCH_FLOOR.getBoxes()[0]
+                : boxes[0];
+    }
+
+    /**
+     * Returns the center of the given bounds.
+     * @param minimum the minimum X coordinate
+     * @param maximum the maximum X coordinate
+     * @return the center of the given bounds
+     */
+    private static float center(float minimum, float maximum) {
+        return (minimum + maximum) * 0.5f;
+    }
+
+    /**
+     * Updates the blur.
+     * @param camera the {@link CameraView} supplied as {@code camera}
+     */
+    private void updateBlur(CameraView camera) {
+        float yawDelta = camera.getYaw() - previousCameraYaw;
+        if (yawDelta > K.Camera.HALF_DEGREES) yawDelta -= K.Camera.FULL_DEGREES;
+        else if (yawDelta < -K.Camera.HALF_DEGREES) yawDelta += K.Camera.FULL_DEGREES;
+
+        float pitchDelta = camera.getPitch() - previousCameraPitch;
+        previousCameraYaw = camera.getYaw();
+        previousCameraPitch = camera.getPitch();
+        blurX = yawDelta / K.Camera.FULL_DEGREES;
+        blurY = pitchDelta / K.Camera.HALF_DEGREES;
+    }
+}

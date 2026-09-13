@@ -1,7 +1,7 @@
 package org.kbeng.engine.data;
 
 import org.kbeng.engine.utils.K;
-import org.kbeng.rpg.data.DataClass;
+import org.kbeng.games.rpg.data.DataClass;
 
 /**
  * Toast provides toast capabilities within the data subsystem.
