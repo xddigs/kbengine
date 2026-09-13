@@ -14,8 +14,6 @@ import org.kbeng.engine.input.ControlAction;
 import org.kbeng.engine.input.Controls;
 import org.kbeng.engine.input.Mouse;
 import org.kbeng.games.rpg.item.*;
-import org.kbeng.rpg.data.*;
-import org.kbeng.rpg.item.*;
 import org.kbeng.games.rpg.service.SoundService;
 import org.kbeng.engine.utils.K;
 import org.kbeng.engine.utils.Settings;

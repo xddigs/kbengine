@@ -17,7 +17,6 @@ import org.kbeng.engine.input.Controls;
 import org.kbeng.engine.input.Mouse;
 import org.kbeng.games.rpg.item.Item;
 import org.kbeng.games.rpg.item.Tool;
-import org.kbeng.rpg.data.*;
 import org.kbeng.games.rpg.service.BookService;
 import org.kbeng.engine.service.Service;
 import org.kbeng.games.rpg.service.TimeService;

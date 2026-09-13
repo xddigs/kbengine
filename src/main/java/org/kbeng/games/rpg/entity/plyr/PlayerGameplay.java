@@ -12,7 +12,6 @@ import org.kbeng.games.rpg.entity.Player;
 import org.kbeng.games.rpg.entity.WorldItem;
 import org.kbeng.games.rpg.entity.pathfinding.GridPos;
 import org.kbeng.games.rpg.item.*;
-import org.kbeng.rpg.item.*;
 import org.kbeng.games.rpg.service.SoundService;
 import org.kbeng.engine.utils.Local;
 import org.kbeng.engine.utils.Settings;

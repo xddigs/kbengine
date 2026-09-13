@@ -8,7 +8,6 @@ import org.kbeng.engine.graphics.gltf.GLTFModel;
 import org.kbeng.games.rpg.item.Item;
 import org.kbeng.games.rpg.item.Shield;
 import org.kbeng.games.rpg.entity.pathfinding.GridPos;
-import org.kbeng.rpg.data.*;
 import org.kbeng.games.rpg.service.SoundService;
 import org.kbeng.games.rpg.service.NPCService;
 import org.kbeng.games.rpg.utils.DeathManager;
