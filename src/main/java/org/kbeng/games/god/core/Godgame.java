@@ -1,4 +1,4 @@
-package org.kbeng.games.kdom.core;
+package org.kbeng.games.god.core;
 
 import org.kbeng.engine.graphics.Application;
 import org.kbeng.engine.utils.K;
@@ -10,11 +10,11 @@ import java.util.function.Consumer;
  * KingdomCore is the entry point for the Kingdom application.
  * Boots the application and initializes the application lifecycle.
  */
-public class KingdomCore implements Application {
+public class Godgame implements Application {
 
     @Override
     public Configuration configuration() {
-        return new Configuration("Kingdom", (int) K.Window.DEFAULT_WIDTH,
+        return new Configuration("Godgame", (int) K.Window.DEFAULT_WIDTH,
                 (int) K.Window.DEFAULT_HEIGHT, true, K.Paths.LOGO,
                 K.Paths.CURSOR_POINTER, List.of(
                 new WindowIcon(16, "/assets/ui/iconx16.png"),
