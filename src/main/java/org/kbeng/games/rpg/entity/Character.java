@@ -3,7 +3,6 @@ package org.kbeng.games.rpg.entity;
 import org.kbeng.games.rpg.data.*;
 import org.kbeng.games.rpg.item.Item;
 import org.kbeng.games.rpg.item.Wallet;
-import org.kbeng.rpg.data.*;
 import org.kbeng.engine.utils.Local;
 import org.kbeng.engine.utils.ToastFactory;
 

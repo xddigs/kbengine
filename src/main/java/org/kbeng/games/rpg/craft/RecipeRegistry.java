@@ -2,8 +2,6 @@ package org.kbeng.games.rpg.craft;
 
 import org.kbeng.games.rpg.data.*;
 import org.kbeng.games.rpg.item.*;
-import org.kbeng.rpg.data.*;
-import org.kbeng.rpg.item.*;
 
 import java.util.*;
 import java.util.function.Function;

@@ -8,8 +8,6 @@ import org.kbeng.games.rpg.entity.enemies.Goblin;
 import org.kbeng.engine.graphics.gltf.GLTFLoader;
 import org.kbeng.engine.graphics.gltf.GLTFModel;
 import org.kbeng.games.rpg.item.*;
-import org.kbeng.rpg.data.*;
-import org.kbeng.rpg.item.*;
 import org.kbeng.engine.utils.K;
 import org.joml.Vector3f;
 import org.slf4j.Logger;

@@ -5,7 +5,6 @@ import org.kbeng.games.rpg.graphics.CelestialLighting;
 import org.kbeng.games.rpg.graphics.EquipmentController;
 import org.kbeng.games.rpg.graphics.ResourceManager;
 import org.kbeng.games.rpg.graphics.ShadowSystem;
-import org.kbeng.rpg.graphics.*;
 import org.kbeng.games.rpg.data.Direction;
 import org.kbeng.games.rpg.data.ArmorFinish;
 import org.kbeng.games.rpg.data.ArmorSlot;

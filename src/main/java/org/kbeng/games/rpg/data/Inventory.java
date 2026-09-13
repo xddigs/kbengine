@@ -3,7 +3,6 @@ package org.kbeng.games.rpg.data;
 import org.kbeng.games.rpg.entity.Character;
 import org.kbeng.games.rpg.entity.Player;
 import org.kbeng.games.rpg.item.*;
-import org.kbeng.rpg.item.*;
 import org.kbeng.games.rpg.service.BookService;
 import org.kbeng.games.rpg.service.SoundService;
 import org.kbeng.engine.utils.K;

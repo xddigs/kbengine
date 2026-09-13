@@ -1,7 +1,6 @@
 package org.kbeng.games.rpg.data;
 
 import org.kbeng.games.rpg.wrld.*;
-import org.kbeng.rpg.wrld.*;
 
 /**
  * WorldData declares the canonical world data set for the data subsystem.

@@ -2,7 +2,6 @@ package org.kbeng.games.rpg.entity;
 
 import org.kbeng.games.rpg.data.*;
 import org.kbeng.games.rpg.item.iBlock;
-import org.kbeng.rpg.data.*;
 import org.kbeng.engine.utils.K;
 import org.kbeng.games.rpg.wrld.GameMaster;
 import org.kbeng.games.rpg.wrld.World;

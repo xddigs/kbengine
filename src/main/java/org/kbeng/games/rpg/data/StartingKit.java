@@ -1,7 +1,6 @@
 package org.kbeng.games.rpg.data;
 
 import org.kbeng.games.rpg.item.*;
-import org.kbeng.rpg.item.*;
 
 /**
  * StartingKit provides starting kit capabilities within the data subsystem.

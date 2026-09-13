@@ -1,7 +1,6 @@
 package org.kbeng.games.rpg.entity;
 
 import org.kbeng.games.rpg.data.*;
-import org.kbeng.rpg.data.*;
 import org.kbeng.games.rpg.wrld.GameMaster;
 
 /**

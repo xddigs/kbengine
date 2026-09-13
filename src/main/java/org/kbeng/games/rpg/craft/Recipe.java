@@ -1,9 +1,9 @@
 package org.kbeng.games.rpg.craft;
 
+import org.kbeng.games.rpg.data.FoodData;
 import org.kbeng.games.rpg.data.MaterialID;
 import org.kbeng.games.rpg.data.Produce;
 import org.kbeng.games.rpg.item.*;
-import org.kbeng.rpg.item.*;
 
 import java.util.List;
 import java.util.Map;
@@ -130,7 +130,7 @@ public final class Recipe {
             case MiningComponent mc1 when b instanceof MiningComponent mc2 -> mc1.getTier() == mc2.getTier()
                     && mc1.getId() == mc2.getId();
             case Block blk1 when b instanceof Block blk2 -> blk1.getType() == blk2.getType();
-            case Food food1 -> b instanceof Food food2 && food1.type() == food2.type();
+            case Food food1 -> b instanceof Food(FoodData type) && food1.type() == type;
             case Produce produce1 -> b instanceof Produce produce2
                     && produce1.getType() == produce2.getType();
             case Material mat1 when b instanceof Material mat2 -> mat1.getId() == mat2.getId();
