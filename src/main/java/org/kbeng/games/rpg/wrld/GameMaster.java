@@ -217,8 +217,7 @@ public final class GameMaster implements Application {
     public synchronized void spawn() {
         areEntitiesActive = false;
         chunkManager.updateLoadedChunks(0, 0);
-        GridPos spawn = world.getHighestY(0.5f, 0.5f);
-        float spawnY = spawn.y() + 1.8f;
+        float spawnY = world.voxels().surface(0.5f, 0.5f) + 0.8f;
         Player.plyr.setPosition(0.5f, spawnY, 0.5f);
         NPCService.npcs.spawn();
         EnemyService.enms.spawn();
@@ -296,16 +295,12 @@ public final class GameMaster implements Application {
         genDelta = delta;
         environmentSystem.update(HoveredCell.get(this), delta);
         NPC trader = NPCService.npcs.getTrader(); if (trader != null) trader.updateShop(TimeService.ts);
-        CropService.cs.update(delta, WeatherService.wes.getWeather());
-        TreeService.ts.update(this);
-        world.forEachInteractiveBlock(iBlock::animate);
         updateEntities(delta);
         viewService.update(world, Player.plyr);
         cameraController.update(this, delta);
         ParticleEngine.peng.update(delta);
         StepController.step.update(this, SoundService.fx, delta);
         GameInteraction.gami.update(this, ItemSelection.selectedItem);
-        FluidSimulation.updateAll(delta);
         chunkManager.update(Player.plyr.getPosition().x(), Player.plyr.getPosition().z(), delta);
         Mouse.update();
         Keyboard.update();

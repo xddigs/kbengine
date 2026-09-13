@@ -29,6 +29,11 @@ public class World {
     private final Map<Long, Chunk> chunks = new HashMap<>();
     private final Map<Long, BlockPos> torches = new HashMap<>();
     private final Map<Long, BlockPos> lavaCells = new HashMap<>();
+    private final org.kbeng.games.rpg.voxel.VoxelWorld voxels = new org.kbeng.games.rpg.voxel.VoxelWorld(0x4B42454E47494E45L);
+
+    /** Authoritative fine grid. Its integer coordinates count quarter-unit voxels;
+     * actors continue to pass physical floats through the spatial bridge below. */
+    public org.kbeng.games.rpg.voxel.VoxelWorld voxels() { return voxels; }
 
     /**
      * Creates a new private {@code World} instance.
@@ -66,7 +71,7 @@ public class World {
     public boolean isChunkLoadedAt(int x, int z) {
         int chunkX = Math.floorDiv(x, Chunk.SIZE_X);
         int chunkZ = Math.floorDiv(z, Chunk.SIZE_Z);
-        return chunks.containsKey(get2DKey(chunkX, chunkZ));
+        return voxels.chunk(chunkX, chunkZ) != null;
     }
 
     /**
@@ -340,6 +345,13 @@ public class World {
      * @return {@code byte}; the block type at
      */
     public byte getBlockTypeAt(int x, int y, int z) {
+        return voxels.at(x, y, z);
+    }
+
+    /** Legacy storage reader retained for restoring the metre-block pipeline.
+     * Active physics must use {@link #voxels()} with fractional world bounds. */
+    @Deprecated(since = "voxel-terrain", forRemoval = false)
+    private byte getLegacyBlockTypeAt(int x, int y, int z) {
         if (y < 0 || y >= Chunk.SIZE_Y) return 0;
         int chunkX = Math.floorDiv(x, Chunk.SIZE_X);
         int chunkZ = Math.floorDiv(z, Chunk.SIZE_Z);
@@ -572,6 +584,11 @@ public class World {
      * @return {@code true} if block solid; otherwise {@code false}
      */
     public boolean isBlockSolid(int x, int y, int z) {
+        return voxels.intersects(x, y, z, x + 1, y + 1, z + 1, false);
+    }
+
+    @Deprecated(since = "voxel-terrain", forRemoval = false)
+    private boolean isLegacyBlockSolid(int x, int y, int z) {
         iBlock interactiveBlock = getInteractiveBlockAt(x, y, z);
         if (interactiveBlock != null) return interactiveBlock.isSolid();
         byte blockId = getBlockTypeAt(x, y, z);
@@ -586,6 +603,11 @@ public class World {
      * excluded because their model-shaped collision is evaluated separately.
      */
     public boolean isFullCubeSolid(int x, int y, int z) {
+        return isBlockSolid(x, y, z);
+    }
+
+    @Deprecated(since = "voxel-terrain", forRemoval = false)
+    private boolean isLegacyFullCubeSolid(int x, int y, int z) {
         iBlock interactiveBlock = getInteractiveBlockAt(x, y, z);
         if (interactiveBlock != null) {
             return !interactiveBlock.getType().isDoor();
@@ -620,6 +642,16 @@ public class World {
 
     /** Returns the world-space collision surface under a point in one cell. */
     public float getBlockSurfaceY(int x, int y, int z, float worldX, float worldZ) {
+        var column = voxels.column(org.kbeng.games.rpg.voxel.VoxelGrid.cell(worldX),
+                org.kbeng.games.rpg.voxel.VoxelGrid.cell(worldZ));
+        for (int cell = y * 4 + 3; cell >= y * 4; cell--) {
+            if (org.kbeng.games.rpg.voxel.VoxelPalette.solid(column.get(cell))) return (cell + 1) * .25f;
+        }
+        return Float.NEGATIVE_INFINITY;
+    }
+
+    @Deprecated(since = "voxel-terrain", forRemoval = false)
+    private float getLegacyBlockSurfaceY(int x, int y, int z, float worldX, float worldZ) {
         iBlock interactiveBlock = getInteractiveBlockAt(x, y, z);
         if (interactiveBlock != null && interactiveBlock.isSolid()) return y + 1.0f;
         BlockData block = BlockData.fromId(getBlockTypeAt(x, y, z));
@@ -635,6 +667,12 @@ public class World {
      * @return the {@link GridPos} representing the highest y
      */
     public GridPos getHighestY(float spawnX, float spawnZ) {
+        return new GridPos((int) Math.floor(spawnX),
+                Math.max(0, (int) Math.ceil(voxels.surface(spawnX, spawnZ)) - 1), (int) Math.floor(spawnZ));
+    }
+
+    @Deprecated(since = "voxel-terrain", forRemoval = false)
+    private GridPos getLegacyHighestY(float spawnX, float spawnZ) {
         int blockX = (int) Math.floor(spawnX);
         int blockZ = (int) Math.floor(spawnZ);
 

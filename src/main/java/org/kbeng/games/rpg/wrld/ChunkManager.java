@@ -24,6 +24,11 @@ import java.util.concurrent.atomic.AtomicLong;
  * The manager coordinates lifecycle and ordering concerns across dependent runtime components.
  */
 public class ChunkManager {
+    private final org.kbeng.games.rpg.graphics.VoxelTerrain voxelTerrain =
+            new org.kbeng.games.rpg.graphics.VoxelTerrain(World.wrld.voxels());
+
+    /** Active packed-colour terrain renderer; legacy textured meshes remain archived. */
+    public org.kbeng.games.rpg.graphics.VoxelTerrain getVoxelTerrain() { return voxelTerrain; }
     private static final float SOIL_GRASS_TIME = 10.0f;
     private static final int MAX_MESH_UPLOADS_PER_FRAME = 2;
     private final Generator generator;
@@ -45,7 +50,7 @@ public class ChunkManager {
      *                        the fluid simulation used by the world generator
      */
     public ChunkManager(FluidSimulation fluidSimulation) {
-        this.generator = WorldData.create(WorldData.ISLAND, fluidSimulation);
+        this.generator = World.wrld.voxels()::generate;
         this.chunkMeshes = new HashMap<>();
         this.soilTimers = new HashMap<>();
         int threads = Math.max(1, Runtime.getRuntime().availableProcessors() - 2);
@@ -60,6 +65,12 @@ public class ChunkManager {
      * @param delta the {@code float} supplied as {@code delta}
      */
     public void update(float playerX, float playerZ, float delta) {
+        voxelTerrain.update(playerX, playerZ);
+    }
+
+    /** @deprecated Archived whole-block streaming and soil simulation. */
+    @Deprecated
+    private void updateLegacy(float playerX, float playerZ, float delta) {
         processCompletedMeshes();
         updateSoil(delta);
 
@@ -79,6 +90,12 @@ public class ChunkManager {
      * @param chunkZ the {@code int} supplied as {@code chunkZ}
      */
     public void buildSingleChunkMesh(int chunkX, int chunkZ) {
+        voxelTerrain.build(chunkX, chunkZ);
+    }
+
+    /** @deprecated Archived textured 1-unit mesh upload. */
+    @Deprecated
+    private void buildLegacyChunkMesh(int chunkX, int chunkZ) {
         Chunk chunk = World.wrld.getChunks().get(World.wrld.get2DKey(chunkX, chunkZ));
         if (chunk == null) return;
 
@@ -97,6 +114,12 @@ public class ChunkManager {
      * @param centerChunkZ the {@code int} supplied as {@code centerChunkZ}
      */
     public void updateLoadedChunks(int centerChunkX, int centerChunkZ) {
+        voxelTerrain.request(centerChunkX, centerChunkZ);
+    }
+
+    /** @deprecated Archived whole-block streaming implementation. */
+    @Deprecated
+    private void updateLegacyLoadedChunks(int centerChunkX, int centerChunkZ) {
         int r = Settings.getRenderDistance();
         int unloadDist = r + Settings.getUnloadMargin();
         int rSquared = r * r;
@@ -460,6 +483,7 @@ public class ChunkManager {
      * Releases the resources associated with this object.
      */
     public void dispose() {
+        voxelTerrain.close();
         meshExecutor.shutdownNow();
         soilTimers.clear();
         completedMeshes.clear();
