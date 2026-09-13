@@ -76,7 +76,13 @@ public class Library implements Service<GameMaster> {
         });
 
         BlockData.forEach(block -> {
-            if (block != BlockData.AIR) registerDefault(itemR, () -> new Voxel(block));
+            if (block.equals(BlockData.WATER) || block.equals(BlockData.LAVA)) return;
+            if (block.getId() > 0 && !block.isInteractive()) {
+                registerDefault(itemR, () -> new Block(block));
+            }
+            if (block.isInteractive()) {
+                registerDefault(itemR, () -> new iBlock(block));
+            }
         });
     }
 
