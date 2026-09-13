@@ -259,38 +259,23 @@ public class Camera implements CameraView {
      * @return the {@link Ray} representing the mouse ray
      */
     public Ray getMouseRay(float mouseX, float mouseY, float screenWidth, float screenHeight) {
-        return getMouseRay(this, mouseX, mouseY, screenWidth, screenHeight);
-    }
-
-    /**
-     * Unprojects a screen coordinate through the supplied camera. Both near and
-     * far clip points are reconstructed, so the result works for this camera's
-     * parallel orthographic rays and for perspective rays that diverge from a
-     * first-person eye.
-     *
-     * @param cameraView camera whose projection and view matrices define the ray
-     * @param mouseX horizontal framebuffer coordinate in pixels
-     * @param mouseY vertical framebuffer coordinate in pixels
-     * @param screenWidth framebuffer width in pixels
-     * @param screenHeight framebuffer height in pixels
-     * @return world-space ray beginning on the near clipping plane
-     */
-    public Ray getMouseRay(CameraView cameraView, float mouseX, float mouseY,
-                           float screenWidth, float screenHeight) {
         float ndcX = (2.0f * mouseX / screenWidth) - 1.0f;
         float ndcY = 1.0f - (2.0f * mouseY / screenHeight);
+        int[] viewport = new int[] { 0, 0, (int)screenWidth, (int)screenHeight };
+        Vector3f nearPoint = new Vector3f();
+        Matrix4f viewMatrix = getViewMatrix();
         Matrix4f invCombined = new Matrix4f();
-        cameraView.getProjectionMatrix().mul(cameraView.getViewMatrix(), invCombined).invert();
+        projectionMatrix.mul(viewMatrix, invCombined).invert();
 
         Vector4f nearVec = new Vector4f(ndcX, ndcY, -1.0f, 1.0f).mul(invCombined);
-        Vector4f farVec = new Vector4f(ndcX, ndcY, 1.0f, 1.0f).mul(invCombined);
-        nearVec.div(nearVec.w);
-        farVec.div(farVec.w);
+        if (nearVec.w != 0.0f) {
+            nearVec.x /= nearVec.w;
+            nearVec.y /= nearVec.w;
+            nearVec.z /= nearVec.w;
+        }
 
         Vector3f rayOrigin = new Vector3f(nearVec.x, nearVec.y, nearVec.z);
-        Vector3f rayDirection = new Vector3f(farVec.x, farVec.y, farVec.z)
-                .sub(rayOrigin).normalize();
-        return new Ray(rayOrigin, rayDirection);
+        return new Ray(rayOrigin, getForwardVector());
     }
 
     /**
@@ -306,30 +291,7 @@ public class Camera implements CameraView {
      */
     public BlockPos highlight(World world, Vector3f playerPos, float mouseX, float mouseY,
                               float screenWidth, float screenHeight, boolean smartFilter) {
-        return highlight(world, playerPos, this, mouseX, mouseY,
-                screenWidth, screenHeight, smartFilter);
-    }
-
-    /**
-     * Selects the first interactable voxel reached through a screen coordinate
-     * of the supplied active camera. Ray traversal and hit-normal bookkeeping
-     * remain centralized in the RPG camera while projection may come from an
-     * engine camera implementation.
-     *
-     * @param world world whose voxel grid is traversed
-     * @param playerPos player position used to enforce interaction range
-     * @param cameraView active view used to unproject the pointer
-     * @param mouseX horizontal framebuffer coordinate in pixels
-     * @param mouseY vertical framebuffer coordinate in pixels
-     * @param screenWidth framebuffer width in pixels
-     * @param screenHeight framebuffer height in pixels
-     * @param smartFilter whether transparent decorative blocks are skipped
-     * @return selected voxel, or {@code null} when the ray finds no valid target
-     */
-    public BlockPos highlight(World world, Vector3f playerPos, CameraView cameraView,
-                              float mouseX, float mouseY, float screenWidth,
-                              float screenHeight, boolean smartFilter) {
-        Ray ray = getMouseRay(cameraView, mouseX, mouseY, screenWidth, screenHeight);
+        Ray ray = getMouseRay(mouseX, mouseY, screenWidth, screenHeight);
         boolean isBucket = ItemSelection.selectedItem instanceof Bucket;
         lastHit = raycast(world, playerPos, ray.origin(), ray.direction(), smartFilter, isBucket);
         if (lastHit == null) {

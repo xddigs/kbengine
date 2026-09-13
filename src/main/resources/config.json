@@ -13,7 +13,6 @@
     "camera_rotate_left": "GLFW_KEY_LEFT",
     "camera_rotate_right": "GLFW_KEY_RIGHT",
     "camera_rotate_down": "GLFW_KEY_DOWN",
-    "toggle_camera_mode": "GLFW_KEY_V",
     "camera_rotate_modifier": ["GLFW_KEY_LEFT_ALT", "GLFW_KEY_RIGHT_ALT"],
     "open_chat": "GLFW_KEY_ENTER",
     "toggle_hud": "GLFW_KEY_F1",

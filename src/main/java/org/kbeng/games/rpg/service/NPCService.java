@@ -136,8 +136,7 @@ public class NPCService implements Service<NPC> {
      */
     public NPC getClosestBeforeBlock(GameMaster gameMaster, BlockPos blockTarget) {
         if (gameMaster == null || Player.plyr == null) return null;
-        Ray ray = gameMaster.getCamera().getMouseRay(gameMaster.getActiveCamera(),
-                gameMaster.getAimScreenX(), gameMaster.getAimScreenY(),
+        Ray ray = gameMaster.getCamera().getMouseRay(Mouse.getX(), Mouse.getY(),
                 gameMaster.getWindowWidth(), gameMaster.getWindowHeight());
         float blockRayDistance = getBlockRayDistance(gameMaster, blockTarget, ray);
         NPC closest = null;

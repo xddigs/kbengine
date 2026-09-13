@@ -21,7 +21,6 @@ public enum ControlAction {
     CAMERA_ROTATE_LEFT("camera_rotate_left"),
     CAMERA_ROTATE_RIGHT("camera_rotate_right"),
     CAMERA_ROTATE_DOWN("camera_rotate_down"),
-    TOGGLE_CAMERA_MODE("toggle_camera_mode"),
     CAMERA_PAN_DRAG("camera_pan_drag"),
     CAMERA_ROTATE_DRAG("camera_rotate_drag"),
     CAMERA_ROTATE_MODIFIER("camera_rotate_modifier"),
