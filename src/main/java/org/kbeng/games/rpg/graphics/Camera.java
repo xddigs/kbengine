@@ -46,7 +46,6 @@ public class Camera implements CameraView {
     private float aspectRatio = 1.0f;
     private float damageTilt;
     private boolean tiltRight;
-    private boolean firstPerson;
     private BlockPos lastHit;
     private int lastHitNormalX;
     private int lastHitNormalY;
@@ -64,15 +63,6 @@ public class Camera implements CameraView {
         updateProjection(width, height, renderDistanceChunks);
     }
 
-    /** Returns whether the RPG camera currently uses perspective first-person mode. */
-    public boolean isFirstPerson() { return firstPerson; }
-
-    /** Switches projection mode while retaining camera pose and zoom state. */
-    public void setFirstPerson(boolean enabled) {
-        firstPerson = enabled;
-        updateProjection(aspectRatio, 1.0f, Settings.getRenderDistance());
-    }
-
     /**
      * Updates the projection.
      * @param width                the {@code float} supplied as {@code width}
@@ -82,9 +72,7 @@ public class Camera implements CameraView {
     public void updateProjection(float width, float height, int renderDistanceChunks) {
         this.aspectRatio = width / Math.max(height, 1.0f);
         float farPlane = (renderDistanceChunks + 2) * 16.0f;
-        if (firstPerson) projectionMatrix.identity().perspective((float) Math.toRadians(75.0f), aspectRatio,
-                NEAR_PLANE, Math.max(farPlane, FAR_PLANE));
-        else projectionMatrix.identity().ortho(-zoom * aspectRatio,
+        projectionMatrix.identity().ortho(-zoom * aspectRatio,
                 zoom * aspectRatio, -zoom, zoom, NEAR_PLANE, Math.max(farPlane, FAR_PLANE));
     }
 
@@ -290,28 +278,6 @@ public class Camera implements CameraView {
      * @return the {@link BlockPos} representing the highlight result
      */
     public BlockPos highlight(World world, Vector3f playerPos, float mouseX, float mouseY,
-                              float screenWidth, float screenHeight, boolean smartFilter) {
-        var hit = highlightVoxel(world, mouseX, mouseY, screenWidth, screenHeight);
-        if (hit == null) return null;
-        var center = hit.center();
-        return new BlockPos(BlockData.fromId(hit.material()), (int) Math.floor(center.x),
-                (int) Math.floor(center.y), (int) Math.floor(center.z));
-    }
-
-    /** Traces the actual quarter-unit cell. Hit indices and face normals belong
-     * to the voxel grid; the distance and camera origin stay in world units. */
-    public org.kbeng.games.rpg.voxel.VoxelRaycast.Hit highlightVoxel(World world, float x, float y, float width, float height) {
-        Ray ray = getMouseRay(x, y, Math.max(width, 1), Math.max(height, 1));
-        var hit = org.kbeng.games.rpg.voxel.VoxelRaycast.cast(world.voxels(), ray.origin(), ray.direction(), 2000f, true);
-        lastHitNormalX = hit == null ? 0 : hit.nx();
-        lastHitNormalY = hit == null ? 0 : hit.ny();
-        lastHitNormalZ = hit == null ? 0 : hit.nz();
-        return hit;
-    }
-
-    /** @deprecated Preserved whole-block selection and smart transparency filter. */
-    @Deprecated
-    private BlockPos highlightLegacy(World world, Vector3f playerPos, float mouseX, float mouseY,
                               float screenWidth, float screenHeight, boolean smartFilter) {
         Ray ray = getMouseRay(mouseX, mouseY, screenWidth, screenHeight);
         boolean isBucket = ItemSelection.selectedItem instanceof Bucket;

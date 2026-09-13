@@ -70,8 +70,7 @@ public class InventorySlotUI extends UIElement implements UIWidget {
         Item currentItem = getItem();
 
         if ((currentItem instanceof Bucket
-                || (currentItem instanceof Block block && block.getType() == BlockData.TORCH)
-                || (currentItem instanceof org.kbeng.games.rpg.item.Voxel voxel && voxel.type() == BlockData.TORCH))
+                || (currentItem instanceof Block block && block.getType() == BlockData.TORCH))
                 && spriteSheet != null) {
             spriteFrame = ResourceManager.getItemFrame(currentItem);
         }
