@@ -1,7 +1,6 @@
 package org.kbeng.games.rpg.graphics;
 
 import org.kbeng.engine.graphics.CameraView;
-import org.kbeng.engine.graphics.CameraMode;
 
 import org.kbeng.games.rpg.data.BlockData;
 import org.kbeng.games.rpg.data.BlockPos;
@@ -130,17 +129,6 @@ public class Camera implements CameraView {
     @Override
     public float getYaw() {
         return yaw;
-    }
-
-    /**
-     * Identifies this detached tactical camera as the orthographic view.
-     *
-     * @return {@link CameraMode#ORTHOGRAPHIC}; this camera never changes its
-     *         projection family at runtime
-     */
-    @Override
-    public CameraMode getMode() {
-        return CameraMode.ORTHOGRAPHIC;
     }
 
     /**
