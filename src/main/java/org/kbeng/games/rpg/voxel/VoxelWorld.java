@@ -1,6 +1,7 @@
 package org.kbeng.games.rpg.voxel;
 
 import java.util.*;
+import org.kbeng.games.rpg.data.BlockData;
 
 /** Authoritative quarter-unit terrain. Public integer coordinates are voxel
  * indices, never whole-block coordinates. Modified columns survive unloading
@@ -10,12 +11,9 @@ public final class VoxelWorld {
     private final Map<Long, Map<Integer, VoxelColumn>> edits = new HashMap<>();
     private final Set<Long> dirty = new LinkedHashSet<>();
     private final VoxelGenerator generator;
-
     public VoxelWorld(long seed) { generator = new VoxelGenerator(seed); }
-
     public Collection<VoxelChunk> chunks() { return chunks.values(); }
     public VoxelChunk chunk(int x, int z) { return chunks.get(VoxelGrid.key(x, z)); }
-
     public void generate(int x, int z) {
         long key = VoxelGrid.key(x, z);
         if (chunks.containsKey(key)) return;
@@ -26,23 +24,19 @@ public final class VoxelWorld {
         dirty.add(VoxelGrid.key(x - 1, z)); dirty.add(VoxelGrid.key(x + 1, z));
         dirty.add(VoxelGrid.key(x, z - 1)); dirty.add(VoxelGrid.key(x, z + 1));
     }
-
     public void unload(int x, int z) {
         chunks.remove(VoxelGrid.key(x, z)); dirty.remove(VoxelGrid.key(x, z));
         dirty.add(VoxelGrid.key(x - 1, z)); dirty.add(VoxelGrid.key(x + 1, z));
         dirty.add(VoxelGrid.key(x, z - 1)); dirty.add(VoxelGrid.key(x, z + 1));
     }
-
     public void meshed(int x, int z) { dirty.remove(VoxelGrid.key(x, z)); }
     public Set<Long> takeDirty() { Set<Long> result = new LinkedHashSet<>(dirty); dirty.clear(); return result; }
     public VoxelColumn column(int x, int z) {
         VoxelChunk c = chunk(Math.floorDiv(x, 64), Math.floorDiv(z, 64));
         return c == null ? VoxelColumn.AIR : c.column(Math.floorMod(x, 64), Math.floorMod(z, 64));
     }
-
     public byte get(int x, int y, int z) { return column(x, z).get(y); }
     public byte at(float x, float y, float z) { return get(VoxelGrid.cell(x), VoxelGrid.cell(y), VoxelGrid.cell(z)); }
-
     /** Replaces precisely one loaded cell and dirties all face-sharing chunk
      * neighbours affected by its exposed faces. Returns false for unloaded cells. */
     public boolean set(int x, int y, int z, byte id) {
