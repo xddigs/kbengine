@@ -226,6 +226,29 @@ public class Player extends Character {
      * @param delta the {@code float} argument; frame time
      */
     public void autoJump(Vector3f velocity, float delta) {
+        if (!isOnGround() || delta <= 0 || velocity.x == 0 && velocity.z == 0) return;
+        Vector3f original = new Vector3f(getPosition());
+        getPosition().add(velocity.x * delta, 0, velocity.z * delta);
+        if (!checkCollision(World.wrld)) { setPosition(original); return; }
+        for (float rise = .25f; rise <= .5f; rise += .25f) {
+            getPosition().y = original.y + rise;
+            if (checkCollision(World.wrld)) continue;
+            Vector3f destination = new Vector3f(getPosition());
+            getPosition().set(original).add(0, rise, 0);
+            boolean clear = !checkCollision(World.wrld);
+            getPosition().set(destination);
+            if (clear) { setPosition(original); getPosition().y += rise; return; }
+        }
+        getPosition().y = original.y + AUTO_JUMP_CLEARANCE;
+        boolean clear = !checkCollision(World.wrld);
+        setPosition(original);
+        if (clear) jump();
+    }
+
+    /** Archived slab/stair auto-step; active movement tests quarter-unit cells
+     * directly and climbs up to two voxels without scaling the actor. */
+    @Deprecated(since = "voxel-terrain", forRemoval = false)
+    private void autoJumpLegacy(Vector3f velocity, float delta) {
         if (!isOnGround() || (velocity.x == 0.0f && velocity.z == 0.0f)) return;
 
         World world = World.wrld;

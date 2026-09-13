@@ -161,6 +161,15 @@ public final class PlayerManager {
      */
     public boolean hasGroundBelow(float testX, float testZ) {
         Player player = Player.plyr;
+        float hw = player.getDimensions().x / 2 - .001f, hd = player.getDimensions().z / 2 - .001f;
+        float feet = player.getPosition().y;
+        return World.wrld.voxels().intersects(testX - hw, feet - .05f, testZ - hd,
+                testX + hw, feet + .001f, testZ + hd, false);
+    }
+
+    @Deprecated(since = "voxel-terrain", forRemoval = false)
+    private boolean hasLegacyGroundBelow(float testX, float testZ) {
+        Player player = Player.plyr;
         World world = World.wrld;
         float epsilon = 0.001f;
         float halfWidth = player.getDimensions().x / 2.0f - epsilon;
