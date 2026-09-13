@@ -25,7 +25,8 @@ public class KingdomCore implements Application {
     }
 
     @Override
-    public void initialize(Context context, Consumer<LoadingProgress> progressCallback) {
+    public void initialize(Context context,
+                           Consumer<LoadingProgress> progressCallback) {
 
     }
 
