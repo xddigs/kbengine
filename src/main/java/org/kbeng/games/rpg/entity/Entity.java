@@ -225,14 +225,6 @@ public abstract class Entity {
      * @return {@code true} when the entity touches lava; otherwise {@code false}
      */
     private boolean isTouchingLava(World world) {
-        return world.voxels().intersectsMaterial(position.x - dimensions.x / 2 + .001f,
-                position.y, position.z - dimensions.z / 2 + .001f,
-                position.x + dimensions.x / 2 - .001f, position.y + dimensions.y,
-                position.z + dimensions.z / 2 - .001f, BlockData.LAVA.getId());
-    }
-
-    @Deprecated(since = "voxel-terrain", forRemoval = false)
-    private boolean isTouchingLegacyLava(World world) {
         float epsilon = 0.001f;
         float minX = position.x - dimensions.x / 2.0f + epsilon;
         float maxX = position.x + dimensions.x / 2.0f - epsilon;
@@ -438,14 +430,6 @@ public abstract class Entity {
      * @return {@code true} if in fluid; otherwise {@code false}
      */
     public boolean isInFluid(World world) {
-        return world.voxels().intersects(position.x - dimensions.x / 2 + .001f,
-                position.y, position.z - dimensions.z / 2 + .001f,
-                position.x + dimensions.x / 2 - .001f, position.y + dimensions.y,
-                position.z + dimensions.z / 2 - .001f, true);
-    }
-
-    @Deprecated(since = "voxel-terrain", forRemoval = false)
-    private boolean isInLegacyFluid(World world) {
         float epsilon = 0.001f;
         float minX = position.x - dimensions.x / 2.0f + epsilon;
         float maxX = position.x + dimensions.x / 2.0f - epsilon;
@@ -483,14 +467,6 @@ public abstract class Entity {
      * @return {@code float}; the fluid submersion
      */
     private float getFluidSubmersion(World world) {
-        return world.voxels().fluidDepth(position.x - dimensions.x / 2 + .001f,
-                position.y, position.z - dimensions.z / 2 + .001f,
-                position.x + dimensions.x / 2 - .001f, position.y + dimensions.y,
-                position.z + dimensions.z / 2 - .001f);
-    }
-
-    @Deprecated(since = "voxel-terrain", forRemoval = false)
-    private float getLegacyFluidSubmersion(World world) {
         float epsilon = 0.001f;
 
         float minX = position.x - dimensions.x / 2.0f + epsilon;
@@ -562,38 +538,6 @@ public abstract class Entity {
             velocity.y += K.World.GRAVITY * delta;
         }
 
-        moveVoxelAxis(world, 0, velocity.x * delta);
-        setOnGround(false);
-        moveVoxelAxis(world, 1, velocity.y * delta);
-        moveVoxelAxis(world, 2, velocity.z * delta);
-    }
-
-    /** Advances an actor by at most half a voxel per collision probe. A blocked
-     * step is bisected to the face, preventing fast falls from tunnelling through
-     * quarter-unit floors while retaining world-space speed and body dimensions. */
-    private void moveVoxelAxis(World world, int axis, float distance) {
-        int steps = Math.max(1, (int) Math.ceil(Math.abs(distance) / .125f));
-        float step = distance / steps;
-        for (int i = 0; i < steps; i++) {
-            float start = position.get(axis);
-            position.setComponent(axis, start + step);
-            if (!checkCollision(world)) continue;
-            float low = 0, high = 1;
-            for (int n = 0; n < 10; n++) {
-                float middle = (low + high) * .5f;
-                position.setComponent(axis, start + step * middle);
-                if (checkCollision(world)) high = middle; else low = middle;
-            }
-            position.setComponent(axis, start + step * low);
-            if (axis == 1 && distance < 0) setOnGround(true);
-            velocity.setComponent(axis, 0);
-            return;
-        }
-    }
-
-    /** Archived single-probe movement, unsuitable for 0.25-unit thin walls. */
-    @Deprecated(since = "voxel-terrain", forRemoval = false)
-    private void moveLegacyAxes(World world, float delta) {
         position.x += velocity.x * delta;
         if (checkCollision(world)) {
             position.x -= velocity.x * delta;
@@ -631,14 +575,6 @@ public abstract class Entity {
      * @return {@code boolean}; the check collision result
      */
     public boolean checkCollision(World world) {
-        return world.voxels().intersects(position.x - dimensions.x / 2 + .001f,
-                position.y + .001f, position.z - dimensions.z / 2 + .001f,
-                position.x + dimensions.x / 2 - .001f, position.y + dimensions.y - .001f,
-                position.z + dimensions.z / 2 - .001f, false);
-    }
-
-    @Deprecated(since = "voxel-terrain", forRemoval = false)
-    private boolean checkLegacyCollision(World world) {
         float epsilon = 0.001f;
 
         float minX = position.x - dimensions.x / 2.0f + epsilon;
