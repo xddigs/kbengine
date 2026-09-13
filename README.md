@@ -8,9 +8,11 @@ The RPG layer owns its terrain representation and depends on the engine; the
 engine has no dependency on RPG classes. Terrain cells are voxels of exactly
 `0.25 × 0.25 × 0.25` world units. Each voxel stores a material id rendered as
 one RGB colour. Columns use run-length encoding and the mesher merges coplanar
-faces, so buried cells do not create geometry. Procedural strata, continuous
-height noise, and rounded multi-lobe trunks/crowns produce softer ground and
-volumetric curved trees.
+faces, so buried cells do not create geometry. Procedural strata, a finite
+radial island mask with a surrounding ocean, continuous height noise, and
+branched/dispersed trunks produce softer ground and volumetric curved trees.
+Flowers and tall grass are small voxel structures that echo the former flower
+sprites without sampling block textures.
 
 Selection is a grid DDA over quarter-unit cells. A primary click removes one
 voxel immediately; there is no active break timer or crack animation. Secondary

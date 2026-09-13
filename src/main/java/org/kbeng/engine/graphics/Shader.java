@@ -117,7 +117,7 @@ public class Shader {
     public void dispose() {
         glUnbind();
         glDeleteProgram(programId);
-        log.info("Shader program deleted [ID: {}]", programId);
+        log.trace("Shader program deleted [ID: {}]", programId);
     }
 
     /**

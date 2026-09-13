@@ -1,28 +1,26 @@
 package org.kbeng.games.rpg.wrld;
 
+import org.joml.Vector3f;
 import org.kbeng.engine.graphics.*;
 import org.kbeng.engine.input.*;
 import org.kbeng.engine.ui.*;
-import org.kbeng.games.rpg.data.*;
-import org.kbeng.games.rpg.graphics.*;
-import org.kbeng.games.rpg.service.*;
-import org.kbeng.games.rpg.input.CameraController;
-import org.kbeng.games.rpg.input.StepController;
-import org.kbeng.games.rpg.utils.HoveredCell;
 import org.kbeng.engine.utils.K;
 import org.kbeng.engine.utils.Local;
 import org.kbeng.engine.utils.Settings;
 import org.kbeng.engine.utils.ToastFactory;
 import org.kbeng.games.rpg.craft.RecipeRegistry;
+import org.kbeng.games.rpg.data.*;
 import org.kbeng.games.rpg.entity.Entity;
 import org.kbeng.games.rpg.entity.NPC;
 import org.kbeng.games.rpg.entity.Player;
-import org.kbeng.games.rpg.entity.pathfinding.GridPos;
+import org.kbeng.games.rpg.graphics.*;
+import org.kbeng.games.rpg.input.CameraController;
 import org.kbeng.games.rpg.input.GameInteraction;
-import org.kbeng.games.rpg.item.iBlock;
-import org.joml.Vector3f;
+import org.kbeng.games.rpg.input.StepController;
+import org.kbeng.games.rpg.service.*;
 import org.kbeng.games.rpg.ui.BookUI;
 import org.kbeng.games.rpg.ui.GameUIService;
+import org.kbeng.games.rpg.utils.HoveredCell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -330,7 +328,6 @@ public final class GameMaster implements Application {
         if (cameraController != null) cameraController.release(this);
         SoundService.fx.cleanup();
         game = null;
-        log.info("GameMaster resources successfully cleaned up");
     }
 
     /**

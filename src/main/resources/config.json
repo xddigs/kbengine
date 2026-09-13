@@ -73,6 +73,9 @@
     "break_animation": false,
     "interactive_blocks": false,
     "material_rendering": "one_rgb_colour_per_voxel",
+    "world_shape": "island_with_ocean",
+    "island_radius": 190.0,
+    "vegetation": "voxel_flowers_and_tall_grass",
     "seed": 5422973103813250629
   }
 }
