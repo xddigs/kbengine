@@ -452,7 +452,6 @@ public class Inventory {
      */
     public static int sortByOrder(Item item) {
         return switch (item) {
-            case org.kbeng.games.rpg.item.Voxel ignored -> 0;
             case Block ignored -> 0;
             case Tool ignored -> 1;
             case Usable ignored -> 2;
@@ -832,7 +831,6 @@ public class Inventory {
                     && armorA.getTier() == armorB.getTier();
             case Seed s1 when b instanceof Seed s2 -> s1.getType() == s2.getType();
             case Crop c1 when b instanceof Crop c2 -> c1.getCropType() == c2.getCropType();
-            case org.kbeng.games.rpg.item.Voxel v1 when b instanceof org.kbeng.games.rpg.item.Voxel v2 -> v1.type() == v2.type();
             case Block b1 when b instanceof Block b2 -> b1.getType() == b2.getType();
             case Tool t1 when b instanceof Tool t2 -> t1.getId() == t2.getId() && t1.getTier() == t2.getTier();
             default -> Objects.equals(a.getName(), b.getName());

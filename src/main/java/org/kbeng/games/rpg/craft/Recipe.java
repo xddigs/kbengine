@@ -129,7 +129,6 @@ public final class Recipe {
             case MaterialID mid1 when b instanceof MaterialID mid2 -> mid1 == mid2;
             case MiningComponent mc1 when b instanceof MiningComponent mc2 -> mc1.getTier() == mc2.getTier()
                     && mc1.getId() == mc2.getId();
-            case org.kbeng.games.rpg.item.Voxel v1 when b instanceof org.kbeng.games.rpg.item.Voxel v2 -> v1.type() == v2.type();
             case Block blk1 when b instanceof Block blk2 -> blk1.getType() == blk2.getType();
             case Food food1 -> b instanceof Food(FoodData type) && food1.type() == type;
             case Produce produce1 -> b instanceof Produce produce2
