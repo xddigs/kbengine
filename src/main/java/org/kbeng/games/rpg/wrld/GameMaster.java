@@ -235,7 +235,25 @@ public final class GameMaster implements Application {
     public float getWindowHeight() { return windowHeight; }
     public World getWorld() { return world; }
     public ChunkManager getChunkManager() { return chunkManager; }
+
+    /**
+     * Returns the persistent orthographic camera and RPG voxel-selection owner.
+     * Rendering code should normally use {@link #getActiveCamera()}; this
+     * accessor remains necessary for projection-independent ray traversal and
+     * orthographic-only controls such as zoom and tactical pan.
+     *
+     * @return the detached orthographic camera created during resource loading
+     */
     public Camera getCamera() { return camera; }
+
+    /**
+     * Resolves the camera that must supply matrices for the current frame. The
+     * returned object is either the persistent orthographic camera or the
+     * engine-level first-person camera selected by
+     * {@link #toggleCameraMode()}.
+     *
+     * @return the currently selected camera view
+     */
     public CameraView getActiveCamera() { return firstPersonCameraActive ? firstPersonCamera : camera; }
 
     /**
@@ -250,8 +268,9 @@ public final class GameMaster implements Application {
 
     /**
      * Exchanges the orthographic and first-person cameras without replacing
-     * either instance. Keeping both cameras alive preserves each view's pitch,
-     * zoom and projection state when the player switches back.
+     * either instance. Keeping both cameras alive preserves projection-specific
+     * state such as orthographic zoom; the controller synchronizes heading at
+     * each transition so camera-relative movement does not change direction.
      */
     public void toggleCameraMode() { firstPersonCameraActive = !firstPersonCameraActive; }
 
