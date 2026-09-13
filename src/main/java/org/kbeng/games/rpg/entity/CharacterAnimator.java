@@ -448,7 +448,8 @@ public final class CharacterAnimator {
         if (game == null) return Float.NaN;
         float width = Math.max(game.getWindowWidth(), 1);
         float height = Math.max(game.getWindowHeight(), 1);
-        Ray ray = game.getCamera().getMouseRay(Mouse.getX(), Mouse.getY(), width, height);
+        Ray ray = game.getCamera().getMouseRay(game.getActiveCamera(),
+                game.getAimScreenX(), game.getAimScreenY(), width, height);
         Vector3f mouse = new Vector3f(ray.origin());
 
         if (Math.abs(ray.direction().y) > .0001f) {

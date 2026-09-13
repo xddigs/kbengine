@@ -63,7 +63,9 @@ public final class GameMaster implements Application {
     private final List<Entity> entities = new LinkedList<>();
     private ChunkManager chunkManager;
     private Camera camera;
+    private FirstPersonCamera firstPersonCamera;
     private CameraController cameraController;
+    private boolean firstPersonCameraActive;
     private float windowWidth = K.Window.DEFAULT_WIDTH;
     private float windowHeight = K.Window.DEFAULT_HEIGHT;
     private Difficulty difficulty = Difficulty.NORMAL;
@@ -187,7 +189,9 @@ public final class GameMaster implements Application {
         if (progressCallback != null) progressCallback.accept(++step / totalSteps);
         chunkManager = new ChunkManager(FluidSimulation.forBlock(BlockData.WATER));
         camera = new Camera(windowWidth, windowHeight, Settings.getRenderDistance());
-        cameraController = new CameraController(camera);
+        firstPersonCamera = new FirstPersonCamera(windowWidth, windowHeight,
+                Settings.getFov(), 0.05f, (Settings.getRenderDistance() + 2) * 16.0f);
+        cameraController = new CameraController(camera, firstPersonCamera);
         if (progressCallback != null) progressCallback.accept(++step / totalSteps);
         RecipeRegistry.reg.init();
         addEntity(Player.plyr);
@@ -232,7 +236,46 @@ public final class GameMaster implements Application {
     public World getWorld() { return world; }
     public ChunkManager getChunkManager() { return chunkManager; }
     public Camera getCamera() { return camera; }
-    public CameraView getActiveCamera() { return camera; }
+    public CameraView getActiveCamera() { return firstPersonCameraActive ? firstPersonCamera : camera; }
+
+    /**
+     * Returns whether the local scene is currently observed through the
+     * player's first-person camera. This is the authoritative mode flag used by
+     * input and presentation code; callers do not need to inspect or cast the
+     * active {@link CameraView}.
+     *
+     * @return {@code true} while the perspective eye camera is active
+     */
+    public boolean isFirstPersonCameraActive() { return firstPersonCameraActive; }
+
+    /**
+     * Exchanges the orthographic and first-person cameras without replacing
+     * either instance. Keeping both cameras alive preserves each view's pitch,
+     * zoom and projection state when the player switches back.
+     */
+    public void toggleCameraMode() { firstPersonCameraActive = !firstPersonCameraActive; }
+
+    /**
+     * Returns the horizontal screen coordinate used to aim. First person is
+     * locked to the viewport center represented by its crosshair; the detached
+     * orthographic camera continues to use the hardware cursor.
+     *
+     * @return aim coordinate in framebuffer pixels
+     */
+    public float getAimScreenX() {
+        return firstPersonCameraActive ? windowWidth * 0.5f : Mouse.getX();
+    }
+
+    /**
+     * Returns the vertical screen coordinate used to aim. First person is
+     * locked to the viewport center represented by its crosshair; the detached
+     * orthographic camera continues to use the hardware cursor.
+     *
+     * @return aim coordinate in framebuffer pixels
+     */
+    public float getAimScreenY() {
+        return firstPersonCameraActive ? windowHeight * 0.5f : Mouse.getY();
+    }
     public CommandRegistry getCommandRegistry() { return commandRegistry; }
     public ItemRegistry getItemRegistry() { return itemRegistry; }
     public CommandService getCommandService() { return commandService; }
@@ -321,7 +364,7 @@ public final class GameMaster implements Application {
         glClearColor(skyColor.x, skyColor.y, skyColor.z, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glEnable(GL_DEPTH_TEST);
-        renderEngine.render(world, camera);
+        renderEngine.render(world, getActiveCamera());
     }
 
     /**
@@ -348,6 +391,7 @@ public final class GameMaster implements Application {
         windowWidth = newWidth;
         windowHeight = newHeight;
         if (camera != null) camera.updateProjection(newWidth, newHeight, Settings.getRenderDistance());
+        if (firstPersonCamera != null) firstPersonCamera.updateProjection(newWidth, newHeight);
         renderEngine.onResize(newWidth, newHeight);
         if (uiManager != null) { uiManager.resize(newWidth, newHeight); Frontend.resize(newWidth, newHeight); }
         if (GameUIService.ui != null) GameUIService.ui.onResize(newWidth, newHeight);

@@ -1,6 +1,7 @@
 package org.kbeng.games.rpg.input;
 
 import org.kbeng.engine.input.*;
+import org.kbeng.engine.graphics.FirstPersonCamera;
 import org.kbeng.games.rpg.graphics.Camera;
 
 import org.kbeng.games.rpg.data.BlockPos;
@@ -21,12 +22,16 @@ import static org.joml.Math.lerp;
 import static org.lwjgl.glfw.GLFW.*;
 
 /**
- * CameraController is an immutable carrier for camera controller state in the input subsystem.
- * Record semantics make instances cheap to pass across systems while preserving value-based equality and snapshot safety.
- * The controller translates user or system signals into deterministic runtime state transitions.
- * It implements Service<Camera>, providing a concrete strategy for this subsystem contract.
+ * Coordinates the RPG's detached orthographic camera and engine-provided
+ * first-person camera.
+ * <p>
+ * Orthographic input retains cursor lead, tactical pan and orbit controls.
+ * First-person input instead captures the cursor, applies relative mouse look,
+ * and attaches the perspective camera to the player's interpolated eye height.
+ * Both modes continue to feed the same camera-relative movement system.
  */
-public record CameraController(Camera camera) implements Service<Camera> {
+public record CameraController(Camera camera, FirstPersonCamera firstPersonCamera)
+        implements Service<Camera> {
     private static final float NORMAL_ZOOM = 18.0f;
     private static final float ZOOMED_ZOOM = NORMAL_ZOOM / 2.5f;
     private static final float INTERIOR_ZOOM = 15.5f;
@@ -50,6 +55,7 @@ public record CameraController(Camera camera) implements Service<Camera> {
     private static final float MAX_ZOOM = 30.0f;
     private static final float ZOOM_OFFSET_MIN = -10.0f;
     private static final float ZOOM_OFFSET_MAX = 10.0f;
+    private static final float FIRST_PERSON_LOOK_STEP = 0.12f;
     private static boolean mouseCaptured = false;
     private static GridPos lastGoal = null;
     private static float zoomOffset = 0.0f;
@@ -62,7 +68,22 @@ public record CameraController(Camera camera) implements Service<Camera> {
      */
     public void update(GameMaster gameMaster, float delta) {
         camera.updateDamageTilt(delta);
-        if (gameMaster.isInventoryOpen() || gameMaster.isChatOpen()) {
+        boolean interfaceOpen = gameMaster.isInventoryOpen()
+                || gameMaster.isBackpackOpen()
+                || gameMaster.isChatOpen()
+                || BookService.bs.isOpen();
+        if (!interfaceOpen && Controls.isPressed(ControlAction.TOGGLE_CAMERA_MODE)) {
+            boolean activatingFirstPerson = !gameMaster.isFirstPersonCameraActive();
+            gameMaster.toggleCameraMode();
+            if (activatingFirstPerson) {
+                firstPersonCamera.setOrientation(camera.getYaw(), 0.0f);
+            } else {
+                camera.rotateYaw(firstPersonCamera.getYaw() - camera.getYaw());
+            }
+        }
+        updateMouseCapture(gameMaster, gameMaster.isFirstPersonCameraActive() && !interfaceOpen);
+
+        if (interfaceOpen) {
             lastGoal = null;
             return;
         }
@@ -88,11 +109,48 @@ public record CameraController(Camera camera) implements Service<Camera> {
             }
         }
 
+        if (gameMaster.isFirstPersonCameraActive()) {
+            updateFirstPerson(player);
+            return;
+        }
+
         boolean isZoomed = Controls.isToggled(ControlAction.ZOOM);
         boolean isMouseRotating = applyMouseCameraRotation(player, delta);
         applyMousePan(delta, isMouseRotating);
         updateZoom(gameMaster, isZoomed);
         followPlayer(gameMaster, delta, isZoomed, isMouseRotating);
+    }
+
+    /**
+     * Applies frame-relative mouse look and attaches the engine camera to the
+     * player's current eye position. The crouch/swim eye interpolation is read
+     * from {@link Player#getCurrentEyeHeight()} so the view follows the same
+     * vertical transition as player collision state.
+     *
+     * @param player local player that owns the first-person viewpoint
+     */
+    private void updateFirstPerson(Player player) {
+        float sensitivity = Math.max(0.1f, Settings.getMouseSensitivity());
+        firstPersonCamera.rotate(Mouse.getDeltaX() * FIRST_PERSON_LOOK_STEP * sensitivity,
+                Mouse.getDeltaY() * FIRST_PERSON_LOOK_STEP * sensitivity);
+        firstPersonCamera.getPosition().set(player.getPosition())
+                .add(0.0f, player.getCurrentEyeHeight(), 0.0f);
+    }
+
+    /**
+     * Keeps GLFW cursor ownership synchronized with the active view. Capturing
+     * uses disabled-cursor mode so mouse deltas continue beyond window edges;
+     * opening an interface or returning to orthographic mode restores the
+     * normal cursor exactly once.
+     *
+     * @param gameMaster runtime that owns the GLFW window
+     * @param capture whether relative first-person look currently needs capture
+     */
+    private void updateMouseCapture(GameMaster gameMaster, boolean capture) {
+        if (capture == mouseCaptured) return;
+        glfwSetInputMode(gameMaster.getWindowHandle(), GLFW_CURSOR,
+                capture ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+        mouseCaptured = capture;
     }
 
     /**
