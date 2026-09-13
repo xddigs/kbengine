@@ -71,6 +71,22 @@ public class GameRenderer {
      * @param chunkMeshes the {@link Map} supplied as {@code chunkMeshes}
      */
     public void render(GameMaster gameMaster, Map<Chunk, ChunkMeshBuilder.ChunkRenderMesh> chunkMeshes) {
+        updateViewFogTransition(gameMaster);
+        updateBlur(gameMaster.getActiveCamera());
+        if (voxelRenderer == null) voxelRenderer = new VoxelSceneRenderer();
+        voxelRenderer.render(gameMaster);
+    }
+
+    private VoxelSceneRenderer voxelRenderer;
+
+    public void disposeVoxelRenderer() {
+        if (voxelRenderer != null) { voxelRenderer.dispose(); voxelRenderer = null; }
+    }
+
+    /** @deprecated Archived textured blocks, plants, interactive models and
+     * fragment-based breaking pass. The active frame uses VoxelSceneRenderer. */
+    @Deprecated
+    private void renderLegacy(GameMaster gameMaster, Map<Chunk, ChunkMeshBuilder.ChunkRenderMesh> chunkMeshes) {
         ShadowSystem.sys.render(gameMaster, chunkMeshes);
         waterTime += gameMaster.getGenDelta();
         CameraView camera = gameMaster.getActiveCamera();
@@ -479,7 +495,8 @@ public class GameRenderer {
         if (blockAtlas != null) blockAtlas.unbind();
 
         Item selectedItem = ItemSelection.selectedItem;
-        if (selectedItem instanceof Tool || selectedItem instanceof Block) {
+        if (selectedItem instanceof Tool || selectedItem instanceof Block
+                || selectedItem instanceof org.kbeng.games.rpg.item.Voxel) {
             if (hoveredCell != null) {
                 Vector3f outlineColor = getOutlineColor();
                 Shader outlineShader = ResourceManager.rem.getOutlineShader();
@@ -710,7 +727,7 @@ public class GameRenderer {
     }
 
     /** Uploads the common cutaway and fog-of-war volume to a world shader. */
-    private void uploadView(Shader shader, CameraView camera) {
+    void uploadView(Shader shader, CameraView camera) {
         ViewFogState fog = getRenderedViewFog();
         Player player = Player.plyr;
         shader.setUniform("uViewMode", fog.view().getShaderId());
@@ -719,7 +736,7 @@ public class GameRenderer {
         shader.setUniform("uViewCameraPosition", camera.getPosition());
         shader.setUniform("uViewBounds", fog.bounds());
         shader.setUniform("uViewRadius", fog.radius());
-        shader.setUniform("uViewFloorY", fog.ceilingY());
+        shader.setUniform("uViewFloorY", fog.floorY());
         shader.setUniform("uViewCeilingY", fog.ceilingY());
         shader.setUniform("uViewFogStrength", getViewFogStrength());
         shader.setUniform("uIgnoreViewFog", false);
@@ -825,4 +842,9 @@ public class GameRenderer {
         blurX = yawDelta / K.Camera.FULL_DEGREES;
         blurY = pitchDelta / K.Camera.HALF_DEGREES;
     }
+
+    /** Last frame's normalized camera motion, exposed to the replacement RPG
+     * scene presenter so post-processing remains identical to the archived pass. */
+    float blurX() { return blurX; }
+    float blurY() { return blurY; }
 }

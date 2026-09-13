@@ -629,6 +629,7 @@ public class ChunkMeshBuilder {
      * Marks the block whose neighbours must render their exposed faces.
      * @param position the position of the breaking block
      */
+    @Deprecated(since = "voxel-terrain", forRemoval = false)
     public static void setBreakingBlock(BlockPos position) {
         breakingBlock = position;
     }
@@ -636,6 +637,7 @@ public class ChunkMeshBuilder {
     /**
      * Clears the temporary breaking-block render state.
      */
+    @Deprecated(since = "voxel-terrain", forRemoval = false)
     public static void clearBreakingBlock() {
         breakingBlock = null;
     }

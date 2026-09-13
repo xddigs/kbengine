@@ -49,6 +49,27 @@ public class ShadowSystem {
 
     private final Matrix4f modelMatrix = new Matrix4f();
 
+    /** Renders the unchanged actor shadow pass and packed RPG terrain into the
+     * same depth target. No atlas, plant billboard or interactive model is read;
+     * quarter-unit positions are decoded by the dedicated voxel shadow shader. */
+    public void renderVoxels(GameMaster game, VoxelTerrain terrain, Shader voxelShader) {
+        if (!Settings.doEnableShadows()) return;
+        ShadowMap map = game.getShadowMap();
+        updateLightMatrix(game, map);
+        map.bind();
+        glEnable(GL_DEPTH_TEST); glDepthMask(true); glEnable(GL_CULL_FACE); glCullFace(GL_BACK);
+        voxelShader.bind(); voxelShader.setUniform("uLightSpaceMatrix", lightSpace);
+        terrain.renderDepth(voxelShader, lightSpace);
+        voxelShader.unbind();
+        Shader actorShader = ResourceManager.rem.getShadowMapShader();
+        actorShader.bind(); actorShader.setUniform("uLightSpaceMatrix", lightSpace);
+        actorShader.setUniform("uAlphaTest", false);
+        for (Entity entity : game.getEntities())
+            if (entity.isAlive() && !(entity instanceof WorldItem)) entity.render(game, RenderPass.SHADOW);
+        actorShader.unbind();
+        map.unbind((int) game.getWindowWidth(), (int) game.getWindowHeight());
+    }
+
     /**
      * Renders this object in the requested render pass.
      * @param gameMaster the {@link GameMaster} supplied as {@code gameMaster}
