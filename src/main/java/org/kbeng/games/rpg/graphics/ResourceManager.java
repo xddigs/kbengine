@@ -84,16 +84,9 @@ public class ResourceManager {
     private static final Texture selectorUI = new Texture(K.Paths.DEFAULT_SELECTOR_UI);
     private static final Texture scrollBar = new Texture(K.Paths.SCROLL_BAR);
     private static final Texture scrollKnob = new Texture(K.Paths.SCROLL_KNOB);
-    private static TextureAtlas blocksAtlas;
+    private static final TextureAtlas blocksAtlas;
 
     static {
-        initializeActorResources();
-    }
-
-    /** @deprecated Preserved opt-in loader for archived textured terrain and
-     * interactive models. Never called by the voxel game's resource lifecycle. */
-    @Deprecated
-    private static void initializeLegacyTerrainResources() {
         List<String> allPaths = BlockData.getAllTexturePaths();
         blocksAtlas = new TextureAtlas(allPaths, 16, 16);
 
@@ -107,9 +100,6 @@ public class ResourceManager {
             }
         }
 
-    }
-
-    private static void initializeActorResources() {
         cropSpritesheets.put(CropType.WHEAT, wheat);
         cropSpritesheets.put(CropType.CARROT, carrot);
         cropSpritesheets.put(CropType.POTATO, potato);
@@ -151,8 +141,6 @@ public class ResourceManager {
      */
     public static SpriteSheet getItemSpriteSheet(Item item) {
         return switch (item) {
-            case Voxel voxel when voxel.type() == BlockData.TORCH -> torchIcons;
-            case Voxel ignored -> blockIcons;
             case Block block when block.getType() == BlockData.TORCH -> torchIcons;
             case Crop crop -> cropSpritesheets.get(crop.getCropType());
             case Produce ignored -> cropIcons;
@@ -205,10 +193,6 @@ public class ResourceManager {
      * @return {@code int}; the item frame
      */
     public static int getItemFrame(Item item) {
-        if (item instanceof Voxel voxel) {
-            if (voxel.type() == BlockData.TORCH) return 0;
-            return Math.max(0, voxel.type().getRow() * K.UI.ICON_BLOCK_COLS + voxel.type().getCol() - 1);
-        }
         if (item instanceof Block block && block.getType() == BlockData.TORCH) {
             return (int) ((System.nanoTime() / 125_000_000L) % K.UI.TORCH_COLS);
         }
@@ -292,7 +276,7 @@ public class ResourceManager {
         selectorUI.dispose();
         scrollBar.dispose();
         scrollKnob.dispose();
-        if (blocksAtlas != null) blocksAtlas.dispose();
+        blocksAtlas.dispose();
 
         wheat.dispose();
         carrot.dispose();

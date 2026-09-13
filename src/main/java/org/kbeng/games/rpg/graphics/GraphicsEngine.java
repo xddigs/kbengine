@@ -85,7 +85,6 @@ public final class GraphicsEngine {
      * Releases all owned GPU/native graphics resources.
      */
     public void dispose() {
-        GameRenderer.gamr.disposeVoxelRenderer();
         if (itemRenderer != null) itemRenderer.dispose();
         if (sceneFbo != null) sceneFbo.dispose();
         if (blurFbo != null) blurFbo.dispose();
