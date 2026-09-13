@@ -31,11 +31,11 @@ public class RecipeRegistry {
                 .or(BlockData.fromIdTo(BlockData.SPRUCE_PLANK.getId()), 2).add();
 
         create().result(new Material(MaterialID.CHARCOAL), 1)
-                .with(new Block(BlockData.OAK_LOG), 6)
-                .or(new Block(BlockData.SPRUCE_LOG), 6)
-                .with(new Block(BlockData.DIRT), 2).add();
+                .with(new Voxel(BlockData.OAK_LOG), 6)
+                .or(new Voxel(BlockData.SPRUCE_LOG), 6)
+                .with(new Voxel(BlockData.DIRT), 2).add();
 
-        create().result(new Block(BlockData.TORCH), 4)
+        create().result(new Voxel(BlockData.TORCH), 4)
                 .with(new Material(MaterialID.STICK), 1)
                 .with(new Material(MaterialID.CHARCOAL), 2).add();
 
@@ -112,7 +112,7 @@ public class RecipeRegistry {
     private Craftable getArmorMaterial(Tier tier) {
         return switch (tier) {
             case LEATHER -> new Material(MaterialID.LEATHER);
-            case STONE -> new Block(BlockData.STONE);
+            case STONE -> new Voxel(BlockData.STONE);
             default -> new MiningComponent(tier, MaterialID.INGOT);
         };
     }
@@ -138,9 +138,9 @@ public class RecipeRegistry {
         for (BlockData block : BlockData.all()) {
             if (!block.isPlanks()) continue;
             if (hasPlanks) {
-                recipe.or(new Block(block), 6);
+                recipe.or(new Voxel(block), 6);
             } else {
-                recipe.with(new Block(block), 6);
+                recipe.with(new Voxel(block), 6);
                 hasPlanks = true;
             }
         }
@@ -169,7 +169,7 @@ public class RecipeRegistry {
      */
     private Tier getTierFromMaterial(Craftable mat) {
         if (mat instanceof MiningComponent mc) return mc.getTier();
-        if (mat instanceof Block block && block.getType() == BlockData.STONE) return Tier.STONE;
+        if (mat instanceof Voxel block && block.getType() == BlockData.STONE) return Tier.STONE;
         if (mat instanceof Material material && material.getMaterialID() == MaterialID.LEATHER) {
             return Tier.LEATHER;
         }
@@ -215,12 +215,12 @@ public class RecipeRegistry {
                     .add();
         }
 
-        create().result(new Block(BlockData.STONE), 1)
-                .with(new Block(BlockData.COBBLESTONE), 1)
+        create().result(new Voxel(BlockData.STONE), 1)
+                .with(new Voxel(BlockData.COBBLESTONE), 1)
                 .with(new Material(MaterialID.CHARCOAL), 1).add();
 
-        create().result(new Block(BlockData.GLASS), 4)
-                .with(new Block(BlockData.SAND), 1)
+        create().result(new Voxel(BlockData.GLASS), 4)
+                .with(new Voxel(BlockData.SAND), 1)
                 .with(new Material(MaterialID.CHARCOAL), 1).add();
     }
 
@@ -242,29 +242,29 @@ public class RecipeRegistry {
      */
     private void registerSpecialBlocks(BlockData primaryMat) {
         if (primaryMat.isLog()) {
-            create().result(new Block(BlockData.toPlanks(primaryMat)), 4)
+            create().result(new Voxel(BlockData.toPlanks(primaryMat)), 4)
                     .with(BlockData.fromIdTo(primaryMat.getId()),1).add();
             return;
         }
 
-        create().result(new Block(BlockData.toSlab(primaryMat, false)), 6)
-                .with(new Block(primaryMat), 3).add();
+        create().result(new Voxel(BlockData.toSlab(primaryMat, false)), 6)
+                .with(new Voxel(primaryMat), 3).add();
 
-        create().result(new Block(BlockData.toSlab(primaryMat, true)), 6)
-                .with(new Block(primaryMat), 3).add();
+        create().result(new Voxel(BlockData.toSlab(primaryMat, true)), 6)
+                .with(new Voxel(primaryMat), 3).add();
 
-        create().result(new Block(BlockData.toStaircase(primaryMat)), 4)
-                .with(new Block(primaryMat), 7).add();
+        create().result(new Voxel(BlockData.toStaircase(primaryMat)), 4)
+                .with(new Voxel(primaryMat), 7).add();
 
         if (!primaryMat.equals(BlockData.STONE)) {
-            create().result(new iBlock(BlockData.toDoor(primaryMat)), 2)
-                    .with(new Block(primaryMat), 6).add();
+            create().result(new Voxel(BlockData.toDoor(primaryMat)), 2)
+                    .with(new Voxel(primaryMat), 6).add();
 
-            create().result(new iBlock(BlockData.toChest(primaryMat)), 1)
-                    .with(new Block(primaryMat), 8).add();
+            create().result(new Voxel(BlockData.toChest(primaryMat)), 1)
+                    .with(new Voxel(primaryMat), 8).add();
 
-            create().result(new Block(BlockData.toFence(primaryMat)), 4)
-                    .with(new Block(primaryMat), 6).add();
+            create().result(new Voxel(BlockData.toFence(primaryMat)), 4)
+                    .with(new Voxel(primaryMat), 6).add();
         }
     }
 

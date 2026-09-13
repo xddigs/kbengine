@@ -209,6 +209,7 @@ public class CraftingService {
             case Produce p1 when b instanceof Produce p2 -> p1.getType() == p2.getType();
             case Seed s1 when b instanceof Seed s2 -> s1.getType() == s2.getType();
             case Crop c1 when b instanceof Crop c2 -> c1.getCropType() == c2.getCropType();
+            case org.kbeng.games.rpg.item.Voxel v1 when b instanceof org.kbeng.games.rpg.item.Voxel v2 -> v1.type() == v2.type();
             case Block b1 when b instanceof Block b2 -> b1.getType() == b2.getType();
             case Tool t1 when b instanceof Tool t2 -> t1.getId() == t2.getId() && t1.getType() == t2.getType();
             default -> a.getName().equals(b.getName());
