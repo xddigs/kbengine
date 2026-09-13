@@ -2,24 +2,6 @@
 
 **kbengine** is a 3D isometric voxel engine/game built in Java with LWJGL/OpenGL.  
 
-### RPG quarter-unit terrain
-
-The RPG layer owns its terrain representation and depends on the engine; the
-engine has no dependency on RPG classes. Terrain cells are voxels of exactly
-`0.25 × 0.25 × 0.25` world units. Each voxel stores a material id rendered as
-one RGB colour. Columns use run-length encoding and the mesher merges coplanar
-faces, so buried cells do not create geometry. Procedural strata, continuous
-height noise, and rounded multi-lobe trunks/crowns produce softer ground and
-volumetric curved trees.
-
-Selection is a grid DDA over quarter-unit cells. A primary click removes one
-voxel immediately; there is no active break timer or crack animation. Secondary
-placement and bucket transfers use the exact hit face and reject actor overlap.
-`Block` and `iBlock` remain available as deprecated compatibility types, while
-new inventory entries are `Voxel`. The old textured/chunk, crop, tree, fluid,
-and interactive-block implementations are retained as archived code and are
-not scheduled by the active RPG loop.
-
 ## Current Technical Stack
 
 - **Language & Build:** Java **21** + Maven.
@@ -38,8 +20,8 @@ not scheduled by the active RPG loop.
 | Swim up | `Space` | — | `A` | In water |
 | Swim down | `Left Ctrl` | — | `RB` | In water |
 | Sneak / Crouch | `Left Ctrl` | — | `RB` | Also used to descend in water |
-| Attack / Mine voxel | — | `Left Click` | `X` | Removes one 0.25-unit voxel immediately |
-| Place voxel | — | `Right Click` | `B` | Places one voxel on the hit face |
+| Attack / Mine block | — | `Left Click` | `X` | Primary action |
+| Interact / Place block | — | `Right Click` | `B` | Secondary action |
 | Pathfinding to tile | — | `Right Click` (hold) | — | Click on terrain to set target destination |
 | Lock-on target NPC | — | `Mouse Button 4` | — | Toggles target lock on the nearest NPC |
 | Toggle zoom | `C` | — | — | Zooms camera in/out |
