@@ -297,7 +297,7 @@ public class GameRenderer {
             }
         }
 
-        if (player != null) {
+        if (player != null && !gameMaster.isFirstPersonCameraActive()) {
             defaultShader.bind();
             defaultShader.setUniform("uIgnoreViewFog", true);
             player.render(gameMaster, RenderPass.NORMAL);
@@ -640,7 +640,7 @@ public class GameRenderer {
                     torch.x() + center(bounds.minX(), bounds.maxX()),
                     torch.y() + bounds.maxY() - 0.15f,
                     torch.z() + center(bounds.minZ(), bounds.maxZ()));
-            if (viewService.isVisible(position)
+            if ((!gameMaster.isFirstPersonCameraActive() || viewService.isVisible(position))
                     && position.distanceSquared(centerPosition) <= searchDistanceSq) {
                 torchLights.add(position);
             }
@@ -648,7 +648,7 @@ public class GameRenderer {
 
         World.wrld.forEachLava(lava -> {
             Vector3f position = new Vector3f(lava.x() + 0.5f, lava.y() + 0.5f, lava.z() + 0.5f);
-            if (viewService.isVisible(position)
+            if ((!gameMaster.isFirstPersonCameraActive() || viewService.isVisible(position))
                     && position.distanceSquared(centerPosition) <= searchDistanceSq) {
                 torchLights.add(position);
             }
@@ -709,19 +709,28 @@ public class GameRenderer {
                 .scale(scaleX, scaleY, scaleZ);
     }
 
-    /** Uploads the common cutaway and fog-of-war volume to a world shader. */
+    /**
+     * Uploads the cutaway and fog-of-war volume shared by terrain and entity
+     * shaders. First-person mode sends an exterior mode id and zero strength,
+     * disabling both fragment rejection and darkening while leaving the
+     * {@link ViewService} state intact for an immediate orthographic return.
+     *
+     * @param shader bound world shader receiving the complete view uniform set
+     * @param camera active camera whose semantic mode and position are rendered
+     */
     private void uploadView(Shader shader, CameraView camera) {
         ViewFogState fog = getRenderedViewFog();
         Player player = Player.plyr;
-        shader.setUniform("uViewMode", fog.view().getShaderId());
+        boolean fogOfWarEnabled = camera.getMode() != CameraMode.FIRST_PERSON;
+        shader.setUniform("uViewMode", fogOfWarEnabled ? fog.view().getShaderId() : 0);
         shader.setUniform("uViewPlayerPosition", player == null
                 ? new Vector3f() : player.getPosition());
         shader.setUniform("uViewCameraPosition", camera.getPosition());
         shader.setUniform("uViewBounds", fog.bounds());
         shader.setUniform("uViewRadius", fog.radius());
-        shader.setUniform("uViewFloorY", fog.ceilingY());
+        shader.setUniform("uViewFloorY", fog.floorY());
         shader.setUniform("uViewCeilingY", fog.ceilingY());
-        shader.setUniform("uViewFogStrength", getViewFogStrength());
+        shader.setUniform("uViewFogStrength", fogOfWarEnabled ? getViewFogStrength() : 0.0f);
         shader.setUniform("uIgnoreViewFog", false);
     }
 

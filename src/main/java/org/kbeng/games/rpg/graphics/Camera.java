@@ -251,12 +251,15 @@ public class Camera implements CameraView {
     }
 
     /**
-     * Returns the mouse ray.
-     * @param mouseX       the {@code float} supplied as {@code mouseX}
-     * @param mouseY       the {@code float} supplied as {@code mouseY}
-     * @param screenWidth  the {@code float} supplied as {@code screenWidth}
-     * @param screenHeight the {@code float} supplied as {@code screenHeight}
-     * @return the {@link Ray} representing the mouse ray
+     * Unprojects a pointer coordinate through this orthographic camera. This
+     * convenience overload preserves the original camera API for callers that
+     * explicitly need the detached view rather than the active game view.
+     *
+     * @param mouseX horizontal framebuffer coordinate in pixels
+     * @param mouseY vertical framebuffer coordinate in pixels
+     * @param screenWidth framebuffer width in pixels
+     * @param screenHeight framebuffer height in pixels
+     * @return world-space ray beginning on the near clipping plane
      */
     public Ray getMouseRay(float mouseX, float mouseY, float screenWidth, float screenHeight) {
         return getMouseRay(this, mouseX, mouseY, screenWidth, screenHeight);
@@ -294,15 +297,18 @@ public class Camera implements CameraView {
     }
 
     /**
-     * Transforms this object according to the supplied values.
-     * @param world        the {@link World} supplied as {@code world}
-     * @param playerPos    the {@link Vector3f} supplied as {@code playerPos}
-     * @param mouseX       the {@code float} supplied as {@code mouseX}
-     * @param mouseY       the {@code float} supplied as {@code mouseY}
-     * @param screenWidth  the {@code float} supplied as {@code screenWidth}
-     * @param screenHeight the {@code float} supplied as {@code screenHeight}
-     * @param smartFilter  the {@code boolean} supplied as {@code smartFilter}
-     * @return the {@link BlockPos} representing the highlight result
+     * Selects a voxel through this orthographic camera. This overload keeps
+     * cursor-based tactical selection available independently of the active
+     * camera and delegates traversal to the shared projection-aware path.
+     *
+     * @param world world whose voxel grid is traversed
+     * @param playerPos player position used to enforce interaction range
+     * @param mouseX horizontal framebuffer coordinate in pixels
+     * @param mouseY vertical framebuffer coordinate in pixels
+     * @param screenWidth framebuffer width in pixels
+     * @param screenHeight framebuffer height in pixels
+     * @param smartFilter whether transparent decorative blocks are skipped
+     * @return selected voxel, or {@code null} when the ray finds no valid target
      */
     public BlockPos highlight(World world, Vector3f playerPos, float mouseX, float mouseY,
                               float screenWidth, float screenHeight, boolean smartFilter) {
@@ -331,7 +337,8 @@ public class Camera implements CameraView {
                               float screenHeight, boolean smartFilter) {
         Ray ray = getMouseRay(cameraView, mouseX, mouseY, screenWidth, screenHeight);
         boolean isBucket = ItemSelection.selectedItem instanceof Bucket;
-        lastHit = raycast(world, playerPos, ray.origin(), ray.direction(), smartFilter, isBucket);
+        lastHit = raycast(world, playerPos, ray.origin(), ray.direction(),
+                smartFilter, isBucket, cameraView.getMode() != CameraMode.FIRST_PERSON);
         if (lastHit == null) {
             return null;
         }
@@ -340,18 +347,25 @@ public class Camera implements CameraView {
     }
 
     /**
-     * Calculates the value represented by raycast from the current state.
-     * @param world         the {@link World} supplied as {@code world}
-     * @param playerPos     the {@link Vector3f} supplied as {@code playerPos}
-     * @param origin        the {@link Vector3f} supplied as {@code origin}
-     * @param direction     the {@link Vector3f} supplied as {@code direction}
-     * @param isSmartFilter the {@code boolean} supplied as {@code isSmartFilter}
-     * @param isBucket      the {@code boolean} supplied as {@code isBucket}
-     * @return the {@link BlockPos} representing the raycast result
+     * Traverses the voxel grid with a three-axis DDA until it reaches a valid
+     * block, door or interactive model. Partial block shapes receive their own
+     * geometric ray test, transparent blocks may be skipped for smart tools,
+     * and every accepted result records the entry-face normal used by placement.
+     *
+     * @param world world whose voxel cells and interactive models are queried
+     * @param playerPos player position used to cap interaction distance
+     * @param origin world-space start on the active camera's near plane
+     * @param direction normalized world-space traversal direction
+     * @param isSmartFilter whether transparent decorative cells are ignored
+     * @param isBucket whether fluid cells count as selectable targets
+     * @param fogOfWarEnabled whether targets outside the tactical visibility
+     *                        volume must be rejected
+     * @return the nearest accepted target, or {@code null} when none is in range
      */
     private BlockPos raycast(World world, Vector3f playerPos,
                              Vector3f origin, Vector3f direction,
-                             boolean isSmartFilter, boolean isBucket) {
+                             boolean isSmartFilter, boolean isBucket,
+                             boolean fogOfWarEnabled) {
         float tileSize = K.World.TILE_SIZE;
 
         int x = (int) Math.floor(origin.x / tileSize);
@@ -376,8 +390,9 @@ public class Camera implements CameraView {
         World.DoorHit doorHit = world.raycastDoor(origin, direction);
 
         do {
-            boolean isVisible = GameMaster.game.getViewService().isVisible(
-                    new Vector3f(x + 0.5f, y + 0.5f, z + 0.5f), getPosition());
+            boolean isVisible = !fogOfWarEnabled
+                    || GameMaster.game.getViewService().isVisible(
+                            new Vector3f(x + 0.5f, y + 0.5f, z + 0.5f), getPosition());
 
             var interactiveBlock = world.getInteractiveBlockAt(x, y, z);
             if (isVisible && interactiveBlock != null
@@ -432,9 +447,10 @@ public class Camera implements CameraView {
 
             if (doorHit != null && doorHit.distance() <= cellExit) {
                 var door = doorHit.block();
-                boolean isDoorVisible = GameMaster.game.getViewService().isVisible(
-                        new Vector3f(door.getX() + 0.5f, door.getY() + 1.0f,
-                                door.getZ() + 0.5f), getPosition());
+                boolean isDoorVisible = !fogOfWarEnabled
+                        || GameMaster.game.getViewService().isVisible(
+                                new Vector3f(door.getX() + 0.5f, door.getY() + 1.0f,
+                                        door.getZ() + 0.5f), getPosition());
                 if (!isDoorVisible) {
                     doorHit = null;
                 } else {

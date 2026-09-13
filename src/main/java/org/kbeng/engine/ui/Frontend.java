@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static org.lwjgl.opengl.GL11C.*;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
@@ -124,6 +125,42 @@ public class Frontend {
         shader.setUniform("uUseFont", false);
 
         mesh.render();
+    }
+
+    /**
+     * Draws a four-arm crosshair at the center of the current UI viewport.
+     * <p>
+     * The crosshair is texture-independent and uses the same solid-color quad
+     * path as {@link #drawLine(float, float, float, float, float, Vector4f)}.
+     * {@link #begin(float, float)} must have been called first so the method can
+     * resolve the current viewport center and use an active UI projection. The
+     * central gap remains empty, which keeps the exact aiming pixel visible
+     * over both bright and dark scene details.
+     *
+     * @param armLength length in pixels of each arm measured outwards from the
+     *                  central gap; non-positive values draw nothing
+     * @param gap distance in pixels from the center to the start of each arm;
+     *            negative values are treated as zero
+     * @param thickness line thickness in pixels; non-positive values draw nothing
+     * @param color RGBA crosshair color, including caller-selected opacity
+     * @throws NullPointerException if {@code color} is {@code null}
+     */
+    public static void drawCrosshair(float armLength, float gap, float thickness,
+                                     Vector4f color) {
+        Objects.requireNonNull(color, "color");
+        if (armLength <= 0.0f || thickness <= 0.0f) return;
+        float centerX = screenWidth * 0.5f;
+        float centerY = screenHeight * 0.5f;
+        float safeGap = Math.max(gap, 0.0f);
+
+        drawLine(centerX - safeGap - armLength, centerY,
+                centerX - safeGap, centerY, thickness, color);
+        drawLine(centerX + safeGap, centerY,
+                centerX + safeGap + armLength, centerY, thickness, color);
+        drawLine(centerX, centerY - safeGap - armLength,
+                centerX, centerY - safeGap, thickness, color);
+        drawLine(centerX, centerY + safeGap,
+                centerX, centerY + safeGap + armLength, thickness, color);
     }
 
     /**

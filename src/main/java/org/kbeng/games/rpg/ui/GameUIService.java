@@ -412,12 +412,21 @@ public final class GameUIService implements Service<GameMaster> {
             }
             renderHotbarLabel();
             renderToasts();
+            if (gameMaster.isFirstPersonCameraActive()
+                    && !gameMaster.isInventoryOpen()
+                    && !gameMaster.isBackpackOpen()
+                    && !gameMaster.isChatOpen()
+                    && !BookUI.bui.isOpen()) {
+                Frontend.drawCrosshair(8.0f, 3.0f, 2.0f,
+                        new Vector4f(1.0f, 1.0f, 1.0f, 0.9f));
+            }
         } else {
         }
 
         renderChatHistory();
 
-        if (!gameMaster.isInventoryOpen() && !gameMaster.isBackpackOpen()
+        if (!gameMaster.isFirstPersonCameraActive()
+                && !gameMaster.isInventoryOpen() && !gameMaster.isBackpackOpen()
                 && !BookUI.bui.isOpen()) {
             drawCursorIcon();
         }
