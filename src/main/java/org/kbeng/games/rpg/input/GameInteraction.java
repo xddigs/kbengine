@@ -1,26 +1,29 @@
 package org.kbeng.games.rpg.input;
 
+import org.joml.Vector3f;
+import org.joml.Vector3i;
+import org.kbeng.engine.graphics.SpriteSheet;
 import org.kbeng.engine.input.ControlAction;
 import org.kbeng.engine.input.Controls;
-import org.kbeng.engine.utils.*;
+import org.kbeng.engine.utils.K;
+import org.kbeng.engine.utils.Local;
+import org.kbeng.engine.utils.Settings;
+import org.kbeng.engine.utils.ToastFactory;
 import org.kbeng.games.rpg.data.*;
-import org.kbeng.games.rpg.item.*;
-import org.kbeng.games.rpg.service.*;
-import org.kbeng.games.rpg.utils.HoveredCell;
 import org.kbeng.games.rpg.entity.Entity;
 import org.kbeng.games.rpg.entity.Player;
 import org.kbeng.games.rpg.entity.WorldItem;
 import org.kbeng.games.rpg.entity.states.SneakingState;
 import org.kbeng.games.rpg.graphics.ChunkMeshBuilder;
 import org.kbeng.games.rpg.graphics.ParticleEngine;
-import org.kbeng.engine.graphics.SpriteSheet;
+import org.kbeng.games.rpg.item.*;
+import org.kbeng.games.rpg.service.*;
 import org.kbeng.games.rpg.ui.GameUIService;
+import org.kbeng.games.rpg.utils.HoveredCell;
 import org.kbeng.games.rpg.wrld.Chunk;
 import org.kbeng.games.rpg.wrld.FluidSimulation;
 import org.kbeng.games.rpg.wrld.GameMaster;
 import org.kbeng.games.rpg.wrld.World;
-import org.joml.Vector3f;
-import org.joml.Vector3i;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,8 +67,7 @@ public class GameInteraction {
         boolean isCtrlHeld = Controls.isDown(ControlAction.MODIFIER);
 
         boolean isShiftHeld = Controls.isDown(ControlAction.SMART_SHIFT);
-        isSmartShift = isShiftHeld && !GameMaster.game.isInventoryOpen()
-                && !GameMaster.game.isBackpackOpen();
+        isSmartShift = false;
 
         boolean isLeftHeld = Controls.isDown(ControlAction.PRIMARY_ACTION);
         boolean isLeftPressed = Controls.isPressed(ControlAction.PRIMARY_ACTION);
@@ -159,6 +161,9 @@ public class GameInteraction {
             Settings.toggleMusic();
         }
 
+        canInteract = canInteract && !GameMaster.game.isInventoryOpen()
+                && !GameMaster.game.isBackpackOpen() && !GameMaster.game.isChatOpen()
+                && !BookService.bs.isOpen() && player.isAlive();
         if (isLeftPressed && canInteract) {
             if (!player.isAttacking()) {
                 player.interact();
@@ -175,7 +180,7 @@ public class GameInteraction {
             return null;
         }
 
-        if (selectedItem instanceof Usable usable) {
+        if (canInteract && selectedItem instanceof Usable usable) {
             switch (usable) {
                 case Backpack backpack -> {
                     if (isRightPressed && !GameMaster.game.isInventoryOpen()
@@ -216,7 +221,7 @@ public class GameInteraction {
             }
         }
 
-        if (selectedItem instanceof Equippable e) {
+        if (canInteract && selectedItem instanceof Equippable e) {
             if (isRightPressed && !e.isEquipped()) {
                 e.equip();
                 isRightPressed = false;
@@ -230,6 +235,20 @@ public class GameInteraction {
             }
         }
 
+        resetBreaking();
+        if (canInteract && !BookService.bs.isOpen()) {
+            org.kbeng.games.rpg.voxel.VoxelInteraction.edit(gameMaster, selectedItem,
+                    isLeftPressed, isRightPressed);
+        }
+        return hoveredCell;
+    }
+
+    /** Archived metre-cell editing: progressive cracks, whole-tree harvesting,
+     * shaped placement and interactive furniture. Never called by voxel input. */
+    @Deprecated(since = "voxel-terrain", forRemoval = false)
+    private BlockPos updateLegacyTerrain(GameMaster gameMaster, Item selectedItem,
+            Player player, BlockPos hoveredCell, BlockPos raycastCell,
+            boolean isShiftHeld, boolean isLeftHeld, boolean isRightPressed, boolean canInteract) {
         if (isShiftHeld && hoveredCell != null) {
             byte blockType = GameMaster.game.getWorld().getBlockTypeAt(hoveredCell);
             if (blockType == BlockData.OAK_LOG.getId()) {

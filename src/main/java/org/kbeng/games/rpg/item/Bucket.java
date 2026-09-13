@@ -55,6 +55,26 @@ public class Bucket extends Usable {
      */
     @Override
     public boolean use(GameMaster gameMaster, boolean isCtrlHeld) {
+        var hit = HoveredCell.voxel(gameMaster);
+        if (!org.kbeng.games.rpg.voxel.VoxelInteraction.reachable(hit)) return false;
+        var world = gameMaster.getWorld().voxels();
+        if (!isFull()) {
+            if (!org.kbeng.games.rpg.voxel.VoxelPalette.fluid(hit.material())) return false;
+            if (!world.set(hit.x(), hit.y(), hit.z(), (byte) 0)) return false;
+            fill(BlockData.fromId(hit.material()));
+            return true;
+        }
+        if (hit.nx() == 0 && hit.ny() == 0 && hit.nz() == 0) return false;
+        int x = hit.x() + hit.nx(), y = hit.y() + hit.ny(), z = hit.z() + hit.nz();
+        if (world.get(x, y, z) != 0 || !world.set(x, y, z, type.getId())) return false;
+        empty();
+        return true;
+    }
+
+    /** Archived source/level bucket logic for metre-sized fluid cells. Active
+     * buckets transfer exactly one full quarter-unit fluid voxel per use. */
+    @Deprecated(since = "voxel-terrain", forRemoval = false)
+    private boolean useLegacy(GameMaster gameMaster, boolean isCtrlHeld) {
         Player player = Player.plyr;
         if (player == null) {
             return false;
@@ -178,8 +198,7 @@ public class Bucket extends Usable {
      * @param fluidType the {@link BlockData} argument; the fluid block type
      */
     public void fill(BlockData fluidType) {
-        FluidSimulation simulation = FluidSimulation.forBlock(fluidType);
-        if (simulation != null) setBlockType(simulation.getFluidType());
+        if (fluidType == BlockData.WATER || fluidType == BlockData.LAVA) setBlockType(fluidType);
     }
 
     /**
