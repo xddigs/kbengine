@@ -10,7 +10,6 @@ public interface UIWidget {
     default String getTooltipCornerText() {
         return null;
     }
-
     default String formatTooltip(String tooltipText) {
         return tooltipText;
     }
