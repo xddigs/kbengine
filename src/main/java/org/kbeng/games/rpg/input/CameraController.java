@@ -29,10 +29,6 @@ import static org.lwjgl.glfw.GLFW.*;
  * First-person input instead captures the cursor, applies relative mouse look,
  * and attaches the perspective camera to the player's interpolated eye height.
  * Both modes continue to feed the same camera-relative movement system.
- *
- * @param camera detached orthographic camera used for tactical navigation,
- *               cursor raycasts and orthographic-only effects
- * @param firstPersonCamera perspective eye camera supplied by the engine layer
  */
 public record CameraController(Camera camera, FirstPersonCamera firstPersonCamera)
         implements Service<Camera> {

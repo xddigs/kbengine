@@ -1,6 +1,6 @@
 ![kbengine_logo](src/main/resources/assets/ui/logo.png)
 
-**kbengine** is a 3D voxel engine/game with switchable orthographic and first-person cameras, built in Java with LWJGL/OpenGL.
+**kbengine** is a 3D isometric voxel engine/game built in Java with LWJGL/OpenGL.  
 
 ## Current Technical Stack
 
@@ -8,15 +8,6 @@
 - **Rendering & Runtime:** LWJGL **3.3.4** (GLFW, OpenGL, STB, OpenAL) + JOML.
 - **Audio & Utilities:** OpenAL, SLF4J/Logback, Gson, OSHI.
 - **Unified Input:** Keyboard, mouse, and gamepad via `config.json`.
-- **Camera System:** Detached orthographic exploration and an engine-level perspective first-person camera.
-
-## Camera Modes
-
-The game starts in its normal orthographic view. Press `V` to switch to the first-person camera and press it again to return. The first-person view initially adopts the orthographic heading; returning copies the current first-person heading back while preserving the orthographic zoom and pitch.
-
-First-person mode captures the mouse for unrestricted relative look, attaches the view to the player's interpolated eye height, and aims block/entity interactions through the center crosshair. Opening chat, inventory, backpack, or the crafting book temporarily releases the mouse; closing the interface captures it again.
-
-Fog of war is intentionally disabled in first person. The local player model, its animated render, and its shadow-map render are also omitted while that camera is active, preventing the eye camera from seeing the avatar from inside. These behaviors revert immediately when switching back to the orthographic camera.
 
 ## Controls (Default & Expanded)
 
@@ -33,13 +24,11 @@ Fog of war is intentionally disabled in first person. The local player model, it
 | Interact / Place block | — | `Right Click` | `B` | Secondary action |
 | Pathfinding to tile | — | `Right Click` (hold) | — | Click on terrain to set target destination |
 | Lock-on target NPC | — | `Mouse Button 4` | — | Toggles target lock on the nearest NPC |
-| Switch camera mode | `V` | — | — | Toggles orthographic / first-person view |
 | Toggle zoom | `C` | — | — | Zooms camera in/out |
 | Fine zoom adjustment | `Alt` + wheel | Scroll Wheel | — | Adjusts zoom offset |
-| Rotate camera (keys) | `Arrow keys` | — | — | Continuous orthographic rotation |
-| Rotate camera (drag) | `Alt` + `Right Click` + move | RMB Drag | — | Orthographic rotation gesture |
-| Camera pan | — | `Middle Click` + drag | — | Temporary orthographic tactical pan |
-| First-person look | — | Mouse movement | — | Active while the first-person cursor is captured |
+| Rotate camera (keys) | `Arrow keys` | — | — | Continuous rotation |
+| Rotate camera (drag) | `Alt` + `Right Click` + move | RMB Drag | — | Rotation gesture |
+| Camera pan | — | `Middle Click` + drag | — | Temporary tactical pan |
 | Open/close chat console | `Enter` | — | `Start` | Executes command on close |
 | Open/close inventory | `E` | — | `Y` | Closes backpack if open |
 | UI / Inventory selection | `Ctrl` (modifier) | `Left Click` | — | `Ctrl + Click` quick-moves stacks |
@@ -72,4 +61,3 @@ Run the main class:
 ```bash
 mvn clean package
 java -jar target/kbengine-1.0-SNAPSHOT.jar
-```
