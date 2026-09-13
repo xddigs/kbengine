@@ -48,7 +48,6 @@ public class UITextField extends UIElement {
         super(x, y, width, height);
         setFocusable(true);
         setLayer(1000);
-        hide();
     }
 
     /**

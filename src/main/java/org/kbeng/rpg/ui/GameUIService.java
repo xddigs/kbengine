@@ -170,6 +170,7 @@ public final class GameUIService implements Service<GameMaster> {
 
         final float offset = 32.0f;
         this.chatField = new UITextField(0, windowHeight - offset, windowWidth, offset);
+        chatField.hide();
         chatField.setCompletionProvider(new CommandCompletionProvider(gameMaster.getCommandRegistry()));
         uiManager.getRoot().addChild(chatField);
 
