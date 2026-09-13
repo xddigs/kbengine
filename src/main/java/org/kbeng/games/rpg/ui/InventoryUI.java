@@ -863,7 +863,7 @@ public class InventoryUI extends UIElement {
      * @return {@code true} when the item may be shown in the creative catalog
      */
     private boolean isSupportedCreativeItem(Item item) {
-        boolean supportedCategory = item instanceof Block
+        boolean supportedCategory = item instanceof Block || item instanceof org.kbeng.games.rpg.item.Voxel
                 || item instanceof Tool
                 || item instanceof Armor
                 || item instanceof Usable
@@ -886,7 +886,7 @@ public class InventoryUI extends UIElement {
         return switch (creativeFilter) {
             case ALL -> true;
             case FOOD -> item instanceof Food;
-            case BLOCKS -> item instanceof Block || item instanceof iBlock;
+            case BLOCKS -> item instanceof Block || item instanceof iBlock || item instanceof org.kbeng.games.rpg.item.Voxel;
             case TOOLS -> item instanceof Tool || item instanceof Armor;
             case MATERIALS -> item instanceof Material;
             case PRODUCE -> item instanceof Produce;

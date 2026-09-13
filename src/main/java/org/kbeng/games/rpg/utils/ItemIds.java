@@ -34,6 +34,7 @@ public final class ItemIds {
             case Tool tool -> tiered(tool.getTier(), tool.getType().getName());
             case Material material -> tiered(material.getTier(), material.getMaterialID().getName());
             case Block block -> block.getType().getName();
+            case org.kbeng.games.rpg.item.Voxel voxel -> voxel.type().getName();
             case Bucket bucket -> bucket.isFull() ? bucket.getBlockType().getName() + "_bucket" : "bucket";
             case Usable usable -> usable.getUsablesID().getName();
             default -> item.getName();

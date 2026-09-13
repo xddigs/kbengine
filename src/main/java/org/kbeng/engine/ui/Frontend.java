@@ -126,6 +126,24 @@ public class Frontend {
         mesh.render();
     }
 
+    /** Draws a camera-independent first-person reticle at the framebuffer
+     * centre. It uses the existing untextured UI quad and therefore does not
+     * depend on terrain materials, texture atlases or the engine camera API.
+     * @param armLength half-length of each arm in pixels
+     * @param thickness line width in pixels
+     * @param color RGBA reticle colour */
+    public static void drawCrosshair(float armLength, float thickness, Vector4f color) {
+        if (screenWidth <= 0 || screenHeight <= 0 || armLength <= 0 || thickness <= 0 || color == null) return;
+        float x = screenWidth * .5f, y = screenHeight * .5f;
+        drawLine(x - armLength, y, x + armLength, y, thickness, color);
+        drawLine(x, y - armLength, x, y + armLength, thickness, color);
+    }
+
+    /** Draws the standard two-pixel white first-person reticle. */
+    public static void drawCrosshair() {
+        drawCrosshair(7.0f, 2.0f, new Vector4f(1.0f, 1.0f, 1.0f, .9f));
+    }
+
     /**
      * Draws the border.
      * @param x the {@code float} supplied as {@code x}

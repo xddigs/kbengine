@@ -419,6 +419,7 @@ public final class GameUIService implements Service<GameMaster> {
 
         if (!gameMaster.isInventoryOpen() && !gameMaster.isBackpackOpen()
                 && !BookUI.bui.isOpen()) {
+            if (gameMaster.getCamera().isFirstPerson()) Frontend.drawCrosshair();
             drawCursorIcon();
         }
 
