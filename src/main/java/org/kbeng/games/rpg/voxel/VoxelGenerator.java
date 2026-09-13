@@ -1,26 +1,48 @@
 package org.kbeng.games.rpg.voxel;
 
 import org.kbeng.games.rpg.data.BlockData;
+import org.kbeng.games.rpg.wrld.Generator;
+
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Samples continuous terrain and rounded tree volumes directly at quarter-unit
- * resolution. All noise and tree anchors are global and seed-derived: generation
- * order cannot clip a crown or introduce a seam at a chunk boundary. */
-public final class VoxelGenerator {
+/** Samples a finite island and its vegetation directly at quarter-unit
+ * resolution. A radial falloff creates a real coastline and ocean floor around
+ * the playable landmass; all tree/plant anchors are global and seed-derived, so
+ * chunk generation order cannot create seams at boundaries. */
+public final class VoxelGenerator implements Generator {
     private final long seed;
     private static final float SEA = 122f;
     public VoxelGenerator(long seed) { this.seed = seed; }
 
-    /** Height in world units before the final quarter-unit quantization. */
+    /** Height in world units before quantization. The island is centred at the
+     * origin and fades into an ocean floor outside a 190-unit radius. */
     public float height(float x, float z) {
-        return 126 + noise(x / 160, z / 160) * 18
-                + noise(x / 42, z / 42) * 6 + noise(x / 14, z / 14) * 1.5f;
+        float distance = (float) Math.sqrt(x * x + z * z);
+        float island = 1.0f - smoothstep(132.0f, 190.0f, distance);
+        float broad = noise(x / 160, z / 160) * (3.0f + island * 14.0f);
+        float detail = noise(x / 42, z / 42) * (1.5f + island * 5.0f)
+                + noise(x / 14, z / 14) * 1.5f;
+        return SEA - 18.0f + island * 25.0f + broad + detail;
     }
+
+    /** {@inheritDoc} */
+    @Override
+    public void generateChunk(int chunkX, int chunkZ) {
+        generate(chunkX, chunkZ);
+    }
+
+    /**
+     * Generates a single chunk.
+     * @param cx chunk X coordinate
+     * @param cz chunk Z coordinate
+     * @return the generated chunk
+     */
     public VoxelChunk generate(int cx, int cz) {
         VoxelChunk chunk = new VoxelChunk(cx, cz);
         List<Tree> trees = trees(cx, cz);
+        List<Plant> plants = plants(cx, cz);
         byte[] cells = new byte[VoxelGrid.HEIGHT];
         for (int z = 0; z < VoxelGrid.WIDTH; z++) for (int x = 0; x < VoxelGrid.WIDTH; x++) {
             float wx = cx * 16f + VoxelGrid.world(x) + 0.125f;
@@ -42,7 +64,21 @@ public final class VoxelGenerator {
                     float h = VoxelGrid.world(y) + 0.125f - tree.base;
                     float bend = 0.35f * (float) Math.sin(h * 0.32f + tree.phase);
                     float trunkRadius = Math.max(0.17f, 0.62f - h * 0.035f);
-                    if (h < tree.height && square(dx - bend) + square(dz) < square(trunkRadius)) {
+                    boolean trunk = h < tree.height && square(dx - bend) + square(dz) < square(trunkRadius);
+                    boolean branch = false;
+                    if (!trunk && h > tree.height * .38f && h < tree.height * .92f) {
+                        for (int b = 0; b < 4; b++) {
+                            float branchHeight = tree.height * (.40f + b * .13f);
+                            float t = (h - branchHeight) / 1.55f;
+                            if (t < 0 || t > 1) continue;
+                            float angle = tree.phase + b * 1.5708f;
+                            float length = 1.6f + b * .42f;
+                            float branchX = bend + (float) Math.cos(angle) * length * t;
+                            float branchZ = (float) Math.sin(angle) * length * t;
+                            branch |= square(dx - branchX) + square(dz - branchZ) < square(.27f);
+                        }
+                    }
+                    if (trunk || branch) {
                         cells[y] = tree.spruce ? BlockData.SPRUCE_LOG.getId() : BlockData.OAK_LOG.getId();
                     } else {
                         float crown = square(dx / 3.8f) + square(dz / 3.3f)
@@ -53,6 +89,29 @@ public final class VoxelGenerator {
                                 && cells[y] == 0) {
                             cells[y] = tree.spruce ? BlockData.SPRUCE_LEAVES.getId() : BlockData.OAK_LEAVES.getId();
                         }
+                    }
+                }
+            }
+            for (Plant plant : plants) {
+                float dx = wx - plant.x, dz = wz - plant.z;
+                if (dx * dx + dz * dz > 2.1f) continue;
+                int plantBase = VoxelGrid.cell(plant.base);
+                if (plantBase < top || top < VoxelGrid.cell(SEA + 0.5f)) continue;
+                int y = Math.max(top, plantBase);
+                if (plant.kind == PlantKind.TALL_GRASS) {
+                    for (int i = 0; i < 4 && y + i < VoxelGrid.HEIGHT; i++)
+                        if (cells[y + i] == 0) cells[y + i] = BlockData.TALL_GRASS.getId();
+                } else {
+                    if (cells[y] == 0) cells[y] = BlockData.TALL_GRASS.getId();
+                    int flowerY = y + 1;
+                    byte flower = plant.kind == PlantKind.GHOSTFLOWER
+                            ? BlockData.GHOSTFLOWER.getId() : BlockData.ROSE.getId();
+                    if (flowerY < VoxelGrid.HEIGHT && cells[flowerY] == 0) cells[flowerY] = flower;
+                    // Cross-shaped petals and a second lobe make a volumetric
+                    // voxel analogue of the former billboard flower sprites.
+                    if (plant.kind == PlantKind.ROSEBUSH) {
+                        if (flowerY + 1 < VoxelGrid.HEIGHT && cells[flowerY + 1] == 0) cells[flowerY + 1] = flower;
+                        if (dx * dx + dz * dz < 1.0f && flowerY < VoxelGrid.HEIGHT) cells[flowerY] = flower;
                     }
                 }
             }
@@ -70,8 +129,32 @@ public final class VoxelGenerator {
                 float tz = z * 12 + 3 + ((h >>> 12) & 255) / 255f * 6;
                 float base = height(tx, tz);
                 if (base <= SEA + 1 || tx * tx + tz * tz < 25) continue;
-                result.add(new Tree(tx, tz, base, 7 + ((h >>> 20) & 255) / 255f * 4,
+                result.add(new Tree(tx, tz, base, 8 + ((h >>> 20) & 255) / 255f * 5,
                         ((h >>> 28) & 255) / 40f, (h & 4) == 0));
+            }
+        return result;
+    }
+
+    /** Returns vegetation anchors in a one-cell border around this chunk. */
+    private List<Plant> plants(int cx, int cz) {
+        List<Plant> result = new ArrayList<>();
+        int minX = cx * 16 - 3, maxX = cx * 16 + 19;
+        int minZ = cz * 16 - 3, maxZ = cz * 16 + 19;
+        for (int z = Math.floorDiv(minZ, 5); z <= Math.floorDiv(maxZ, 5); z++)
+            for (int x = Math.floorDiv(minX, 5); x <= Math.floorDiv(maxX, 5); x++) {
+                long h = hash(x * 17 + 11, z * 17 - 7);
+                if ((h & 7) > 2) continue;
+                float px = x * 5 + 1.0f + ((h >>> 8) & 255) / 255f * 3.0f;
+                float pz = z * 5 + 1.0f + ((h >>> 16) & 255) / 255f * 3.0f;
+                float base = height(px, pz);
+                if (base <= SEA + 0.5f || px * px + pz * pz > 184f * 184f) continue;
+                PlantKind kind = switch ((int) ((h >>> 24) & 3)) {
+                    case 0 -> PlantKind.TALL_GRASS;
+                    case 1 -> PlantKind.GHOSTFLOWER;
+                    case 2 -> PlantKind.ROSE;
+                    default -> PlantKind.ROSEBUSH;
+                };
+                result.add(new Plant(px, pz, base, kind));
             }
         return result;
     }
@@ -92,5 +175,12 @@ public final class VoxelGenerator {
     }
     private static float square(float x) { return x * x; }
     private static float mix(float a, float b, float t) { return a + (b - a) * t; }
+    private static float smoothstep(float edge0, float edge1, float value) {
+        float t = Math.clamp((value - edge0) / (edge1 - edge0), 0.0f, 1.0f);
+        return t * t * (3.0f - 2.0f * t);
+    }
+
     private record Tree(float x, float z, float base, float height, float phase, boolean spruce) {}
+    private record Plant(float x, float z, float base, PlantKind kind) {}
+    private enum PlantKind { TALL_GRASS, GHOSTFLOWER, ROSE, ROSEBUSH }
 }

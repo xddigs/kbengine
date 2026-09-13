@@ -60,6 +60,18 @@ float applyViewFog(vec3 p) {
         visibility = 1.0 - smoothstep(max(0.0, uViewRadius - 2.0), uViewRadius, distance);
         if (dot(offset, front) > 0.20 && abs(dot(offset, vec2(-front.y, front.x))) < max(1.5, uViewRadius * 0.32)
                 && p.y > uViewFloorY + 0.08) visibility = 0.15;
+        // Match the generator's sparse global tree lattice. This is a soft,
+        // deterministic canopy shadow, so fog does not form a repeated grid and
+        // remains stable when chunks stream in a different order.
+        vec2 treeCell = floor(p.xz / 12.0);
+        vec2 local = fract(p.xz / 12.0) * 12.0;
+        float treeHash = fract(sin(dot(treeCell, vec2(127.1, 311.7))) * 43758.5453);
+        vec2 crown = vec2(3.0 + fract(treeHash * 19.0) * 6.0,
+                          3.0 + fract(treeHash * 47.0) * 6.0);
+        float canopyRadius = length(local - crown);
+        float canopyBand = smoothstep(1.0, 3.5, canopyRadius) * smoothstep(0.0, 2.5, p.y - 126.0);
+        if (treeHash > 0.25 && canopyRadius < 4.8 && p.y > uViewFloorY + 2.0)
+            visibility = min(visibility, mix(0.28, visibility, canopyBand));
     }
     if (outside) {
         if (uViewFogStrength >= 1.0) discard;

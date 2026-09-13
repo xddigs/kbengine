@@ -5,6 +5,7 @@ package org.kbeng.games.rpg.wrld;
  * Implementations are expected to preserve these behavioral guarantees while choosing their own storage and execution strategy.
  * The generator produces deterministic content from seeds, rules, and runtime configuration.
  */
+@FunctionalInterface
 public interface Generator {
     /**
      * Generates a chunk

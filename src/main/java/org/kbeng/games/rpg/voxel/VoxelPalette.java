@@ -19,6 +19,9 @@ public final class VoxelPalette {
             case DIRT -> 0x8B6145;
             case TILLED_DIRT -> 0x654532;
             case GRASS, TALL_GRASS -> 0x79A64B;
+            case ROSE, ROSES -> 0xC94356;
+            case ROSEBUSH -> 0xB6324C;
+            case GHOSTFLOWER -> 0xB7A6E6;
             case STONE, STONE_SLAB, STONE_VERTICAL_SLAB, STONE_STAIRCASE -> 0x85878C;
             case COBBLESTONE -> 0x6A7077;
             case SAND -> 0xDBC68A;
