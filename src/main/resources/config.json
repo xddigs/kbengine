@@ -64,15 +64,5 @@
       "move_x": "GLFW_GAMEPAD_AXIS_LEFT_X",
       "move_y": "GLFW_GAMEPAD_AXIS_LEFT_Y"
     }
-  },
-  "voxel_terrain": {
-    "voxel_size": 0.25,
-    "chunk_voxels": 64,
-    "height_voxels": 1024,
-    "selection": "single_voxel",
-    "break_animation": false,
-    "interactive_blocks": false,
-    "material_rendering": "one_rgb_colour_per_voxel",
-    "seed": 5422973103813250629
   }
 }
