@@ -1,6 +1,8 @@
 package org.kbeng;
 
-import org.kbeng.engine.utils.Menu;
+import org.kbeng.engine.graphics.Application;
+import org.kbeng.engine.graphics.Game;
+import org.kbeng.games.rpg.wrld.GameMaster;
 
 /**
  * Main is the entry point for the app.
@@ -13,6 +15,7 @@ public final class Main {
      * @param ignoredArgs an array of {@link String} values supplied as {@code ignoredArgs}
      */
     public static void main(String[] ignoredArgs) {
-        Menu.create().prompt("kbengine").display();
+        Application app = new GameMaster();
+        new Game(app).run();
     }
 }
