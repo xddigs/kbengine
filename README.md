@@ -1,7 +1,6 @@
 ![kbengine_logo](src/main/resources/assets/ui/logo.png)
 
 **kbengine** is a 3D isometric voxel engine/game built in Java with LWJGL/OpenGL.  
-Currently, the project focuses on sandbox gameplay featuring world simulation, combat, inventory/crafting, and modern isometric rendering (shadows, weather, particles, and post-processing), with file-configurable controls.
 
 ## Current Technical Stack
 
@@ -9,15 +8,6 @@ Currently, the project focuses on sandbox gameplay featuring world simulation, c
 - **Rendering & Runtime:** LWJGL **3.3.4** (GLFW, OpenGL, STB, OpenAL) + JOML.
 - **Audio & Utilities:** OpenAL, SLF4J/Logback, Gson, OSHI.
 - **Unified Input:** Keyboard, mouse, and gamepad via `config.json`.
-- **Core Architecture:** World services (`World`, `ChunkManager`, `FluidSimulation`, `TimeService`, `WeatherService`, `ViewService`), entities (`Player`, NPCs, enemies, animals), UI, and graphics pipeline (`GameRenderer`, shadows, and post-FX).
-
-## Current Project Roadmap
-
-The development focus is clearly set on:
-1. **Consolidating the sandbox base** (chunk-based procedural generation, day/night cycle, seasons, rain, farming, and NPC economy).
-2. **Polishing core gameplay systems** (combat/interaction, inventories, crafting, navigation, and visual feedback).
-3. **Enhancing rendering quality** (fog-of-war, interior/underground visibility, shadows, and frame stability).
-4. **Improving overall robustness** (fewer runtime errors, better code maintainability, and broader control configurability).
 
 ## Controls (Default & Expanded)
 
