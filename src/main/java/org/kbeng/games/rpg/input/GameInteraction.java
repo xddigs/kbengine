@@ -455,7 +455,6 @@ public class GameInteraction {
      */
     private boolean isVisibleToPlayer(BlockPos cell) {
         if (cell == null) return false;
-        if (GameMaster.game.isFirstPersonCameraActive()) return true;
         return GameMaster.game.getViewService().isVisible(
                 new Vector3f(cell.x() + 0.5f, cell.y() + 0.5f, cell.z() + 0.5f),
                 GameMaster.game.getActiveCamera().getPosition());

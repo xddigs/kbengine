@@ -92,7 +92,6 @@ public class ShadowSystem {
         for (Entity entity : gameMaster.getEntities()) {
             if (entity == null || !entity.isAlive()) continue;
             if (entity instanceof WorldItem) continue;
-            if (entity == player && gameMaster.isFirstPersonCameraActive()) continue;
             entity.render(gameMaster, RenderPass.SHADOW);
         }
 
