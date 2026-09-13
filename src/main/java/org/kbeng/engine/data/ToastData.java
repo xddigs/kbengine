@@ -1,13 +1,11 @@
 package org.kbeng.engine.data;
 
-import org.kbeng.games.rpg.data.DataClass;
 
 /**
  * ToastData declares the canonical toast data set for the data subsystem.
  * Each constant provides a stable, type-safe branch token for runtime decisions and avoids string-based switches.
  * The data type is used as a normalized schema for transport, persistence, and runtime inspection.
  */
-@DataClass
 public enum ToastData {
     SUCCESS((byte) 0, "Success"),
     INFO((byte) 1, "Info"),

@@ -1,14 +1,12 @@
 package org.kbeng.engine.data;
 
 import org.kbeng.engine.utils.K;
-import org.kbeng.games.rpg.data.DataClass;
 
 /**
  * Toast provides toast capabilities within the data subsystem.
  * It represents strongly typed domain data shared between simulation, rendering, input, and persistence boundaries.
  * The implementation keeps this concern isolated so higher-level orchestrators remain focused on flow control.
  */
-@DataClass
 public class Toast {
     private final ToastData type;
     private final String message;
