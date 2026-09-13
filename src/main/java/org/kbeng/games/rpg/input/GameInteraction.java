@@ -437,7 +437,7 @@ public class GameInteraction {
                         }
                         if (stored > 0) {
                             SoundService.fx.playEntitySound(SoundGroup.ITEMS);
-                            log.trace("Picked up x{} {}", stored, item.getName());
+                            log.info("Picked up x{} {}", stored, item.getName());
                         }
                     } else {
                         iterator.remove();

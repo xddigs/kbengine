@@ -132,7 +132,7 @@ public class Texture {
      */
     public void dispose() {
         glDeleteTextures(id);
-        log.trace("Texture resource deleted (ID: {})", id);
+        log.info("Texture resource deleted (ID: {})", id);
     }
 
     /**
