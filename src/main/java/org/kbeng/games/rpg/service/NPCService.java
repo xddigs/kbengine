@@ -1,20 +1,15 @@
 package org.kbeng.games.rpg.service;
 
+import org.joml.Vector3f;
+import org.kbeng.engine.input.Mouse;
 import org.kbeng.engine.service.Service;
-import org.kbeng.games.rpg.data.Job;
-import org.kbeng.games.rpg.data.BlockPos;
-import org.kbeng.games.rpg.data.BlockShape;
-import org.kbeng.games.rpg.data.NPCGender;
-import org.kbeng.games.rpg.data.Ray;
-import org.kbeng.games.rpg.data.Singleton;
+import org.kbeng.engine.utils.Settings;
+import org.kbeng.games.rpg.data.*;
 import org.kbeng.games.rpg.entity.NPC;
 import org.kbeng.games.rpg.entity.Player;
-import org.kbeng.engine.input.Mouse;
 import org.kbeng.games.rpg.item.iBlock;
 import org.kbeng.games.rpg.ui.GameUIService;
-import org.kbeng.engine.utils.Settings;
 import org.kbeng.games.rpg.wrld.GameMaster;
-import org.joml.Vector3f;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -155,6 +150,13 @@ public class NPCService implements Service<NPC> {
     }
 
     private float getBlockRayDistance(GameMaster gameMaster, BlockPos blockTarget, Ray ray) {
+        var hit = org.kbeng.games.rpg.voxel.VoxelRaycast.cast(gameMaster.getWorld().voxels(),
+                ray.origin(), ray.direction(), 2000f, true);
+        return hit == null ? Float.POSITIVE_INFINITY : hit.distance();
+    }
+
+    @Deprecated(since = "voxel-terrain", forRemoval = false)
+    private float getLegacyBlockRayDistance(GameMaster gameMaster, BlockPos blockTarget, Ray ray) {
         if (blockTarget == null) return Float.POSITIVE_INFINITY;
         iBlock interactiveBlock = gameMaster.getWorld().getInteractiveBlockAt(
                 blockTarget.x(), blockTarget.y(), blockTarget.z());
